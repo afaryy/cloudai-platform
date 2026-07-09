@@ -1,40 +1,234 @@
 # cloudai-platform
 
-Public-safe reference implementation for an AWS-first, multi-cloud-ready Cloud & AI platform.
+Cloud & AI platform engineering portfolio project.
 
-This repository demonstrates a cloud-agnostic Enterprise AI Control Plane with AWS as the first implementation provider. The first iteration is documentation-heavy and implementation-light: it defines the operating model, architecture boundaries, provider abstraction, governance posture, and mock-mode scaffolding without deploying real cloud resources.
+`cloudai-platform` is a public-safe reference implementation and learning project for an AWS-first, multi-cloud-ready Cloud & AI platform. It demonstrates how an enterprise-style AI control plane could organize secure AI enablement, governed model access, AI traffic governance, platform foundations, FinOps, observability, and release engineering patterns.
 
-## Goals
+This is not a production product. It is intentionally documentation-heavy and implementation-light in the foundation phase, with mock mode as the default.
 
-- Secure AI enablement for enterprise-style workloads.
-- Governed model access through a GenAI / LLM gateway sub-layer.
-- Broader AI traffic governance for future agent, tool, and data flows.
-- AWS Bedrock integration pattern using public AWS concepts.
-- Terraform-based AWS platform foundations, initially as placeholders.
+## Project Overview
+
+The project models a CloudAI platform that separates control-plane concerns from provider-specific implementation details.
+
+At a high level, it explores:
+
+- CloudAI Control Plane concepts for policy, approval, audit, and provider registry.
+- GenAI / LLM Gateway patterns for governed model access.
+- Broader AI Traffic Governance for future agent, tool, retrieval, workflow, and data-access flows.
+- AWS-first provider foundations with future Azure and GCP mappings.
+- AI FinOps, observability, evaluation, operations, and responsible AI practices.
+
+## Why This Project Exists
+
+AI platform work often spans cloud engineering, security, governance, developer experience, data access, cost controls, and operations. This repository gives those concerns a concrete shape in a public-safe portfolio project.
+
+The goal is to show practical architecture thinking and incremental platform delivery without using employer-specific content, private implementation details, real credentials, or production infrastructure.
+
+## What This Project Demonstrates
+
+- Secure AI enablement for enterprise-style workflows.
+- Governed access to foundation models and future AI services.
+- A model-access sub-layer through a GenAI / LLM Gateway.
+- A broader AI traffic governance layer for future agent and tool flows.
+- AWS Bedrock integration pattern at the architecture level.
+- Terraform-oriented AWS platform foundations as placeholders.
 - GitHub Actions CI/CD skeletons.
-- AI FinOps, observability, and responsible AI guidance.
-- Future EKS release engineering and multi-cloud provider mapping.
+- AI FinOps and token cost tracking concepts.
+- Observability, evaluation, runbook, and operations practices.
+- Responsible AI checklist and public-safety boundary.
+- Future EKS-based AI release engineering.
+- Future multi-cloud provider mapping for Azure and GCP.
 
-## Public Safety Boundary
+## AWS-First, Multi-Cloud-Ready
 
-This repository uses synthetic examples only. It must not include employer-specific content, internal project names, screenshots, tickets, real metrics, private links, secrets, credentials, internal namespaces, or proprietary diagrams.
+AWS is the first implementation provider. The reference architecture maps early provider concepts to public AWS services such as Amazon Bedrock, IAM, KMS, Secrets Manager, API Gateway, Lambda, DynamoDB, S3, CloudWatch, and EKS.
 
-Mock mode is the default. Do not deploy real cloud resources from this repository unless a future release explicitly adds reviewed deployment instructions.
+The control model is intentionally cloud-agnostic. Azure and GCP are represented as early mapping notes, not active implementations. The project keeps provider-specific details behind adapter boundaries so the core governance model can remain portable.
 
-## Repository Map
+## CloudAI Control Plane Concept
 
-- `docs/` - architecture, operations, governance, and platform patterns.
-- `docs/project/` - charter, roadmap, backlog, status, and delivery logs.
-- `providers/aws/` - first implementation provider placeholder.
-- `providers/azure/` and `providers/gcp/` - future provider mapping notes.
-- `shared/` - common schemas, policies, and examples.
-- `examples/` - synthetic scenario folders.
-- `helm/` and `argocd/` - future Kubernetes release engineering placeholders.
-- `scripts/` - mock-only helper scripts.
-- `.github/workflows/` - CI and validation skeletons.
+The CloudAI Control Plane is the governance and coordination layer for AI enablement.
 
-## Current Status
+It is responsible for:
 
-Sprint 00 is focused on repository foundation, public-safety guardrails, documentation structure, and non-deploying placeholders.
+- Policy and approval workflows.
+- Use case and environment registration.
+- Model and provider access decisions.
+- Audit and evidence capture.
+- Cost and usage visibility.
+- Observability and operational review.
 
-See `docs/project/ROADMAP.md` and `docs/project/PROGRESS_DASHBOARD.md` for phase status.
+It is not a model training platform, data warehouse, or production runtime in this phase.
+
+## Architecture Flow
+
+```text
+User / workload
+  -> CloudAI Control Plane
+  -> GenAI / LLM Gateway
+  -> AI Traffic Governance Layer
+  -> Provider Adapter
+  -> AWS-first provider services
+```
+
+The GenAI / LLM Gateway is the first model-access sub-layer. The AI Traffic Governance Layer is the broader future control point for agents, tools, retrieval, workflows, and governed data access.
+
+See `docs/architecture.md` for the relationship between this implementation view and the six-layer enterprise AI model: Strategy, Governance, Data, Platform, Infrastructure, and Operations.
+
+## Track A: AWS GenAI Platform Starter
+
+Track A focuses on the AWS-first GenAI platform foundation.
+
+Current scope:
+
+- AWS provider placeholder structure.
+- Bedrock-oriented architecture notes.
+- Terraform module and environment folders.
+- Mock-mode scripts for future cost and ingest examples.
+
+Future scope:
+
+- Mock gateway API.
+- Policy schema drafts.
+- Terraform validation examples.
+- Reviewed AWS foundation modules.
+
+## Track B: AI Release Engineering on EKS
+
+Track B explores future release engineering for AI services on Amazon EKS.
+
+Current scope:
+
+- Placeholder Helm chart folders.
+- Placeholder Argo CD application folder.
+- EKS module placeholder.
+
+Future scope:
+
+- Helm packaging examples.
+- GitOps deployment patterns.
+- Progressive delivery and runtime observability notes.
+- Policy-aware release gates.
+
+## Track C: AI-Assisted DevSecOps Pattern
+
+Track C documents how AI assistance can support delivery without bypassing engineering controls.
+
+The pattern emphasizes:
+
+- Human review of AI-assisted changes.
+- Required CI and security checks.
+- No secrets or private data in AI prompts.
+- Synthetic examples only.
+- Clear separation between private working notes and public documentation.
+
+## Track D: AI Traffic Gateway and Kubernetes-Native Agent Runtime Exploration
+
+Track D is a future exploration track for governed agent, tool, retrieval, workflow, and data-access traffic.
+
+It asks:
+
+- How should tool calls be authorized?
+- How should retrieval and data egress be governed?
+- Which events should be audited?
+- What runtime isolation model is appropriate?
+- How could Kubernetes-native agents inherit platform controls?
+
+No agent runtime is implemented in the foundation phase.
+
+## Track E: Future LLMOps / GPU Sandbox
+
+Track E is a future placeholder for LLMOps and GPU-oriented experimentation.
+
+Potential areas:
+
+- Model evaluation workflows.
+- Prompt and response quality checks.
+- Synthetic benchmark datasets.
+- GPU sandbox architecture notes.
+- Cost and quota guardrails.
+
+This track is intentionally deferred until the control-plane and gateway patterns are clearer.
+
+## Security and Governance Boundary
+
+This repository is public-safe by design.
+
+Do not include:
+
+- Employer-specific content.
+- Internal project names, tickets, dashboards, metrics, links, or screenshots.
+- Real company data or private architecture.
+- Secrets, credentials, account IDs, tokens, private URLs, or keys.
+- Proprietary implementation details.
+- Raw prompt logs or private reference text.
+
+Private reference material may live locally under `_private/`, which is ignored by git. Public content must be rewritten as synthetic, employer-neutral guidance based on public cloud concepts.
+
+## FinOps and Token Cost Tracking
+
+The project includes early AI FinOps concepts for understanding usage and cost signals.
+
+Planned signals include:
+
+- Estimated input and output tokens.
+- Provider and model labels.
+- Environment and use case labels.
+- Request volume and latency.
+- Cost allocation metadata.
+
+The current `scripts/estimate-token-cost.ts` file is mock-only and uses synthetic values. It does not call a provider or calculate a real cloud bill.
+
+## Observability and Operations
+
+The operations model covers:
+
+- Request counts, latency, and errors.
+- Policy allow, deny, and review decisions.
+- Provider and model routing decisions.
+- Token estimates and cost metadata.
+- Evaluation results for quality and safety review.
+- Runbooks, assessments, gap tracking, and sprint reviews.
+
+Provider-specific dashboards, alarms, traces, and evaluation harnesses are future work.
+
+## How to Run Locally in Mock Mode
+
+This foundation phase does not require cloud credentials.
+
+There is no production runtime yet. The current mock scripts are simple placeholders:
+
+```bash
+# Optional, if a TypeScript runner is available in your local environment
+tsx scripts/estimate-token-cost.ts
+tsx scripts/ingest-sample-docs.ts
+```
+
+If you do not have a TypeScript runner installed, read the scripts as mock examples. Do not install dependencies or configure cloud credentials unless a future phase explicitly adds reviewed setup instructions.
+
+## Roadmap
+
+Current phase: P0 Foundation.
+
+Near-term:
+
+- Strengthen public-safe architecture and project-control docs.
+- Add mock GenAI / LLM Gateway API.
+- Draft policy schemas for model access and AI traffic governance.
+- Add tests for mock-mode behavior.
+
+Later:
+
+- Add reviewed AWS Terraform module stubs.
+- Expand AI FinOps and observability examples.
+- Add EKS release engineering examples.
+- Expand Azure and GCP provider mapping.
+- Explore agent runtime and LLMOps / GPU sandbox tracks.
+
+See `docs/project/ROADMAP.md`, `docs/project/BACKLOG.md`, and `docs/project/PROGRESS_DASHBOARD.md` for project tracking.
+
+## Public Safety Statement
+
+This project uses synthetic examples only. It avoids employer-specific content, private reference material, proprietary implementation details, real credentials, and live cloud deployment by default.
+
+Mock mode is the default. Avoid real AWS cost unless a future task explicitly requests and documents a safe deployment path.

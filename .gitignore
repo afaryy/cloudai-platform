@@ -5,6 +5,15 @@ _private/
 *.pdf
 *.pptx
 *.xlsx
+*.key
+*.pages
+*.numbers
+*.png
+*.jpg
+*.jpeg
+*.heic
+*.mov
+*.mp4
 
 # macOS
 .DS_Store

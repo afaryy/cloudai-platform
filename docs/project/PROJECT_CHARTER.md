@@ -11,6 +11,7 @@ Build a public-safe reference implementation for an AWS-first, multi-cloud-ready
 - Azure and GCP provider mapping notes.
 - Mock-mode demos and scripts.
 - Governance, observability, FinOps, and responsible AI practices.
+- Lightweight public prompt execution summaries for project-control traceability.
 
 ## Non-Goals
 
