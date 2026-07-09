@@ -1,0 +1,18 @@
+{
+  "project": "cloudai-platform",
+  "phase": "sprint-00-foundation",
+  "defaultMode": "mock",
+  "publicSafety": "active",
+  "providers": {
+    "aws": "placeholder",
+    "azure": "placeholder",
+    "gcp": "placeholder"
+  },
+  "tracks": {
+    "documentation": "in-progress",
+    "terraform": "placeholder",
+    "ci": "skeleton",
+    "mockGateway": "not-started",
+    "eksReleaseEngineering": "placeholder"
+  }
+}

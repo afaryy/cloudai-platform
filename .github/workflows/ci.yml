@@ -1,0 +1,20 @@
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  repo-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Confirm mock-first repository
+        run: |
+          test -f README.md
+          test -f docs/project/PUBLIC_SAFETY_BOUNDARY.md
+          grep -R "mock" README.md docs/project/status.json
