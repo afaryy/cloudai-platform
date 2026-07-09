@@ -1,18 +1,185 @@
 {
   "project": "cloudai-platform",
-  "phase": "sprint-00-foundation",
+  "updated": "2026-07-10",
   "defaultMode": "mock",
-  "publicSafety": "active",
-  "providers": {
-    "aws": "placeholder",
-    "azure": "placeholder",
-    "gcp": "placeholder"
+  "sourceOfTruth": "docs/project/status.json",
+  "publicSafety": {
+    "status": "active",
+    "privateFolderIgnored": true,
+    "rawPromptsPrivate": true,
+    "allowsEmployerSpecificContent": false,
+    "allowsSecrets": false,
+    "allowsRealCloudDeploymentByDefault": false
   },
-  "tracks": {
-    "documentation": "in-progress",
-    "terraform": "placeholder",
-    "ci": "skeleton",
-    "mockGateway": "not-started",
-    "eksReleaseEngineering": "placeholder"
+  "phases": [
+    {
+      "id": "P0",
+      "name": "Foundation",
+      "status": "in-progress",
+      "completion": 70,
+      "goal": "Establish public-safe structure, architecture narrative, project controls, and mock-first guardrails."
+    },
+    {
+      "id": "P1",
+      "name": "AWS GenAI MVP",
+      "status": "not-started",
+      "completion": 0,
+      "goal": "Add a mock GenAI gateway and AWS-first integration shape without live cloud calls."
+    },
+    {
+      "id": "P2",
+      "name": "Platform Controls",
+      "status": "not-started",
+      "completion": 0,
+      "goal": "Add policy, approval, audit, and control-plane schemas."
+    },
+    {
+      "id": "P3",
+      "name": "RAG Governance",
+      "status": "not-started",
+      "completion": 0,
+      "goal": "Document and prototype governed retrieval and data-access patterns with synthetic examples."
+    },
+    {
+      "id": "P4",
+      "name": "EKS Release Engineering",
+      "status": "placeholder",
+      "completion": 0,
+      "goal": "Add Kubernetes, Helm, Argo CD, and EKS release engineering examples."
+    },
+    {
+      "id": "P5",
+      "name": "AI-assisted DevSecOps",
+      "status": "placeholder",
+      "completion": 0,
+      "goal": "Show how AI-assisted delivery can preserve review, CI, and security controls."
+    },
+    {
+      "id": "P6",
+      "name": "AI Traffic Gateway Research",
+      "status": "research",
+      "completion": 0,
+      "goal": "Explore governance for agent, tool, workflow, retrieval, and data-access traffic."
+    },
+    {
+      "id": "P7",
+      "name": "LLMOps / GPU Stretch",
+      "status": "stretch",
+      "completion": 0,
+      "goal": "Reserve future space for evaluation, LLMOps, and GPU sandbox patterns."
+    }
+  ],
+  "tracks": [
+    {
+      "id": "A",
+      "name": "AWS GenAI Platform Starter",
+      "status": "in-progress",
+      "completion": 35,
+      "primaryPhases": ["P0", "P1", "P2"]
+    },
+    {
+      "id": "B",
+      "name": "AI Release Engineering on EKS",
+      "status": "placeholder",
+      "completion": 10,
+      "primaryPhases": ["P4"]
+    },
+    {
+      "id": "C",
+      "name": "AI-assisted DevSecOps Pattern",
+      "status": "placeholder",
+      "completion": 10,
+      "primaryPhases": ["P5"]
+    },
+    {
+      "id": "D",
+      "name": "AI Traffic Gateway and Kubernetes-native Agent Runtime Research",
+      "status": "research",
+      "completion": 10,
+      "primaryPhases": ["P2", "P6"]
+    },
+    {
+      "id": "E",
+      "name": "LLMOps / GPU Sandbox",
+      "status": "stretch",
+      "completion": 0,
+      "primaryPhases": ["P7"]
+    }
+  ],
+  "readiness": {
+    "documentationCompleteness": {
+      "status": "in-progress",
+      "score": 2,
+      "notes": "Foundation docs exist; deeper phase docs remain future work."
+    },
+    "demoReadiness": {
+      "status": "not-started",
+      "score": 0,
+      "notes": "No runnable demo beyond mock script placeholders."
+    },
+    "publicSafetyCompliance": {
+      "status": "active",
+      "score": 3,
+      "notes": "Synthetic-only boundary, ignored private folder, and prompt-log separation are documented."
+    },
+    "securityGovernance": {
+      "status": "documented",
+      "score": 1,
+      "notes": "Controls are described but not implemented."
+    },
+    "finopsObservability": {
+      "status": "documented",
+      "score": 1,
+      "notes": "FinOps and observability concepts exist; no runtime telemetry yet."
+    }
+  },
+  "gaps": [
+    {
+      "category": "delivery",
+      "gap": "No mock gateway implementation yet.",
+      "phase": "P1",
+      "status": "open"
+    },
+    {
+      "category": "security-governance",
+      "gap": "No policy schema or approval workflow implementation yet.",
+      "phase": "P2",
+      "status": "open"
+    },
+    {
+      "category": "rag-governance",
+      "gap": "No governed retrieval or data-egress example yet.",
+      "phase": "P3",
+      "status": "open"
+    },
+    {
+      "category": "finops-observability",
+      "gap": "No runtime token telemetry, dashboards, or traces yet.",
+      "phase": "P1",
+      "status": "open"
+    },
+    {
+      "category": "demo-readiness",
+      "gap": "No end-to-end mock demo script has been implemented.",
+      "phase": "P1",
+      "status": "open"
+    },
+    {
+      "category": "automation",
+      "gap": "Markdown dashboards are manually maintained instead of generated from status.json.",
+      "phase": "P0",
+      "status": "open"
+    }
+  ],
+  "currentSprint": {
+    "id": "sprint-00-foundation",
+    "phase": "P0",
+    "status": "in-progress",
+    "focus": [
+      "Public-safe project positioning",
+      "Architecture and project-control documentation",
+      "Private reference and prompt-log guardrails",
+      "Mock-first repository foundation"
+    ]
   }
 }

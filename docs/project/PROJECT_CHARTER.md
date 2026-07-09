@@ -1,21 +1,36 @@
 # Project Charter
 
+<!-- TODO: Future automation can generate this summary from docs/project/status.json. -->
+
 ## Mission
 
-Build a public-safe reference implementation for an AWS-first, multi-cloud-ready Cloud & AI platform that demonstrates an Enterprise AI Control Plane.
+Build a public-safe Cloud & AI platform engineering portfolio project that demonstrates an AWS-first, multi-cloud-ready Enterprise AI Control Plane reference implementation.
+
+## Why This Exists
+
+The project shows practical platform architecture, governance, FinOps, observability, and release engineering thinking without using employer-specific content, private diagrams, real credentials, or live cloud deployment by default.
 
 ## Scope
 
-- Documentation-first platform architecture.
-- AWS provider foundations as placeholders.
-- Azure and GCP provider mapping notes.
-- Mock-mode demos and scripts.
-- Governance, observability, FinOps, and responsible AI practices.
-- Lightweight public prompt execution summaries for project-control traceability.
+- P0 Foundation documentation and project controls.
+- Track A AWS GenAI Platform Starter as the first implementation direction.
+- Track B EKS release engineering placeholders.
+- Track C AI-assisted DevSecOps pattern placeholders.
+- Track D AI traffic gateway and Kubernetes-native agent runtime research notes.
+- Track E LLMOps / GPU sandbox as a future stretch track.
+- Mock mode and synthetic examples by default.
 
 ## Non-Goals
 
-- No real cloud deployment in the first iteration.
-- No credentials, secrets, account identifiers, or internal data.
-- No employer-specific implementation details.
-- No production-ready runtime in Sprint 00.
+- No production product claim.
+- No real cloud deployment in P0.
+- No employer-specific implementation detail.
+- No private reference content in public docs.
+- No raw prompt logs in git.
+
+## Success Criteria
+
+- Phase and track status are traceable in `docs/project/status.json`.
+- Human-readable summaries are kept aligned with the structured status file.
+- Public safety remains explicit and enforceable.
+- Each phase produces small, reviewable, portfolio-safe increments.

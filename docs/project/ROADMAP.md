@@ -1,31 +1,30 @@
 # Roadmap
 
-## Phase 0: Foundation
+<!-- TODO: Future automation can generate this roadmap from docs/project/status.json. -->
 
-- Establish public-safe documentation structure.
-- Define architecture, control-plane boundaries, and provider abstraction.
-- Add AWS placeholder structure.
-- Add CI and Terraform validation skeletons.
+## Phases
 
-## Phase 1: Mock Gateway
+| Phase | Name | Status | Outcome |
+| --- | --- | --- | --- |
+| P0 | Foundation | In progress | Public-safe repo structure, architecture docs, project controls, mock-first guardrails. |
+| P1 | AWS GenAI MVP | Not started | Mock GenAI / LLM Gateway and AWS-first integration shape. |
+| P2 | Platform Controls | Not started | Policy, approval, audit, and control-plane schemas. |
+| P3 | RAG Governance | Not started | Governed retrieval and synthetic data-access examples. |
+| P4 | EKS Release Engineering | Placeholder | Helm, Argo CD, and EKS release engineering examples. |
+| P5 | AI-assisted DevSecOps | Placeholder | AI-assisted delivery pattern with CI and security controls. |
+| P6 | AI Traffic Gateway Research | Research | Agent, tool, workflow, retrieval, and data-access governance research. |
+| P7 | LLMOps / GPU Stretch | Stretch | Evaluation, LLMOps, and GPU sandbox exploration. |
 
-- Add mock GenAI / LLM gateway API.
-- Add synthetic request and response examples.
-- Add policy schema drafts.
-- Add mock cost estimation tests.
+## Track Alignment
 
-## Phase 2: AWS Reference Pattern
+| Track | Name | Primary phases |
+| --- | --- | --- |
+| Track A | AWS GenAI Platform Starter | P0, P1, P2 |
+| Track B | AI Release Engineering on EKS | P4 |
+| Track C | AI-assisted DevSecOps Pattern | P5 |
+| Track D | AI Traffic Gateway and Kubernetes-native Agent Runtime Research | P2, P6 |
+| Track E | LLMOps / GPU Sandbox | P7 |
 
-- Add reviewed Terraform modules for AWS foundations.
-- Add mock-to-AWS adapter boundary.
-- Document Bedrock integration assumptions.
+## Delivery Rule
 
-## Phase 3: Kubernetes Release Engineering
-
-- Add EKS-oriented Helm and Argo CD examples.
-- Keep local and CI defaults in mock mode.
-
-## Phase 4: Multi-Cloud Mapping
-
-- Expand Azure and GCP mappings.
-- Add provider capability matrix.
+Do not build all tracks at once. Advance one small, reviewable phase at a time, keeping mock mode and public safety as defaults.
