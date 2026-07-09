@@ -14,6 +14,73 @@ The platform is AWS-first, with Amazon Bedrock as the initial model provider pat
 
 The GenAI / LLM Gateway is the first concrete runtime access pattern. The CloudAI Control Plane is not just a runtime hop; it is the governance and evidence layer that defines which use cases, providers, controls, and audit expectations apply. The broader AI Traffic Governance layer is intentionally described before implementation so future agent and tool flows can inherit the same policy, audit, observability, FinOps, and responsible AI model.
 
+## Cloud & AI Platform System View
+
+```mermaid
+flowchart LR
+  subgraph experience["1. Experience and Consumers"]
+    teams["Platform teams"]
+    apps["Applications"]
+    developers["Developers"]
+    agents["AI agents"]
+  end
+
+  subgraph control["2. Enterprise Cloud AI Control Plane"]
+    intake["Use case intake"]
+    governance["Responsible AI governance"]
+    registry["Provider and model registry"]
+    evidence["Audit evidence"]
+  end
+
+  subgraph access["3. AI Access and Traffic Governance"]
+    llm["GenAI / LLM Gateway<br/>model access"]
+    traffic["AI Traffic Governance<br/>agents, tools, data flows"]
+    policy["Policy, token, and rate controls"]
+    egress["Data egress controls"]
+  end
+
+  subgraph provider["4. Provider Implementation"]
+    aws["AWS-first path<br/>Amazon Bedrock | API Gateway | Lambda / ECS / EKS"]
+    azure["Azure mapping<br/>future provider adapter"]
+    gcp["GCP mapping<br/>future provider adapter"]
+  end
+
+  subgraph ops["5. Infrastructure and Operations"]
+    iac["Terraform and GitHub Actions"]
+    identity["Identity, encryption, and key management"]
+    observability["Observability and evaluation"]
+    finops["FinOps and cost controls"]
+  end
+
+  teams --> intake
+  apps --> llm
+  developers --> intake
+  agents --> traffic
+
+  intake --> governance
+  governance --> registry
+  registry --> llm
+  evidence --> observability
+
+  llm --> policy
+  traffic --> policy
+  policy --> egress
+  egress --> aws
+
+  aws -. "provider adapter boundary" .-> azure
+  aws -. "provider adapter boundary" .-> gcp
+
+  iac -. "supports" .-> aws
+  iac -. "supports future mappings" .-> azure
+  iac -. "supports future mappings" .-> gcp
+  identity -. "protects" .-> control
+  identity -. "protects" .-> access
+  observability -. "measures" .-> access
+  finops -. "governs usage" .-> access
+```
+
+This system view shows the overall Cloud & AI platform story: consumer entry points, control-plane governance, runtime access and traffic controls, provider implementation paths, and operating capabilities. It is intentionally higher level than the technical architecture view below.
+
 ## High-Level CloudAI Platform Architecture
 
 ```mermaid
