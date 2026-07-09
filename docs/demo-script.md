@@ -9,5 +9,5 @@ This synthetic demo script explains the repository story without requiring live 
 3. Walk through governed model access and the GenAI / LLM gateway.
 4. Explain AI traffic governance beyond prompts.
 5. Review AWS placeholder structure and future provider mappings.
-6. Show project governance files, roadmap, and public-safety boundary.
+6. Show project governance files, roadmap, and project scope boundary.
 7. Run mock-only scripts when they are implemented in a later phase.

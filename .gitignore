@@ -1,20 +1,6 @@
-# local reference files
+# local files
 _private
 _private/
-*.docx
-*.pdf
-*.pptx
-*.xlsx
-*.key
-*.pages
-*.numbers
-*.png
-*.jpg
-*.jpeg
-*.heic
-*.mov
-*.mp4
-
 docs/project/
 
 # macOS
