@@ -8,7 +8,7 @@ P0 Foundation
 
 ## Goal
 
-Create a public-safe project foundation for an AWS-first, multi-cloud-ready Cloud & AI platform reference implementation.
+Create a portfolio-ready project foundation for an AWS-first, multi-cloud-ready Cloud & AI platform reference implementation.
 
 ## Scope
 
@@ -18,7 +18,7 @@ Create a public-safe project foundation for an AWS-first, multi-cloud-ready Clou
 - Provider placeholder folders.
 - CI skeletons.
 - Mock-only scripts.
-- Private reference and raw prompt-log guardrails.
+- Local working-note and prompt-summary guardrails.
 
 ## Acceptance Criteria
 

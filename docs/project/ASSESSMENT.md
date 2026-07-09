@@ -4,13 +4,13 @@
 
 ## Current Assessment
 
-The project is in P0 Foundation. It has a strong public-safe documentation base and clear portfolio positioning, but it has no runtime implementation yet.
+The project is in P0 Foundation. It has a strong documentation base and clear portfolio positioning, but it has no runtime implementation yet.
 
 ## Strengths
 
 - AWS-first, multi-cloud-ready positioning is clear.
-- Public-safety boundary is explicit.
-- Private references and raw prompt logs are separated from public docs.
+- Project scope guidance is explicit.
+- Local working notes and full prompt transcripts are separated from public summaries.
 - Phase and track model is now explicit.
 - `status.json` provides a structured project-control source of truth.
 
@@ -27,7 +27,7 @@ Scores use `0` to `3` from `ASSESSMENT_RUBRIC.md`.
 
 | Area | Score | Notes |
 | --- | --- | --- |
-| Public safety compliance | 3 | Boundary, ignore rules, and raw prompt separation are documented. |
+| Project scope compliance | 3 | Scope guidance, ignore rules, and prompt-summary separation are documented. |
 | Documentation completeness | 2 | Foundation docs are broad; deeper phase docs remain future work. |
 | Demo readiness | 0 | No runnable mock demo yet. |
 | Security and governance | 1 | Described but not implemented. |

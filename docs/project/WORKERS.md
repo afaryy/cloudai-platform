@@ -4,7 +4,7 @@
 
 These AI-assisted worker roles define how Codex-based development should be scoped for `cloudai-platform`. They are project operating roles, not real company roles.
 
-All workers must keep the repository public-safe, synthetic, mock-first, and employer-neutral.
+All workers must keep the repository portfolio-ready, synthetic, mock-first, and reusable.
 
 ## Principal Architect Worker
 
@@ -25,7 +25,7 @@ Own control-plane architecture, provider abstraction, roadmap, and architectural
 
 ### Should Not Touch
 
-- Raw prompt logs or `_private/`.
+- Full prompt transcripts or local-only working notes.
 - Provider implementation code unless reviewing architecture boundaries.
 - Terraform resources unless clarifying architecture intent.
 
@@ -35,12 +35,12 @@ Own control-plane architecture, provider abstraction, roadmap, and architectural
 - Control-plane responsibilities are distinct from provider adapters.
 - GenAI / LLM Gateway and AI Traffic Governance are clearly separated.
 - Roadmap changes stay phase-aligned and do not over-expand scope.
-- Public wording is synthetic and employer-neutral.
+- Public wording is synthetic and reusable.
 
 ### Example Prompt
 
 ```text
-Act as the Principal Architect Worker. Review docs/architecture.md and docs/control-plane.md for consistency with the AWS-first, multi-cloud-ready CloudAI Control Plane model. Update only public-safe documentation and commit the change.
+Act as the Principal Architect Worker. Review docs/architecture.md and docs/control-plane.md for consistency with the AWS-first, multi-cloud-ready CloudAI Control Plane model. Update only portfolio-ready documentation and commit the change.
 ```
 
 ## AWS Platform Worker
@@ -65,7 +65,7 @@ Own AWS implementation direction for Bedrock, API Gateway, Lambda, DynamoDB, S3,
 ### Should Not Touch
 
 - Azure or GCP implementation beyond mapping notes.
-- Private reference files.
+- Local working-note files.
 - Real AWS credentials, account IDs, or deployment state.
 - Production deployment instructions without explicit approval.
 
@@ -80,7 +80,7 @@ Own AWS implementation direction for Bedrock, API Gateway, Lambda, DynamoDB, S3,
 ### Example Prompt
 
 ```text
-Act as the AWS Platform Worker. Add public-safe AWS Bedrock integration notes to providers/aws/README.md and docs/aws-reference-architecture.md. Do not add Terraform resources or real credentials. Commit the documentation update.
+Act as the AWS Platform Worker. Add portfolio-ready AWS Bedrock integration notes to providers/aws/README.md and docs/aws-reference-architecture.md. Do not add Terraform resources or real credentials. Commit the documentation update.
 ```
 
 ## Terraform / IaC Worker
@@ -116,7 +116,7 @@ Own Terraform module structure, environments, validation, security notes, and fu
 ### Example Prompt
 
 ```text
-Act as the Terraform / IaC Worker. Add public-safe Terraform module README notes for the AWS foundation placeholders and update terraform validation guidance. Do not create deployable resources. Commit the docs-only change.
+Act as the Terraform / IaC Worker. Add portfolio-ready Terraform module README notes for the AWS foundation placeholders and update terraform validation guidance. Do not create deployable resources. Commit the docs-only change.
 ```
 
 ## Application API Worker
@@ -139,7 +139,7 @@ Own the TypeScript API, mock Bedrock client, request metadata, token estimation,
 
 - Real Bedrock calls unless explicitly approved in a later phase.
 - Terraform modules.
-- Raw prompts or private references.
+- Full prompt transcripts or local references.
 - UI/frontend work unless required by an API demo.
 
 ### Quality Checklist
@@ -176,15 +176,15 @@ Own the public safety boundary, IAM, KMS, secrets, responsible AI checklist, and
 
 ### Should Not Touch
 
-- Raw prompt logs except to confirm they remain ignored.
+- Full prompt transcripts except to confirm they remain ignored.
 - Real secrets, credentials, or account-specific policy.
 - Employer-specific access patterns.
 - Runtime implementation outside security review scope.
 
 ### Quality Checklist
 
-- `_private/` remains ignored and unstaged.
-- Public docs do not contain private text, screenshots, credentials, or internal names.
+- Local-only working folders remain ignored and unstaged.
+- Public docs do not contain non-public text, screenshots, credentials, or non-public names.
 - IAM and KMS guidance is least-privilege and provider-public.
 - Responsible AI checklist is clear and actionable.
 - Policy docs distinguish documented intent from implemented enforcement.
@@ -192,7 +192,7 @@ Own the public safety boundary, IAM, KMS, secrets, responsible AI checklist, and
 ### Example Prompt
 
 ```text
-Act as the Security & Governance Worker. Review public safety, responsible AI, and governed model access docs for gaps. Update only public-safe docs and commit the change.
+Act as the Security & Governance Worker. Review public safety, responsible AI, and governed model access docs for gaps. Update only portfolio-ready docs and commit the change.
 ```
 
 ## FinOps & Observability Worker
@@ -258,13 +258,13 @@ Own GitHub Actions, Helm, rollout, rollback, probes, PodDisruptionBudget, EKS no
 - Workflows are non-deploying unless explicitly approved.
 - Helm and Argo CD examples use synthetic names and mock images.
 - Probes, rollbacks, and PDBs are documented before runtime rollout.
-- Failure modes are clear and public-safe.
+- Failure modes are clear and portfolio-ready.
 - EKS notes avoid account-specific details.
 
 ### Example Prompt
 
 ```text
-Act as the AI DevOps / EKS Release Worker. Add public-safe EKS release engineering notes for probes, rollback, and failure modes. Do not deploy or add cluster credentials. Commit the docs update.
+Act as the AI DevOps / EKS Release Worker. Add portfolio-ready EKS release engineering notes for probes, rollback, and failure modes. Do not deploy or add cluster credentials. Commit the docs update.
 ```
 
 ## Documentation & Portfolio Worker
@@ -285,15 +285,15 @@ Own README, demo script, journey log, decision log, and LinkedIn-safe language.
 
 ### Should Not Touch
 
-- Raw prompt logs.
-- Private reference material.
+- Full prompt transcripts.
+- Local working-note material.
 - Live infrastructure code unless documenting it.
 - Claims that imply the project is production-ready.
 
 ### Quality Checklist
 
 - Tone is professional, practical, and not overclaimed.
-- Public summaries are sanitized and employer-neutral.
+- Public summaries are concise, synthetic, and reusable.
 - Demo narrative uses synthetic examples only.
 - Journey and decision logs explain why changes happened.
 - README reflects current phase and mock-first status.

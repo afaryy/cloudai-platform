@@ -3,11 +3,11 @@
   "updated": "2026-07-10",
   "defaultMode": "mock",
   "sourceOfTruth": "docs/project/status.json",
-  "publicSafety": {
+  "projectScope": {
     "status": "active",
-    "privateFolderIgnored": true,
-    "rawPromptsPrivate": true,
-    "allowsEmployerSpecificContent": false,
+    "localWorkingFilesIgnored": true,
+    "fullPromptTranscriptsExcluded": true,
+    "usesSyntheticExamples": true,
     "allowsSecrets": false,
     "allowsRealCloudDeploymentByDefault": false
   },
@@ -17,7 +17,7 @@
       "name": "Foundation",
       "status": "in-progress",
       "completion": 70,
-      "goal": "Establish public-safe structure, architecture narrative, project controls, and mock-first guardrails."
+      "goal": "Establish portfolio structure, architecture narrative, project controls, and mock-first guardrails."
     },
     {
       "id": "P1",
@@ -117,10 +117,10 @@
       "score": 0,
       "notes": "No runnable demo beyond mock script placeholders."
     },
-    "publicSafetyCompliance": {
+    "projectScopeCompliance": {
       "status": "active",
       "score": 3,
-      "notes": "Synthetic-only boundary, ignored private folder, and prompt-log separation are documented."
+      "notes": "Synthetic examples, local working-file exclusions, and prompt-summary guidance are documented."
     },
     "securityGovernance": {
       "status": "documented",
@@ -176,9 +176,9 @@
     "phase": "P0",
     "status": "in-progress",
     "focus": [
-      "Public-safe project positioning",
+      "Portfolio project positioning",
       "Architecture and project-control documentation",
-      "Private reference and prompt-log guardrails",
+      "Local working-note and prompt-summary guardrails",
       "Mock-first repository foundation"
     ]
   }

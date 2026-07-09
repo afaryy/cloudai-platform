@@ -2,7 +2,7 @@
 
 <!-- TODO: Future automation can validate commit scopes against docs/project/status.json phases and tracks. -->
 
-Use Conventional Commits with a phase-oriented scope. Keep commits small, public-safe, and tied to one reviewable change.
+Use Conventional Commits with a phase-oriented scope. Keep commits small, portfolio-ready, and tied to one reviewable change.
 
 ## Commit Format
 
@@ -20,7 +20,7 @@ Use lowercase type and scope values. Prefer a scope that combines the phase with
 - `infra`: Infrastructure, Terraform, provider scaffolding, or platform foundation change.
 - `ci`: GitHub Actions and automation.
 - `test`: Tests and fixtures.
-- `security`: Security, IAM, KMS, secrets, policy, or public-safety change.
+- `security`: Security, IAM, KMS, secrets, policy, or project-scope change.
 - `ops`: Operations, runbooks, release, reliability, or observability operations change.
 - `finops`: Cost, token estimation, usage reporting, or allocation change.
 - `refactor`: Internal restructuring without behavior change.
@@ -55,12 +55,12 @@ type/pN-short-description
 - `feature/p3-finops-observability`
 - `feature/p4-eks-release-skeleton`
 - `fix/p1-token-estimator`
-- `docs/p0-public-safety-boundary`
+- `docs/p0-project-scope-boundary`
 
 ## Commit Safety Rules
 
-- Do not commit `_private/`.
-- Do not commit raw prompt logs.
-- Do not commit secrets, credentials, account IDs, screenshots, private links, or proprietary content.
+- Keep local-only working folders out of git.
+- Keep full prompt transcripts out of git.
+- Keep secrets, credentials, account IDs, screenshots, non-public links, and generated local artifacts out of git.
 - Keep mock mode as the default unless a task explicitly approves real cloud work.
 - Update `docs/project/JOURNEY_LOG.md` when a change materially advances a phase or track.

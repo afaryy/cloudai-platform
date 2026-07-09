@@ -23,6 +23,6 @@
 - Azure and GCP implementation.
 - LLMOps / GPU sandbox implementation.
 
-## Public Safety Check
+## Project Scope Check
 
-No gap should be closed by adding employer-specific content, private reference text, raw prompts, screenshots, credentials, real account data, or proprietary diagrams.
+No gap should be closed by adding organization-specific content, local working-note text, full prompt transcripts, screenshots, credentials, real account data, or non-public diagrams.

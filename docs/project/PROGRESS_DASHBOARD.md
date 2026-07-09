@@ -31,6 +31,6 @@
 | --- | --- | --- | --- |
 | Documentation completeness | In progress | 2/3 | Foundation docs exist; deeper phase docs remain future work. |
 | Demo readiness | Not started | 0/3 | No runnable demo beyond mock script placeholders. |
-| Public safety compliance | Active | 3/3 | Synthetic-only boundary and ignored private folders are documented. |
+| Project scope compliance | Active | 3/3 | Synthetic examples and local working-file exclusions are documented. |
 | Security and governance | Documented | 1/3 | Controls are described but not implemented. |
 | FinOps and observability | Documented | 1/3 | Concepts exist; no runtime telemetry yet. |

@@ -23,9 +23,9 @@
 - Decision: Track phase status, track status, readiness, and gaps in `docs/project/status.json`.
 - Rationale: Structured status can later generate dashboards and reduce drift across Markdown summaries.
 
-## D-0004: Raw Prompt Logs Stay Private
+## D-0004: Full Prompt Transcripts Stay Local
 
 - Date: 2026-07-10
 - Status: Accepted
-- Decision: Store raw prompt logs under ignored `_private/prompt-logs/`; keep only sanitized summaries in public docs.
-- Rationale: Raw prompts may contain private context, paths, or temporary reasoning.
+- Decision: Keep full prompt transcripts in local ignored workspace areas; keep only sanitized summaries in public docs.
+- Rationale: Full prompt transcripts may contain local context, paths, or temporary reasoning.

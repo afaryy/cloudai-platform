@@ -1,32 +1,22 @@
-# Public Safety Boundary
+# Project Scope Guidance
 
-<!-- TODO: Future automation can validate public-safety checklist fields from docs/project/status.json. -->
+<!-- TODO: Future automation can validate project-scope checklist fields from docs/project/status.json. -->
 
-This project is designed for a public GitHub portfolio.
+This project is a personal learning and reference implementation. It uses synthetic examples and public cloud service patterns, and is not a representation of any production platform.
 
-## Do Not Include
-
-- Employer-specific content.
-- Internal project names, repository names, or namespaces.
-- Screenshots, tickets, dashboards, or private diagrams.
-- Real company data, metrics, incidents, or architecture.
-- Secrets, credentials, account IDs, tokens, private URLs, or keys.
-- Proprietary implementation details.
-- Raw prompt logs or private reference text.
-
-## Local Private References
-
-Private reference documents may be kept locally in `_private/` for personal orientation only. The `_private/` folder is ignored by git and must not be staged, committed, copied into public docs, or used as a source for verbatim text.
-
-Raw prompts belong under `_private/prompt-logs/` when they are saved locally. Raw prompts may contain private context, local paths, temporary reasoning, or private reference details, so they must not be committed.
-
-Public prompt logs must be summarized and sanitized. Do not copy employer-specific content, private reference text, internal names, tickets, metrics, links, screenshots, credentials, or proprietary implementation details into public prompt logs.
-
-## Public Content Rules
+## Public Content Scope
 
 - Use synthetic examples.
 - Use public cloud documentation concepts.
 - Keep mock mode as the default.
 - Avoid real cloud cost unless explicitly requested and reviewed.
-- Keep architecture generic and employer-neutral.
+- Keep architecture generic and reusable.
 - Clearly label placeholders and future work.
+
+## Local Working Notes
+
+Detailed working notes, full prompt transcripts, generated local files, credentials, screenshots, and document exports should stay in local ignored workspace areas. Public project docs should contain only concise summaries and reusable project guidance.
+
+## Prompt and Journey Summaries
+
+Public prompt and journey logs should summarize intent, outcome, changed files, deviations, validation, and next steps. They should not contain full transcripts, local paths, credentials, screenshots, or non-public implementation details.

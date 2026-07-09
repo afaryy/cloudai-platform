@@ -5,7 +5,7 @@
 ## P0 Foundation
 
 - [x] Create repository structure.
-- [x] Add public-safety guardrails.
+- [x] Add project scope guardrails.
 - [x] Add documentation foundation.
 - [x] Add provider placeholders.
 - [x] Add CI skeletons.

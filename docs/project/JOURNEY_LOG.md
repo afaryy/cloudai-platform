@@ -4,7 +4,7 @@
 
 ## 2026-07-09
 
-- Initialized the public-safe repository foundation.
+- Initialized the portfolio-ready repository foundation.
 - Established AWS-first, multi-cloud-ready positioning.
 - Created documentation-heavy architecture and provider placeholder structure.
 - Kept all runtime behavior in mock mode.
@@ -13,7 +13,7 @@
 
 - Stabilized Git workflow with a baseline public scaffold commit.
 - Created `feature/p0-project-foundation`.
-- Strengthened public-safety boundaries for private references and raw prompt logs.
+- Strengthened project scope guidance for local working notes and prompt summaries.
 - Added prompt execution logging guidance.
 - Clarified the relationship between the six-layer enterprise AI model and the repository implementation view.
 - Improved README positioning as a Cloud & AI platform engineering portfolio project.

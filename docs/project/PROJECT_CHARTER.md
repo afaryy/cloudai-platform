@@ -4,11 +4,11 @@
 
 ## Mission
 
-Build a public-safe Cloud & AI platform engineering portfolio project that demonstrates an AWS-first, multi-cloud-ready Enterprise AI Control Plane reference implementation.
+Build a Cloud & AI platform engineering portfolio project that demonstrates an AWS-first, multi-cloud-ready Enterprise AI Control Plane reference implementation.
 
 ## Why This Exists
 
-The project shows practical platform architecture, governance, FinOps, observability, and release engineering thinking without using employer-specific content, private diagrams, real credentials, or live cloud deployment by default.
+This project is a personal learning and reference implementation. It uses synthetic examples and public cloud service patterns, and is not a representation of any production platform.
 
 ## Scope
 
@@ -24,13 +24,13 @@ The project shows practical platform architecture, governance, FinOps, observabi
 
 - No production product claim.
 - No real cloud deployment in P0.
-- No employer-specific implementation detail.
-- No private reference content in public docs.
-- No raw prompt logs in git.
+- No production platform claim.
+- No real credentials or live cloud deployment in P0.
+- No full working transcripts in git.
 
 ## Success Criteria
 
 - Phase and track status are traceable in `docs/project/status.json`.
 - Human-readable summaries are kept aligned with the structured status file.
-- Public safety remains explicit and enforceable.
-- Each phase produces small, reviewable, portfolio-safe increments.
+- Project scope remains clear and reviewable.
+- Each phase produces small, portfolio-friendly increments.

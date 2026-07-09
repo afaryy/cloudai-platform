@@ -2,7 +2,7 @@
 
 Cloud & AI platform engineering portfolio project.
 
-`cloudai-platform` is a public-safe reference implementation and learning project for an AWS-first, multi-cloud-ready Cloud & AI platform. It demonstrates how an enterprise-style AI control plane could organize secure AI enablement, governed model access, AI traffic governance, platform foundations, FinOps, observability, and release engineering patterns.
+`cloudai-platform` is a personal learning and reference implementation for an AWS-first, multi-cloud-ready Cloud & AI platform. It demonstrates how an enterprise-style AI control plane could organize secure AI enablement, governed model access, AI traffic governance, platform foundations, FinOps, observability, and release engineering patterns.
 
 This is not a production product. It is intentionally documentation-heavy and implementation-light in the foundation phase, with mock mode as the default.
 
@@ -20,9 +20,9 @@ At a high level, it explores:
 
 ## Why This Project Exists
 
-AI platform work often spans cloud engineering, security, governance, developer experience, data access, cost controls, and operations. This repository gives those concerns a concrete shape in a public-safe portfolio project.
+AI platform work often spans cloud engineering, security, governance, developer experience, data access, cost controls, and operations. This repository gives those concerns a concrete shape in a practical portfolio project.
 
-The goal is to show practical architecture thinking and incremental platform delivery without using employer-specific content, private implementation details, real credentials, or production infrastructure.
+The goal is to show practical architecture thinking and incremental platform delivery using synthetic examples and public cloud service patterns.
 
 ## What This Project Demonstrates
 
@@ -35,7 +35,7 @@ The goal is to show practical architecture thinking and incremental platform del
 - GitHub Actions CI/CD skeletons.
 - AI FinOps and token cost tracking concepts.
 - Observability, evaluation, runbook, and operations practices.
-- Responsible AI checklist and public-safety boundary.
+- Responsible AI checklist and project scope guidance.
 - Future EKS-based AI release engineering.
 - Future multi-cloud provider mapping for Azure and GCP.
 
@@ -118,9 +118,9 @@ The pattern emphasizes:
 
 - Human review of AI-assisted changes.
 - Required CI and security checks.
-- No secrets or private data in AI prompts.
+- No secrets or sensitive data in AI prompts.
 - Synthetic examples only.
-- Clear separation between private working notes and public documentation.
+- Clear separation between local working notes and public documentation.
 
 ## Track D: AI Traffic Gateway and Kubernetes-Native Agent Runtime Exploration
 
@@ -150,20 +150,16 @@ Potential areas:
 
 This track is intentionally deferred until the control-plane and gateway patterns are clearer.
 
-## Security and Governance Boundary
+## Project Scope and Governance
 
-This repository is public-safe by design.
+This project uses synthetic examples and public cloud service patterns for demonstration purposes.
 
-Do not include:
+Scope assumptions:
 
-- Employer-specific content.
-- Internal project names, tickets, dashboards, metrics, links, or screenshots.
-- Real company data or private architecture.
-- Secrets, credentials, account IDs, tokens, private URLs, or keys.
-- Proprietary implementation details.
-- Raw prompt logs or private reference text.
-
-Private reference material may live locally under `_private/`, which is ignored by git. Public content must be rewritten as synthetic, employer-neutral guidance based on public cloud concepts.
+- It is not a representation of any production platform.
+- Examples use synthetic data, generic service names, and public cloud concepts.
+- Local notes, credentials, generated state, screenshots, and full working transcripts are kept out of the repository.
+- Mock mode remains the default unless a future task explicitly adds reviewed deployment guidance.
 
 ## FinOps and Token Cost Tracking
 
@@ -212,7 +208,7 @@ Current phase: P0 Foundation.
 
 Near-term:
 
-- Strengthen public-safe architecture and project-control docs.
+- Strengthen architecture and project-control docs.
 - Add mock GenAI / LLM Gateway API.
 - Draft policy schemas for model access and AI traffic governance.
 - Add tests for mock-mode behavior.
@@ -227,8 +223,8 @@ Later:
 
 See `docs/project/ROADMAP.md`, `docs/project/BACKLOG.md`, and `docs/project/PROGRESS_DASHBOARD.md` for project tracking.
 
-## Public Safety Statement
+## Project Scope Statement
 
-This project uses synthetic examples only. It avoids employer-specific content, private reference material, proprietary implementation details, real credentials, and live cloud deployment by default.
+This project is a personal learning and reference implementation. It uses synthetic examples and public cloud service patterns, and is not a representation of any production platform.
 
 Mock mode is the default. Avoid real AWS cost unless a future task explicitly requests and documents a safe deployment path.
