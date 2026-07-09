@@ -2,7 +2,7 @@
 
 Cloud & AI platform engineering portfolio project.
 
-`cloudai-platform` is a personal learning and reference implementation for an AWS-first, multi-cloud-ready Cloud & AI platform. It demonstrates how an enterprise-style AI control plane could organize secure AI enablement, governed model access, AI traffic governance, platform foundations, FinOps, observability, and release engineering patterns.
+`cloudai-platform` is positioned as an AWS-first, multi-cloud-ready learning and reference implementation using synthetic examples and public cloud service patterns. It demonstrates how an enterprise-style AI control plane could organize secure AI enablement, governed model access, AI traffic governance, platform foundations, FinOps, observability, and release engineering patterns.
 
 This is not a production product. It is intentionally documentation-heavy and implementation-light in the foundation phase, with mock mode as the default.
 

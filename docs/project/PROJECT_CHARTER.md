@@ -8,7 +8,7 @@ Build a Cloud & AI platform engineering portfolio project that demonstrates an A
 
 ## Why This Exists
 
-This project is a personal learning and reference implementation. It uses synthetic examples and public cloud service patterns, and is not a representation of any production platform.
+The project is positioned as an AWS-first, multi-cloud-ready learning and reference implementation using synthetic examples and public cloud service patterns. It is not a representation of any production platform.
 
 ## Scope
 
