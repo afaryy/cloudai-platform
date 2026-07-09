@@ -21,20 +21,23 @@
 - [ ] `refactor`
 - [ ] `chore`
 
-## Safety Boundary Checklist
+## Scope Boundary Checklist
 
-- [ ] Uses synthetic examples only.
 - [ ] Uses demo scenarios, mock data, and public cloud service patterns.
 - [ ] Does not include secrets, credentials, account IDs, or tokens.
 - [ ] Does not include full prompt transcripts or local working notes.
 - [ ] Keeps mock mode as the default unless explicitly approved.
 
-## Testing Checklist
+## Testing
 
-- [ ] Documentation reviewed.
-- [ ] Unit tests added or updated, if applicable.
-- [ ] CI checks pass or are not applicable.
-- [ ] Terraform changes are validation-only or explicitly approved.
+- [ ] Testing performed, or not applicable.
+- [ ] Documentation reviewed, if applicable.
+- [ ] CI checks pass, or are not applicable.
+- [ ] Terraform validation performed, or not applicable.
+
+Testing notes:
+
+-
 
 ## Security / Governance Impact
 
