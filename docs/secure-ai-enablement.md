@@ -10,6 +10,8 @@ Secure AI enablement makes approved AI capabilities available without weakening 
 - Encrypt sensitive configuration and logs where applicable.
 - Avoid storing prompts, responses, or document content unless explicitly required and governed.
 
-## Public Repository Rule
+## Repository Scope
 
-No secrets, credentials, account identifiers, internal URLs, proprietary diagrams, or real company data belong in this repository.
+This is a personal learning and reference implementation. Secure AI examples use synthetic prompts, placeholder identifiers, and public cloud service patterns for demonstration purposes.
+
+Do not use real credentials, live account details, or production data in examples or local test runs.
