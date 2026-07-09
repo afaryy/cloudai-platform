@@ -51,5 +51,5 @@ Describe logs, metrics, traces, request IDs, dashboard, alerting, or runbook imp
 ## Project Control
 
 - [ ] Journey log updated, or not applicable.
-- [ ] `status.json` updated, or not applicable.
+- [ ] Local tracking notes updated, or not applicable.
 - [ ] Gap analysis updated, or not applicable.

@@ -16,5 +16,5 @@ jobs:
       - name: Confirm mock-first repository
         run: |
           test -f README.md
-          test -f docs/project/PUBLIC_SAFETY_BOUNDARY.md
-          grep -R "mock" README.md docs/project/status.json
+          test -f docs/architecture.md
+          grep -R "mock" README.md docs

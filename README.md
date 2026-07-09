@@ -221,7 +221,7 @@ Later:
 - Expand Azure and GCP provider mapping.
 - Explore agent runtime and LLMOps / GPU sandbox tracks.
 
-See `docs/project/ROADMAP.md`, `docs/project/BACKLOG.md`, and `docs/project/PROGRESS_DASHBOARD.md` for project tracking.
+Detailed planning notes are kept locally. The public repository focuses on the reference architecture, examples, and mock-mode implementation path.
 
 ## Project Scope Statement
 
