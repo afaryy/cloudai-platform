@@ -1,27 +1,66 @@
-# Commit Convention
+# Commit and Branch Convention
 
 <!-- TODO: Future automation can validate commit scopes against docs/project/status.json phases and tracks. -->
 
-Use Conventional Commit style with phase or track scopes where useful.
+Use Conventional Commits with a phase-oriented scope. Keep commits small, public-safe, and tied to one reviewable change.
 
-## Types
+## Commit Format
 
-- `docs:` documentation-only changes.
-- `feat:` new user-visible capability.
-- `fix:` bug fix.
-- `chore:` tooling, repository maintenance, or non-runtime updates.
-- `test:` tests and fixtures.
-- `ci:` GitHub Actions and automation.
+```text
+type(scope): short imperative summary
+```
 
-## Suggested Scopes
+Use lowercase type and scope values. Prefer a scope that combines the phase with the work area, such as `p1-api` or `p2-iam`.
 
-- `p0`, `p1`, `p2`, `p3`, `p4`, `p5`, `p6`, `p7`
-- `track-a`, `track-b`, `track-c`, `track-d`, `track-e`
-- `safety`, `finops`, `observability`, `governance`
+## Commit Types
+
+- `feat`: New user-visible capability.
+- `fix`: Bug fix.
+- `docs`: Documentation-only change.
+- `infra`: Infrastructure, Terraform, provider scaffolding, or platform foundation change.
+- `ci`: GitHub Actions and automation.
+- `test`: Tests and fixtures.
+- `security`: Security, IAM, KMS, secrets, policy, or public-safety change.
+- `ops`: Operations, runbooks, release, reliability, or observability operations change.
+- `finops`: Cost, token estimation, usage reporting, or allocation change.
+- `refactor`: Internal restructuring without behavior change.
+- `chore`: Repository maintenance or housekeeping.
 
 ## Examples
 
-- `docs(p0): update project control pack`
-- `docs(track-a): add aws genai gateway notes`
-- `ci(p0): add markdown validation check`
-- `feat(p1): add mock gateway health endpoint`
+- `feat(p1-api): add mock Bedrock chat endpoint`
+- `fix(p1-api): validate empty prompt input`
+- `docs(p0-charter): add public safety boundary`
+- `infra(p1-terraform): scaffold AWS dev environment`
+- `ci(p2-github-actions): add terraform validation workflow`
+- `test(p1-api): add token estimator unit tests`
+- `security(p2-iam): document OIDC and least privilege pattern`
+- `ops(p3-observability): add request metadata logging notes`
+- `finops(p3-cost): add token cost estimator`
+- `chore(p0-repo): initialise workspace structure`
+
+## Branch Naming
+
+Use a short prefix, phase, and work-area name.
+
+```text
+type/pN-short-description
+```
+
+## Branch Examples
+
+- `feature/p0-project-foundation`
+- `feature/p1-mock-bedrock-api`
+- `feature/p2-terraform-skeleton`
+- `feature/p3-finops-observability`
+- `feature/p4-eks-release-skeleton`
+- `fix/p1-token-estimator`
+- `docs/p0-public-safety-boundary`
+
+## Commit Safety Rules
+
+- Do not commit `_private/`.
+- Do not commit raw prompt logs.
+- Do not commit secrets, credentials, account IDs, screenshots, private links, or proprietary content.
+- Keep mock mode as the default unless a task explicitly approves real cloud work.
+- Update `docs/project/JOURNEY_LOG.md` when a change materially advances a phase or track.
