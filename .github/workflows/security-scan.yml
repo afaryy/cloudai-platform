@@ -1,0 +1,22 @@
+name: security-scan
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  public-safety-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check for common secret file patterns
+        run: |
+          if find . -path ./.git -prune -o -type f \( -name "*.pem" -o -name "*.key" -o -name ".env" \) -print | grep .; then
+            echo "Potential secret file detected."
+            exit 1
+          fi
+          echo "No common secret file patterns found."

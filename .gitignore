@@ -1,0 +1,42 @@
+# local reference files
+_private
+_private/
+*.docx
+*.pdf
+*.pptx
+*.xlsx
+*.key
+*.pages
+*.numbers
+*.png
+*.jpg
+*.jpeg
+*.heic
+*.mov
+*.mp4
+
+docs/project/
+
+# macOS
+.DS_Store
+
+# local environment
+.env
+.env.*
+!.env.example
+
+# dependencies and build output
+node_modules/
+dist/
+coverage/
+
+# Terraform local state and cache
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+crash.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json

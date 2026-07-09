@@ -1,0 +1,19 @@
+name: terraform-plan
+
+on:
+  pull_request:
+    paths:
+      - "providers/aws/infra/terraform/**"
+      - ".github/workflows/terraform-plan.yml"
+
+jobs:
+  plan-placeholder:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Explain plan boundary
+        run: |
+          echo "No terraform plan is executed in Sprint 00."
+          echo "This workflow is a placeholder until reviewed modules exist."
