@@ -6,7 +6,7 @@ The platform is AWS-first, with Amazon Bedrock as the initial model provider pat
 
 ## Logical Layers
 
-- CloudAI Control Plane: use case intake, policy, approval, provider registry, audit, and evaluation.
+- CloudAI Control Plane: use case intake, policy, approval, responsible AI review, provider registry, audit, and evaluation.
 - Model access sub-layer: GenAI / LLM Gateway for governed model routing, request controls, and response handling.
 - AI Traffic Governance layer: broader future gateway controls for agent, tool, retrieval, workflow, and data-access traffic.
 - Provider Adapter layer: AWS first, with Azure and GCP mapping notes.
@@ -16,7 +16,7 @@ The platform is AWS-first, with Amazon Bedrock as the initial model provider pat
 flowchart TB
   purpose["Why this exists<br/>Enable AI use with governance, visibility, and cost awareness"]
 
-  decide["1. Decide what is allowed<br/>Use case intake | Policies | Approvals | Evidence"]
+  decide["1. Decide what is allowed<br/>Use case intake | Policies | Responsible AI review | Approvals | Evidence"]
 
   access["2. Control how AI is accessed<br/>GenAI / LLM Gateway | Model routing | Request checks"]
 
