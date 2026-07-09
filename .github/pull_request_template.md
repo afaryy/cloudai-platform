@@ -38,7 +38,7 @@
 
 ## Security / Governance Impact
 
-Describe IAM, KMS, secrets, public-safety, policy, approval, or audit impact.
+Describe IAM, KMS, secrets, scope boundary, policy, approval, or audit impact.
 
 ## FinOps Impact
 

@@ -7,7 +7,7 @@ on:
       - main
 
 jobs:
-  public-safety-scan:
+  scope-and-secret-scan:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
