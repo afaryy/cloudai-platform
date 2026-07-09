@@ -1,8 +1,8 @@
 # Architecture
 
-`cloudai-platform` models an Enterprise AI Control Plane that separates governance, model access, AI traffic controls, provider integration, platform foundations, observability, and cost controls.
+`cloudai-platform` presents an Enterprise Cloud AI Control Plane for governing model access, AI traffic, provider integration, platform foundations, observability, and cost controls across cloud environments.
 
-The first implementation path is AWS-first. Amazon Bedrock is represented as the primary model provider pattern, while the control-plane concepts remain provider-neutral so Azure and GCP mappings can be added later.
+The platform is AWS-first, with Amazon Bedrock as the initial model provider pattern. Its control-plane design remains provider-neutral so Azure and GCP mappings can be added without changing the core governance model.
 
 ## Logical Layers
 
@@ -18,87 +18,36 @@ The GenAI / LLM Gateway is the first concrete runtime access pattern. The CloudA
 
 ```mermaid
 flowchart TB
-  subgraph consumers["Consumers"]
-    developers["Developers"]
-    applications["Applications"]
-    agents["AI Agents"]
-    teams["Platform Teams"]
+  consumers["Consumers<br/>Developers | Applications | AI Agents | Platform Teams"]
+
+  control["Enterprise Cloud AI Control Plane<br/>Use case intake | Policy and approval | Provider registry | Audit and evaluation"]
+
+  governance["AI Traffic Gateway / Governance Layer<br/>GenAI / LLM Gateway | Agent and tool governance | Token and rate controls | Data egress policy"]
+
+  adapters["Provider Adapter Layer<br/>AWS adapter | Azure adapter | GCP adapter"]
+
+  subgraph providers["Provider Implementation View"]
+    aws["AWS-first implementation<br/>Amazon Bedrock | API Gateway | Lambda / ECS / EKS | DynamoDB / S3 | CloudWatch"]
+    azure["Azure future mapping<br/>Model access | API management | Runtime | Monitoring"]
+    gcp["GCP future mapping<br/>Model access | API gateway | Runtime | Monitoring"]
   end
 
-  subgraph control["CloudAI Control Plane"]
-    intake["Use case intake"]
-    approval["Policy and approval"]
-    registry["Provider registry"]
-    auditEval["Audit and evaluation"]
-  end
+  cross["Cross-cutting capabilities<br/>Identity | Secrets | Encryption | Terraform | GitHub Actions | Observability | FinOps | Responsible AI | Audit"]
 
-  subgraph access["Access and Traffic Governance Layer"]
-    llmGateway["GenAI / LLM Gateway"]
-    trafficGov["AI Traffic Governance"]
-    tokenRate["Token / rate controls"]
-    egress["Data egress policy"]
-    hooks["Observability hooks"]
-  end
+  consumers --> control
+  control --> governance
+  governance --> adapters
+  adapters --> aws
+  adapters -. "future mapping" .-> azure
+  adapters -. "future mapping" .-> gcp
 
-  subgraph adapters["Provider Adapter Layer"]
-    awsAdapter["AWS adapter"]
-    azureAdapter["Azure adapter"]
-    gcpAdapter["GCP adapter"]
-  end
-
-  subgraph aws["AWS-first Provider Services"]
-    bedrock["Amazon Bedrock"]
-    apiGateway["API Gateway"]
-    compute["Lambda / ECS / EKS"]
-    dynamodb["DynamoDB"]
-    s3["S3"]
-    cloudwatch["CloudWatch"]
-  end
-
-  subgraph cross["Cross-cutting Capabilities"]
-    identity["IAM / Secrets / KMS"]
-    delivery["Terraform / GitHub Actions"]
-    ops["Observability / FinOps"]
-    responsible["Responsible AI / Audit"]
-  end
-
-  developers --> llmGateway
-  applications --> llmGateway
-  agents --> trafficGov
-  teams --> intake
-
-  intake --> approval
-  approval --> registry
-  registry --> llmGateway
-  auditEval --> hooks
-
-  llmGateway --> tokenRate
-  trafficGov --> tokenRate
-  tokenRate --> egress
-  egress --> hooks
-  hooks --> awsAdapter
-
-  awsAdapter --> bedrock
-  awsAdapter --> apiGateway
-  apiGateway --> compute
-  compute --> dynamodb
-  compute --> s3
-  compute --> cloudwatch
-
-  azureAdapter -. "future mapping" .-> registry
-  gcpAdapter -. "future mapping" .-> registry
-
-  identity -. "applies to" .-> control
-  identity -. "applies to" .-> access
-  identity -. "applies to" .-> aws
-  delivery -. "deploys and validates" .-> adapters
-  ops -. "measures" .-> access
-  ops -. "measures" .-> aws
-  responsible -. "guides" .-> control
-  responsible -. "guides" .-> access
+  cross -. "applies across" .-> control
+  cross -. "applies across" .-> governance
+  cross -. "applies across" .-> adapters
+  cross -. "applies across" .-> providers
 ```
 
-This view separates governance from runtime request handling. The CloudAI Control Plane defines controls and evidence. The Access and Traffic Governance layer applies those controls to model requests now and broader AI traffic later. Provider adapters keep AWS implementation concrete while preserving space for Azure and GCP mappings.
+This diagram shows the control and integration layers rather than a deployed topology. The CloudAI Control Plane defines controls and evidence. The AI Traffic Gateway / Governance Layer applies those controls to model access now and broader AI traffic later. AWS is the first implementation path; Azure and GCP are shown as future provider mappings behind the same adapter boundary.
 
 ## Runtime Request Flow
 
