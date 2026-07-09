@@ -25,4 +25,4 @@
 
 ## Project Scope Check
 
-No gap should be closed by adding organization-specific content, local working-note text, full prompt transcripts, screenshots, credentials, real account data, or non-public diagrams.
+No gap should be closed by adding local working-note text, full prompt transcripts, screenshots, credentials, real account data, or restricted diagrams.

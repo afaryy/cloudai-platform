@@ -22,7 +22,7 @@ flowchart TB
     developers["Developers"]
     applications["Applications"]
     agents["AI Agents"]
-    teams["Internal Teams"]
+    teams["Platform Teams"]
   end
 
   subgraph control["CloudAI Control Plane"]

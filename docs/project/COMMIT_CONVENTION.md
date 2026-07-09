@@ -23,7 +23,7 @@ Use lowercase type and scope values. Prefer a scope that combines the phase with
 - `security`: Security, IAM, KMS, secrets, policy, or project-scope change.
 - `ops`: Operations, runbooks, release, reliability, or observability operations change.
 - `finops`: Cost, token estimation, usage reporting, or allocation change.
-- `refactor`: Internal restructuring without behavior change.
+- `refactor`: Code restructuring without behavior change.
 - `chore`: Repository maintenance or housekeeping.
 
 ## Examples
@@ -61,6 +61,6 @@ type/pN-short-description
 
 - Keep local-only working folders out of git.
 - Keep full prompt transcripts out of git.
-- Keep secrets, credentials, account IDs, screenshots, non-public links, and generated local artifacts out of git.
+- Keep secrets, credentials, account IDs, screenshots, restricted links, and generated local artifacts out of git.
 - Keep mock mode as the default unless a task explicitly approves real cloud work.
 - Update `docs/project/JOURNEY_LOG.md` when a change materially advances a phase or track.

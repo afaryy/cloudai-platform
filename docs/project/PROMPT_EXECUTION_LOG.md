@@ -8,7 +8,7 @@ Full prompt transcripts may include local context, local file paths, temporary r
 
 Do not paste full prompt transcripts into this file. Record only sanitized summaries that are safe for a public GitHub repository.
 
-Public entries in this file should be concise, synthetic, and reusable. Do not copy full prompt text, local working-note content, local paths, credentials, screenshots, tickets, metrics, or non-public implementation details.
+Public entries in this file should be concise, synthetic, and reusable. Do not copy full prompt text, local working-note content, local paths, credentials, screenshots, tickets, metrics, or restricted implementation details.
 
 ## Log
 

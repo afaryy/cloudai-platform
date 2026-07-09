@@ -19,4 +19,4 @@ The prompting playbook is used to plan project prompts and keep work phase-align
 - Keep entries synthetic and reusable.
 - Do not paste full prompt text.
 - Do not include local file paths.
-- Do not include organization-specific content, local note excerpts, non-public names, tickets, metrics, links, screenshots, credentials, or non-public implementation details.
+- Do not include local note excerpts, restricted names, tickets, metrics, links, screenshots, credentials, or restricted implementation details.

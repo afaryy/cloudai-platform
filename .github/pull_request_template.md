@@ -24,9 +24,9 @@
 ## Safety Boundary Checklist
 
 - [ ] Uses synthetic examples only.
-- [ ] Does not include secrets, credentials, account IDs, tokens, or private URLs.
-- [ ] Does not include employer-specific or proprietary content.
-- [ ] Does not include raw prompt logs or private reference text.
+- [ ] Uses demo scenarios, mock data, and public cloud service patterns.
+- [ ] Does not include secrets, credentials, account IDs, or tokens.
+- [ ] Does not include full prompt transcripts or local working notes.
 - [ ] Keeps mock mode as the default unless explicitly approved.
 
 ## Testing Checklist

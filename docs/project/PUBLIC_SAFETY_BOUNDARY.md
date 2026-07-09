@@ -2,7 +2,7 @@
 
 <!-- TODO: Future automation can validate project-scope checklist fields from docs/project/status.json. -->
 
-This project is a personal learning and reference implementation. It uses synthetic examples and public cloud service patterns, and is not a representation of any production platform.
+This project is a personal learning and reference implementation. It uses synthetic examples and public cloud service patterns.
 
 ## Public Content Scope
 
@@ -19,4 +19,4 @@ Detailed working notes, full prompt transcripts, generated local files, credenti
 
 ## Prompt and Journey Summaries
 
-Public prompt and journey logs should summarize intent, outcome, changed files, deviations, validation, and next steps. They should not contain full transcripts, local paths, credentials, screenshots, or non-public implementation details.
+Public prompt and journey logs should summarize intent, outcome, changed files, deviations, validation, and next steps. They should not contain full transcripts, local paths, credentials, screenshots, or restricted implementation details.

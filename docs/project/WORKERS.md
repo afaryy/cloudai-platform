@@ -2,7 +2,7 @@
 
 <!-- TODO: Future automation can map worker ownership to phases and tracks from docs/project/status.json. -->
 
-These AI-assisted worker roles define how Codex-based development should be scoped for `cloudai-platform`. They are project operating roles, not real company roles.
+These AI-assisted worker roles define how Codex-based development should be scoped for `cloudai-platform`. They are project operating roles, not staffing roles.
 
 All workers must keep the repository portfolio-ready, synthetic, mock-first, and reusable.
 
@@ -67,7 +67,7 @@ Own AWS implementation direction for Bedrock, API Gateway, Lambda, DynamoDB, S3,
 - Azure or GCP implementation beyond mapping notes.
 - Local working-note files.
 - Real AWS credentials, account IDs, or deployment state.
-- Production deployment instructions without explicit approval.
+- Live deployment instructions without explicit approval.
 
 ### Quality Checklist
 
@@ -178,13 +178,13 @@ Own the public safety boundary, IAM, KMS, secrets, responsible AI checklist, and
 
 - Full prompt transcripts except to confirm they remain ignored.
 - Real secrets, credentials, or account-specific policy.
-- Employer-specific access patterns.
+- Environment-specific access patterns.
 - Runtime implementation outside security review scope.
 
 ### Quality Checklist
 
 - Local-only working folders remain ignored and unstaged.
-- Public docs do not contain non-public text, screenshots, credentials, or non-public names.
+- Public docs do not contain restricted text, screenshots, credentials, or restricted names.
 - IAM and KMS guidance is least-privilege and provider-public.
 - Responsible AI checklist is clear and actionable.
 - Policy docs distinguish documented intent from implemented enforcement.
@@ -250,7 +250,7 @@ Own GitHub Actions, Helm, rollout, rollback, probes, PodDisruptionBudget, EKS no
 
 - Real cluster credentials.
 - Live kubeconfig files.
-- Production deployment targets.
+- Live deployment targets.
 - Application business logic outside release integration.
 
 ### Quality Checklist
@@ -288,7 +288,7 @@ Own README, demo script, journey log, decision log, and LinkedIn-safe language.
 - Full prompt transcripts.
 - Local working-note material.
 - Live infrastructure code unless documenting it.
-- Claims that imply the project is production-ready.
+- Claims that imply the project is release-ready.
 
 ### Quality Checklist
 
@@ -301,5 +301,5 @@ Own README, demo script, journey log, decision log, and LinkedIn-safe language.
 ### Example Prompt
 
 ```text
-Act as the Documentation & Portfolio Worker. Improve README.md and docs/demo-script.md for a public GitHub portfolio audience. Keep wording synthetic, professional, and non-production. Commit the documentation update.
+Act as the Documentation & Portfolio Worker. Improve README.md and docs/demo-script.md for a public GitHub portfolio audience. Keep wording synthetic, professional, and mock-first. Commit the documentation update.
 ```

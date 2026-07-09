@@ -4,7 +4,7 @@ Cloud & AI platform engineering portfolio project.
 
 `cloudai-platform` is positioned as an AWS-first, multi-cloud-ready learning and reference implementation using synthetic examples and public cloud service patterns. It demonstrates how an enterprise-style AI control plane could organize secure AI enablement, governed model access, AI traffic governance, platform foundations, FinOps, observability, and release engineering patterns.
 
-This is not a production product. It is intentionally documentation-heavy and implementation-light in the foundation phase, with mock mode as the default.
+This is a learning and reference project. It is intentionally documentation-heavy and implementation-light in the foundation phase, with mock mode as the default.
 
 ## Project Overview
 
@@ -58,7 +58,7 @@ It is responsible for:
 - Cost and usage visibility.
 - Observability and operational review.
 
-It is not a model training platform, data warehouse, or production runtime in this phase.
+It is not a model training platform, data warehouse, or deployed runtime in this phase.
 
 ## Architecture Flow
 
@@ -156,7 +156,7 @@ This project uses synthetic examples and public cloud service patterns for demon
 
 Scope assumptions:
 
-- It is not a representation of any production platform.
+- It is a learning and reference implementation.
 - Examples use synthetic data, generic service names, and public cloud concepts.
 - Local notes, credentials, generated state, screenshots, and full working transcripts are kept out of the repository.
 - Mock mode remains the default unless a future task explicitly adds reviewed deployment guidance.
@@ -192,7 +192,7 @@ Provider-specific dashboards, alarms, traces, and evaluation harnesses are futur
 
 This foundation phase does not require cloud credentials.
 
-There is no production runtime yet. The current mock scripts are simple placeholders:
+There is no deployed runtime yet. The current mock scripts are simple placeholders:
 
 ```bash
 # Optional, if a TypeScript runner is available in your local environment
@@ -225,6 +225,6 @@ See `docs/project/ROADMAP.md`, `docs/project/BACKLOG.md`, and `docs/project/PROG
 
 ## Project Scope Statement
 
-This project is a personal learning and reference implementation. It uses synthetic examples and public cloud service patterns, and is not a representation of any production platform.
+This project is a personal learning and reference implementation. It uses synthetic examples and public cloud service patterns.
 
 Mock mode is the default. Avoid real AWS cost unless a future task explicitly requests and documents a safe deployment path.

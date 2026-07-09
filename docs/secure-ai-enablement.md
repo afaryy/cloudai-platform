@@ -14,4 +14,4 @@ Secure AI enablement makes approved AI capabilities available without weakening 
 
 This is a personal learning and reference implementation. Secure AI examples use synthetic prompts, placeholder identifiers, and public cloud service patterns for demonstration purposes.
 
-Do not use real credentials, live account details, or production data in examples or local test runs.
+Do not use real credentials, live account details, or operational datasets in examples or local test runs.

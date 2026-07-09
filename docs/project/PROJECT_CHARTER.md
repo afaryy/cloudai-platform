@@ -8,7 +8,7 @@ Build a Cloud & AI platform engineering portfolio project that demonstrates an A
 
 ## Why This Exists
 
-The project is positioned as an AWS-first, multi-cloud-ready learning and reference implementation using synthetic examples and public cloud service patterns. It is not a representation of any production platform.
+The project is positioned as an AWS-first, multi-cloud-ready learning and reference implementation using synthetic examples and public cloud service patterns.
 
 ## Scope
 
@@ -22,9 +22,9 @@ The project is positioned as an AWS-first, multi-cloud-ready learning and refere
 
 ## Non-Goals
 
-- No production product claim.
+- No product-readiness claim.
 - No real cloud deployment in P0.
-- No production platform claim.
+- No platform-readiness claim.
 - No real credentials or live cloud deployment in P0.
 - No full working transcripts in git.
 
