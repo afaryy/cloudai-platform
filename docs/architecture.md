@@ -4,13 +4,15 @@
 
 The platform is AWS-first, with Amazon Bedrock as the initial model provider pattern. Its control-plane design remains provider-neutral so Azure and GCP mappings can be added without changing the core governance model.
 
-## Logical Layers
+## Logical Layer Overview
+
+Start here. This view explains the platform in plain language before the later diagrams add system and implementation detail.
 
 - CloudAI Control Plane: use case intake, policy, approval, responsible AI review, provider registry, audit, and evaluation.
 - Model access sub-layer: GenAI / LLM Gateway for governed model routing, request controls, and response handling.
 - AI Traffic Governance layer: broader future gateway controls for agent, tool, retrieval, workflow, and data-access traffic.
 - Provider Adapter layer: AWS first, with Azure and GCP mapping notes.
-- Platform Foundations: identity, secrets, encryption, network, CI/CD, observability, and infrastructure automation.
+- Platform Foundations: identity, encryption, key management, network, CI/CD, observability, and infrastructure automation.
 
 ```mermaid
 flowchart TB
@@ -122,7 +124,7 @@ flowchart TB
     gcp["GCP future mapping<br/>Model access | API gateway | Runtime | Monitoring"]
   end
 
-  cross["Cross-cutting capabilities<br/>Identity | Secrets | Encryption | Terraform | GitHub Actions | Observability | FinOps | Responsible AI | Audit"]
+  cross["Cross-cutting capabilities<br/>Identity | Key management | Encryption | Terraform | GitHub Actions | Observability | FinOps | Responsible AI | Audit"]
 
   consumers --> control
   control --> governance
@@ -186,7 +188,7 @@ These two views are complementary, not conflicting. The six-layer model explains
 | Governance | CloudAI Control Plane, policy, approval, audit | Defines rules, controls, approval and evidence. |
 | Data | RAG, retrieval, data access, data egress governance | Defines how enterprise knowledge and data are safely used. |
 | Platform | GenAI / LLM Gateway, AI Traffic Governance, provider adapters | Provides standard access to models, tools, agents and provider services. |
-| Infrastructure | AWS/Azure/GCP foundations, Terraform, IAM, network, KMS, secrets | Provides secure runtime and deployment foundations. |
+| Infrastructure | AWS/Azure/GCP foundations, Terraform, IAM, network, KMS, key management | Provides secure runtime and deployment foundations. |
 | Operations | Observability, FinOps, runbooks, assessment, gap tracking | Makes the platform measurable, supportable and continuously improvable. |
 
 ## First Iteration Boundary
