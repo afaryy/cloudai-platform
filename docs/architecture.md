@@ -12,6 +12,29 @@ The platform is AWS-first, with Amazon Bedrock as the initial model provider pat
 - Provider Adapter layer: AWS first, with Azure and GCP mapping notes.
 - Platform Foundations: identity, secrets, encryption, network, CI/CD, observability, and infrastructure automation.
 
+```mermaid
+flowchart TB
+  purpose["Why this exists<br/>Enable AI use with governance, visibility, and cost awareness"]
+
+  decide["1. Decide what is allowed<br/>Use case intake | Policies | Approvals | Evidence"]
+
+  access["2. Control how AI is accessed<br/>GenAI / LLM Gateway | Model routing | Request checks"]
+
+  govern["3. Govern broader AI traffic<br/>Agents | Tools | Retrieval | Data movement"]
+
+  connect["4. Connect to cloud providers<br/>AWS-first adapter | Azure mapping | GCP mapping"]
+
+  operate["5. Run, measure, and improve<br/>Infrastructure | CI/CD | Observability | FinOps | Responsible AI"]
+
+  purpose --> decide
+  decide --> access
+  access --> govern
+  govern --> connect
+  connect --> operate
+```
+
+This logical view introduces the role of each layer before the system and technical diagrams describe provider adapters, gateways, and runtime flows.
+
 The GenAI / LLM Gateway is the first concrete runtime access pattern. The CloudAI Control Plane is not just a runtime hop; it is the governance and evidence layer that defines which use cases, providers, controls, and audit expectations apply. The broader AI Traffic Governance layer is intentionally described before implementation so future agent and tool flows can inherit the same policy, audit, observability, FinOps, and responsible AI model.
 
 ## Cloud & AI Platform System View
