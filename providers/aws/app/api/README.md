@@ -95,6 +95,23 @@ Example empty prompt response:
 }
 ```
 
+Example token budget response:
+
+```json
+{
+  "error": {
+    "code": "token_budget_exceeded",
+    "message": "estimated input tokens exceed the mock budget of 80."
+  }
+}
+```
+
+## Local Token Budget Guardrail
+
+The mock API applies a simple synthetic input token budget before generating a response. The current local limit is `80` estimated input tokens.
+
+This guardrail is intentionally small and demo-oriented. It shows where token-aware policy, rate limiting, and FinOps controls can sit in the GenAI / LLM Gateway without calling real provider services.
+
 ## Local Request Logs
 
 The mock API writes one structured JSON log event per request. Logs include routing, status, duration, and metadata for cost and observability examples. They do not include prompt text or request bodies.
