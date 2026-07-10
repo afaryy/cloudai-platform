@@ -1,0 +1,26 @@
+{
+  "requestId": "rag_req_demo_0002",
+  "response": {
+    "answer": "The request was not answered because the demo policy does not allow external egress for this retrieval flow.",
+    "citations": []
+  },
+  "retrieval": {
+    "knowledgeBase": "external-demo-source",
+    "documentsConsidered": 0,
+    "documentsReturned": 0,
+    "sources": []
+  },
+  "governance": {
+    "citationRequirementMet": false,
+    "egressDecision": {
+      "allowed": false,
+      "scope": "external_network",
+      "reason": "external_egress_not_allowed_for_demo_policy"
+    }
+  },
+  "audit": {
+    "requestId": "rag_req_demo_0002",
+    "policyProfile": "rag-demo-governed",
+    "evaluatedAt": "2026-07-10T00:00:00.000Z"
+  }
+}

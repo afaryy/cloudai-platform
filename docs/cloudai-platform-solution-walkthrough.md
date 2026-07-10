@@ -23,6 +23,19 @@ The solution is organized around these layers:
 | Platform Foundations | Provide IAM, KMS, network, API, runtime, CI/CD, and observability foundations. | Documentation and skeletons only. |
 | FinOps / Observability | Track token estimates, costs, logs, metrics, and operational signals. | Local metadata, token budget, and structured logs implemented. |
 
+## Language Boundary
+
+The repository uses a deliberate language boundary rather than mixing implementation styles randomly.
+
+| Area | Primary language | Reason |
+|---|---|---|
+| Platform control layer | TypeScript | Fits API, gateway, request/response contracts, policy checks, guardrails, CI tests, and service-oriented platform engineering. |
+| AI workflow utilities | Python, future phase | Fits RAG ingestion, chunking, embeddings workflow, eval dataset preparation, benchmarking utilities, and orchestration experiments. |
+
+The current P1 implementation stays TypeScript-first because it is focused on the GenAI / LLM Gateway, contracts, metadata, guardrails, local evals, and CI-tested platform behavior.
+
+Python should be introduced when the project adds AI workflow tooling, such as a synthetic RAG ingestion skeleton or LLMOps evaluation utility. This keeps the portfolio story clear: TypeScript demonstrates the platform gateway and control layer, while Python demonstrates AI workflow and LLMOps capability.
+
 ## Current P1 Mock API
 
 The P1 mock API lives under:
@@ -81,7 +94,8 @@ The repository has been built incrementally through small PRs.
 | #9 | Default policy profile and walkthrough | Added a local policy profile for default model, allowed models, max prompt length, and token budget settings, plus this solution walkthrough. |
 | #10 | Demo fixtures | Added synthetic request, response, error, and request log examples for demos and contract checks. |
 | #11 | Demo script | Refreshed the portfolio walkthrough around the current P1 mock API and synthetic fixtures. |
-| In progress | Local mock eval harness | Adds synthetic eval cases for gateway contract, guardrail, metadata, and observability behavior. |
+| #12 | Local mock eval harness | Added synthetic eval cases for gateway contract, guardrail, metadata, and observability behavior. |
+| In progress | RAG governance contract | Adds mock RAG request and response contracts for retrieval metadata, citation requirements, egress decisions, and audit evidence. |
 
 ## P0 Foundation Summary
 
@@ -180,3 +194,4 @@ Useful entry points:
 - `providers/aws/app/api/README.md` for the local mock API.
 - `shared/schemas/mock-genai-api/` for API contract schemas.
 - `shared/examples/mock-genai-api/` for synthetic demo fixtures.
+- `examples/rag-pattern/README.md` for governed RAG contract notes.
