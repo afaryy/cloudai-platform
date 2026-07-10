@@ -17,7 +17,7 @@ At a high level, it explores:
 - Broader AI Traffic Governance for future agent, tool, retrieval, workflow, and data-access flows.
 - AWS-first provider foundations with future Azure and GCP mappings.
 - AI FinOps, observability, evaluation, operations, and responsible AI practices.
-- Enterprise AI capacity planning across model quotas, inference throughput, GPU workloads, retrieval scale, agent runtime limits, and operational support.
+- AI capacity planning across model quotas, inference throughput, GPU workloads, retrieval scale, agent runtime limits, and operational support.
 
 ## Why This Project Exists
 
