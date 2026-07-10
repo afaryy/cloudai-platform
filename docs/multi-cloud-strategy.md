@@ -6,7 +6,7 @@ The platform is AWS-first and multi-cloud-ready. The goal is to keep control-pla
 
 - Keep policies, schemas, and governance concepts provider-neutral.
 - Implement AWS first using public AWS service concepts.
-- Treat Azure and GCP as mapping notes until implementation phases begin.
+- Treat Azure and GCP as reference architecture mappings until implementation phases begin.
 - Avoid lowest-common-denominator architecture; use provider strengths behind stable abstractions.
 
 ## Provider Readiness

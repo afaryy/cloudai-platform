@@ -17,6 +17,7 @@ At a high level, it explores:
 - Broader AI Traffic Governance for future agent, tool, retrieval, workflow, and data-access flows.
 - AWS-first provider foundations with future Azure and GCP mappings.
 - AI FinOps, observability, evaluation, operations, and responsible AI practices.
+- Enterprise AI capacity planning across model quotas, inference throughput, GPU workloads, retrieval scale, agent runtime limits, and operational support.
 
 ## Why This Project Exists
 
@@ -41,9 +42,9 @@ The goal is to show practical architecture thinking and incremental platform del
 
 ## AWS-First, Multi-Cloud-Ready
 
-AWS is the first implementation provider. The reference architecture maps early provider concepts to public AWS services such as Amazon Bedrock, IAM, KMS, Secrets Manager, API Gateway, Lambda, DynamoDB, S3, CloudWatch, and EKS.
+AWS is the first implementation provider. The reference architecture maps early provider concepts to public AWS services such as Amazon Bedrock, Amazon Bedrock AgentCore, Amazon SageMaker AI, IAM, KMS, Secrets Manager, API Gateway, Lambda, DynamoDB, S3, CloudWatch, ECS, and EKS.
 
-The control model is intentionally cloud-agnostic. Azure and GCP are represented as early mapping notes, not active implementations. The project keeps provider-specific details behind adapter boundaries so the core governance model can remain portable.
+The control model is intentionally cloud-agnostic. Azure and GCP are represented as early reference architecture mappings, not active implementations. Azure mappings track Microsoft Foundry, Azure AI Search, Entra ID, Key Vault, Azure Monitor, API Management, and Private Link. GCP mappings track Gemini Enterprise Agent Platform, Vertex AI / Model Garden, Agent Gateway, Agent Runtime, Vector Search, IAM, Cloud KMS, Secret Manager, Cloud Logging, and Cloud Monitoring. The project keeps provider-specific details behind adapter boundaries so the core governance model can remain portable.
 
 ## CloudAI Control Plane Concept
 
