@@ -11,7 +11,7 @@
       "minLength": 1,
       "maxLength": 4000,
       "pattern": ".*\\S.*",
-      "description": "Prompt text for the local mock GenAI response."
+      "description": "Prompt text for the local mock GenAI response. The max length mirrors the default mock policy profile."
     },
     "modelName": {
       "anyOf": [
@@ -24,7 +24,7 @@
           "pattern": "^\\s*$"
         }
       ],
-      "description": "Optional mock model name. Defaults to mock-bedrock-claude when omitted or blank."
+      "description": "Optional mock model name. Defaults to the model configured by the default mock policy profile when omitted or blank."
     }
   }
 }

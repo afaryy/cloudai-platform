@@ -6,6 +6,11 @@ import {
   enforceInputTokenBudget
 } from "../src/lib/tokenBudget.js";
 import { HttpError } from "../src/lib/errors.js";
+import { DEFAULT_POLICY_PROFILE } from "../src/lib/policyProfile.js";
+
+test("DEFAULT_MAX_INPUT_TOKENS uses the default policy profile", () => {
+  assert.equal(DEFAULT_MAX_INPUT_TOKENS, DEFAULT_POLICY_PROFILE.maxInputTokens);
+});
 
 test("checkInputTokenBudget allows prompts within the mock budget", () => {
   const decision = checkInputTokenBudget("hello world", DEFAULT_MAX_INPUT_TOKENS);

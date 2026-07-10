@@ -4,7 +4,7 @@ Cloud & AI platform engineering portfolio project.
 
 `cloudai-platform` is positioned as an AWS-first, multi-cloud-ready learning and reference implementation using synthetic examples and public cloud service patterns. It demonstrates a Cloud AI control plane for organizing secure AI enablement, governed model access, AI traffic governance, platform foundations, FinOps, observability, and release engineering patterns.
 
-This is a learning and reference project. It is intentionally documentation-heavy and implementation-light in the foundation phase, with mock mode as the default.
+This is a learning and reference project. It stays intentionally incremental, with mock mode as the default.
 
 ## Project Overview
 
@@ -18,6 +18,8 @@ At a high level, it explores:
 - AWS-first provider foundations with future Azure and GCP mappings.
 - AI FinOps, observability, evaluation, operations, and responsible AI practices.
 - AI capacity planning across model quotas, inference throughput, GPU workloads, retrieval scale, agent runtime limits, and operational support.
+
+For an end-to-end reader guide, see `docs/cloudai-platform-solution-walkthrough.md`.
 
 ## Why This Project Exists
 
@@ -86,13 +88,14 @@ Current scope:
 - Bedrock-oriented architecture notes.
 - Terraform module and environment folders.
 - Mock-mode scripts for future cost and ingest examples.
+- Local mock GenAI / LLM Gateway API.
+- Request metadata, structured logs, token guardrail, API schemas, and default policy profile examples.
 
 Future scope:
 
-- Mock gateway API.
-- Policy schema drafts.
-- Terraform validation examples.
 - Reviewed AWS foundation modules.
+- Terraform validation examples.
+- Optional small AWS runtime deployment after cost and cleanup guidance is documented.
 
 ## Track B: AI Release Engineering on EKS
 
@@ -135,7 +138,7 @@ It asks:
 - What runtime isolation model is appropriate?
 - How could Kubernetes-native agents inherit platform controls?
 
-No agent runtime is implemented in the foundation phase.
+No agent runtime is implemented in the current scope.
 
 ## Track E: Future LLMOps / GPU Sandbox
 
@@ -191,7 +194,7 @@ Provider-specific dashboards, alarms, traces, and evaluation harnesses are futur
 
 ## How to Run Locally in Mock Mode
 
-This foundation phase runs locally in mock mode.
+The current P1 implementation runs locally in mock mode.
 
 The P1 mock GenAI API uses local synthetic responses:
 
@@ -220,14 +223,14 @@ If you do not have a TypeScript runner installed, read the scripts as mock examp
 
 ## Roadmap
 
-Current phase: P0 Foundation.
+Current phase: P1 AWS GenAI MVP.
 
 Near-term:
 
-- Strengthen architecture and project-control docs.
-- Add mock GenAI / LLM Gateway API.
-- Draft policy schemas for model access and AI traffic governance.
-- Add tests for mock-mode behavior.
+- Complete local mock GenAI / LLM Gateway controls.
+- Keep API contracts, request metadata, token guardrails, and policy profile examples aligned.
+- Add focused tests for mock-mode behavior as each control is introduced.
+- Prepare the next AWS foundation skeletons without enabling real deployment by default.
 
 Later:
 

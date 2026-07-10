@@ -36,6 +36,19 @@ Supported mock models:
 
 If `modelName` is omitted, the API uses `mock-bedrock-claude`.
 
+## Default Policy Profile
+
+The mock API uses a local policy profile named `default-mock-governed`.
+
+The profile defines:
+
+- default model: `mock-bedrock-claude`
+- allowed models: `mock-bedrock-claude`, `mock-bedrock-titan`
+- maximum prompt length: `4000` characters
+- synthetic input token budget: `80` estimated input tokens
+
+This profile is a small local example of governed model access. It is not connected to identity, persistence, or cloud policy services in this phase.
+
 ## API Contract Schemas
 
 Lightweight JSON schemas document the current mock API request, response, and error shapes:

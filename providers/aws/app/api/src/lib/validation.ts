@@ -1,11 +1,15 @@
 import type { ChatRequest } from "../types.js";
 import { HttpError } from "./errors.js";
+import {
+  DEFAULT_POLICY_PROFILE,
+  isModelAllowed,
+  type MockPolicyProfile
+} from "./policyProfile.js";
 
-const DEFAULT_MODEL = "mock-bedrock-claude";
-const ALLOWED_MODELS = new Set(["mock-bedrock-claude", "mock-bedrock-titan"]);
-const MAX_PROMPT_LENGTH = 4000;
-
-export function normalizeChatRequest(input: unknown): Required<ChatRequest> {
+export function normalizeChatRequest(
+  input: unknown,
+  profile: MockPolicyProfile = DEFAULT_POLICY_PROFILE
+): Required<ChatRequest> {
   if (!isRecord(input)) {
     throw new HttpError(400, "Request body must be a JSON object.", "invalid_body");
   }
@@ -19,15 +23,19 @@ export function normalizeChatRequest(input: unknown): Required<ChatRequest> {
     throw new HttpError(400, "prompt must not be empty.", "empty_prompt");
   }
 
-  if (prompt.length > MAX_PROMPT_LENGTH) {
-    throw new HttpError(400, `prompt must be ${MAX_PROMPT_LENGTH} characters or fewer.`, "prompt_too_long");
+  if (prompt.length > profile.maxPromptCharacters) {
+    throw new HttpError(
+      400,
+      `prompt must be ${profile.maxPromptCharacters} characters or fewer.`,
+      "prompt_too_long"
+    );
   }
 
   const modelName = typeof input.modelName === "string" && input.modelName.trim().length > 0
     ? input.modelName.trim()
-    : DEFAULT_MODEL;
+    : profile.defaultModelName;
 
-  if (!ALLOWED_MODELS.has(modelName)) {
+  if (!isModelAllowed(modelName, profile)) {
     throw new HttpError(400, "modelName is not supported in mock mode.", "unsupported_model");
   }
 

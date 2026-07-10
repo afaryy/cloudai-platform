@@ -6,6 +6,7 @@ import { resolve } from "node:path";
 import { MockBedrockClient } from "../src/clients/mockBedrockClient.js";
 import { postChat } from "../src/routes/chat.js";
 import { createMockApiServer } from "../src/server.js";
+import { DEFAULT_POLICY_PROFILE } from "../src/lib/policyProfile.js";
 import { normalizeChatRequest } from "../src/lib/validation.js";
 
 const SCHEMA_DIR = resolve(process.cwd(), "../../../../shared/schemas/mock-genai-api");
@@ -16,9 +17,9 @@ test("chat request schema documents the current request contract", async () => {
   assert.deepEqual(schema.required, ["prompt"]);
   assert.equal(schema.additionalProperties, true);
   assert.equal(schema.properties.prompt.type, "string");
-  assert.equal(schema.properties.prompt.maxLength, 4000);
+  assert.equal(schema.properties.prompt.maxLength, DEFAULT_POLICY_PROFILE.maxPromptCharacters);
   assert.equal(schema.properties.prompt.pattern, ".*\\S.*");
-  assert.deepEqual(schema.properties.modelName.anyOf[0].enum, ["mock-bedrock-claude", "mock-bedrock-titan"]);
+  assert.deepEqual(schema.properties.modelName.anyOf[0].enum, [...DEFAULT_POLICY_PROFILE.allowedModelNames]);
   assert.equal(schema.properties.modelName.anyOf[1].pattern, "^\\s*$");
 });
 
