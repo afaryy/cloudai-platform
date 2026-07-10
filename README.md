@@ -2,7 +2,7 @@
 
 Cloud & AI platform engineering portfolio project.
 
-`cloudai-platform` is positioned as an AWS-first, multi-cloud-ready learning and reference implementation using synthetic examples and public cloud service patterns. It demonstrates how an enterprise-style AI control plane could organize secure AI enablement, governed model access, AI traffic governance, platform foundations, FinOps, observability, and release engineering patterns.
+`cloudai-platform` is positioned as an AWS-first, multi-cloud-ready learning and reference implementation using synthetic examples and public cloud service patterns. It demonstrates a Cloud AI control plane for organizing secure AI enablement, governed model access, AI traffic governance, platform foundations, FinOps, observability, and release engineering patterns.
 
 This is a learning and reference project. It is intentionally documentation-heavy and implementation-light in the foundation phase, with mock mode as the default.
 
@@ -27,7 +27,7 @@ The goal is to show practical architecture thinking and incremental platform del
 
 ## What This Project Demonstrates
 
-- Secure AI enablement for enterprise-style workflows.
+- Secure AI enablement for Cloud & AI platform workflows.
 - Governed access to foundation models and future AI services.
 - A model-access sub-layer through a GenAI / LLM Gateway.
 - A broader AI traffic governance layer for future agent and tool flows.
@@ -191,9 +191,24 @@ Provider-specific dashboards, alarms, traces, and evaluation harnesses are futur
 
 ## How to Run Locally in Mock Mode
 
-This foundation phase does not require cloud credentials.
+This foundation phase runs locally in mock mode.
 
-There is no deployed runtime yet. The current mock scripts are simple placeholders:
+The P1 mock GenAI API uses local synthetic responses:
+
+```bash
+cd providers/aws/app/api
+pnpm install
+pnpm run build
+pnpm test
+pnpm run dev
+```
+
+The API exposes:
+
+- `GET /health`
+- `POST /chat`
+
+The current mock scripts are simple placeholders:
 
 ```bash
 # Optional, if a TypeScript runner is available in your local environment
@@ -201,7 +216,7 @@ tsx scripts/estimate-token-cost.ts
 tsx scripts/ingest-sample-docs.ts
 ```
 
-If you do not have a TypeScript runner installed, read the scripts as mock examples. Do not install dependencies or configure cloud credentials unless a future phase explicitly adds reviewed setup instructions.
+If you do not have a TypeScript runner installed, read the scripts as mock examples. No cloud account setup is needed for this phase.
 
 ## Roadmap
 
