@@ -24,7 +24,7 @@ PYTHONPATH=examples/rag-pattern/python python3 -m unittest discover -s examples/
 Expected result:
 
 ```text
-Ran 15 tests
+Ran 21 tests
 
 OK
 ```
@@ -40,12 +40,33 @@ PYTHONPATH=examples/rag-pattern/python python3 -m rag_ingest.cli \
   --knowledge-base cloudai-demo-handbook
 ```
 
+To prepare a local eval dataset from the same synthetic docs:
+
+```bash
+PYTHONPATH=examples/rag-pattern/python python3 -m rag_ingest.cli \
+  --mode eval-dataset \
+  --docs examples/rag-pattern/python/sample_docs \
+  --out /tmp/cloudai-rag-eval-dataset.json \
+  --knowledge-base cloudai-demo-handbook \
+  --dataset-id cloudai-rag-eval-demo
+```
+
 The command writes a local JSON export file outside the repository.
 It does not call cloud services, create embeddings, or write to a vector database.
 
-A committed sample output is available at:
+Committed sample outputs are available at:
 
 - `examples/rag-pattern/python/sample_outputs/cloudai-rag-chunks.json`
+- `examples/rag-pattern/python/sample_outputs/cloudai-rag-eval-dataset.json`
+
+## Local Flow
+
+```text
+synthetic markdown docs
+  -> local ingest and chunking
+  -> governance-aligned chunk JSON
+  -> local eval dataset JSON
+```
 
 ## Current Boundary
 
@@ -58,6 +79,7 @@ Included:
 - local JSON export helpers
 - local CLI wrapper for ingest/export demos
 - committed sample output fixture
+- local eval dataset preparation
 - unit tests using Python standard library tools
 
 Deferred:
@@ -65,6 +87,7 @@ Deferred:
 - embeddings
 - vector indexes
 - retrieval runtime
+- automated LLM evaluation
 - LangChain or similar orchestration framework
 - provider-hosted knowledge base integration
 - cloud deployment
@@ -96,3 +119,17 @@ The exporter maps local chunks to field names used by the governed RAG contract:
 
 The export also includes chunk-specific fields such as `chunkId`, `chunkIndex`, `contentType`, `metadata`, and `text`.
 This is not a full governed RAG response; it is a local ingest artifact that can support later retrieval and evaluation work.
+
+## Eval Dataset Boundary
+
+The local eval dataset prepares simple deterministic cases with:
+
+- `caseId`
+- `question`
+- `expectedSourceId`
+- `expectedSourceTitle`
+- `expectedCitationRequired`
+- `sourceChunkId`
+- `qualityNotes`
+
+It does not score model responses or call an evaluation framework.
