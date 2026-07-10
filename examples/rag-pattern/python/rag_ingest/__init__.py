@@ -5,6 +5,7 @@ from rag_ingest.eval_dataset import build_eval_dataset, chunk_to_eval_case, writ
 from rag_ingest.exporter import chunk_to_export_record, chunks_to_export_document, write_chunks_json
 from rag_ingest.ingest import ingest_markdown_directory
 from rag_ingest.models import RagChunk
+from rag_ingest.quality_scoring import score_eval_dataset, score_eval_response, write_score_report_json
 
 __all__ = [
     "RagChunk",
@@ -14,6 +15,9 @@ __all__ = [
     "chunk_to_export_record",
     "chunks_to_export_document",
     "ingest_markdown_directory",
+    "score_eval_dataset",
+    "score_eval_response",
     "write_eval_dataset_json",
+    "write_score_report_json",
     "write_chunks_json",
 ]

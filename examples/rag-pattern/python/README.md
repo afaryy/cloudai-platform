@@ -24,7 +24,7 @@ PYTHONPATH=examples/rag-pattern/python python3 -m unittest discover -s examples/
 Expected result:
 
 ```text
-Ran 21 tests
+Ran 29 tests
 
 OK
 ```
@@ -51,13 +51,25 @@ PYTHONPATH=examples/rag-pattern/python python3 -m rag_ingest.cli \
   --dataset-id cloudai-rag-eval-demo
 ```
 
+To score synthetic mock responses against the eval dataset:
+
+```bash
+PYTHONPATH=examples/rag-pattern/python python3 -m rag_ingest.cli \
+  --mode score-report \
+  --eval-dataset examples/rag-pattern/python/sample_outputs/cloudai-rag-eval-dataset.json \
+  --responses examples/rag-pattern/python/sample_outputs/mock-rag-responses.json \
+  --out /tmp/cloudai-rag-score-report.json
+```
+
 The command writes a local JSON export file outside the repository.
-It does not call cloud services, create embeddings, or write to a vector database.
+It does not call cloud services, create embeddings, run an LLM, or write to a vector database.
 
 Committed sample outputs are available at:
 
 - `examples/rag-pattern/python/sample_outputs/cloudai-rag-chunks.json`
 - `examples/rag-pattern/python/sample_outputs/cloudai-rag-eval-dataset.json`
+- `examples/rag-pattern/python/sample_outputs/mock-rag-responses.json`
+- `examples/rag-pattern/python/sample_outputs/cloudai-rag-score-report.json`
 
 ## Local Flow
 
@@ -66,6 +78,7 @@ synthetic markdown docs
   -> local ingest and chunking
   -> governance-aligned chunk JSON
   -> local eval dataset JSON
+  -> synthetic response-quality score report
 ```
 
 ## Current Boundary
@@ -80,6 +93,7 @@ Included:
 - local CLI wrapper for ingest/export demos
 - committed sample output fixture
 - local eval dataset preparation
+- local response-quality scoring for synthetic mock responses
 - unit tests using Python standard library tools
 
 Deferred:
@@ -88,6 +102,7 @@ Deferred:
 - vector indexes
 - retrieval runtime
 - automated LLM evaluation
+- model-based scoring
 - LangChain or similar orchestration framework
 - provider-hosted knowledge base integration
 - cloud deployment
@@ -133,3 +148,14 @@ The local eval dataset prepares simple deterministic cases with:
 - `qualityNotes`
 
 It does not score model responses or call an evaluation framework.
+
+## Quality Scoring Boundary
+
+The local scoring harness checks synthetic mock responses for:
+
+- response present
+- expected source present
+- citation requirement met
+- unsupported marker absent
+
+It is a deterministic local scoring example, not a model-based evaluator.

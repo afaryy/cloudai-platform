@@ -1,0 +1,29 @@
+{
+  "responseSetId": "mock-rag-responses",
+  "responses": [
+    {
+      "answer": "The workflow captures governance metadata, source evidence, and operational signals while citing the expected synthetic source.",
+      "caseId": "eval-cloudai-demo-handbook-0001",
+      "citations": [
+        {
+          "sourceId": "cloudai-demo-handbook"
+        }
+      ],
+      "sourceIds": [
+        "cloudai-demo-handbook"
+      ]
+    },
+    {
+      "answer": "Operational signals include request identifiers, token estimates, evaluation notes, and cost indicators, with the expected synthetic source cited.",
+      "caseId": "eval-cloudai-demo-handbook-0002",
+      "citations": [
+        {
+          "sourceId": "cloudai-demo-handbook"
+        }
+      ],
+      "sourceIds": [
+        "cloudai-demo-handbook"
+      ]
+    }
+  ]
+}

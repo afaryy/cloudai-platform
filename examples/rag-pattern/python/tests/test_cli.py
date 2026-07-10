@@ -69,6 +69,64 @@ class CliTest(unittest.TestCase):
         self.assertEqual(exported["caseCount"], 1)
         self.assertEqual(exported["cases"][0]["expectedSourceId"], "demo-handbook")
 
+    def test_exports_score_report_from_eval_dataset_and_responses(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            tmp_path = Path(tmp_dir)
+            eval_dataset_path = tmp_path / "eval-dataset.json"
+            responses_path = tmp_path / "responses.json"
+            output_path = tmp_path / "score-report.json"
+            eval_dataset_path.write_text(
+                json.dumps(
+                    {
+                        "datasetId": "demo-rag-eval",
+                        "cases": [
+                            {
+                                "caseId": "eval-demo-handbook-0001",
+                                "expectedSourceId": "demo-handbook",
+                                "expectedCitationRequired": True,
+                            }
+                        ],
+                    }
+                ),
+                encoding="utf-8",
+            )
+            responses_path.write_text(
+                json.dumps(
+                    {
+                        "responseSetId": "mock-responses",
+                        "responses": [
+                            {
+                                "caseId": "eval-demo-handbook-0001",
+                                "answer": "Cited response.",
+                                "sourceIds": ["demo-handbook"],
+                                "citations": [{"sourceId": "demo-handbook"}],
+                            }
+                        ],
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            exit_code = main(
+                [
+                    "--mode",
+                    "score-report",
+                    "--eval-dataset",
+                    str(eval_dataset_path),
+                    "--responses",
+                    str(responses_path),
+                    "--out",
+                    str(output_path),
+                ]
+            )
+
+            exported = json.loads(output_path.read_text(encoding="utf-8"))
+
+        self.assertEqual(exit_code, 0)
+        self.assertEqual(exported["datasetId"], "demo-rag-eval")
+        self.assertEqual(exported["responseSetId"], "mock-responses")
+        self.assertEqual(exported["passedCount"], 1)
+
     def test_returns_error_for_missing_docs_directory(self):
         with tempfile.TemporaryDirectory() as tmp_dir:
             tmp_path = Path(tmp_dir)
