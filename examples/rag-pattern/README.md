@@ -17,6 +17,11 @@ Synthetic examples:
 - `shared/examples/rag-governance/rag-response.governed.json`
 - `shared/examples/rag-governance/rag-egress-blocked.json`
 
+Local Python workflow:
+
+- `examples/rag-pattern/python/README.md`
+- `examples/rag-pattern/python/sample_docs/cloudai-demo-handbook.md`
+
 ## Governance Intent
 
 The contract captures:
@@ -48,16 +53,15 @@ Current scope:
 - JSON contracts
 - synthetic examples
 - contract tests
+- local Python ingest and chunking skeleton
 - public cloud architecture notes
 
 Deferred scope:
 
-- document ingestion
-- chunking
 - embeddings
 - vector indexes
 - retrieval runtime
 - LangChain or similar orchestration framework
 - provider-hosted knowledge base integration
 
-Python workflow utilities may be added later for ingestion, chunking, eval data preparation, or LLMOps experiments. The current contract stays TypeScript-tested because it belongs to the platform control and API contract layer.
+The current RAG contract stays TypeScript-tested because it belongs to the platform control and API contract layer. Python is introduced here for local AI workflow utilities such as ingestion, chunking, eval data preparation, and future LLMOps experiments.
