@@ -1,6 +1,6 @@
 # Architecture
 
-`cloudai-platform` presents an Enterprise Cloud AI Control Plane for governing model access, AI traffic, provider integration, platform foundations, observability, and cost controls across cloud environments.
+`cloudai-platform` presents a Cloud AI Control Plane for governing model access, AI traffic, provider integration, platform foundations, observability, and cost controls across cloud environments.
 
 The platform is AWS-first, with Amazon Bedrock as the initial model provider pattern. Its control-plane design remains provider-neutral so Azure and GCP mappings can be added without changing the core governance model.
 
@@ -50,7 +50,7 @@ flowchart LR
     agents["AI agents"]
   end
 
-  subgraph control["2. Enterprise Cloud AI Control Plane"]
+  subgraph control["2. Cloud AI Control Plane"]
     intake["Use case intake"]
     governance["Responsible AI governance"]
     registry["Provider and model registry"]
@@ -112,7 +112,7 @@ This system view shows the overall Cloud & AI platform story: consumer entry poi
 flowchart TB
   consumers["Consumers<br/>Developers | Applications | AI Agents | Platform Teams"]
 
-  control["Enterprise Cloud AI Control Plane<br/>Use case intake | Policy and approval | Provider registry | Audit and evaluation"]
+  control["CloudAI Control Plane<br/>Use case intake | Policy and approval | Provider registry | Audit and evaluation"]
 
   governance["AI Traffic Gateway / Governance Layer<br/>GenAI / LLM Gateway | Agent and tool governance | Token and rate controls | Data egress policy"]
 
@@ -178,19 +178,19 @@ Runtime requests do not bypass governance. Even in future agent or tool flows, t
 
 ## Relationship to the Six-Layer Enterprise AI Model
 
-The six-layer enterprise AI model describes the broader operating model and capability map. This repository architecture describes how those capabilities are organised into a buildable reference implementation.
+The six-layer enterprise AI model describes the broader capability map. This repository architecture describes how those capabilities are organised into a buildable reference implementation.
 
-These two views are complementary, not conflicting. The six-layer model explains what enterprise capabilities are needed. The implementation model explains how this project structures those capabilities technically.
+These two views are complementary, not conflicting. The six-layer model explains what platform capabilities are needed. The implementation model explains how this project structures those capabilities technically.
 
 | Six-layer model | Repository implementation view | Explanation |
 |---|---|---|
 | Strategy | Project charter, roadmap, use case framing | Defines why the platform exists and what outcomes it supports. |
 | Governance | CloudAI Control Plane, policy, approval, audit | Defines rules, controls, approval and evidence. |
-| Data | RAG, retrieval, data access, data egress governance | Defines how enterprise knowledge and data are safely used. |
+| Data | RAG, retrieval, data access, data egress governance | Defines how knowledge and data are safely used. |
 | Platform | GenAI / LLM Gateway, AI Traffic Governance, provider adapters | Provides standard access to models, tools, agents and provider services. |
 | Infrastructure | AWS/Azure/GCP foundations, Terraform, IAM, network, KMS, key management | Provides secure runtime and deployment foundations. |
 | Operations | Observability, FinOps, runbooks, assessment, gap tracking | Makes the platform measurable, supportable and continuously improvable. |
 
 ## First Iteration Boundary
 
-This iteration creates documentation and placeholders only. It does not deploy infrastructure, create credentials, or call real model APIs.
+This iteration creates documentation and placeholders only. It does not deploy infrastructure, set up provider access, or call real model APIs.

@@ -32,7 +32,7 @@ The control plane defines what should happen. Provider adapters define how that 
 ## Architecture Flow
 
 ```text
-Enterprise AI Control Plane
+CloudAI Control Plane
   -> AI Traffic Gateway / Governance Layer
   -> Provider Adapter
   -> AWS / Azure / GCP AI Services

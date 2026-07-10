@@ -1,6 +1,6 @@
 # Cloud Provider Abstraction
 
-The provider abstraction describes a stable contract between the Enterprise AI Control Plane and cloud-specific services.
+The provider abstraction describes a stable contract between the CloudAI Control Plane and cloud-specific services.
 
 ## Adapter Capabilities
 
