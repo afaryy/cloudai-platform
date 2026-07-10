@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/cloudai-platform/schemas/mock-genai-api/chat-response.schema.json",
+  "title": "Mock GenAI Chat Response",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["response", "metadata"],
+  "properties": {
+    "response": {
+      "type": "string",
+      "description": "Synthetic local mock response text."
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "requestId",
+        "modelName",
+        "estimatedInputTokens",
+        "estimatedOutputTokens",
+        "estimatedCostUsd",
+        "timestamp"
+      ],
+      "properties": {
+        "requestId": {
+          "type": "string",
+          "description": "Synthetic request identifier for local tracing examples."
+        },
+        "modelName": {
+          "type": "string",
+          "enum": ["mock-bedrock-claude", "mock-bedrock-titan"]
+        },
+        "estimatedInputTokens": {
+          "type": "number",
+          "minimum": 1
+        },
+        "estimatedOutputTokens": {
+          "type": "number",
+          "minimum": 1
+        },
+        "estimatedCostUsd": {
+          "type": "number",
+          "minimum": 0
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    }
+  }
+}

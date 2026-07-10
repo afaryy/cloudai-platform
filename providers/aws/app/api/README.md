@@ -36,6 +36,16 @@ Supported mock models:
 
 If `modelName` is omitted, the API uses `mock-bedrock-claude`.
 
+## API Contract Schemas
+
+Lightweight JSON schemas document the current mock API request, response, and error shapes:
+
+- `shared/schemas/mock-genai-api/chat-request.schema.json`
+- `shared/schemas/mock-genai-api/chat-response.schema.json`
+- `shared/schemas/mock-genai-api/error-response.schema.json`
+
+These schemas are documentation and test fixtures in this phase. Runtime schema validation can be added later if the API needs stricter client compatibility checks.
+
 ## Chat Response
 
 The response includes synthetic text plus metadata that later phases can use for cost, audit, and observability patterns.

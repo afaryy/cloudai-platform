@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/cloudai-platform/schemas/mock-genai-api/chat-request.schema.json",
+  "title": "Mock GenAI Chat Request",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["prompt"],
+  "properties": {
+    "prompt": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4000,
+      "pattern": ".*\\S.*",
+      "description": "Prompt text for the local mock GenAI response."
+    },
+    "modelName": {
+      "anyOf": [
+        {
+          "type": "string",
+          "enum": ["mock-bedrock-claude", "mock-bedrock-titan"]
+        },
+        {
+          "type": "string",
+          "pattern": "^\\s*$"
+        }
+      ],
+      "description": "Optional mock model name. Defaults to mock-bedrock-claude when omitted or blank."
+    }
+  }
+}
