@@ -90,6 +90,7 @@ Current scope:
 - Mock-mode scripts for future cost and ingest examples.
 - Local mock GenAI / LLM Gateway API.
 - Request metadata, structured logs, token guardrail, API schemas, and default policy profile examples.
+- Synthetic demo fixtures for request, response, error, and request log examples.
 
 Future scope:
 
@@ -122,7 +123,7 @@ The pattern emphasizes:
 
 - Human review of AI-assisted changes.
 - Required CI and security checks.
-- No secrets or sensitive data in AI prompts.
+- Reviewable prompts that use synthetic examples.
 - Synthetic examples only.
 - Clear separation between local working notes and public documentation.
 
@@ -162,7 +163,7 @@ Scope assumptions:
 
 - It is a learning and reference implementation.
 - Examples use synthetic data, generic service names, and public cloud concepts.
-- Local notes, credentials, generated state, screenshots, and full working transcripts are kept out of the repository.
+- Local notes, generated state, screenshots, and full working transcripts are kept out of the repository.
 - Mock mode remains the default unless a future task explicitly adds reviewed deployment guidance.
 
 ## FinOps and Token Cost Tracking

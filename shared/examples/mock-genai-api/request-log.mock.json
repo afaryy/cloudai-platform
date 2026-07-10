@@ -1,0 +1,14 @@
+{
+  "event": "mock_api_request",
+  "mode": "mock",
+  "requestId": "req_demo_0001",
+  "method": "POST",
+  "route": "/chat",
+  "statusCode": 200,
+  "durationMs": 13,
+  "timestamp": "2026-07-10T00:00:00.000Z",
+  "modelName": "mock-bedrock-claude",
+  "estimatedInputTokens": 12,
+  "estimatedOutputTokens": 17,
+  "estimatedCostUsd": 0.000046
+}

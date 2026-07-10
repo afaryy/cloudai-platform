@@ -59,6 +59,19 @@ Lightweight JSON schemas document the current mock API request, response, and er
 
 These schemas are documentation and test fixtures in this phase. Runtime schema validation can be added later if the API needs stricter client compatibility checks.
 
+## Demo Fixtures
+
+Synthetic demo fixtures are available under `shared/examples/mock-genai-api/`.
+
+They show:
+
+- an allowed chat request
+- a mock chat response
+- a token budget error response
+- a structured request log event without prompt text or request bodies
+
+The test suite checks these examples against the documented contract shapes so the demo material stays aligned with the mock API.
+
 ## Chat Response
 
 The response includes synthetic text plus metadata that later phases can use for cost, audit, and observability patterns.

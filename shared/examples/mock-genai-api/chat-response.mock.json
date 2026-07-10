@@ -1,0 +1,11 @@
+{
+  "response": "Mock CloudAI response: received 56 characters and routed through the mock GenAI gateway.",
+  "metadata": {
+    "requestId": "req_demo_0001",
+    "modelName": "mock-bedrock-claude",
+    "estimatedInputTokens": 12,
+    "estimatedOutputTokens": 17,
+    "estimatedCostUsd": 0.000046,
+    "timestamp": "2026-07-10T00:00:00.000Z"
+  }
+}
