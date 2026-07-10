@@ -36,6 +36,12 @@ Application / Agent
 
 The first implementation path should keep this boundary small: mock model requests, synthetic metadata, token estimates, and audit-friendly response shapes. Broader agent, tool, and data-flow controls belong to the AI Traffic Gateway / Governance Layer.
 
+## Relationship to Governed RAG
+
+RAG flows combine model access with retrieval and data governance. In this repository, the GenAI / LLM Gateway remains responsible for model access, while the broader AI Traffic Governance Layer owns retrieval metadata, citation requirements, data classification, and egress decisions.
+
+The mock RAG governance contract in `shared/schemas/rag-governance/` defines the evidence shape for future retrieval flows without implementing retrieval infrastructure.
+
 ## Future Features
 
 - Model allow lists.

@@ -24,7 +24,7 @@ The GenAI / LLM Gateway handles model access. The broader traffic governance lay
 ## Governed Traffic Types
 
 - Model prompts and completions.
-- Retrieval requests.
+- Retrieval requests, including source metadata, citation requirements, and egress decisions.
 - Agent-to-agent communication.
 - Agent tool calls.
 - Agent-to-tool or agent-to-API calls.
@@ -56,3 +56,5 @@ The GenAI / LLM Gateway handles model access. The broader traffic governance lay
 ## First Iteration Boundary
 
 This document defines the governance shape only. No runtime policy engine, agent gateway, retrieval service, traffic proxy, or tool-call enforcement is implemented in the foundation phase.
+
+The RAG governance contract under `shared/schemas/rag-governance/` is a mock contract for retrieval evidence. It defines how future RAG flows can expose data classification, allowed knowledge base boundaries, citation checks, egress decisions, and audit metadata before any retrieval runtime is added.

@@ -1,0 +1,40 @@
+{
+  "requestId": "rag_req_demo_0001",
+  "response": {
+    "answer": "The demo gateway applies request validation, approved model access, token budget checks, metadata capture, and local eval evidence before any future provider integration.",
+    "citations": [
+      {
+        "sourceId": "demo-platform-handbook-001",
+        "sourceTitle": "CloudAI Demo Platform Handbook",
+        "citationUrl": "https://example.com/cloudai-platform/demo-platform-handbook"
+      }
+    ]
+  },
+  "retrieval": {
+    "knowledgeBase": "demo-platform-handbook",
+    "documentsConsidered": 3,
+    "documentsReturned": 1,
+    "sources": [
+      {
+        "sourceId": "demo-platform-handbook-001",
+        "sourceTitle": "CloudAI Demo Platform Handbook",
+        "citationUrl": "https://example.com/cloudai-platform/demo-platform-handbook",
+        "classification": "synthetic-public",
+        "retrievedAt": "2026-07-10T00:00:00.000Z"
+      }
+    ]
+  },
+  "governance": {
+    "citationRequirementMet": true,
+    "egressDecision": {
+      "allowed": true,
+      "scope": "internal_response",
+      "reason": "internal_response_allowed_with_synthetic_sources"
+    }
+  },
+  "audit": {
+    "requestId": "rag_req_demo_0001",
+    "policyProfile": "rag-demo-governed",
+    "evaluatedAt": "2026-07-10T00:00:00.000Z"
+  }
+}

@@ -1,0 +1,194 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/cloudai-platform/schemas/rag-governance/rag-response.schema.json",
+  "title": "Governed RAG Response",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "requestId",
+    "response",
+    "retrieval",
+    "governance",
+    "audit"
+  ],
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "governance": {
+            "properties": {
+              "citationRequirementMet": {
+                "const": true
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "response": {
+            "properties": {
+              "citations": {
+                "minItems": 1
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "properties": {
+    "requestId": {
+      "type": "string"
+    },
+    "response": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "answer",
+        "citations"
+      ],
+      "properties": {
+        "answer": {
+          "type": "string"
+        },
+        "citations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "sourceId",
+              "sourceTitle",
+              "citationUrl"
+            ],
+            "properties": {
+              "sourceId": {
+                "type": "string"
+              },
+              "sourceTitle": {
+                "type": "string"
+              },
+              "citationUrl": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "retrieval": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "knowledgeBase",
+        "documentsConsidered",
+        "documentsReturned",
+        "sources"
+      ],
+      "properties": {
+        "knowledgeBase": {
+          "type": "string"
+        },
+        "documentsConsidered": {
+          "type": "number"
+        },
+        "documentsReturned": {
+          "type": "number"
+        },
+        "sources": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "sourceId",
+              "sourceTitle",
+              "citationUrl",
+              "classification",
+              "retrievedAt"
+            ],
+            "properties": {
+              "sourceId": {
+                "type": "string"
+              },
+              "sourceTitle": {
+                "type": "string"
+              },
+              "citationUrl": {
+                "type": "string"
+              },
+              "classification": {
+                "type": "string",
+                "enum": ["synthetic-public", "synthetic-restricted"]
+              },
+              "retrievedAt": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          }
+        }
+      }
+    },
+    "governance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "citationRequirementMet",
+        "egressDecision"
+      ],
+      "properties": {
+        "citationRequirementMet": {
+          "type": "boolean"
+        },
+        "egressDecision": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "allowed",
+            "scope",
+            "reason"
+          ],
+          "properties": {
+            "allowed": {
+              "type": "boolean"
+            },
+            "scope": {
+              "type": "string",
+              "enum": ["internal_response", "external_network"]
+            },
+            "reason": {
+              "type": "string",
+              "enum": [
+                "internal_response_allowed_with_synthetic_sources",
+                "external_egress_not_allowed_for_demo_policy"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "audit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "requestId",
+        "policyProfile",
+        "evaluatedAt"
+      ],
+      "properties": {
+        "requestId": {
+          "type": "string"
+        },
+        "policyProfile": {
+          "type": "string"
+        },
+        "evaluatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    }
+  }
+}

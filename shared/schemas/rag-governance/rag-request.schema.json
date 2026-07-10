@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/cloudai-platform/schemas/rag-governance/rag-request.schema.json",
+  "title": "Governed RAG Request",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "requestId",
+    "query",
+    "dataClassification",
+    "retrieval",
+    "governance"
+  ],
+  "properties": {
+    "requestId": {
+      "type": "string"
+    },
+    "query": {
+      "type": "string"
+    },
+    "dataClassification": {
+      "type": "string",
+      "enum": ["synthetic-public", "synthetic-restricted"]
+    },
+    "retrieval": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "allowedKnowledgeBases",
+        "maxDocuments",
+        "requiredMetadata"
+      ],
+      "properties": {
+        "allowedKnowledgeBases": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        },
+        "maxDocuments": {
+          "type": "number"
+        },
+        "requiredMetadata": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "enum": [
+              "sourceId",
+              "sourceTitle",
+              "classification",
+              "citationUrl",
+              "retrievedAt"
+            ]
+          }
+        }
+      }
+    },
+    "governance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "requireCitations",
+        "allowExternalEgress",
+        "policyProfile"
+      ],
+      "properties": {
+        "requireCitations": {
+          "type": "boolean"
+        },
+        "allowExternalEgress": {
+          "type": "boolean"
+        },
+        "policyProfile": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

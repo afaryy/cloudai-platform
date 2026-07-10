@@ -1,0 +1,21 @@
+{
+  "requestId": "rag_req_demo_0001",
+  "query": "Summarize the CloudAI gateway guardrails from the demo handbook.",
+  "dataClassification": "synthetic-public",
+  "retrieval": {
+    "allowedKnowledgeBases": ["demo-platform-handbook"],
+    "maxDocuments": 3,
+    "requiredMetadata": [
+      "sourceId",
+      "sourceTitle",
+      "classification",
+      "citationUrl",
+      "retrievedAt"
+    ]
+  },
+  "governance": {
+    "requireCitations": true,
+    "allowExternalEgress": false,
+    "policyProfile": "rag-demo-governed"
+  }
+}
