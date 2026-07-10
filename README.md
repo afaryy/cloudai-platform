@@ -91,6 +91,7 @@ Current scope:
 - Local mock GenAI / LLM Gateway API.
 - Request metadata, structured logs, token guardrail, API schemas, and default policy profile examples.
 - Synthetic demo fixtures for request, response, error, and request log examples.
+- Local governed RAG workflow examples for ingest, chunk metadata, evaluation dataset preparation, and response-quality scoring.
 
 Future scope:
 
@@ -224,7 +225,7 @@ If you do not have a TypeScript runner installed, read the scripts as mock examp
 
 ## Roadmap
 
-Current phase: P1 AWS GenAI MVP.
+Current phase: P2 RAG governance and local AI workflow examples.
 
 Near-term:
 
