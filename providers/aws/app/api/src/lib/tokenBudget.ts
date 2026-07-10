@@ -1,4 +1,5 @@
 import { HttpError } from "./errors.js";
+import { DEFAULT_POLICY_PROFILE } from "./policyProfile.js";
 import { estimateTokens } from "./tokenEstimator.js";
 
 export type TokenBudgetDecision = {
@@ -7,7 +8,7 @@ export type TokenBudgetDecision = {
   maxInputTokens: number;
 };
 
-export const DEFAULT_MAX_INPUT_TOKENS = 80;
+export const DEFAULT_MAX_INPUT_TOKENS = DEFAULT_POLICY_PROFILE.maxInputTokens;
 
 export function checkInputTokenBudget(
   prompt: string,
