@@ -78,7 +78,8 @@ The repository has been built incrementally through small PRs.
 | #7 | Token budget guardrail | Added a synthetic input token budget check before mock response generation, returning `token_budget_exceeded` for oversized requests. |
 | #8 | API contract schemas | Added JSON schemas for chat request, chat response, and error response, with tests comparing actual runtime payloads to the documented contracts. |
 | #9 | Default policy profile and walkthrough | Added a local policy profile for default model, allowed models, max prompt length, and token budget settings, plus this solution walkthrough. |
-| In progress | Demo fixtures | Adds synthetic request, response, error, and request log examples for demos and contract checks. |
+| #10 | Demo fixtures | Added synthetic request, response, error, and request log examples for demos and contract checks. |
+| In progress | Demo script | Refreshes the portfolio walkthrough around the current P1 mock API and synthetic fixtures. |
 
 ## P0 Foundation Summary
 
@@ -171,6 +172,7 @@ Useful entry points:
 - `docs/control-plane.md` for the CloudAI Control Plane concept.
 - `docs/genai-llm-gateway.md` for model-access gateway framing.
 - `docs/ai-traffic-governance.md` for future traffic governance scope.
+- `docs/demo-script.md` for a short portfolio walkthrough.
 - `providers/aws/app/api/README.md` for the local mock API.
 - `shared/schemas/mock-genai-api/` for API contract schemas.
 - `shared/examples/mock-genai-api/` for synthetic demo fixtures.
