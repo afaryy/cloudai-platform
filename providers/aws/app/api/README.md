@@ -95,6 +95,29 @@ Example empty prompt response:
 }
 ```
 
+## Local Request Logs
+
+The mock API writes one structured JSON log event per request. Logs include routing, status, duration, and metadata for cost and observability examples. They do not include prompt text or request bodies.
+
+Example chat log:
+
+```json
+{
+  "event": "mock_api_request",
+  "mode": "mock",
+  "requestId": "synthetic request id",
+  "method": "POST",
+  "route": "/chat",
+  "statusCode": 200,
+  "durationMs": 13,
+  "timestamp": "2026-07-10T00:00:00.000Z",
+  "modelName": "mock-bedrock-claude",
+  "estimatedInputTokens": 8,
+  "estimatedOutputTokens": 24,
+  "estimatedCostUsd": 0.000032
+}
+```
+
 ## Local Run
 
 ```bash
