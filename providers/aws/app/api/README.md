@@ -9,7 +9,18 @@ It runs in mock mode only. It returns synthetic responses and does not call Amaz
 - `GET /health`: returns service health and mock mode status.
 - `POST /chat`: accepts a prompt and returns a synthetic model response with request metadata.
 
-Example request:
+## Chat Request
+
+```bash
+curl -s http://localhost:3000/chat \
+  -H "content-type: application/json" \
+  -d '{
+    "prompt": "Summarize the CloudAI control plane.",
+    "modelName": "mock-bedrock-claude"
+  }'
+```
+
+Request body:
 
 ```json
 {
@@ -18,16 +29,69 @@ Example request:
 }
 ```
 
-Example response metadata:
+Supported mock models:
+
+- `mock-bedrock-claude`
+- `mock-bedrock-titan`
+
+If `modelName` is omitted, the API uses `mock-bedrock-claude`.
+
+## Chat Response
+
+The response includes synthetic text plus metadata that later phases can use for cost, audit, and observability patterns.
 
 ```json
 {
-  "requestId": "synthetic request id",
-  "modelName": "mock-bedrock-claude",
-  "estimatedInputTokens": 8,
-  "estimatedOutputTokens": 24,
-  "estimatedCostUsd": 0.000032,
+  "response": "Mock CloudAI response: received 36 characters and routed through the mock GenAI gateway.",
+  "metadata": {
+    "requestId": "synthetic request id",
+    "modelName": "mock-bedrock-claude",
+    "estimatedInputTokens": 8,
+    "estimatedOutputTokens": 24,
+    "estimatedCostUsd": 0.000032,
+    "timestamp": "2026-07-10T00:00:00.000Z"
+  }
+}
+```
+
+Metadata fields:
+
+| Field | Description |
+|---|---|
+| `requestId` | Synthetic request identifier for local tracing examples. |
+| `modelName` | Mock model selected for the request. |
+| `estimatedInputTokens` | Simple word-based input token estimate. |
+| `estimatedOutputTokens` | Simple word-based output token estimate. |
+| `estimatedCostUsd` | Synthetic token cost estimate for demo FinOps workflows. |
+| `timestamp` | ISO timestamp generated when the mock response is created. |
+
+## Health Response
+
+```bash
+curl -s http://localhost:3000/health
+```
+
+```json
+{
+  "status": "ok",
+  "mode": "mock",
+  "service": "mock-genai-api",
   "timestamp": "2026-07-10T00:00:00.000Z"
+}
+```
+
+## Error Handling
+
+The API returns JSON errors for invalid input.
+
+Example empty prompt response:
+
+```json
+{
+  "error": {
+    "code": "empty_prompt",
+    "message": "prompt must not be empty."
+  }
 }
 ```
 
