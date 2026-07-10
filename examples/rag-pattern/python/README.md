@@ -24,10 +24,24 @@ PYTHONPATH=examples/rag-pattern/python python3 -m unittest discover -s examples/
 Expected result:
 
 ```text
-Ran 11 tests
+Ran 14 tests
 
 OK
 ```
+
+## Run Local Export
+
+From the repository root:
+
+```bash
+PYTHONPATH=examples/rag-pattern/python python3 -m rag_ingest.cli \
+  --docs examples/rag-pattern/python/sample_docs \
+  --out /tmp/cloudai-rag-chunks.json \
+  --knowledge-base cloudai-demo-handbook
+```
+
+The command writes a local JSON export file outside the repository.
+It does not call cloud services, create embeddings, or write to a vector database.
 
 ## Current Boundary
 
@@ -38,6 +52,7 @@ Included:
 - stable chunk identifiers
 - basic governance metadata
 - local JSON export helpers
+- local CLI wrapper for ingest/export demos
 - unit tests using Python standard library tools
 
 Deferred:
