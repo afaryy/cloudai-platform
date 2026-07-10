@@ -1,0 +1,32 @@
+{
+  "caseCount": 2,
+  "cases": [
+    {
+      "caseId": "eval-cloudai-demo-handbook-0001",
+      "expectedCitationRequired": true,
+      "expectedSourceId": "cloudai-demo-handbook",
+      "expectedSourceTitle": "CloudAI Demo Handbook",
+      "qualityNotes": [
+        "answer should cite the expected source"
+      ],
+      "question": "What governance signals are described in CloudAI Demo Handbook?",
+      "sourceChunkId": "cloudai-demo-handbook:0001",
+      "sourceChunkIndex": 1
+    },
+    {
+      "caseId": "eval-cloudai-demo-handbook-0002",
+      "expectedCitationRequired": true,
+      "expectedSourceId": "cloudai-demo-handbook",
+      "expectedSourceTitle": "CloudAI Demo Handbook",
+      "qualityNotes": [
+        "answer should cite the expected source"
+      ],
+      "question": "What governance signals are described in CloudAI Demo Handbook?",
+      "sourceChunkId": "cloudai-demo-handbook:0002",
+      "sourceChunkIndex": 2
+    }
+  ],
+  "datasetId": "cloudai-rag-eval-demo",
+  "datasetProfile": "local-rag-eval-demo",
+  "generatedAt": "2026-07-10T00:00:00.000Z"
+}
