@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/cloudai-platform/schemas/mock-genai-api/error-response.schema.json",
+  "title": "Mock GenAI Error Response",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["error"],
+  "properties": {
+    "error": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "message"],
+      "properties": {
+        "code": {
+          "type": "string",
+          "enum": [
+            "body_too_large",
+            "empty_body",
+            "empty_prompt",
+            "internal_error",
+            "invalid_body",
+            "invalid_json",
+            "invalid_prompt",
+            "not_found",
+            "prompt_too_long",
+            "token_budget_exceeded",
+            "unsupported_model"
+          ]
+        },
+        "message": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}
