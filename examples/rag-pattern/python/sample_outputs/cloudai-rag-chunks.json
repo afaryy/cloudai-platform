@@ -1,0 +1,40 @@
+{
+  "exportProfile": "local-rag-ingest-demo",
+  "knowledgeBase": "cloudai-demo-handbook",
+  "recordCount": 2,
+  "records": [
+    {
+      "chunkId": "cloudai-demo-handbook:0001",
+      "chunkIndex": 1,
+      "citationUrl": "https://example.com/cloudai-platform/rag-sources/cloudai-demo-handbook",
+      "classification": "synthetic-public",
+      "contentType": "text/markdown",
+      "metadata": {
+        "egress": "local-only",
+        "embedding_status": "not-generated",
+        "use_case": "rag-pattern"
+      },
+      "retrievedAt": "2026-07-10T00:00:00.000Z",
+      "sourceId": "cloudai-demo-handbook",
+      "sourceTitle": "CloudAI Demo Handbook",
+      "text": "# CloudAI Demo Handbook\n\nThis synthetic handbook describes a reference workflow for governed AI access.\nIt is designed for local demonstrations and does not represent a deployed platform.\n\nThe workflow starts with a request that carries use case metadata, data classification, and an intended model access path.\nThe platform can evaluate policy, token budget, and audit requirements before routing traffic to a provider adapter.\n\nFor RAG scenarios, retrieved content should include source identifiers, citation metadata, classification labels, and egress decisions.\nThis makes it easier to explain why a response was allowed, blocked, or limited."
+    },
+    {
+      "chunkId": "cloudai-demo-handbook:0002",
+      "chunkIndex": 2,
+      "citationUrl": "https://example.com/cloudai-platform/rag-sources/cloudai-demo-handbook",
+      "classification": "synthetic-public",
+      "contentType": "text/markdown",
+      "metadata": {
+        "egress": "local-only",
+        "embedding_status": "not-generated",
+        "use_case": "rag-pattern"
+      },
+      "retrievedAt": "2026-07-10T00:00:00.000Z",
+      "sourceId": "cloudai-demo-handbook",
+      "sourceTitle": "CloudAI Demo Handbook",
+      "text": "Operational signals such as request identifiers, token estimates, evaluation notes, and cost indicators can be captured alongside the response.\nThese signals support future observability, FinOps, and quality measurement work."
+    }
+  ],
+  "retrievedAt": "2026-07-10T00:00:00.000Z"
+}
