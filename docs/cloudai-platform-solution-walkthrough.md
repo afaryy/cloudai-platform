@@ -43,6 +43,7 @@ It currently supports:
 - token budget guardrail
 - API contract schemas
 - demo request, response, error, and request log fixtures
+- local mock eval harness
 - local tests
 
 The mock API does not call Amazon Bedrock, deploy cloud resources, or require cloud account setup.
@@ -79,7 +80,8 @@ The repository has been built incrementally through small PRs.
 | #8 | API contract schemas | Added JSON schemas for chat request, chat response, and error response, with tests comparing actual runtime payloads to the documented contracts. |
 | #9 | Default policy profile and walkthrough | Added a local policy profile for default model, allowed models, max prompt length, and token budget settings, plus this solution walkthrough. |
 | #10 | Demo fixtures | Added synthetic request, response, error, and request log examples for demos and contract checks. |
-| In progress | Demo script | Refreshes the portfolio walkthrough around the current P1 mock API and synthetic fixtures. |
+| #11 | Demo script | Refreshed the portfolio walkthrough around the current P1 mock API and synthetic fixtures. |
+| In progress | Local mock eval harness | Adds synthetic eval cases for gateway contract, guardrail, metadata, and observability behavior. |
 
 ## P0 Foundation Summary
 
@@ -112,6 +114,7 @@ Current P1 capabilities:
 - Token budget guardrail
 - JSON contract schemas
 - Synthetic demo fixtures
+- Local mock eval harness
 - Local test suite
 - CI test job
 
@@ -148,7 +151,8 @@ A concise demo story:
 8. Send an oversized prompt and show the token budget guardrail.
 9. Point to JSON schemas as the documented API contract.
 10. Open the synthetic fixtures under `shared/examples/mock-genai-api/` to show the demo request, response, error, and request log shapes.
-11. Explain how AWS deployment and real Bedrock integration are future opt-in phases.
+11. Show the local mock eval harness and eval result fixture as lightweight LLMOps evidence.
+12. Explain how AWS deployment and real Bedrock integration are future opt-in phases.
 
 ## Future Deployment Path
 

@@ -69,8 +69,23 @@ They show:
 - a mock chat response
 - a token budget error response
 - a structured request log event without prompt text or request bodies
+- a mock eval report
 
 The test suite checks these examples against the documented contract shapes so the demo material stays aligned with the mock API.
+
+## Local Mock Evals
+
+The package includes a small local eval harness in `src/evals/mockGatewayEvals.ts`.
+
+The evals check:
+
+- allowed chat request behavior
+- token budget blocked-request behavior
+- unsupported model policy behavior
+- response metadata presence
+- request log safety for prompt and request body omission
+
+This is a lightweight mock-mode evaluation pattern. It is not a model judge, benchmark suite, or provider-hosted evaluation service.
 
 ## Chat Response
 

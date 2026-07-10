@@ -1,0 +1,44 @@
+{
+  "mode": "mock",
+  "evaluatedAt": "2026-07-10T00:00:00.000Z",
+  "totalCases": 5,
+  "passedCases": 5,
+  "failedCases": 0,
+  "results": [
+    {
+      "id": "allowed-chat-request",
+      "category": "contract",
+      "description": "Allowed chat request returns a mock response through the gateway contract.",
+      "passed": true,
+      "evidence": "Mock response and selected model metadata were returned."
+    },
+    {
+      "id": "token-budget-blocked-request",
+      "category": "guardrail",
+      "description": "Oversized prompt is blocked by the synthetic token budget guardrail.",
+      "passed": true,
+      "evidence": "Token budget guardrail returned token_budget_exceeded."
+    },
+    {
+      "id": "unsupported-model-request",
+      "category": "guardrail",
+      "description": "Unsupported model request is rejected by the local policy profile.",
+      "passed": true,
+      "evidence": "Policy validation returned unsupported_model."
+    },
+    {
+      "id": "response-metadata-present",
+      "category": "metadata",
+      "description": "Mock response includes metadata for traceability, token estimates, and cost signals.",
+      "passed": true,
+      "evidence": "Response metadata included request, model, token, cost, and timestamp fields."
+    },
+    {
+      "id": "request-log-omits-prompt",
+      "category": "observability",
+      "description": "Structured request log event keeps prompt text and request bodies out of observability examples.",
+      "passed": true,
+      "evidence": "Request log event contains metadata only."
+    }
+  ]
+}

@@ -28,4 +28,14 @@ The platform should make it possible to answer:
 
 ## Early Scope
 
-The first iteration documents observability and evaluation intent only. Provider-specific dashboards, alarms, traces, and evaluation harnesses are future work.
+The current P1 mock API includes local metadata, request logs, token estimates, and a small mock eval harness for gateway behavior checks.
+
+The local eval harness checks synthetic cases for:
+
+- allowed request behavior
+- token budget blocking
+- unsupported model blocking
+- response metadata presence
+- request log omission of prompt text and request bodies
+
+Provider-specific dashboards, alarms, distributed traces, provider-hosted evals, and larger benchmark suites are future work.
