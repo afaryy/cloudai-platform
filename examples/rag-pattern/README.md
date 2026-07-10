@@ -1,8 +1,8 @@
 # Governed RAG Pattern
 
-This example documents a mock governance contract for Retrieval-Augmented Generation (RAG).
+This example documents a mock governance contract and local workflow for Retrieval-Augmented Generation (RAG).
 
-It does not implement retrieval, embeddings, a vector database, or a RAG API endpoint. The purpose is to define the request and response evidence that a future governed RAG flow should produce.
+It does not implement retrieval runtime, embeddings, a vector database, or a RAG API endpoint. The purpose is to define the request, response, chunk, evaluation, and scoring evidence that a future governed RAG flow should produce.
 
 ## Contract Files
 
@@ -20,7 +20,11 @@ Synthetic examples:
 Local Python workflow:
 
 - `examples/rag-pattern/python/README.md`
+- `examples/rag-pattern/python/DEMO_WALKTHROUGH.md`
 - `examples/rag-pattern/python/sample_docs/cloudai-demo-handbook.md`
+- `examples/rag-pattern/python/sample_outputs/cloudai-rag-chunks.json`
+- `examples/rag-pattern/python/sample_outputs/cloudai-rag-eval-dataset.json`
+- `examples/rag-pattern/python/sample_outputs/cloudai-rag-score-report.json`
 
 ## Governance Intent
 
@@ -34,6 +38,19 @@ The contract captures:
 - audit metadata
 
 This lets the project discuss RAG governance before adding retrieval infrastructure.
+
+## Local Python Workflow
+
+The local Python workflow demonstrates:
+
+- synthetic markdown ingest
+- deterministic chunk export
+- governance-aligned metadata
+- evaluation dataset preparation
+- synthetic mock response scoring
+- sample outputs that can be reviewed in the repository
+
+This workflow is local-only. It does not call an LLM, create embeddings, build a vector index, or deploy cloud resources.
 
 ## Example Flow
 
@@ -53,7 +70,10 @@ Current scope:
 - JSON contracts
 - synthetic examples
 - contract tests
-- local Python ingest and chunking skeleton
+- local Python ingest and chunking
+- local evaluation dataset preparation
+- local response-quality scoring for synthetic mock responses
+- committed sample outputs and walkthrough
 - public cloud architecture notes
 
 Deferred scope:
@@ -61,7 +81,8 @@ Deferred scope:
 - embeddings
 - vector indexes
 - retrieval runtime
+- model-based evaluation
 - LangChain or similar orchestration framework
 - provider-hosted knowledge base integration
 
-The current RAG contract stays TypeScript-tested because it belongs to the platform control and API contract layer. Python is introduced here for local AI workflow utilities such as ingestion, chunking, eval data preparation, and future LLMOps experiments.
+The RAG governance contracts stay TypeScript-tested where they describe platform control and API contract behavior. Python is used for local AI workflow utilities: ingestion, chunking, evaluation dataset preparation, and deterministic response-quality evidence.
