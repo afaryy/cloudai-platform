@@ -3,6 +3,8 @@
 This example adds a lightweight Python workflow for local RAG document preparation.
 It uses synthetic markdown only and does not call cloud services, embedding models, vector databases, or orchestration frameworks.
 
+For a guided explanation of the full local flow, see `examples/rag-pattern/python/DEMO_WALKTHROUGH.md`.
+
 ## What It Demonstrates
 
 - loading local markdown documents
