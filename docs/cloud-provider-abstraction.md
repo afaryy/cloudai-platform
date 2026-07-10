@@ -7,6 +7,7 @@ The provider abstraction describes a stable contract between the Enterprise AI C
 - Model invocation and routing.
 - Agent runtime, tool invocation, and agent gateway integration.
 - Retrieval and vector search integration.
+- Guardrail, safety policy, and content filtering integration.
 - Identity and authorization integration.
 - Secrets and key management.
 - Logging, metrics, and tracing export.
@@ -16,6 +17,6 @@ The provider abstraction describes a stable contract between the Enterprise AI C
 
 ## AWS First
 
-The AWS adapter will eventually map these capabilities to services such as Amazon Bedrock, Amazon Bedrock AgentCore, Amazon SageMaker AI, IAM, KMS, Secrets Manager, CloudWatch, S3, DynamoDB, Lambda, API Gateway, ECS, and EKS.
+The AWS adapter will eventually map these capabilities to services such as Amazon Bedrock, Amazon Bedrock Guardrails, Amazon Bedrock AgentCore, Amazon SageMaker AI, IAM, KMS, Secrets Manager, CloudWatch, S3, DynamoDB, Lambda, API Gateway, ECS, and EKS.
 
-Azure and GCP adapters remain documentation-only placeholders in early phases. Azure mappings should track Microsoft Foundry, Foundry Models sold by Azure, Azure AI Search, Microsoft Entra ID, Key Vault, Azure Monitor, API Management, and Private Link. GCP mappings should track Gemini Enterprise Agent Platform, Vertex AI/Model Garden, Agent Gateway, Agent Runtime, Vector Search, IAM, Cloud KMS, Secret Manager, Cloud Logging, Cloud Monitoring, Private Service Connect, Cloud Run, and GKE.
+Azure and GCP adapters remain documentation-only placeholders in early phases. Azure mappings should track Microsoft Foundry, Foundry Models sold by Azure, Azure AI Search, Azure AI Content Safety, Microsoft Entra ID, Key Vault, Azure Monitor, API Management, and Private Link. GCP mappings should track Gemini Enterprise Agent Platform, Vertex AI/Model Garden, Model Armor, Agent Gateway, Agent Runtime, Vector Search, IAM, Cloud KMS, Secret Manager, Cloud Logging, Cloud Monitoring, Private Service Connect, Cloud Run, and GKE.

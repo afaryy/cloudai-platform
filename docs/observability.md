@@ -9,6 +9,7 @@ Observability helps platform teams understand AI traffic behavior, reliability, 
 - Provider and model routing decisions.
 - Token estimates and cost allocation metadata.
 - Quota, rate-limit, and capacity utilization signals.
+- Guardrail trigger, safety policy, and blocked-request events.
 - Agent session, tool-call, retrieval, and workflow trace events.
 - Safety and responsible AI review markers.
 - Synthetic evaluation results for prompt quality, response quality, retrieval relevance, and policy behavior.
@@ -21,6 +22,7 @@ The platform should make it possible to answer:
 - Which model, provider, region, and route handled the request?
 - Was the request served in real time, batched, cached, throttled, or failed over?
 - Which quota, rate limit, or capacity control applied?
+- Did any guardrail, safety policy, or content filter allow, block, or require review?
 - Did retrieval, agent tooling, or workflow orchestration contribute to latency or cost?
 - Which evaluation, policy, or human-review events are linked to the trace?
 
