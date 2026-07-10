@@ -19,7 +19,7 @@ At a high level, it explores:
 - AI FinOps, observability, evaluation, operations, and responsible AI practices.
 - AI capacity planning across model quotas, inference throughput, GPU workloads, retrieval scale, agent runtime limits, and operational support.
 
-For an end-to-end reader guide, including the TypeScript/Python language boundary, see `docs/cloudai-platform-solution-walkthrough.md`. For a short walkthrough flow, see `docs/demo-script.md`.
+For an end-to-end reader guide, including the TypeScript/Python language boundary, see `docs/cloudai-platform-solution-walkthrough.md`. For runnable local examples, see `examples/README.md`. For a short walkthrough flow, see `docs/demo-script.md`.
 
 ## Why This Project Exists
 
