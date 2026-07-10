@@ -12,6 +12,8 @@ Mock mode is the default. It should run without cloud credentials, provider API 
 - Provider adapter readiness.
 - Policy evaluation failures.
 - Cost anomaly review.
+- Quota, rate-limit, and capacity saturation review.
+- Model, retrieval, agent runtime, and GPU workload degradation.
 - Audit event review.
 - Incident response for unsafe AI behavior.
 

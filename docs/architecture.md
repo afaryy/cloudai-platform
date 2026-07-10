@@ -11,7 +11,7 @@ Start here. This view explains the platform in plain language before the later d
 - CloudAI Control Plane: use case intake, policy, approval, responsible AI review, provider registry, audit, and evaluation.
 - Model access sub-layer: GenAI / LLM Gateway for governed model routing, request controls, and response handling.
 - AI Traffic Governance layer: broader future gateway controls for agent, tool, retrieval, workflow, and data-access traffic.
-- Provider Adapter layer: AWS first, with Azure and GCP mapping notes.
+- Provider Adapter layer: AWS first, with Azure and GCP reference architecture mappings.
 - Platform Foundations: identity, encryption, key management, network, CI/CD, observability, and infrastructure automation.
 
 ```mermaid
