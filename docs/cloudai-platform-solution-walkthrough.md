@@ -36,6 +36,8 @@ The P1 implementation stays TypeScript-first because it is focused on the GenAI 
 
 Python is used where the project demonstrates AI workflow tooling, such as synthetic RAG ingestion, chunking, evaluation dataset preparation, and deterministic response-quality scoring. This keeps the portfolio story clear: TypeScript demonstrates the platform gateway and control layer, while Python demonstrates AI workflow and LLMOps capability.
 
+The two layers are connected through documented contracts and artifact metadata. The TypeScript API can describe the local RAG workflow and its sample outputs without executing Python code or coupling the API runtime to workflow utilities.
+
 ## Current P1 Mock API
 
 The P1 mock API lives under:
@@ -47,6 +49,8 @@ providers/aws/app/api/
 It currently supports:
 
 - `GET /health`
+- `GET /rag/status`
+- `GET /rag/artifacts`
 - `POST /chat`
 - mock Bedrock client interface
 - synthetic model responses
@@ -57,6 +61,7 @@ It currently supports:
 - API contract schemas
 - demo request, response, error, and request log fixtures
 - local mock eval harness
+- RAG governance metadata endpoints
 - local tests
 
 The mock API does not call Amazon Bedrock, deploy cloud resources, or require cloud account setup.
@@ -99,6 +104,8 @@ The repository has been built incrementally through small PRs.
 | #14 | Architecture wording alignment | Refined architecture wording around the CloudAI control plane and implementation view. |
 | #15-#21 | Local RAG workflow | Added Python ingest, chunk export, evaluation dataset preparation, synthetic mock response scoring, sample outputs, and a local RAG demo walkthrough. |
 | #22 | Demo index | Added an examples index that links the mock GenAI API and local RAG walkthrough. |
+| #23 | RAG documentation alignment | Aligned README and solution docs around the local RAG workflow and TypeScript/Python language boundary. |
+| Current | RAG governance API metadata | Adds mock API endpoints and contracts that expose local RAG workflow artifact metadata without adding retrieval runtime. |
 
 ## P0 Foundation Summary
 
@@ -170,7 +177,8 @@ A concise demo story:
 10. Open the synthetic fixtures under `shared/examples/mock-genai-api/` to show the demo request, response, error, and request log shapes.
 11. Show the local mock eval harness and eval result fixture as lightweight LLMOps evidence.
 12. Open `examples/README.md` and show the local RAG walkthrough.
-13. Explain how AWS deployment and real Bedrock integration are future opt-in phases.
+13. Call `/rag/status` and `/rag/artifacts` to show how the API describes local RAG contracts and sample outputs.
+14. Explain how AWS deployment and real Bedrock integration are future opt-in phases.
 
 ## Future Deployment Path
 

@@ -2,7 +2,7 @@
 
 This example documents a mock governance contract and local workflow for Retrieval-Augmented Generation (RAG).
 
-It does not implement retrieval runtime, embeddings, a vector database, or a RAG API endpoint. The purpose is to define the request, response, chunk, evaluation, and scoring evidence that a future governed RAG flow should produce.
+It does not implement retrieval runtime, embeddings, a vector database, or a retrieval or answer-generation RAG endpoint. The purpose is to define the request, response, chunk, evaluation, and scoring evidence that a future governed RAG flow should produce.
 
 ## Contract Files
 
@@ -10,12 +10,16 @@ Schemas:
 
 - `shared/schemas/rag-governance/rag-request.schema.json`
 - `shared/schemas/rag-governance/rag-response.schema.json`
+- `shared/schemas/rag-governance/rag-status.schema.json`
+- `shared/schemas/rag-governance/rag-artifacts.schema.json`
 
 Synthetic examples:
 
 - `shared/examples/rag-governance/rag-request.allowed.json`
 - `shared/examples/rag-governance/rag-response.governed.json`
 - `shared/examples/rag-governance/rag-egress-blocked.json`
+- `shared/examples/rag-governance/rag-status.mock.json`
+- `shared/examples/rag-governance/rag-artifacts.mock.json`
 
 Local Python workflow:
 
@@ -52,6 +56,15 @@ The local Python workflow demonstrates:
 
 This workflow is local-only. It does not call an LLM, create embeddings, build a vector index, or deploy cloud resources.
 
+## Mock API Metadata Endpoints
+
+The TypeScript mock API exposes RAG workflow metadata without running the Python workflow:
+
+- `GET /rag/status`
+- `GET /rag/artifacts`
+
+These endpoints help a reader discover the local RAG contracts, sample outputs, score report, and walkthrough from the platform API layer. They do not execute Python, perform retrieval, call a model, or deploy resources.
+
 ## Example Flow
 
 ```text
@@ -74,6 +87,7 @@ Current scope:
 - local evaluation dataset preparation
 - local response-quality scoring for synthetic mock responses
 - committed sample outputs and walkthrough
+- mock API metadata endpoints for local RAG artifacts
 - public cloud architecture notes
 
 Deferred scope:

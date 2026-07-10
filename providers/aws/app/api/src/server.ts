@@ -10,6 +10,7 @@ import {
 } from "./lib/requestLogger.js";
 import { getHealth } from "./routes/health.js";
 import { postChat } from "./routes/chat.js";
+import { getRagArtifacts, getRagStatus } from "./routes/ragMetadata.js";
 
 const DEFAULT_PORT = 3000;
 const MAX_BODY_BYTES = 1_000_000;
@@ -34,6 +35,34 @@ export function createMockApiServer(
           statusCode: 200,
           durationMs: Date.now() - startedAt,
           timestamp: healthResponse.timestamp
+        }));
+        return;
+      }
+
+      if (method === "GET" && route === "/rag/status") {
+        const ragStatusResponse = getRagStatus();
+        writeJson(response, 200, ragStatusResponse);
+        writeRequestLog(logger, buildRequestLogEvent({
+          requestId: randomUUID(),
+          method,
+          route,
+          statusCode: 200,
+          durationMs: Date.now() - startedAt,
+          timestamp: new Date().toISOString()
+        }));
+        return;
+      }
+
+      if (method === "GET" && route === "/rag/artifacts") {
+        const ragArtifactsResponse = getRagArtifacts();
+        writeJson(response, 200, ragArtifactsResponse);
+        writeRequestLog(logger, buildRequestLogEvent({
+          requestId: randomUUID(),
+          method,
+          route,
+          statusCode: 200,
+          durationMs: Date.now() - startedAt,
+          timestamp: new Date().toISOString()
         }));
         return;
       }
@@ -127,7 +156,7 @@ function writeError(response: ServerResponse, error: unknown): void {
 
   writeJson(response, 500, {
     error: {
-      code: "internal_error",
+      code: "unexpected_error",
       message: "Unexpected mock API error."
     }
   });
@@ -147,7 +176,7 @@ function getErrorStatusCode(error: unknown): number {
 }
 
 function getErrorCode(error: unknown): string {
-  return error instanceof HttpError ? error.code : "internal_error";
+  return error instanceof HttpError ? error.code : "unexpected_error";
 }
 
 function writeRequestLog(logger: RequestLogger, event: ReturnType<typeof buildRequestLogEvent>): void {

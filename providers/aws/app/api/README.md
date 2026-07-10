@@ -7,6 +7,8 @@ It runs in mock mode only. It returns synthetic responses and does not call Amaz
 ## Endpoints
 
 - `GET /health`: returns service health and mock mode status.
+- `GET /rag/status`: returns local RAG governance workflow status and current boundaries.
+- `GET /rag/artifacts`: returns metadata for RAG contracts, sample outputs, and walkthrough documentation.
 - `POST /chat`: accepts a prompt and returns a synthetic model response with request metadata.
 
 ## Chat Request
@@ -56,8 +58,47 @@ Lightweight JSON schemas document the current mock API request, response, and er
 - `shared/schemas/mock-genai-api/chat-request.schema.json`
 - `shared/schemas/mock-genai-api/chat-response.schema.json`
 - `shared/schemas/mock-genai-api/error-response.schema.json`
+- `shared/schemas/rag-governance/rag-status.schema.json`
+- `shared/schemas/rag-governance/rag-artifacts.schema.json`
 
 These schemas are documentation and test fixtures in this phase. Runtime schema validation can be added later if the API needs stricter client compatibility checks.
+
+## RAG Governance Metadata
+
+The mock API exposes read-only metadata for the local RAG governance workflow. These endpoints help connect the TypeScript platform API layer with the Python RAG workflow artifacts through documented contracts.
+
+```bash
+curl -s http://localhost:3000/rag/status
+curl -s http://localhost:3000/rag/artifacts
+```
+
+`GET /rag/status` describes the current workflow and boundaries:
+
+```json
+{
+  "status": "available",
+  "mode": "mock",
+  "workflow": "local-rag-governance",
+  "summary": "Local metadata endpoint for the synthetic RAG governance workflow and sample artifacts.",
+  "artifacts": {
+    "requestSchema": "shared/schemas/rag-governance/rag-request.schema.json",
+    "responseSchema": "shared/schemas/rag-governance/rag-response.schema.json",
+    "chunkExport": "examples/rag-pattern/python/sample_outputs/cloudai-rag-chunks.json",
+    "evalDataset": "examples/rag-pattern/python/sample_outputs/cloudai-rag-eval-dataset.json",
+    "scoreReport": "examples/rag-pattern/python/sample_outputs/cloudai-rag-score-report.json",
+    "walkthrough": "examples/rag-pattern/python/DEMO_WALKTHROUGH.md"
+  },
+  "boundaries": {
+    "embeddings": false,
+    "vectorIndex": false,
+    "modelCalls": false,
+    "cloudDeployment": false,
+    "pythonExecutionFromApi": false
+  }
+}
+```
+
+`GET /rag/artifacts` lists the RAG contract and sample artifact paths. The API does not execute Python, create embeddings, build a vector index, call a model, or deploy resources.
 
 ## Demo Fixtures
 
@@ -70,6 +111,7 @@ They show:
 - a token budget error response
 - a structured request log event without prompt text or request bodies
 - a mock eval report
+- RAG governance metadata responses
 
 The test suite checks these examples against the documented contract shapes so the demo material stays aligned with the mock API.
 
