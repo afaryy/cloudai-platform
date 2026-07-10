@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/cloudai-platform/schemas/rag-governance/rag-artifacts.schema.json",
+  "title": "RAG Governance Workflow Artifacts",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "mode",
+    "workflow",
+    "artifacts"
+  ],
+  "properties": {
+    "mode": {
+      "type": "string",
+      "const": "mock"
+    },
+    "workflow": {
+      "type": "string",
+      "const": "local-rag-governance"
+    },
+    "artifacts": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "kind",
+          "path",
+          "description"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "schema",
+              "sample-output",
+              "documentation"
+            ]
+          },
+          "path": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

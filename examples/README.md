@@ -8,7 +8,7 @@ The examples are synthetic and local-first. They are intended to show platform e
 
 | Demo | Status | What it shows | Start here |
 |---|---|---|---|
-| Mock GenAI API | Implemented locally under AWS provider app | TypeScript mock API, request metadata, policy profile examples, token guardrail, and synthetic responses | `providers/aws/app/api/README.md` |
+| Mock GenAI API | Implemented locally under AWS provider app | TypeScript mock API, request metadata, policy profile examples, token guardrail, synthetic responses, and RAG workflow metadata endpoints | `providers/aws/app/api/README.md` |
 | Governed RAG Python Flow | Implemented locally under examples | Python ingest, chunk export, evaluation dataset preparation, mock responses, and deterministic score report | `examples/rag-pattern/python/DEMO_WALKTHROUGH.md` |
 
 ## Local Demo Flow
@@ -16,6 +16,7 @@ The examples are synthetic and local-first. They are intended to show platform e
 ```text
 Mock GenAI API
   -> demonstrates governed model-access API behavior
+  -> exposes local RAG workflow metadata at /rag/status and /rag/artifacts
 
 Governed RAG Python Flow
   -> demonstrates local retrieval evidence and response-quality scoring artifacts
@@ -25,6 +26,7 @@ These demos are complementary:
 
 - The TypeScript API represents the platform control and model-access layer.
 - The Python RAG flow represents local AI workflow utilities for ingest, evaluation preparation, and quality evidence.
+- The RAG metadata endpoints connect the two through documented artifact paths, not runtime coupling.
 
 ## Deferred Example Tracks
 

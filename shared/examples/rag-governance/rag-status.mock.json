@@ -1,0 +1,21 @@
+{
+  "status": "available",
+  "mode": "mock",
+  "workflow": "local-rag-governance",
+  "summary": "Local metadata endpoint for the synthetic RAG governance workflow and sample artifacts.",
+  "artifacts": {
+    "requestSchema": "shared/schemas/rag-governance/rag-request.schema.json",
+    "responseSchema": "shared/schemas/rag-governance/rag-response.schema.json",
+    "chunkExport": "examples/rag-pattern/python/sample_outputs/cloudai-rag-chunks.json",
+    "evalDataset": "examples/rag-pattern/python/sample_outputs/cloudai-rag-eval-dataset.json",
+    "scoreReport": "examples/rag-pattern/python/sample_outputs/cloudai-rag-score-report.json",
+    "walkthrough": "examples/rag-pattern/python/DEMO_WALKTHROUGH.md"
+  },
+  "boundaries": {
+    "embeddings": false,
+    "vectorIndex": false,
+    "modelCalls": false,
+    "cloudDeployment": false,
+    "pythonExecutionFromApi": false
+  }
+}

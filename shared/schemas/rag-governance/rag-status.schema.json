@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/cloudai-platform/schemas/rag-governance/rag-status.schema.json",
+  "title": "RAG Governance Workflow Status",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "status",
+    "mode",
+    "workflow",
+    "summary",
+    "artifacts",
+    "boundaries"
+  ],
+  "properties": {
+    "status": {
+      "type": "string",
+      "const": "available"
+    },
+    "mode": {
+      "type": "string",
+      "const": "mock"
+    },
+    "workflow": {
+      "type": "string",
+      "const": "local-rag-governance"
+    },
+    "summary": {
+      "type": "string"
+    },
+    "artifacts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "requestSchema",
+        "responseSchema",
+        "chunkExport",
+        "evalDataset",
+        "scoreReport",
+        "walkthrough"
+      ],
+      "properties": {
+        "requestSchema": {
+          "type": "string"
+        },
+        "responseSchema": {
+          "type": "string"
+        },
+        "chunkExport": {
+          "type": "string"
+        },
+        "evalDataset": {
+          "type": "string"
+        },
+        "scoreReport": {
+          "type": "string"
+        },
+        "walkthrough": {
+          "type": "string"
+        }
+      }
+    },
+    "boundaries": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "embeddings",
+        "vectorIndex",
+        "modelCalls",
+        "cloudDeployment",
+        "pythonExecutionFromApi"
+      ],
+      "properties": {
+        "embeddings": {
+          "type": "boolean",
+          "const": false
+        },
+        "vectorIndex": {
+          "type": "boolean",
+          "const": false
+        },
+        "modelCalls": {
+          "type": "boolean",
+          "const": false
+        },
+        "cloudDeployment": {
+          "type": "boolean",
+          "const": false
+        },
+        "pythonExecutionFromApi": {
+          "type": "boolean",
+          "const": false
+        }
+      }
+    }
+  }
+}

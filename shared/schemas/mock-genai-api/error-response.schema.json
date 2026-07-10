@@ -17,7 +17,7 @@
             "body_too_large",
             "empty_body",
             "empty_prompt",
-            "internal_error",
+            "unexpected_error",
             "invalid_body",
             "invalid_json",
             "invalid_prompt",
