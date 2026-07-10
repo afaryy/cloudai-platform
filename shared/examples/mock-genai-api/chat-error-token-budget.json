@@ -1,0 +1,6 @@
+{
+  "error": {
+    "code": "token_budget_exceeded",
+    "message": "estimated input tokens exceed the mock budget of 80."
+  }
+}

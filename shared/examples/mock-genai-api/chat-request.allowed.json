@@ -1,0 +1,8 @@
+{
+  "prompt": "Summarize the CloudAI control plane for a platform demo.",
+  "modelName": "mock-bedrock-claude",
+  "demoContext": {
+    "useCase": "platform-overview",
+    "mode": "mock"
+  }
+}

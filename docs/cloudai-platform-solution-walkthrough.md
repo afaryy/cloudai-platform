@@ -42,6 +42,7 @@ It currently supports:
 - structured request logs
 - token budget guardrail
 - API contract schemas
+- demo request, response, error, and request log fixtures
 - local tests
 
 The mock API does not call Amazon Bedrock, deploy cloud resources, or require cloud account setup.
@@ -76,7 +77,8 @@ The repository has been built incrementally through small PRs.
 | #6 | Request metadata logging | Added structured JSON request logs for local observability and FinOps examples without logging prompts or request bodies. |
 | #7 | Token budget guardrail | Added a synthetic input token budget check before mock response generation, returning `token_budget_exceeded` for oversized requests. |
 | #8 | API contract schemas | Added JSON schemas for chat request, chat response, and error response, with tests comparing actual runtime payloads to the documented contracts. |
-| In progress | Default policy profile | Adds a local policy profile for default model, allowed models, max prompt length, and token budget settings. |
+| #9 | Default policy profile and walkthrough | Added a local policy profile for default model, allowed models, max prompt length, and token budget settings, plus this solution walkthrough. |
+| In progress | Demo fixtures | Adds synthetic request, response, error, and request log examples for demos and contract checks. |
 
 ## P0 Foundation Summary
 
@@ -108,6 +110,7 @@ Current P1 capabilities:
 - Structured request logs
 - Token budget guardrail
 - JSON contract schemas
+- Synthetic demo fixtures
 - Local test suite
 - CI test job
 
@@ -143,7 +146,8 @@ A concise demo story:
 7. Show structured logs that omit prompt text and request bodies.
 8. Send an oversized prompt and show the token budget guardrail.
 9. Point to JSON schemas as the documented API contract.
-10. Explain how AWS deployment and real Bedrock integration are future opt-in phases.
+10. Open the synthetic fixtures under `shared/examples/mock-genai-api/` to show the demo request, response, error, and request log shapes.
+11. Explain how AWS deployment and real Bedrock integration are future opt-in phases.
 
 ## Future Deployment Path
 
@@ -169,3 +173,4 @@ Useful entry points:
 - `docs/ai-traffic-governance.md` for future traffic governance scope.
 - `providers/aws/app/api/README.md` for the local mock API.
 - `shared/schemas/mock-genai-api/` for API contract schemas.
+- `shared/examples/mock-genai-api/` for synthetic demo fixtures.
