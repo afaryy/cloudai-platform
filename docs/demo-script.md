@@ -73,6 +73,7 @@ Highlight:
 - token budget guardrail
 - API contract schemas
 - synthetic demo fixtures
+- local mock eval harness
 
 Run:
 
@@ -82,7 +83,25 @@ pnpm test
 
 Explain that the tests prove the local mock API behavior without calling provider services.
 
-### 4. Show The Demo Fixtures
+### 4. Show The Local Eval Harness
+
+Open `providers/aws/app/api/src/evals/mockGatewayEvals.ts`.
+
+Talk track:
+
+The local eval harness is a mock-mode quality and guardrail check. It does not judge model intelligence. Instead, it verifies gateway behavior that a platform team would care about: allowed requests, blocked requests, policy decisions, response metadata, and log safety.
+
+Open `shared/examples/mock-genai-api/eval-result.mock.json`.
+
+Point out:
+
+- total, passed, and failed case counts
+- contract checks
+- guardrail checks
+- metadata checks
+- observability checks
+
+### 5. Show The Demo Fixtures
 
 Open `shared/examples/mock-genai-api/`.
 
@@ -92,6 +111,7 @@ Show these files:
 - `chat-response.mock.json`
 - `chat-error-token-budget.json`
 - `request-log.mock.json`
+- `eval-result.mock.json`
 
 Talk track:
 
@@ -99,7 +119,7 @@ These fixtures make the demo repeatable. They show the request shape, response m
 
 Point out that the request log example includes metadata only. It does not include prompt text or request bodies.
 
-### 5. Show The Runtime Request Flow
+### 6. Show The Runtime Request Flow
 
 Open `docs/cloudai-platform-solution-walkthrough.md`.
 
@@ -119,7 +139,7 @@ Client
 
 Explain that this is the first practical slice of the GenAI / LLM Gateway. It is intentionally small, but it already shows where policy, model access, token controls, cost signals, and observability hooks fit.
 
-### 6. Show The Guardrail Path
+### 7. Show The Guardrail Path
 
 Open `shared/examples/mock-genai-api/chat-error-token-budget.json`.
 
@@ -129,7 +149,7 @@ The token budget guardrail is a local example of gateway-level control. In a lat
 
 Keep this framed as a pattern, not an operated implementation.
 
-### 7. Show What Is Deferred
+### 8. Show What Is Deferred
 
 Open `docs/cloudai-platform-solution-walkthrough.md`, then the “What Is Intentionally Mock-Only” and “Future Deployment Path” sections.
 
