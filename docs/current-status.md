@@ -22,6 +22,9 @@ The repository can now demonstrate:
 - capability-governance contracts for approved, blocked, and approval-required reusable assets
 - RAG knowledge lifecycle records for active and retired synthetic sources
 - Guardrails as a Service contracts and `POST /guardrails/assess` for synthetic PII, jailbreak, prompt-injection, high-risk, and safe signals
+- P4a Helm chart for synthetic Kubernetes packaging of the mock AI API service
+- P4c Argo CD Application pattern for manual GitOps promotion
+- P4d release gates and rollback pattern for synthetic EKS release engineering
 
 ## Completed For Mock Scope
 
@@ -39,6 +42,9 @@ The repository can now demonstrate:
 | Capability governance contracts | Complete | `shared/schemas/agent-capability-governance/` and `shared/examples/agent-capability-governance/` |
 | RAG knowledge lifecycle | Complete | `shared/schemas/rag-knowledge-lifecycle/`, synthetic lifecycle fixtures, and retired-source route test |
 | Guardrails as a Service | Complete | `shared/schemas/guardrails-as-a-service/`, synthetic fixtures, `POST /guardrails/assess`, and mock eval evidence |
+| P4a Helm packaging | Complete | `helm/ai-api-service/` |
+| P4c Argo CD pattern | Complete | `argocd/applications/cloudai-api-sandbox.yaml` |
+| P4d release gates and rollback | Complete | `docs/eks-release-gates-and-rollback.md` |
 
 ## Intentionally Deferred
 
@@ -60,16 +66,26 @@ These should remain opt-in future work with explicit cost, cleanup, and governan
 
 ## Recommended Next Slice
 
-The current public slice is moving through **P4 EKS Release Engineering readiness**.
+The current public slice has completed the core synthetic **P4 EKS Release Engineering readiness** documentation.
 
-Recommended split:
+Completed P4 split:
 
 - **P4a portfolio-ready release engineering:** Helm/Kubernetes chart for the mock AI API service, probes, rollback notes, resource requests, policy gates, and synthetic deployment metadata.
-- **P4b optional personal AWS EKS sandbox POC:** Terraform-managed sandbox using a personal AWS account, S3 and DynamoDB backend, GitHub Actions OIDC, explicit budget, manual approval, synthetic workload only, and teardown guidance.
 - **P4c GitOps / Argo CD pattern:** application manifest pattern, promotion notes, and audit metadata for release decisions.
-- **Later P4d/P5 extension:** optional Bedrock Guardrails or AgentCore-aligned patterns after EKS, Terraform, and budget controls are established.
+- **P4d release gates and rollback:** pre-deploy gates, rollout observation, rollback choices, failure modes, and synthetic evidence expectations.
+
+Recommended next choices:
+
+- **P4b optional personal AWS EKS sandbox POC:** Terraform-managed sandbox using a personal AWS account, S3 and DynamoDB backend, GitHub Actions OIDC, explicit budget, manual approval, synthetic workload only, and teardown guidance.
+- **P5 AI-assisted DevSecOps:** synthetic workflow examples for AI-assisted delivery with human review, CI, security checks, and auditable change evidence.
 
 The repository should not perform a real cloud deployment by default. Any personal sandbox work must keep account identifiers, state, kubeconfig, plan files, tfvars, credentials, and live endpoint details out of git.
+
+Use the package-pinned API test command when validating locally:
+
+```bash
+corepack pnpm@11.7.0 --dir providers/aws/app/api test
+```
 
 ## Portfolio Positioning
 
