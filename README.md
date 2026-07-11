@@ -106,13 +106,16 @@ Future scope:
 
 ## Track B: AI Release Engineering on EKS
 
-Track B explores future release engineering for AI services on Amazon EKS.
+Track B explores release engineering for AI services on Amazon EKS. It is split into a synthetic-only default path and an optional personal sandbox path so the portfolio can show real platform-engineering judgment without accidentally turning the public repository into a live cloud deployment.
 
 Current scope:
 
 - Placeholder Helm chart folders.
 - Placeholder Argo CD application folder.
 - EKS module placeholder.
+- P4a portfolio-ready release-engineering plan: Helm/Kubernetes packaging, probes, rollout/rollback notes, resource boundaries, and synthetic workload metadata.
+- P4b optional personal AWS EKS sandbox plan: Terraform-managed sandbox, explicit budget, manual approval, synthetic workload only, and teardown guidance.
+- P4c GitOps plan: Argo CD application pattern and release-promotion story.
 
 Future scope:
 
@@ -120,6 +123,7 @@ Future scope:
 - GitOps deployment patterns.
 - Progressive delivery and runtime observability notes.
 - Policy-aware release gates.
+- Optional Bedrock Guardrails or AgentCore-aligned extension after the EKS and Terraform foundations are clear.
 
 ## Track C: AI-Assisted DevSecOps Pattern
 
@@ -247,6 +251,7 @@ Near-term:
 Later:
 
 - Add reviewed AWS Terraform module stubs.
+- Add AWS bootstrap guidance for Terraform state, locking, and GitHub Actions OIDC role assumptions.
 - Expand AI FinOps and observability examples.
 - Add EKS release engineering examples.
 - Expand Azure and GCP provider mapping.

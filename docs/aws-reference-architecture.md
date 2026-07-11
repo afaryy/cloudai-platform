@@ -27,6 +27,19 @@ The AWS mapping should separate model access, agent runtime, ML lifecycle, and p
 - API Gateway, Lambda, ECS, and EKS remain candidate runtime patterns for the project gateway, provider adapter, mock services, and future agent experiments.
 - CloudWatch, cost tags, request metadata, and audit events should be treated as required platform signals, not optional logging.
 
+## P4 EKS Sandbox Readiness
+
+P4 keeps EKS release engineering separate from general AWS runtime choices:
+
+- **Public default:** Helm, Kubernetes, Argo CD, release metadata, and rollback examples that can be reviewed without a cloud account.
+- **Optional personal sandbox:** Terraform-managed EKS proof of concept in a personal account, using synthetic workloads, manual approval, budget controls, and teardown guidance.
+- **Bootstrap pattern:** CloudFormation can create the Terraform state bucket, DynamoDB lock table, and a GitHub Actions IAM role that trusts an existing account-level GitHub OIDC provider.
+- **Delivery-plane pattern:** GitHub Actions is the intended control point for Terraform plan/apply, container build and push, Helm deployment, GitOps updates, and teardown.
+- **OIDC boundary:** the repository should reuse an existing `token.actions.githubusercontent.com` OIDC provider where one already exists in the account, rather than creating duplicates.
+- **Cost boundary:** avoid NAT-heavy defaults and long-lived clusters until the sandbox workload, budget, and teardown process are explicit.
+
+Bedrock Guardrails and AgentCore-aligned resources remain later optional extensions. They should not be added to the EKS sandbox until the Terraform backend, identity, release, observability, and cleanup controls are proven with synthetic examples.
+
 ## AI Factory Operating Model
 
 For the later P7 stretch track, an AWS AI Factory reference pattern separates accountable governance from the platform and compute layers:
@@ -46,4 +59,4 @@ The CDAO is an operating-model and governance role, not a service deployed by th
 
 ## Current State
 
-The repository contains placeholder folders only. No Terraform resources are defined yet, and no AWS deployment is performed.
+The repository contains synthetic-only scaffold examples. No Terraform apply is performed, no live AWS resources are required, and no account-specific values should be committed.

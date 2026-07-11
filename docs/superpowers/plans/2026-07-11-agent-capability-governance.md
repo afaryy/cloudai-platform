@@ -12,7 +12,7 @@
 
 - Keep mock mode as the default; add no agent runtime, tool executor, provider call, cloud deployment, or traffic proxy.
 - Do not add external dependencies, NVIDIA software, SkillSpector, credentials, real endpoints, or cryptographic signing.
-- Use only synthetic, public-safe examples and avoid confidential, internal, customer, and production claims.
+- Use only synthetic examples and avoid confidential, internal, customer, and production claims.
 - Keep capability governance distinct from runtime AgentOps: this plan admits reusable capabilities but does not enforce runtime permissions.
 - Follow existing `shared/schemas/rag-governance/`, `shared/examples/rag-governance/`, and `providers/aws/app/api/tests/ragGovernanceContracts.test.ts` patterns.
 
@@ -349,7 +349,7 @@ PYTHONPATH=examples/rag-pattern/python python3 -m unittest discover -s examples/
 
 Expected: all Python RAG tests pass.
 
-- [ ] **Step 2: Run whitespace and public-safety checks**
+- [ ] **Step 2: Run whitespace and repository-safety checks**
 
 Run:
 
