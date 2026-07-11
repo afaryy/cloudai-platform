@@ -150,6 +150,7 @@ Current mock scope:
 - **P6a Runtime AgentOps:** metadata-only agent-action authorisation decisions for allow, deny, approval-required, paused, and budget-exhausted outcomes.
 - **P6b Capability Governance:** registry, skill card, synthetic scan/evaluation evidence, admission decision, and lifecycle records for reusable agent capabilities.
 - **P6c RAG Knowledge Lifecycle:** source provenance, owner, classification, authorised knowledge-base boundary, retention, review, and active/paused/retired source states.
+- **P6d Control-Plane Evidence Map:** one synthetic map that links runtime AgentOps, capability admission, RAG lifecycle, guardrail verdicts, and AI-assisted review evidence.
 
 It asks:
 

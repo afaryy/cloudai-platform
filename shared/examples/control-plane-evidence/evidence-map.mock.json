@@ -1,0 +1,60 @@
+{
+  "evidenceMapId": "p6d_control_plane_evidence_map_0001",
+  "phase": "P6d",
+  "controlPlane": "CloudAI Control Plane",
+  "scenario": "Synthetic high-risk knowledge-assistant action with admitted capability, active RAG source, guardrail review, and human-owned delivery evidence.",
+  "evidenceLanes": [
+    {
+      "lane": "runtime-agentops",
+      "source": "P6a",
+      "referenceId": "agent_req_0002",
+      "decisionOrState": "approval-required",
+      "ownerRole": "platform-runtime-owner",
+      "evidencePath": "shared/examples/agentops-governance/agent-action.approval-required.json"
+    },
+    {
+      "lane": "capability-governance",
+      "source": "P6b",
+      "referenceId": "synthetic-knowledge-search",
+      "decisionOrState": "approved",
+      "ownerRole": "platform-governance-reviewer",
+      "evidencePath": "shared/examples/agent-capability-governance/knowledge-search.decision.json"
+    },
+    {
+      "lane": "rag-knowledge-lifecycle",
+      "source": "P6c",
+      "referenceId": "demo-platform-handbook-001",
+      "decisionOrState": "active",
+      "ownerRole": "knowledge-source-owner",
+      "evidencePath": "shared/examples/rag-knowledge-lifecycle/demo-platform-handbook.active.json"
+    },
+    {
+      "lane": "guardrails-as-a-service",
+      "source": "P2",
+      "referenceId": "guardrail_req_0004",
+      "decisionOrState": "approval-required",
+      "ownerRole": "safety-policy-owner",
+      "evidencePath": "shared/examples/guardrails-as-a-service/high-risk-review.verdict.json"
+    },
+    {
+      "lane": "ai-assisted-review-evidence",
+      "source": "P5b",
+      "referenceId": "p5b_ai_review_summary_0001",
+      "decisionOrState": "human-reviewed",
+      "ownerRole": "engineer",
+      "evidencePath": "shared/examples/ai-assisted-devsecops/ai-review-summary.mock.json"
+    }
+  ],
+  "audit": {
+    "traceId": "trace_p6d_control_plane_evidence_map_0001",
+    "recordedAt": "2026-07-11T00:00:00.000Z",
+    "retention": "demo-evidence-only"
+  },
+  "boundaries": {
+    "containsSensitiveData": false,
+    "containsPromptTranscript": false,
+    "executesRuntimeAction": false,
+    "callsProvider": false,
+    "deploysCloudResources": false
+  }
+}
