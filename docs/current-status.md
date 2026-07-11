@@ -4,7 +4,7 @@ This page summarizes the current public project state. Local planning notes and 
 
 ## Current Milestone
 
-The local mock GenAI gateway, governed RAG evidence path, mock AgentOps decision path, capability-governance contracts, RAG knowledge lifecycle, and Guardrails as a Service path are complete for the current demo scope.
+The local mock GenAI gateway, governed RAG evidence path, mock AgentOps decision path, capability-governance contracts, RAG knowledge lifecycle, Guardrails as a Service path, P4 release engineering patterns, and P5 AI-assisted DevSecOps evidence path are complete for the current demo scope.
 
 The repository can now demonstrate:
 
@@ -27,6 +27,12 @@ The repository can now demonstrate:
 - P4d release gates and rollback pattern for synthetic EKS release engineering
 - P5a AI-assisted DevSecOps boundary for advisory AI use, human review, CI/security checks, and release evidence
 - P5b AI-assisted review evidence records for review summaries, threat-model checklists, CI failure summaries, and release-note drafts
+
+The next main portfolio focus is **P6 AI Traffic Governance / AgentOps**. P6 currently has three mock-first lanes:
+
+- **P6a Runtime AgentOps:** agent identity, tool permission, policy verdict, human approval, budget state, traceability, and pause/terminate decisions.
+- **P6b Capability Governance:** registry metadata, skill cards, scan/evaluation evidence, admission decision, lifecycle state, and approved/blocked/approval-required capability outcomes.
+- **P6c RAG Knowledge Lifecycle:** source provenance, owner, classification, authorised knowledge-base boundary, retention, review, and active/paused/retired state.
 
 ## Completed For Mock Scope
 
@@ -81,8 +87,8 @@ Completed P4 split:
 
 Recommended next choices:
 
+- **P6 AI Traffic Governance status/evidence expansion:** improve the portfolio story around runtime AgentOps, capability governance, RAG knowledge lifecycle, Guardrails as a Service, and AI-assisted delivery evidence as connected control-plane patterns.
 - **P4b optional personal AWS EKS sandbox POC:** Terraform-managed sandbox using a personal AWS account, S3 and DynamoDB backend, GitHub Actions OIDC, explicit budget, manual approval, synthetic workload only, and teardown guidance.
-- **P6 AI Traffic Governance:** runtime AgentOps contract pack for agent identity, tool permissions, policy verdicts, human approval, traceability, budgets, and pause/terminate state.
 
 The repository should not perform a real cloud deployment by default. Any personal sandbox work must keep account identifiers, state, kubeconfig, plan files, tfvars, credentials, and live endpoint details out of git.
 
