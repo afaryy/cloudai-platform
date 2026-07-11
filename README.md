@@ -142,19 +142,21 @@ It asks:
 
 No agent runtime is implemented in the current scope.
 
-## Track E: Future LLMOps / GPU Sandbox
+## Track E: AI Factory / LLMOps / GPU Platform Stretch
 
-Track E is a future placeholder for LLMOps and GPU-oriented experimentation.
+Track E is a future design-first exploration of an Enterprise AI Factory: the operating model, controls, and accelerated compute patterns required to take approved models from evaluation through training, deployment, inference, and retirement.
 
 Potential areas:
 
+- AI Factory operating model: CDAO or equivalent governance ownership, central platform ownership, and product-team delivery responsibilities.
 - Model evaluation workflows.
 - Prompt and response quality checks.
 - Synthetic benchmark datasets.
-- GPU sandbox architecture notes.
-- Cost and quota guardrails.
+- GPU capacity and scheduling architecture notes for training, fine-tuning, batch inference, and high-throughput serving.
+- Amazon SageMaker HyperPod as an optional AWS reference for resilient accelerated clusters with EKS or Slurm orchestration.
+- Cost, quota, capacity, resilience, and teardown guardrails.
 
-This track is intentionally deferred until the control-plane and gateway patterns are clearer.
+This track is intentionally deferred until the control-plane, AgentOps, and delivery patterns are clearer. A HyperPod cluster is not a default portfolio deployment: any later personal POC needs a useful synthetic workload, capacity approval, explicit budget, and teardown plan.
 
 ## Project Scope and Governance
 
