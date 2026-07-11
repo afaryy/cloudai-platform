@@ -1,4 +1,4 @@
-# cloudai-platform
+# CloudAI Platform
 
 Cloud & AI platform engineering portfolio project.
 
@@ -143,7 +143,13 @@ The pattern emphasizes:
 
 ## Track D: AI Traffic Gateway and Kubernetes-Native Agent Runtime Exploration
 
-Track D is a future exploration track for governed agent, tool, retrieval, workflow, and data-access traffic.
+Track D explores governed agent, tool, retrieval, workflow, and data-access traffic. It is the P6 track for AgentOps / AI Traffic Governance.
+
+Current mock scope:
+
+- **P6a Runtime AgentOps:** metadata-only agent-action authorisation decisions for allow, deny, approval-required, paused, and budget-exhausted outcomes.
+- **P6b Capability Governance:** registry, skill card, synthetic scan/evaluation evidence, admission decision, and lifecycle records for reusable agent capabilities.
+- **P6c RAG Knowledge Lifecycle:** source provenance, owner, classification, authorised knowledge-base boundary, retention, review, and active/paused/retired source states.
 
 It asks:
 
@@ -153,7 +159,7 @@ It asks:
 - What runtime isolation model is appropriate?
 - How could Kubernetes-native agents inherit platform controls?
 
-No agent runtime is implemented in the current scope.
+No real agent runtime, MCP execution, traffic proxy, cloud deployment, or provider integration is implemented in the current scope.
 
 ## Track E: AI Factory / LLMOps / GPU Platform Stretch
 
@@ -249,6 +255,7 @@ Current milestone: mock GenAI gateway, governed RAG evidence, AgentOps decisions
 Near-term:
 
 - Keep API contracts, request metadata, token guardrails, policy profile examples, and RAG governance examples aligned.
+- Make P6 AgentOps / AI Traffic Governance the next mock-first focus by improving runtime decision evidence, capability lifecycle examples, and traffic governance documentation.
 - Keep future slices synthetic and contract-first before adding any runtime agent behavior.
 - Continue refreshing status and planning docs as future slices land.
 
@@ -257,7 +264,7 @@ Later:
 - Add reviewed AWS Terraform module stubs.
 - Add AWS bootstrap guidance for Terraform state, locking, and GitHub Actions OIDC role assumptions.
 - Expand AI FinOps and observability examples.
-- Add EKS release engineering examples.
+- Optionally execute a personal AWS EKS sandbox POC only after budget, teardown, backend, OIDC, and secret-handling controls are explicit.
 - Expand Azure and GCP provider mapping.
 - Explore agent runtime and LLMOps / GPU sandbox tracks.
 
