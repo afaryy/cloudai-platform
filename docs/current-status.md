@@ -60,7 +60,16 @@ These should remain opt-in future work with explicit cost, cleanup, and governan
 
 ## Recommended Next Slice
 
-The next public slice can move toward **EKS Release Engineering** or **AI-assisted DevSecOps**, while keeping the same public-safe discipline: local examples first, synthetic evidence, documented controls, and no real cloud deployment unless a separate personal sandbox POC is explicitly scoped with cost and teardown guidance.
+The next public slice is **P4 EKS Release Engineering readiness**.
+
+Recommended split:
+
+- **P4a public-safe release engineering:** Helm/Kubernetes examples, probes, rollback notes, resource requests, policy gates, and synthetic deployment metadata.
+- **P4b optional personal AWS EKS sandbox POC:** Terraform-managed sandbox using a personal AWS account, S3 and DynamoDB backend, GitHub Actions OIDC, explicit budget, manual approval, synthetic workload only, and teardown guidance.
+- **P4c GitOps / Argo CD pattern:** application manifest pattern, promotion notes, and audit metadata for release decisions.
+- **Later P4d/P5 extension:** optional Bedrock Guardrails or AgentCore-aligned patterns after EKS, Terraform, and budget controls are established.
+
+The repository should not perform a real cloud deployment by default. Any personal sandbox work must keep account identifiers, state, kubeconfig, plan files, tfvars, credentials, and live endpoint details out of git.
 
 ## Portfolio Positioning
 

@@ -1,0 +1,9 @@
+terraform {
+  backend "s3" {
+    bucket         = "REPLACE_WITH_BACKEND_BUCKET"
+    key            = "cloudai-platform/eks-sandbox/terraform.tfstate"
+    region         = "ap-southeast-2"
+    dynamodb_table = "REPLACE_WITH_LOCK_TABLE"
+    encrypt        = true
+  }
+}
