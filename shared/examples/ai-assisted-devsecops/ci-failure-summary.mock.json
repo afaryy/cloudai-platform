@@ -1,0 +1,27 @@
+{
+  "evidenceId": "p5b_ci_failure_summary_0001",
+  "evidenceType": "ci-failure-summary",
+  "phase": "P5",
+  "track": "AI-assisted DevSecOps",
+  "summary": "Synthetic CI summary explaining that a localhost bind failure in the sandbox requires rerunning the same API tests with approved localhost permissions.",
+  "safeContext": {
+    "contextSource": "synthetic-ci",
+    "containsSensitiveData": false,
+    "containsPromptTranscript": false,
+    "allowedInputs": ["test command", "exit code", "sanitised error category"]
+  },
+  "humanReview": {
+    "ownerRole": "engineer",
+    "decision": "accepted",
+    "notes": "Engineer reran the package-pinned test command and verified the actual passing output."
+  },
+  "checks": [
+    { "name": "corepack pnpm API test", "status": "pass" },
+    { "name": "manual error interpretation", "status": "pass" }
+  ],
+  "audit": {
+    "traceId": "trace_p5b_ci_failure_summary_0001",
+    "recordedAt": "2026-07-11T00:00:00.000Z",
+    "retention": "demo-evidence-only"
+  }
+}
