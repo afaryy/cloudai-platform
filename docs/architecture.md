@@ -9,8 +9,10 @@ The platform is AWS-first, with Amazon Bedrock as the initial model provider pat
 Start here. This view explains the platform in plain language before the later diagrams add system and implementation detail.
 
 - CloudAI Control Plane: use case intake, policy, approval, responsible AI review, provider registry, audit, and evaluation.
+- Unified AI Asset Registry: approved models, agents, skills, MCP tools, RAG sources, evaluations, versions, owners, and lifecycle evidence.
 - Model access sub-layer: GenAI / LLM Gateway for governed model routing, request controls, and response handling.
 - AI Traffic Governance layer: broader future gateway controls for agent, tool, retrieval, workflow, and data-access traffic.
+- Guardrails as a Service: reusable PII/sensitive-data, prompt-injection/jailbreak, safety-policy, and action-risk verdicts.
 - Provider Adapter layer: AWS first, with Azure and GCP reference architecture mappings.
 - Platform Foundations: identity, encryption, key management, network, CI/CD, observability, and infrastructure automation.
 
@@ -20,16 +22,19 @@ flowchart TB
 
   decide["1. Decide what is allowed<br/>Use case intake | Policies | Responsible AI review | Approvals | Evidence"]
 
-  access["2. Control how AI is accessed<br/>GenAI / LLM Gateway | Model routing | Request checks"]
+  assets["2. Register approved assets<br/>Models | Agents | Skills | MCP tools | RAG sources | Evaluations"]
 
-  govern["3. Govern broader AI traffic<br/>Agents | Tools | Retrieval | Data movement"]
+  access["3. Control how AI is accessed<br/>GenAI / LLM Gateway | Federated data boundaries | Request checks"]
 
-  connect["4. Connect to cloud providers<br/>AWS-first adapter | Azure mapping | GCP mapping"]
+  govern["4. Govern broader AI traffic<br/>Agents | Tools | Retrieval | Data movement | Guardrail verdicts"]
 
-  operate["5. Run, measure, and improve<br/>Infrastructure | CI/CD | Observability | FinOps | Responsible AI"]
+  connect["5. Connect to cloud providers and compute<br/>AWS-first adapter | Azure mapping | GCP mapping | Optional GPU capacity"]
+
+  operate["6. Run, measure, and improve<br/>Agentic LLMOps | CI/CD | Observability | FinOps | Responsible AI"]
 
   purpose --> decide
-  decide --> access
+  decide --> assets
+  assets --> access
   access --> govern
   govern --> connect
   connect --> operate
@@ -53,7 +58,7 @@ flowchart LR
   subgraph control["2. Cloud AI Control Plane"]
     intake["Use case intake"]
     governance["Responsible AI governance"]
-    registry["Provider and model registry"]
+    registry["Unified AI Asset Registry<br/>models, agents, tools, data, evaluations"]
     evidence["Audit evidence"]
   end
 
@@ -61,6 +66,7 @@ flowchart LR
     llm["GenAI / LLM Gateway<br/>model access"]
     traffic["AI Traffic Governance<br/>agents, tools, data flows"]
     policy["Policy, token, and rate controls"]
+    guardrails["Guardrails as a Service<br/>PII, injection, safety, action risk"]
     egress["Data egress controls"]
   end
 
@@ -89,7 +95,8 @@ flowchart LR
 
   llm --> policy
   traffic --> policy
-  policy --> egress
+  policy --> guardrails
+  guardrails --> egress
   egress --> aws
 
   aws -. "provider adapter boundary" .-> azure
@@ -124,7 +131,7 @@ flowchart TB
     gcp["GCP future mapping<br/>Model access | API gateway | Runtime | Monitoring"]
   end
 
-  cross["Cross-cutting capabilities<br/>Identity | Key management | Encryption | Terraform | GitHub Actions | Observability | FinOps | Responsible AI | Audit"]
+  cross["Cross-cutting capabilities<br/>Identity | Key management | Encryption | Terraform | GitHub Actions | Agentic LLMOps | Observability | FinOps | Responsible AI | Audit"]
 
   consumers --> control
   control --> governance
@@ -175,6 +182,8 @@ sequenceDiagram
 ```
 
 Runtime requests do not bypass governance. Even in future agent or tool flows, the expected pattern is to capture request metadata, evaluate policy, control tokens and data egress, emit observability and FinOps signals, and route through provider adapters.
+
+For the broader destination model, including unified asset registry, Guardrails as a Service, federated data boundaries, adoption pathways, and optional accelerated compute, see `docs/governed-ai-factory.md`.
 
 ## Relationship to the Six-Layer Enterprise AI Model
 

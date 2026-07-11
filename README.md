@@ -18,8 +18,9 @@ At a high level, it explores:
 - AWS-first provider foundations with future Azure and GCP mappings.
 - AI FinOps, observability, evaluation, operations, and responsible AI practices.
 - AI capacity planning across model quotas, inference throughput, GPU workloads, retrieval scale, agent runtime limits, and operational support.
+- A future Governed AI Factory pattern: unified AI asset registry, federated model/data access, reusable safety guardrails, Agentic LLMOps, and scalable adoption pathways.
 
-For an end-to-end reader guide, including the TypeScript/Python language boundary, see `docs/cloudai-platform-solution-walkthrough.md`. For runnable local examples, see `examples/README.md`. For a short walkthrough flow, see `docs/demo-script.md`.
+For an end-to-end reader guide, including the TypeScript/Python language boundary, see `docs/cloudai-platform-solution-walkthrough.md`. For runnable local examples, see `examples/README.md`. For a short walkthrough flow, see `docs/demo-script.md`. For the destination architecture that connects registry, gateways, guardrails, Agentic LLMOps, adoption pathways, and accelerated compute, see `docs/governed-ai-factory.md`.
 
 ## Why This Project Exists
 
