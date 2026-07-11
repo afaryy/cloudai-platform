@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/cloudai-platform/schemas/rag-knowledge-lifecycle/knowledge-source-lifecycle.schema.json",
+  "title": "Mock RAG Knowledge Source Lifecycle",
+  "description": "Metadata-only source provenance and lifecycle record for governed RAG.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["sourceId", "sourceTitle", "ownerRole", "classification", "provenance", "allowedKnowledgeBases", "lifecycleStatus", "retentionDecision", "reviewBy"],
+  "properties": {
+    "sourceId": { "type": "string", "minLength": 1 },
+    "sourceTitle": { "type": "string", "minLength": 1 },
+    "ownerRole": { "type": "string", "minLength": 1 },
+    "classification": { "type": "string", "enum": ["synthetic-public", "synthetic-restricted"] },
+    "provenance": { "type": "string", "minLength": 1 },
+    "allowedKnowledgeBases": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+    "lifecycleStatus": { "type": "string", "enum": ["active", "paused", "retired"] },
+    "retentionDecision": { "type": "string", "enum": ["retain-for-demo", "retire-after-review"] },
+    "reviewBy": { "type": "string", "format": "date-time" }
+  }
+}

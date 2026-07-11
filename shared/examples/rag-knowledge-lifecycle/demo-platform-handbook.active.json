@@ -1,0 +1,11 @@
+{
+  "sourceId": "demo-platform-handbook-001",
+  "sourceTitle": "CloudAI Demo Platform Handbook",
+  "ownerRole": "knowledge-source-owner",
+  "classification": "synthetic-public",
+  "provenance": "Synthetic portfolio handbook maintained for local governed RAG demonstrations.",
+  "allowedKnowledgeBases": ["demo-platform-handbook"],
+  "lifecycleStatus": "active",
+  "retentionDecision": "retain-for-demo",
+  "reviewBy": "2026-10-11T00:00:00.000Z"
+}

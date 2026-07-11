@@ -1,8 +1,8 @@
 {
   "mode": "mock",
   "evaluatedAt": "2026-07-10T00:00:00.000Z",
-  "totalCases": 8,
-  "passedCases": 8,
+  "totalCases": 9,
+  "passedCases": 9,
   "failedCases": 0,
   "results": [
     {
@@ -60,6 +60,13 @@
       "description": "Mock capability admission keeps approved, blocked, and approval-required reusable agent capabilities distinct.",
       "passed": true,
       "evidence": "Synthetic capability evidence preserved approved, blocked, and approval-required outcomes; only the approved asset is eligible for a future runtime action."
+    },
+    {
+      "id": "rag-knowledge-lifecycle-governance",
+      "category": "contract",
+      "description": "Mock RAG lifecycle allows an active source and blocks a retired source before response generation.",
+      "passed": true,
+      "evidence": "Active source returned governed evidence and retired source cannot produce a governed RAG response."
     }
   ]
 }

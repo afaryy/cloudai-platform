@@ -35,6 +35,7 @@ The goal is to show practical architecture thinking and incremental platform del
 - A model-access sub-layer through a GenAI / LLM Gateway.
 - A broader AI traffic governance layer for future agent and tool flows.
 - Capability governance before runtime use: declared permissions, synthetic scan/evaluation evidence, admission decisions, and lifecycle status for reusable agent assets.
+- RAG knowledge lifecycle controls for source provenance, owner, classification, authorised knowledge bases, retention, review, and active/paused/retired status.
 - AWS Bedrock integration pattern at the architecture level.
 - Terraform-oriented AWS platform foundations as placeholders.
 - GitHub Actions CI/CD skeletons.

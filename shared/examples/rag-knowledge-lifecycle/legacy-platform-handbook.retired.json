@@ -1,0 +1,11 @@
+{
+  "sourceId": "legacy-platform-handbook-001",
+  "sourceTitle": "Legacy CloudAI Demo Platform Handbook",
+  "ownerRole": "knowledge-source-owner",
+  "classification": "synthetic-public",
+  "provenance": "Synthetic retired handbook retained only as lifecycle evidence.",
+  "allowedKnowledgeBases": ["legacy-platform-handbook"],
+  "lifecycleStatus": "retired",
+  "retentionDecision": "retire-after-review",
+  "reviewBy": "2026-07-11T00:00:00.000Z"
+}
