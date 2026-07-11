@@ -1,8 +1,8 @@
 {
   "mode": "mock",
   "evaluatedAt": "2026-07-10T00:00:00.000Z",
-  "totalCases": 5,
-  "passedCases": 5,
+  "totalCases": 6,
+  "passedCases": 6,
   "failedCases": 0,
   "results": [
     {
@@ -39,6 +39,13 @@
       "description": "Structured request log event keeps prompt text and request bodies out of observability examples.",
       "passed": true,
       "evidence": "Request log event contains metadata only."
+    },
+    {
+      "id": "governed-rag-query-contract",
+      "category": "contract",
+      "description": "Mock governed RAG query returns citation, egress decision, and audit evidence without echoing query text.",
+      "passed": true,
+      "evidence": "RAG response included citation, egress decision, and audit evidence without query text echo."
     }
   ]
 }

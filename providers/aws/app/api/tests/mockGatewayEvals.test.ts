@@ -13,8 +13,8 @@ test("runMockGatewayEvals reports all default mock gateway eval cases as passed"
   const report = await runMockGatewayEvals();
 
   assert.equal(report.mode, "mock");
-  assert.equal(report.totalCases, 5);
-  assert.equal(report.passedCases, 5);
+  assert.equal(report.totalCases, 6);
+  assert.equal(report.passedCases, 6);
   assert.equal(report.failedCases, 0);
   assert.deepEqual(
     report.results.map((result) => result.id),
@@ -23,7 +23,8 @@ test("runMockGatewayEvals reports all default mock gateway eval cases as passed"
       "token-budget-blocked-request",
       "unsupported-model-request",
       "response-metadata-present",
-      "request-log-omits-prompt"
+      "request-log-omits-prompt",
+      "governed-rag-query-contract"
     ]
   );
   assert.ok(report.results.every((result) => result.passed));
@@ -37,6 +38,16 @@ test("mock gateway evals include contract, guardrail, metadata, and observabilit
   assert.ok(categories.has("guardrail"));
   assert.ok(categories.has("metadata"));
   assert.ok(categories.has("observability"));
+});
+
+test("mock gateway evals include governed RAG query evidence", async () => {
+  const report = await runMockGatewayEvals();
+  const ragEval = report.results.find((result) => result.id === "governed-rag-query-contract");
+
+  assert.ok(ragEval);
+  assert.equal(ragEval.category, "contract");
+  assert.equal(ragEval.passed, true);
+  assert.match(ragEval.evidence, /citation, egress decision, and audit evidence/i);
 });
 
 test("mock gateway eval report fixture matches the current report shape", async () => {

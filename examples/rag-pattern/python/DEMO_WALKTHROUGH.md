@@ -13,6 +13,7 @@ It demonstrates:
 - governance-aligned chunk metadata
 - evaluation (eval) dataset preparation
 - synthetic response scoring
+- a TypeScript mock RAG query endpoint that returns governed response evidence
 - deterministic sample outputs for review
 
 ## End-to-End Flow
@@ -24,6 +25,7 @@ synthetic markdown docs
   -> local eval dataset JSON
   -> synthetic mock responses
   -> deterministic score report
+  -> mock governed RAG API response
 ```
 
 ## Step 1: Source Documents
@@ -94,6 +96,26 @@ The local scoring harness checks:
 
 The score report is intentionally simple. It demonstrates the structure of response-quality evidence before model-based evaluation is added.
 
+## Step 6: Mock Governed RAG Query
+
+The TypeScript mock API exposes:
+
+- `POST /rag/query`
+
+It accepts the governed RAG request fixture:
+
+- `shared/examples/rag-governance/rag-request.allowed.json`
+
+It returns a deterministic synthetic governed response with:
+
+- citation metadata
+- retrieval metadata
+- egress decision
+- audit evidence
+- no query text echo in the response body
+
+This endpoint does not perform retrieval, execute Python, call a model, create embeddings, or use a vector index. It demonstrates the API control point that a future provider-backed RAG implementation could preserve.
+
 ## Run The Demo Locally
 
 From the repository root, run:
@@ -126,6 +148,21 @@ PYTHONPATH=examples/rag-pattern/python python3 -m rag_ingest.cli \
 
 The commands write local outputs under `/tmp` and do not create cloud resources.
 
+To run the mock RAG query endpoint manually, start the API:
+
+```bash
+cd providers/aws/app/api
+pnpm run dev
+```
+
+From the repository root in another terminal:
+
+```bash
+curl -s http://localhost:3000/rag/query \
+  -H "content-type: application/json" \
+  -d @shared/examples/rag-governance/rag-request.allowed.json
+```
+
 ## Current Boundary
 
 Included:
@@ -135,6 +172,7 @@ Included:
 - deterministic JSON artifacts
 - local eval dataset preparation
 - rule-based score report
+- mock governed RAG query endpoint
 - unit tests and drift checks
 
 Deferred:
@@ -154,6 +192,7 @@ This demo makes the control evidence visible:
 - what sources were used
 - what citations are expected
 - what response quality checks were applied
+- what governed response evidence the mock API returns
 - what remains deferred before a real RAG runtime exists
 
 That makes the RAG track easier to review as a Cloud & AI platform engineering reference implementation.

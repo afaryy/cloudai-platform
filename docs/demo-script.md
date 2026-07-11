@@ -65,6 +65,7 @@ Highlight:
 
 - `GET /health`
 - `POST /chat`
+- `POST /rag/query`
 - mock Bedrock client interface
 - default mock policy profile
 - request metadata
@@ -100,6 +101,7 @@ Point out:
 - guardrail checks
 - metadata checks
 - observability checks
+- governed RAG query evidence, including citation, egress decision, audit evidence, and no query text echo
 
 ### 5. Show The Demo Fixtures
 
@@ -112,6 +114,8 @@ Show these files:
 - `chat-error-token-budget.json`
 - `request-log.mock.json`
 - `eval-result.mock.json`
+- `../rag-governance/rag-request.allowed.json`
+- `../rag-governance/rag-response.governed.json`
 
 Talk track:
 
@@ -119,7 +123,17 @@ These fixtures make the demo repeatable. They show the request shape, response m
 
 Point out that the request log example includes metadata only. It does not include prompt text or request bodies.
 
-### 6. Show The Runtime Request Flow
+### 6. Show The Mock Governed RAG Query
+
+Open `providers/aws/app/api/README.md`.
+
+Open `shared/examples/rag-governance/rag-request.allowed.json` and `shared/examples/rag-governance/rag-response.governed.json`.
+
+Talk track:
+
+The mock RAG query endpoint demonstrates the governed response contract. It returns synthetic citation metadata, retrieval metadata, an egress decision, and audit evidence without performing retrieval, executing Python, calling a model, creating embeddings, or using a vector index.
+
+### 7. Show The Runtime Request Flow
 
 Open `docs/cloudai-platform-solution-walkthrough.md`.
 
@@ -139,7 +153,7 @@ Client
 
 Explain that this is the first practical slice of the GenAI / LLM Gateway. It is intentionally small, but it already shows where policy, model access, token controls, cost signals, and observability hooks fit.
 
-### 7. Show The Guardrail Path
+### 8. Show The Guardrail Path
 
 Open `shared/examples/mock-genai-api/chat-error-token-budget.json`.
 
@@ -149,7 +163,7 @@ The token budget guardrail is a local example of gateway-level control. In a lat
 
 Keep this framed as a pattern, not an operated implementation.
 
-### 8. Show What Is Deferred
+### 9. Show What Is Deferred
 
 Open `docs/cloudai-platform-solution-walkthrough.md`, then the “What Is Intentionally Mock-Only” and “Future Deployment Path” sections.
 
@@ -186,6 +200,12 @@ curl -s http://localhost:3000/health
 curl -s http://localhost:3000/chat \
   -H "content-type: application/json" \
   -d @../../../../shared/examples/mock-genai-api/chat-request.allowed.json
+```
+
+```bash
+curl -s http://localhost:3000/rag/query \
+  -H "content-type: application/json" \
+  -d @../../../../shared/examples/rag-governance/rag-request.allowed.json
 ```
 
 Stop the local server when finished.
