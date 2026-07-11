@@ -110,19 +110,16 @@ Track B explores release engineering for AI services on Amazon EKS. It is split 
 
 Current scope:
 
-- Placeholder Helm chart folders.
-- Placeholder Argo CD application folder.
-- EKS module placeholder.
-- P4a portfolio-ready release-engineering plan: Helm/Kubernetes packaging, probes, rollout/rollback notes, resource boundaries, and synthetic workload metadata.
+- P4a portfolio-ready Helm chart for the mock AI API service, including Kubernetes packaging, probes, resource boundaries, synthetic labels, and optional PodDisruptionBudget.
 - P4b optional personal AWS EKS sandbox plan: Terraform-managed sandbox, explicit budget, manual approval, synthetic workload only, and teardown guidance.
-- P4c GitOps plan: Argo CD application pattern and release-promotion story.
+- P4c GitOps pattern: synthetic Argo CD Application manifest, manual sync posture, release metadata, and promotion boundaries.
+- P4d release gates and rollback pattern: pre-deploy gates, rollout observation, rollback choices, failure modes, and evidence expectations.
+- EKS module placeholder remains deferred until the personal sandbox path is explicitly approved.
 
 Future scope:
 
-- Helm packaging examples.
-- GitOps deployment patterns.
-- Progressive delivery and runtime observability notes.
-- Policy-aware release gates.
+- Optional personal EKS sandbox execution through GitHub Actions OIDC, budget controls, and teardown.
+- Progressive delivery and runtime observability evidence from a bounded sandbox, if approved.
 - Optional Bedrock Guardrails or AgentCore-aligned extension after the EKS and Terraform foundations are clear.
 
 ## Track C: AI-Assisted DevSecOps Pattern
