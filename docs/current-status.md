@@ -25,6 +25,7 @@ The repository can now demonstrate:
 - P4a Helm chart for synthetic Kubernetes packaging of the mock AI API service
 - P4c Argo CD Application pattern for manual GitOps promotion
 - P4d release gates and rollback pattern for synthetic EKS release engineering
+- P5a AI-assisted DevSecOps boundary for advisory AI use, human review, CI/security checks, and release evidence
 
 ## Completed For Mock Scope
 
@@ -45,6 +46,7 @@ The repository can now demonstrate:
 | P4a Helm packaging | Complete | `helm/ai-api-service/` |
 | P4c Argo CD pattern | Complete | `argocd/applications/cloudai-api-sandbox.yaml` |
 | P4d release gates and rollback | Complete | `docs/eks-release-gates-and-rollback.md` |
+| P5a AI-assisted DevSecOps boundary | Complete | `docs/ai-assisted-devsecops-pattern.md` and `.github/workflows/ai-assisted-devsecops.yml` |
 
 ## Intentionally Deferred
 
@@ -61,12 +63,13 @@ The following are not part of the current mock scope:
 - runtime agent execution
 - runtime traffic proxy
 - EKS runtime delivery
+- autonomous AI-assisted delivery
 
 These should remain opt-in future work with explicit cost, cleanup, and governance guidance.
 
 ## Recommended Next Slice
 
-The current public slice has completed the core synthetic **P4 EKS Release Engineering readiness** documentation.
+The current slice has completed the core synthetic **P4 EKS Release Engineering readiness** documentation and the first **P5 AI-assisted DevSecOps** boundary.
 
 Completed P4 split:
 
@@ -77,7 +80,8 @@ Completed P4 split:
 Recommended next choices:
 
 - **P4b optional personal AWS EKS sandbox POC:** Terraform-managed sandbox using a personal AWS account, S3 and DynamoDB backend, GitHub Actions OIDC, explicit budget, manual approval, synthetic workload only, and teardown guidance.
-- **P5 AI-assisted DevSecOps:** synthetic workflow examples for AI-assisted delivery with human review, CI, security checks, and auditable change evidence.
+- **P5b AI-assisted review evidence:** synthetic checklist examples for AI-assisted code review, threat-model prompts, CI failure summaries, and release notes that remain human-reviewed.
+- **P6 AI Traffic Governance:** runtime AgentOps contract pack for agent identity, tool permissions, policy verdicts, human approval, traceability, budgets, and pause/terminate state.
 
 The repository should not perform a real cloud deployment by default. Any personal sandbox work must keep account identifiers, state, kubeconfig, plan files, tfvars, credentials, and live endpoint details out of git.
 
