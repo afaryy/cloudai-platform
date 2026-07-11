@@ -11,7 +11,8 @@ The default path is synthetic-only and mock-first. It shows how an enterprise pl
 | P4a | Synthetic-only Helm and Kubernetes release examples | No real cluster, no kubeconfig, no live endpoints, no secrets. |
 | P4b | Optional personal AWS EKS sandbox POC | Personal account only, manual approval, budget alarm, synthetic workload, teardown required. |
 | P4c | Argo CD / GitOps release pattern | Synthetic Application manifest and promotion notes only until a sandbox is explicitly approved. |
-| P4d/P5 later | Bedrock Guardrails or AgentCore-aligned extension | Optional after EKS, Terraform, OIDC, FinOps, and cleanup controls are established. |
+| P4d | Release gates and rollback pattern | Documentation-only gates, rollout observation, failure modes, and rollback choices. |
+| P4e/P5 later | Bedrock Guardrails or AgentCore-aligned extension | Optional after EKS, Terraform, OIDC, FinOps, and cleanup controls are established. |
 
 ## Candidate Topics
 
@@ -59,6 +60,7 @@ Current P4 evidence includes:
 - Synthetic-only Argo CD Application manifest for the mock AI API Helm chart.
 - Manual sync posture with no automated sync enabled by default.
 - Argo CD labels and annotations for owner, environment, data scope, cost allocation, release boundary, and rollback/runbook metadata.
+- Release gates and rollback pattern in `docs/eks-release-gates-and-rollback.md`.
 - CloudFormation bootstrap example for Terraform backend and GitHub Actions role/policy.
 - Terraform backend example for `eks-sandbox`.
 - Manual GitHub Actions workflow example for future validate/plan flow.
@@ -74,3 +76,14 @@ The Argo CD example is a release-engineering contract, not a live deployment. It
 - Helm values that keep `mockMode`, `providerMode`, and `dataScope` synthetic.
 
 Do not add a real cluster URL, Argo CD token, kubeconfig, account ID, role ARN, or live namespace to the public manifest.
+
+## P4d Release Gates And Rollback
+
+`docs/eks-release-gates-and-rollback.md` defines the release governance pattern that sits between GitOps intent and a future sandbox deployment. It covers:
+
+- pre-deploy gates for scope, manifest rendering, chart quality, secrets, identity, policy, resources, cost, and approval;
+- rollout observation through Argo CD health, Kubernetes Deployment readiness, probes, events, logs, and synthetic health checks;
+- rollback choices across Git revert, Argo CD rollback/history, Helm rollback, sync pause, and teardown;
+- failure modes such as bad image tags, readiness failures, resource pressure, bad config, missing namespaces, and policy violations.
+
+The document is intentionally not a live operating procedure. It is a public-safe release-engineering pattern for future sandbox work.
