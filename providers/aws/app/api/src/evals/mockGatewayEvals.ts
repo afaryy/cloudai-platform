@@ -1,4 +1,6 @@
 import { MockBedrockClient } from "../clients/mockBedrockClient.js";
+import { readFile } from "node:fs/promises";
+import { resolve } from "node:path";
 import { HttpError } from "../lib/errors.js";
 import { buildRequestLogEvent } from "../lib/requestLogger.js";
 import { enforceInputTokenBudget } from "../lib/tokenBudget.js";
@@ -38,7 +40,8 @@ export async function runMockGatewayEvals(evaluatedAt = "2026-07-10T00:00:00.000
     await evaluateResponseMetadataPresent(),
     evaluateRequestLogOmitsPrompt(),
     evaluateGovernedRagQueryContract(),
-    evaluateAgentOpsRuntimeDecisionContract()
+    evaluateAgentOpsRuntimeDecisionContract(),
+    await evaluateCapabilityAdmissionGovernance()
   ];
   const passedCases = results.filter((result) => result.passed).length;
 
@@ -252,6 +255,41 @@ function evaluateAgentOpsRuntimeDecisionContract(): MockGatewayEvalResult {
       ? "Allowed read action returned policy verdict, audit metadata, and no tool execution."
       : "AgentOps decision evidence was incomplete or included execution-like payloads."
   };
+}
+
+async function evaluateCapabilityAdmissionGovernance(): Promise<MockGatewayEvalResult> {
+  const directory = resolve(process.cwd(), "../../../../shared/examples/agent-capability-governance");
+  const [approvedEvidence, approvedDecision, blockedEvidence, blockedDecision, reviewEvidence, reviewDecision] = await Promise.all([
+    readJsonFixture("knowledge-search.evidence.json", directory),
+    readJsonFixture("knowledge-search.decision.json", directory),
+    readJsonFixture("external-export.evidence.json", directory),
+    readJsonFixture("external-export.decision.json", directory),
+    readJsonFixture("change-summary.evidence.json", directory),
+    readJsonFixture("change-summary.decision.json", directory)
+  ]);
+  const approvedEligibleForRuntime = approvedDecision.decision === "approved";
+  const passed = approvedEvidence.scan.status === "passed"
+    && approvedEvidence.evaluation.status === "passed"
+    && approvedEligibleForRuntime
+    && blockedEvidence.scan.status === "failed"
+    && blockedDecision.decision === "blocked"
+    && reviewEvidence.scan.status === "passed"
+    && reviewDecision.decision === "approval-required"
+    && reviewDecision.decision !== "approved";
+
+  return {
+    id: "capability-admission-governance",
+    category: "contract",
+    description: "Mock capability admission keeps approved, blocked, and approval-required reusable agent capabilities distinct.",
+    passed,
+    evidence: passed
+      ? "Synthetic capability evidence preserved approved, blocked, and approval-required outcomes; only the approved asset is eligible for a future runtime action."
+      : "Synthetic capability evidence did not preserve the required admission outcomes."
+  };
+}
+
+async function readJsonFixture(fileName: string, directory: string): Promise<any> {
+  return JSON.parse(await readFile(resolve(directory, fileName), "utf8"));
 }
 
 function catchesHttpError(fn: () => unknown, code: string): boolean {

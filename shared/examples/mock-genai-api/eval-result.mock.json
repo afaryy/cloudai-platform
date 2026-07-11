@@ -1,8 +1,8 @@
 {
   "mode": "mock",
   "evaluatedAt": "2026-07-10T00:00:00.000Z",
-  "totalCases": 7,
-  "passedCases": 7,
+  "totalCases": 8,
+  "passedCases": 8,
   "failedCases": 0,
   "results": [
     {
@@ -53,6 +53,13 @@
       "description": "Mock AgentOps authorisation returns a policy verdict and audit metadata without tool execution.",
       "passed": true,
       "evidence": "Allowed read action returned policy verdict, audit metadata, and no tool execution."
+    },
+    {
+      "id": "capability-admission-governance",
+      "category": "contract",
+      "description": "Mock capability admission keeps approved, blocked, and approval-required reusable agent capabilities distinct.",
+      "passed": true,
+      "evidence": "Synthetic capability evidence preserved approved, blocked, and approval-required outcomes; only the approved asset is eligible for a future runtime action."
     }
   ]
 }

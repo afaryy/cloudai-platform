@@ -1,0 +1,10 @@
+{
+  "capabilityId": "synthetic-external-export",
+  "name": "Synthetic External Export",
+  "version": "1.0.0",
+  "ownerRole": "platform-capability-owner",
+  "source": { "classification": "synthetic-public", "reference": "https://example.com/cloudai-platform/external-export" },
+  "declaredPermissions": { "network": ["external-network:write"], "fileSystem": ["workspace:read"], "tools": ["http-export:write"] },
+  "dependencies": ["synthetic-http-client"],
+  "lifecycleStatus": "blocked"
+}

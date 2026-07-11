@@ -110,7 +110,9 @@ The repository has been built incrementally through small PRs.
 | #24 | RAG governance API metadata | Added mock API endpoints and contracts that expose local RAG workflow artifact metadata without adding retrieval runtime. |
 | #25 | Mock governed RAG query | Added a mock governed RAG response endpoint using existing contracts, without adding retrieval runtime or provider calls. |
 | #26 | Governed RAG query demo eval | Added eval evidence and demo documentation for the mock governed RAG query endpoint. |
-| Next planned | AgentOps / AI Traffic Governance contracts | Define synthetic agent-session and tool-permission evidence before any runtime agent behavior. |
+| #29 | Mock AgentOps traffic governance | Added metadata-only authorisation decisions, session and action contracts, synthetic fixtures, audit evidence, and local evaluation without tool execution. |
+| Current slice | Capability governance | Adds synthetic asset registry, skill-card, evidence, and admission-decision contracts before future runtime use. |
+| Next planned | RAG knowledge lifecycle | Define source provenance, lifecycle, retention, review, and retired-source invariants. |
 
 ## P0 Foundation Summary
 

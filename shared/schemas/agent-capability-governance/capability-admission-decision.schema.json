@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/cloudai-platform/schemas/agent-capability-governance/capability-admission-decision.schema.json",
+  "title": "Mock Capability Admission Decision",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["capabilityId", "decision", "rationale", "reviewerRole", "decidedAt", "reviewBy", "evidenceReferences"],
+  "properties": {
+    "capabilityId": { "type": "string", "minLength": 1 },
+    "decision": { "type": "string", "enum": ["approved", "blocked", "approval-required"] },
+    "rationale": { "type": "string", "minLength": 1 },
+    "reviewerRole": { "type": "string", "minLength": 1 },
+    "decidedAt": { "type": "string", "format": "date-time" },
+    "reviewBy": { "type": "string", "format": "date-time" },
+    "evidenceReferences": { "type": "array", "items": { "type": "string" } }
+  }
+}

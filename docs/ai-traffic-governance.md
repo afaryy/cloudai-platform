@@ -57,6 +57,8 @@ The GenAI / LLM Gateway handles model access. The broader traffic governance lay
 
 `POST /agent-actions/authorize` evaluates synthetic metadata only. It applies a fixed local allowlist and simple decision order for session lifecycle, budget exhaustion, tool permission, and human approval. Its response is an evidence contract, not an executed action.
 
-P6a does not install or scan agent skills, invoke MCP tools, execute tool calls, contact models or cloud providers, persist audit records, proxy traffic, or enforce policy outside the local mock process. Capability governance (registry, signing, scanning, evaluation evidence, and lifecycle) remains a later P6 sub-slice.
+P6a does not install or scan agent skills, invoke MCP tools, execute tool calls, contact models or cloud providers, persist audit records, proxy traffic, or enforce policy outside the local mock process.
+
+P6b adds the separate mock capability-governance contract pack. It records registry metadata, skill cards, declared permissions, synthetic scan and evaluation evidence, integrity status, lifecycle, and admission decisions before a capability is eligible for future runtime use. See `docs/agent-capability-governance.md`. A blocked or approval-required capability is not treated as approved by the capability-admission evaluation.
 
 The RAG governance contract under `shared/schemas/rag-governance/` is a mock contract for retrieval evidence. It defines how future RAG flows can expose data classification, allowed knowledge base boundaries, citation checks, egress decisions, and audit metadata before any retrieval runtime is added.

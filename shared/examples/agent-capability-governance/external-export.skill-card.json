@@ -1,0 +1,11 @@
+{
+  "capabilityId": "synthetic-external-export",
+  "purpose": "Demonstrate a capability that requests external export access.",
+  "intendedUsers": ["synthetic-agent"],
+  "inputCategories": ["synthetic-public-data"],
+  "outputCategories": ["external-export-request"],
+  "dataFlow": "Synthetic public data would cross an external network boundary.",
+  "knownRisks": ["External egress", "Broad workspace read"],
+  "mitigations": ["Admission block", "No runtime availability"],
+  "references": ["https://example.com/cloudai-platform/external-export"]
+}

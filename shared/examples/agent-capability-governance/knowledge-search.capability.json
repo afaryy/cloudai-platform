@@ -1,0 +1,10 @@
+{
+  "capabilityId": "synthetic-knowledge-search",
+  "name": "Synthetic Knowledge Search",
+  "version": "1.0.0",
+  "ownerRole": "platform-capability-owner",
+  "source": { "classification": "synthetic-public", "reference": "https://example.com/cloudai-platform/knowledge-search" },
+  "declaredPermissions": { "network": [], "fileSystem": ["synthetic-knowledge-base:read"], "tools": ["knowledge-search:read"] },
+  "dependencies": [],
+  "lifecycleStatus": "approved"
+}

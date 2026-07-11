@@ -1,0 +1,7 @@
+{
+  "capabilityId": "synthetic-change-summary",
+  "scan": { "status": "passed", "summary": "Synthetic review found no external network or write permission." },
+  "evaluation": { "status": "passed", "summary": "Synthetic evaluation supports reviewed summary output." },
+  "integrity": { "status": "not-implemented", "summary": "No signature verification is implemented in this mock reference." },
+  "evidenceReferences": ["https://example.com/cloudai-platform/change-summary/evidence"]
+}

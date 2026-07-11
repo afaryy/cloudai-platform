@@ -13,6 +13,7 @@ The project models a CloudAI platform that separates control-plane concerns from
 At a high level, it explores:
 
 - CloudAI Control Plane concepts for policy, approval, audit, and provider registry.
+- Unified AI Asset Registry patterns for approved models, agents, skills, MCP tools, RAG sources, evaluations, versions, owners, and lifecycle evidence.
 - GenAI / LLM Gateway patterns for governed model access.
 - Broader AI Traffic Governance for future agent, tool, retrieval, workflow, and data-access flows.
 - AWS-first provider foundations with future Azure and GCP mappings.
@@ -33,6 +34,7 @@ The goal is to show practical architecture thinking and incremental platform del
 - Governed access to foundation models and future AI services.
 - A model-access sub-layer through a GenAI / LLM Gateway.
 - A broader AI traffic governance layer for future agent and tool flows.
+- Capability governance before runtime use: declared permissions, synthetic scan/evaluation evidence, admission decisions, and lifecycle status for reusable agent assets.
 - AWS Bedrock integration pattern at the architecture level.
 - Terraform-oriented AWS platform foundations as placeholders.
 - GitHub Actions CI/CD skeletons.
