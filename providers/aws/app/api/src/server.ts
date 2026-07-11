@@ -11,6 +11,7 @@ import {
 import { getHealth } from "./routes/health.js";
 import { postChat } from "./routes/chat.js";
 import { getRagArtifacts, getRagStatus } from "./routes/ragMetadata.js";
+import { postRagQuery } from "./routes/ragQuery.js";
 
 const DEFAULT_PORT = 3000;
 const MAX_BODY_BYTES = 1_000_000;
@@ -63,6 +64,21 @@ export function createMockApiServer(
           statusCode: 200,
           durationMs: Date.now() - startedAt,
           timestamp: new Date().toISOString()
+        }));
+        return;
+      }
+
+      if (method === "POST" && route === "/rag/query") {
+        const body = await readJsonBody(request);
+        const ragQueryResponse = postRagQuery(body);
+        writeJson(response, 200, ragQueryResponse);
+        writeRequestLog(logger, buildRequestLogEvent({
+          requestId: ragQueryResponse.audit.requestId,
+          method,
+          route,
+          statusCode: 200,
+          durationMs: Date.now() - startedAt,
+          timestamp: ragQueryResponse.audit.evaluatedAt
         }));
         return;
       }

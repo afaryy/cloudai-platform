@@ -9,6 +9,7 @@ It runs in mock mode only. It returns synthetic responses and does not call Amaz
 - `GET /health`: returns service health and mock mode status.
 - `GET /rag/status`: returns local RAG governance workflow status and current boundaries.
 - `GET /rag/artifacts`: returns metadata for RAG contracts, sample outputs, and walkthrough documentation.
+- `POST /rag/query`: accepts a governed RAG request and returns a synthetic governed RAG response.
 - `POST /chat`: accepts a prompt and returns a synthetic model response with request metadata.
 
 ## Chat Request
@@ -100,6 +101,38 @@ curl -s http://localhost:3000/rag/artifacts
 
 `GET /rag/artifacts` lists the RAG contract and sample artifact paths. The API does not execute Python, create embeddings, build a vector index, call a model, or deploy resources.
 
+## Mock Governed RAG Query
+
+`POST /rag/query` demonstrates the governed RAG API control point using the existing RAG request and response contracts.
+
+```bash
+curl -s http://localhost:3000/rag/query \
+  -H "content-type: application/json" \
+  -d '{
+    "requestId": "rag_req_demo_0001",
+    "query": "Summarize the CloudAI gateway guardrails from the demo handbook.",
+    "dataClassification": "synthetic-public",
+    "retrieval": {
+      "allowedKnowledgeBases": ["demo-platform-handbook"],
+      "maxDocuments": 3,
+      "requiredMetadata": [
+        "sourceId",
+        "sourceTitle",
+        "classification",
+        "citationUrl",
+        "retrievedAt"
+      ]
+    },
+    "governance": {
+      "requireCitations": true,
+      "allowExternalEgress": false,
+      "policyProfile": "rag-demo-governed"
+    }
+  }'
+```
+
+The endpoint returns a deterministic synthetic response with citation metadata, egress decision, and audit evidence. It does not perform retrieval, execute Python, call a model, create embeddings, or use a vector index.
+
 ## Demo Fixtures
 
 Synthetic demo fixtures are available under `shared/examples/mock-genai-api/`.
@@ -112,6 +145,7 @@ They show:
 - a structured request log event without prompt text or request bodies
 - a mock eval report
 - RAG governance metadata responses
+- a governed RAG request and response
 
 The test suite checks these examples against the documented contract shapes so the demo material stays aligned with the mock API.
 

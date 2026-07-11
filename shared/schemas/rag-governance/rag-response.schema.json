@@ -156,12 +156,12 @@
             },
             "scope": {
               "type": "string",
-              "enum": ["internal_response", "external_network"]
+              "enum": ["controlled_response", "external_network"]
             },
             "reason": {
               "type": "string",
               "enum": [
-                "internal_response_allowed_with_synthetic_sources",
+                "controlled_response_allowed_with_synthetic_sources",
                 "external_egress_not_allowed_for_demo_policy"
               ]
             }

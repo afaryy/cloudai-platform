@@ -1,8 +1,8 @@
 # Governed RAG Pattern
 
-This example documents a mock governance contract and local workflow for Retrieval-Augmented Generation (RAG).
+This example documents a mock governance contract, local workflow, and synthetic API response pattern for Retrieval-Augmented Generation (RAG).
 
-It does not implement retrieval runtime, embeddings, a vector database, or a retrieval or answer-generation RAG endpoint. The purpose is to define the request, response, chunk, evaluation, and scoring evidence that a future governed RAG flow should produce.
+It does not implement retrieval runtime, embeddings, or a vector database. The purpose is to define the request, response, chunk, evaluation, and scoring evidence that a future governed RAG flow should produce.
 
 ## Contract Files
 
@@ -65,6 +65,14 @@ The TypeScript mock API exposes RAG workflow metadata without running the Python
 
 These endpoints help a reader discover the local RAG contracts, sample outputs, score report, and walkthrough from the platform API layer. They do not execute Python, perform retrieval, call a model, or deploy resources.
 
+## Mock Governed RAG Query Endpoint
+
+The TypeScript mock API also exposes:
+
+- `POST /rag/query`
+
+This endpoint accepts the governed RAG request contract and returns a deterministic synthetic RAG response with citations, retrieval metadata, an egress decision, and audit evidence. It does not perform retrieval, execute Python, call a model, create embeddings, or use a vector index.
+
 ## Example Flow
 
 ```text
@@ -88,6 +96,7 @@ Current scope:
 - local response-quality scoring for synthetic mock responses
 - committed sample outputs and walkthrough
 - mock API metadata endpoints for local RAG artifacts
+- mock governed RAG query endpoint
 - public cloud architecture notes
 
 Deferred scope:
@@ -95,6 +104,7 @@ Deferred scope:
 - embeddings
 - vector indexes
 - retrieval runtime
+- provider-backed RAG answer generation
 - model-based evaluation
 - LangChain or similar orchestration framework
 - provider-hosted knowledge base integration

@@ -17,13 +17,16 @@
             "body_too_large",
             "empty_body",
             "empty_prompt",
-            "unexpected_error",
+            "empty_rag_query",
             "invalid_body",
             "invalid_json",
             "invalid_prompt",
+            "invalid_rag_query",
+            "invalid_rag_request",
             "not_found",
             "prompt_too_long",
             "token_budget_exceeded",
+            "unexpected_error",
             "unsupported_model"
           ]
         },
