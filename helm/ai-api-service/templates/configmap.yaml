@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "ai-api-service.fullname" . }}-config
+  labels:
+    {{- include "ai-api-service.labels" . | nindent 4 }}
+data:
+  NODE_ENV: {{ .Values.config.nodeEnv | quote }}
+  MOCK_MODE: {{ .Values.config.mockMode | quote }}
+  LOG_LEVEL: {{ .Values.config.logLevel | quote }}
+  DATA_SCOPE: {{ .Values.config.dataScope | quote }}
+  PROVIDER_MODE: {{ .Values.config.providerMode | quote }}
+  ALLOWED_MODEL: {{ .Values.config.allowedModel | quote }}
