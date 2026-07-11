@@ -10,7 +10,7 @@ The default path is synthetic-only and mock-first. It shows how an enterprise pl
 |---|---|---|
 | P4a | Synthetic-only Helm and Kubernetes release examples | No real cluster, no kubeconfig, no live endpoints, no secrets. |
 | P4b | Optional personal AWS EKS sandbox POC | Personal account only, manual approval, budget alarm, synthetic workload, teardown required. |
-| P4c | Argo CD / GitOps release pattern | Application manifests and promotion notes only until a sandbox is explicitly approved. |
+| P4c | Argo CD / GitOps release pattern | Synthetic Application manifest and promotion notes only until a sandbox is explicitly approved. |
 | P4d/P5 later | Bedrock Guardrails or AgentCore-aligned extension | Optional after EKS, Terraform, OIDC, FinOps, and cleanup controls are established. |
 
 ## Candidate Topics
@@ -48,7 +48,7 @@ ECS can be a useful simpler runtime pattern for API services, but P4 focuses on 
 
 ## Current State
 
-The P4a chart exists under `helm/ai-api-service/`. Placeholder folders still exist for later Argo CD and EKS Terraform module work.
+The P4a chart exists under `helm/ai-api-service/`. The P4c Argo CD application example exists under `argocd/applications/`. EKS Terraform module work remains deferred until a personal sandbox apply path is explicitly approved.
 
 Current P4 evidence includes:
 
@@ -56,7 +56,21 @@ Current P4 evidence includes:
 - Kubernetes Deployment, Service, ConfigMap, ServiceAccount, and optional PodDisruptionBudget templates.
 - Readiness and liveness probes on `/health`.
 - Resource requests, limits, and release metadata labels.
+- Synthetic-only Argo CD Application manifest for the mock AI API Helm chart.
+- Manual sync posture with no automated sync enabled by default.
+- Argo CD labels and annotations for owner, environment, data scope, cost allocation, release boundary, and rollback/runbook metadata.
 - CloudFormation bootstrap example for Terraform backend and GitHub Actions role/policy.
 - Terraform backend example for `eks-sandbox`.
 - Manual GitHub Actions workflow example for future validate/plan flow.
-- Argo CD README guidance for future GitOps work.
+- Argo CD README guidance for local validation and future GitOps sandbox use.
+
+## P4c Argo CD Boundary
+
+The Argo CD example is a release-engineering contract, not a live deployment. It intentionally uses:
+
+- `destination.server: https://kubernetes.default.svc` as the in-cluster Argo CD destination placeholder.
+- `destination.namespace: cloudai-sandbox` as a synthetic namespace.
+- `syncPolicy` without automated sync.
+- Helm values that keep `mockMode`, `providerMode`, and `dataScope` synthetic.
+
+Do not add a real cluster URL, Argo CD token, kubeconfig, account ID, role ARN, or live namespace to the public manifest.
