@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/cloudai-platform/schemas/control-plane-evidence/evidence-map.schema.json",
+  "title": "Mock CloudAI Control Plane Evidence Map",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["evidenceMapId", "phase", "controlPlane", "scenario", "evidenceLanes", "audit", "boundaries"],
+  "properties": {
+    "evidenceMapId": { "type": "string", "pattern": "^p6d_[a-z0-9_]+$" },
+    "phase": { "type": "string", "const": "P6d" },
+    "controlPlane": { "type": "string", "const": "CloudAI Control Plane" },
+    "scenario": { "type": "string", "minLength": 10 },
+    "evidenceLanes": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["lane", "source", "referenceId", "decisionOrState", "ownerRole", "evidencePath"],
+        "properties": {
+          "lane": {
+            "type": "string",
+            "enum": [
+              "runtime-agentops",
+              "capability-governance",
+              "rag-knowledge-lifecycle",
+              "guardrails-as-a-service",
+              "ai-assisted-review-evidence"
+            ]
+          },
+          "source": { "type": "string", "enum": ["P6a", "P6b", "P6c", "P2", "P5b"] },
+          "referenceId": { "type": "string", "minLength": 3 },
+          "decisionOrState": { "type": "string", "minLength": 3 },
+          "ownerRole": { "type": "string", "minLength": 3 },
+          "evidencePath": { "type": "string", "pattern": "^shared/examples/.+\\.json$" }
+        }
+      }
+    },
+    "audit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["traceId", "recordedAt", "retention"],
+      "properties": {
+        "traceId": { "type": "string" },
+        "recordedAt": { "type": "string", "format": "date-time" },
+        "retention": { "type": "string", "const": "demo-evidence-only" }
+      }
+    },
+    "boundaries": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["containsSensitiveData", "containsPromptTranscript", "executesRuntimeAction", "callsProvider", "deploysCloudResources"],
+      "properties": {
+        "containsSensitiveData": { "type": "boolean", "const": false },
+        "containsPromptTranscript": { "type": "boolean", "const": false },
+        "executesRuntimeAction": { "type": "boolean", "const": false },
+        "callsProvider": { "type": "boolean", "const": false },
+        "deploysCloudResources": { "type": "boolean", "const": false }
+      }
+    }
+  }
+}
