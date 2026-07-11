@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/cloudai-platform/schemas/agentops-governance/agent-action-audit-event.schema.json",
+  "title": "Mock Agent Action Audit Event",
+  "description": "Metadata-only audit evidence. It intentionally excludes prompts, tool inputs, secrets, and execution results.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["requestId", "sessionId", "agentId", "traceId", "eventId", "toolId", "actionClass", "policyId", "verdict", "reasonCode", "runtimeState", "recordedAt"],
+  "properties": {
+    "requestId": { "type": "string", "minLength": 1 },
+    "sessionId": { "type": "string", "minLength": 1 },
+    "agentId": { "type": "string", "minLength": 1 },
+    "traceId": { "type": "string", "minLength": 1 },
+    "eventId": { "type": "string", "minLength": 1 },
+    "toolId": { "type": "string", "minLength": 1 },
+    "actionClass": { "type": "string", "enum": ["read", "write", "high-impact"] },
+    "policyId": { "type": "string", "minLength": 1 },
+    "verdict": { "type": "string", "enum": ["allow", "deny", "approval-required", "paused"] },
+    "reasonCode": { "type": "string", "minLength": 1 },
+    "runtimeState": { "type": "string", "enum": ["active", "paused", "terminated"] },
+    "recordedAt": { "type": "string", "format": "date-time" }
+  }
+}

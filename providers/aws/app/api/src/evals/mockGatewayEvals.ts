@@ -2,6 +2,7 @@ import { MockBedrockClient } from "../clients/mockBedrockClient.js";
 import { HttpError } from "../lib/errors.js";
 import { buildRequestLogEvent } from "../lib/requestLogger.js";
 import { enforceInputTokenBudget } from "../lib/tokenBudget.js";
+import { authoriseAgentAction } from "../lib/agentOpsPolicy.js";
 import { normalizeChatRequest } from "../lib/validation.js";
 import { postChat } from "../routes/chat.js";
 import { postRagQuery } from "../routes/ragQuery.js";
@@ -36,7 +37,8 @@ export async function runMockGatewayEvals(evaluatedAt = "2026-07-10T00:00:00.000
     evaluateUnsupportedModelRequest(),
     await evaluateResponseMetadataPresent(),
     evaluateRequestLogOmitsPrompt(),
-    evaluateGovernedRagQueryContract()
+    evaluateGovernedRagQueryContract(),
+    evaluateAgentOpsRuntimeDecisionContract()
   ];
   const passedCases = results.filter((result) => result.passed).length;
 
@@ -207,6 +209,48 @@ function evaluateGovernedRagQueryContract(): MockGatewayEvalResult {
     evidence: passed
       ? "RAG response included citation, egress decision, and audit evidence without query text echo."
       : "RAG response contract evidence was missing or query text was echoed."
+  };
+}
+
+function evaluateAgentOpsRuntimeDecisionContract(): MockGatewayEvalResult {
+  const decision = authoriseAgentAction({
+    requestId: "agent_req_eval_0001",
+    session: {
+      sessionId: "agent_session_eval_0001",
+      agentId: "demo-knowledge-agent",
+      owner: "platform-demo-owner",
+      delegatedUser: "synthetic-user",
+      riskTier: "standard",
+      status: "active"
+    },
+    action: {
+      toolId: "knowledge-search",
+      actionClass: "read",
+      leastPrivilegeScope: "synthetic-public-knowledge"
+    },
+    governance: {
+      policyProfile: "agentops-demo-governed",
+      approvalId: null,
+      budgetLimit: 10,
+      budgetConsumed: 2
+    }
+  });
+  const serializedDecision = JSON.stringify(decision);
+  const passed = decision.decision.verdict === "allow"
+    && decision.decision.reasonCode === "read_only_action_allowed"
+    && decision.audit.traceId === "trace_agent_req_eval_0001"
+    && decision.runtimeControl.budgetRemaining === 8
+    && !serializedDecision.includes("toolInput")
+    && !serializedDecision.includes("executionResult");
+
+  return {
+    id: "agentops-runtime-decision-contract",
+    category: "contract",
+    description: "Mock AgentOps authorisation returns a policy verdict and audit metadata without tool execution.",
+    passed,
+    evidence: passed
+      ? "Allowed read action returned policy verdict, audit metadata, and no tool execution."
+      : "AgentOps decision evidence was incomplete or included execution-like payloads."
   };
 }
 

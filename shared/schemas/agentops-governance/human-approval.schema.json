@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/cloudai-platform/schemas/agentops-governance/human-approval.schema.json",
+  "title": "Mock Human Approval Evidence",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["approvalId", "actionFingerprint", "approverRole", "decision", "expiresAt"],
+  "properties": {
+    "approvalId": { "type": "string", "minLength": 1 },
+    "actionFingerprint": { "type": "string", "minLength": 1 },
+    "approverRole": { "type": "string", "minLength": 1 },
+    "decision": { "type": "string", "enum": ["approved", "rejected"] },
+    "expiresAt": { "type": "string", "format": "date-time" }
+  }
+}

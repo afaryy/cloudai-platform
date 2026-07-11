@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/cloudai-platform/schemas/agentops-governance/tool-authorisation-decision.schema.json",
+  "title": "Mock Agent Tool Authorisation Decision",
+  "description": "Deterministic mock decision evidence. It records policy evaluation only and does not execute a tool.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["requestId", "decision", "approval", "runtimeControl", "audit"],
+  "properties": {
+    "requestId": { "type": "string", "minLength": 1 },
+    "decision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["verdict", "reasonCode", "policyId"],
+      "properties": {
+        "verdict": { "type": "string", "enum": ["allow", "deny", "approval-required", "paused"] },
+        "reasonCode": {
+          "type": "string",
+          "enum": [
+            "read_only_action_allowed",
+            "approved_high_impact_action",
+            "human_approval_required",
+            "tool_not_allowed",
+            "budget_limit_exceeded",
+            "session_not_active"
+          ]
+        },
+        "policyId": { "type": "string", "minLength": 1 }
+      }
+    },
+    "approval": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["required", "approvalId"],
+      "properties": {
+        "required": { "type": "boolean" },
+        "approvalId": { "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }] }
+      }
+    },
+    "runtimeControl": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state", "budgetLimit", "budgetConsumed", "budgetRemaining"],
+      "properties": {
+        "state": { "type": "string", "enum": ["active", "paused", "terminated"] },
+        "budgetLimit": { "type": "number", "minimum": 0 },
+        "budgetConsumed": { "type": "number", "minimum": 0 },
+        "budgetRemaining": { "type": "number", "minimum": 0 }
+      }
+    },
+    "audit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["traceId", "eventId", "recordedAt"],
+      "properties": {
+        "traceId": { "type": "string", "minLength": 1 },
+        "eventId": { "type": "string", "minLength": 1 },
+        "recordedAt": { "type": "string", "format": "date-time" }
+      }
+    }
+  }
+}

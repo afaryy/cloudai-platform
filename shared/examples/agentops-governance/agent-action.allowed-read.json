@@ -1,0 +1,22 @@
+{
+  "requestId": "agent_req_0001",
+  "session": {
+    "sessionId": "agent_session_0001",
+    "agentId": "demo-knowledge-agent",
+    "owner": "platform-demo-owner",
+    "delegatedUser": "synthetic-user",
+    "riskTier": "standard",
+    "status": "active"
+  },
+  "action": {
+    "toolId": "knowledge-search",
+    "actionClass": "read",
+    "leastPrivilegeScope": "synthetic-public-knowledge"
+  },
+  "governance": {
+    "policyProfile": "agentops-demo-governed",
+    "approvalId": null,
+    "budgetLimit": 10,
+    "budgetConsumed": 2
+  }
+}

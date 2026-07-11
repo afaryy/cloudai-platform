@@ -1,4 +1,11 @@
-import type { ChatRequest, RagGovernanceRequest } from "../types.js";
+import type {
+  AgentActionAuthorisationRequest,
+  AgentActionClass,
+  AgentRiskTier,
+  AgentSessionStatus,
+  ChatRequest,
+  RagGovernanceRequest
+} from "../types.js";
 import { HttpError } from "./errors.js";
 import {
   DEFAULT_POLICY_PROFILE,
@@ -16,6 +23,10 @@ const RAG_REQUIRED_METADATA_VALUES = [
   "citationUrl",
   "retrievedAt"
 ] as const;
+const AGENTOPS_REQUEST_KEYS = ["requestId", "session", "action", "governance"] as const;
+const AGENTOPS_SESSION_KEYS = ["sessionId", "agentId", "owner", "delegatedUser", "riskTier", "status"] as const;
+const AGENTOPS_ACTION_KEYS = ["toolId", "actionClass", "leastPrivilegeScope"] as const;
+const AGENTOPS_GOVERNANCE_KEYS = ["policyProfile", "approvalId", "budgetLimit", "budgetConsumed"] as const;
 
 export function normalizeChatRequest(
   input: unknown,
@@ -77,6 +88,21 @@ export function normalizeRagGovernanceRequest(input: unknown): RagGovernanceRequ
     dataClassification,
     retrieval,
     governance
+  };
+}
+
+export function normalizeAgentActionAuthorisationRequest(input: unknown): AgentActionAuthorisationRequest {
+  if (!isRecord(input)) {
+    throw new HttpError(400, "Request body must be a JSON object.", "invalid_body");
+  }
+
+  assertOnlyKeys(input, AGENTOPS_REQUEST_KEYS, "request", "invalid_agent_action_request");
+
+  return {
+    requestId: readRequiredString(input, "requestId", "invalid_agent_action_request").trim(),
+    session: readAgentSession(input.session),
+    action: readAgentAction(input.action),
+    governance: readAgentGovernance(input.governance)
   };
 }
 
@@ -155,11 +181,12 @@ function readGovernance(value: unknown): RagGovernanceRequest["governance"] {
 function assertOnlyKeys(
   input: Record<string, unknown>,
   allowedKeys: readonly string[],
-  objectName: string
+  objectName: string,
+  errorCode = "invalid_rag_request"
 ): void {
   for (const key of Object.keys(input)) {
     if (!allowedKeys.includes(key)) {
-      throw new HttpError(400, `${objectName}.${key} is not supported in mock mode.`, "invalid_rag_request");
+      throw new HttpError(400, `${objectName}.${key} is not supported in mock mode.`, errorCode);
     }
   }
 }
@@ -180,4 +207,86 @@ function readStringArray(value: unknown, fieldName: string, allowedValues?: stri
   }
 
   return normalized;
+}
+
+function readAgentSession(value: unknown): AgentActionAuthorisationRequest["session"] {
+  if (!isRecord(value)) {
+    throw new HttpError(400, "session is required and must be an object.", "invalid_agent_action_request");
+  }
+
+  assertOnlyKeys(value, AGENTOPS_SESSION_KEYS, "session", "invalid_agent_action_request");
+
+  return {
+    sessionId: readRequiredString(value, "sessionId", "invalid_agent_action_request").trim(),
+    agentId: readRequiredString(value, "agentId", "invalid_agent_action_request").trim(),
+    owner: readRequiredString(value, "owner", "invalid_agent_action_request").trim(),
+    delegatedUser: readRequiredString(value, "delegatedUser", "invalid_agent_action_request").trim(),
+    riskTier: readAgentRiskTier(value.riskTier),
+    status: readAgentSessionStatus(value.status)
+  };
+}
+
+function readAgentAction(value: unknown): AgentActionAuthorisationRequest["action"] {
+  if (!isRecord(value)) {
+    throw new HttpError(400, "action is required and must be an object.", "invalid_agent_action_request");
+  }
+
+  assertOnlyKeys(value, AGENTOPS_ACTION_KEYS, "action", "invalid_agent_action_request");
+
+  return {
+    toolId: readRequiredString(value, "toolId", "invalid_agent_action_request").trim(),
+    actionClass: readAgentActionClass(value.actionClass),
+    leastPrivilegeScope: readRequiredString(value, "leastPrivilegeScope", "invalid_agent_action_request").trim()
+  };
+}
+
+function readAgentGovernance(value: unknown): AgentActionAuthorisationRequest["governance"] {
+  if (!isRecord(value)) {
+    throw new HttpError(400, "governance is required and must be an object.", "invalid_agent_action_request");
+  }
+
+  assertOnlyKeys(value, AGENTOPS_GOVERNANCE_KEYS, "governance", "invalid_agent_action_request");
+
+  if (value.approvalId !== null && (typeof value.approvalId !== "string" || value.approvalId.trim().length === 0)) {
+    throw new HttpError(400, "governance.approvalId must be a non-empty string or null.", "invalid_agent_action_request");
+  }
+
+  if (!isNonNegativeNumber(value.budgetLimit) || !isNonNegativeNumber(value.budgetConsumed)) {
+    throw new HttpError(400, "governance budget values must be non-negative numbers.", "invalid_agent_action_request");
+  }
+
+  return {
+    policyProfile: readRequiredString(value, "policyProfile", "invalid_agent_action_request").trim(),
+    approvalId: typeof value.approvalId === "string" ? value.approvalId.trim() : null,
+    budgetLimit: value.budgetLimit,
+    budgetConsumed: value.budgetConsumed
+  };
+}
+
+function readAgentRiskTier(value: unknown): AgentRiskTier {
+  if (value === "standard" || value === "high") {
+    return value;
+  }
+
+  throw new HttpError(400, "session.riskTier is not supported in mock mode.", "invalid_agent_action_request");
+}
+
+function readAgentSessionStatus(value: unknown): AgentSessionStatus {
+  if (value === "active" || value === "paused" || value === "terminated") {
+    return value;
+  }
+
+  throw new HttpError(400, "session.status is not supported in mock mode.", "invalid_agent_action_request");
+}
+
+function readAgentActionClass(value: unknown): AgentActionClass {
+  if (value === "read" || value === "write" || value === "high-impact") {
+    return value;
+  }
+
+  throw new HttpError(400, "action.actionClass is not supported in mock mode.", "invalid_agent_action_request");
+}
+
+function isNonNegativeNumber(value: unknown): value is number {
+  return typeof value === "number" && Number.isFinite(value) && value >= 0;
 }

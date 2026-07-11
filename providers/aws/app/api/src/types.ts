@@ -117,3 +117,62 @@ export type RagGovernanceResponse = {
     evaluatedAt: string;
   };
 };
+
+export type AgentActionClass = "read" | "write" | "high-impact";
+export type AgentRiskTier = "standard" | "high";
+export type AgentSessionStatus = "active" | "paused" | "terminated";
+export type AgentAuthorisationVerdict = "allow" | "deny" | "approval-required" | "paused";
+export type AgentAuthorisationReasonCode =
+  | "read_only_action_allowed"
+  | "approved_high_impact_action"
+  | "human_approval_required"
+  | "tool_not_allowed"
+  | "budget_limit_exceeded"
+  | "session_not_active";
+
+export type AgentActionAuthorisationRequest = {
+  requestId: string;
+  session: {
+    sessionId: string;
+    agentId: string;
+    owner: string;
+    delegatedUser: string;
+    riskTier: AgentRiskTier;
+    status: AgentSessionStatus;
+  };
+  action: {
+    toolId: string;
+    actionClass: AgentActionClass;
+    leastPrivilegeScope: string;
+  };
+  governance: {
+    policyProfile: string;
+    approvalId: string | null;
+    budgetLimit: number;
+    budgetConsumed: number;
+  };
+};
+
+export type AgentActionAuthorisationDecision = {
+  requestId: string;
+  decision: {
+    verdict: AgentAuthorisationVerdict;
+    reasonCode: AgentAuthorisationReasonCode;
+    policyId: string;
+  };
+  approval: {
+    required: boolean;
+    approvalId: string | null;
+  };
+  runtimeControl: {
+    state: AgentSessionStatus;
+    budgetLimit: number;
+    budgetConsumed: number;
+    budgetRemaining: number;
+  };
+  audit: {
+    traceId: string;
+    eventId: string;
+    recordedAt: string;
+  };
+};

@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/cloudai-platform/schemas/agentops-governance/tool-authorisation-request.schema.json",
+  "title": "Mock Agent Tool Authorisation Request",
+  "description": "A metadata-only request for deterministic mock AgentOps policy evaluation. It must not include tool inputs or executable instructions.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["requestId", "session", "action", "governance"],
+  "properties": {
+    "requestId": { "type": "string", "minLength": 1 },
+    "session": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sessionId", "agentId", "owner", "delegatedUser", "riskTier", "status"],
+      "properties": {
+        "sessionId": { "type": "string", "minLength": 1 },
+        "agentId": { "type": "string", "minLength": 1 },
+        "owner": { "type": "string", "minLength": 1 },
+        "delegatedUser": { "type": "string", "minLength": 1 },
+        "riskTier": { "type": "string", "enum": ["standard", "high"] },
+        "status": { "type": "string", "enum": ["active", "paused", "terminated"] }
+      }
+    },
+    "action": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["toolId", "actionClass", "leastPrivilegeScope"],
+      "properties": {
+        "toolId": { "type": "string", "minLength": 1 },
+        "actionClass": { "type": "string", "enum": ["read", "write", "high-impact"] },
+        "leastPrivilegeScope": { "type": "string", "minLength": 1 }
+      }
+    },
+    "governance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["policyProfile", "approvalId", "budgetLimit", "budgetConsumed"],
+      "properties": {
+        "policyProfile": { "type": "string", "minLength": 1 },
+        "approvalId": { "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }] },
+        "budgetLimit": { "type": "number", "minimum": 0 },
+        "budgetConsumed": { "type": "number", "minimum": 0 }
+      }
+    }
+  }
+}
