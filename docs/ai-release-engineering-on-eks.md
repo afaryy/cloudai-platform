@@ -8,7 +8,7 @@ The default path is synthetic-only and mock-first. It shows how an enterprise pl
 
 | Phase | Scope | Boundary |
 |---|---|---|
-| P4a | Public-safe Helm and Kubernetes release examples | No real cluster, no kubeconfig, no live endpoints, no secrets. |
+| P4a | Synthetic-only Helm and Kubernetes release examples | No real cluster, no kubeconfig, no live endpoints, no secrets. |
 | P4b | Optional personal AWS EKS sandbox POC | Personal account only, manual approval, budget alarm, synthetic workload, teardown required. |
 | P4c | Argo CD / GitOps release pattern | Application manifests and promotion notes only until a sandbox is explicitly approved. |
 | P4d/P5 later | Bedrock Guardrails or AgentCore-aligned extension | Optional after EKS, Terraform, OIDC, FinOps, and cleanup controls are established. |
@@ -48,11 +48,15 @@ ECS can be a useful simpler runtime pattern for API services, but P4 focuses on 
 
 ## Current State
 
-Placeholder folders exist under `helm/`, `argocd/`, and `providers/aws/infra/terraform/modules/eks/`.
+The P4a chart exists under `helm/ai-api-service/`. Placeholder folders still exist for later Argo CD and EKS Terraform module work.
 
-This readiness slice adds portfolio-ready scaffolding for the optional sandbox path:
+Current P4 evidence includes:
 
+- Synthetic-only Helm chart for the mock AI API service.
+- Kubernetes Deployment, Service, ConfigMap, ServiceAccount, and optional PodDisruptionBudget templates.
+- Readiness and liveness probes on `/health`.
+- Resource requests, limits, and release metadata labels.
 - CloudFormation bootstrap example for Terraform backend and GitHub Actions role/policy.
 - Terraform backend example for `eks-sandbox`.
 - Manual GitHub Actions workflow example for future validate/plan flow.
-- Helm and Argo CD README guidance.
+- Argo CD README guidance for future GitOps work.

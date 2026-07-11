@@ -1,0 +1,13 @@
+{{- if and .Values.pdb.enabled (gt (int .Values.replicaCount) 1) -}}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "ai-api-service.fullname" . }}
+  labels:
+    {{- include "ai-api-service.labels" . | nindent 4 }}
+spec:
+  minAvailable: {{ .Values.pdb.minAvailable }}
+  selector:
+    matchLabels:
+      {{- include "ai-api-service.selectorLabels" . | nindent 6 }}
+{{- end }}

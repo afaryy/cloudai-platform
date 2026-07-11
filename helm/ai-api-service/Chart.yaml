@@ -1,0 +1,13 @@
+apiVersion: v2
+name: ai-api-service
+description: Synthetic-only Helm chart for the cloudai-platform mock AI API service.
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+keywords:
+  - cloudai-platform
+  - ai-platform
+  - eks
+  - release-engineering
+maintainers:
+  - name: cloudai-platform
