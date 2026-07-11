@@ -1,0 +1,1 @@
+{"requestId":"guardrail_req_0002","verdict":"redact","reasonCode":"synthetic_pii_signal","policyProfile":"guardrails-demo","audit":{"traceId":"trace_guardrail_req_0002","recordedAt":"2026-07-11T00:00:00.000Z"}}

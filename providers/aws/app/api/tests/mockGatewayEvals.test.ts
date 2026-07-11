@@ -13,8 +13,8 @@ test("runMockGatewayEvals reports all default mock gateway eval cases as passed"
   const report = await runMockGatewayEvals();
 
   assert.equal(report.mode, "mock");
-  assert.equal(report.totalCases, 9);
-  assert.equal(report.passedCases, 9);
+  assert.equal(report.totalCases, 10);
+  assert.equal(report.passedCases, 10);
   assert.equal(report.failedCases, 0);
   assert.deepEqual(
     report.results.map((result) => result.id),
@@ -27,7 +27,8 @@ test("runMockGatewayEvals reports all default mock gateway eval cases as passed"
       "governed-rag-query-contract",
       "agentops-runtime-decision-contract",
       "capability-admission-governance",
-      "rag-knowledge-lifecycle-governance"
+      "rag-knowledge-lifecycle-governance",
+      "guardrails-as-a-service-contract"
     ]
   );
   assert.ok(report.results.every((result) => result.passed));
@@ -81,6 +82,16 @@ test("mock gateway evals include RAG knowledge lifecycle evidence", async () => 
   assert.equal(lifecycleEval.category, "contract");
   assert.equal(lifecycleEval.passed, true);
   assert.match(lifecycleEval.evidence, /retired source cannot produce a governed RAG response/i);
+});
+
+test("mock gateway evals include Guardrails as a Service evidence", async () => {
+  const report = await runMockGatewayEvals();
+  const guardrailEval = report.results.find((result) => result.id === "guardrails-as-a-service-contract");
+
+  assert.ok(guardrailEval);
+  assert.equal(guardrailEval.category, "guardrail");
+  assert.equal(guardrailEval.passed, true);
+  assert.match(guardrailEval.evidence, /synthetic PII, jailbreak, high-risk, and safe signals/i);
 });
 
 test("mock gateway eval report fixture matches the current report shape", async () => {

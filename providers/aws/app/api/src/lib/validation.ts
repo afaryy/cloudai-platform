@@ -4,6 +4,9 @@ import type {
   AgentRiskTier,
   AgentSessionStatus,
   ChatRequest,
+  GuardrailAssessmentRequest,
+  GuardrailSurface,
+  GuardrailSyntheticSignal,
   RagGovernanceRequest
 } from "../types.js";
 import { HttpError } from "./errors.js";
@@ -27,6 +30,7 @@ const AGENTOPS_REQUEST_KEYS = ["requestId", "session", "action", "governance"] a
 const AGENTOPS_SESSION_KEYS = ["sessionId", "agentId", "owner", "delegatedUser", "riskTier", "status"] as const;
 const AGENTOPS_ACTION_KEYS = ["toolId", "actionClass", "leastPrivilegeScope"] as const;
 const AGENTOPS_GOVERNANCE_KEYS = ["policyProfile", "approvalId", "budgetLimit", "budgetConsumed"] as const;
+const GUARDRAIL_REQUEST_KEYS = ["requestId", "policyProfile", "surface", "syntheticSignals"] as const;
 
 export function normalizeChatRequest(
   input: unknown,
@@ -103,6 +107,21 @@ export function normalizeAgentActionAuthorisationRequest(input: unknown): AgentA
     session: readAgentSession(input.session),
     action: readAgentAction(input.action),
     governance: readAgentGovernance(input.governance)
+  };
+}
+
+export function normalizeGuardrailAssessmentRequest(input: unknown): GuardrailAssessmentRequest {
+  if (!isRecord(input)) {
+    throw new HttpError(400, "Request body must be a JSON object.", "invalid_body");
+  }
+
+  assertOnlyKeys(input, GUARDRAIL_REQUEST_KEYS, "request", "invalid_guardrail_assessment_request");
+
+  return {
+    requestId: readRequiredString(input, "requestId", "invalid_guardrail_assessment_request").trim(),
+    policyProfile: readRequiredString(input, "policyProfile", "invalid_guardrail_assessment_request").trim(),
+    surface: readGuardrailSurface(input.surface),
+    syntheticSignals: readGuardrailSignals(input.syntheticSignals)
   };
 }
 
@@ -285,6 +304,52 @@ function readAgentActionClass(value: unknown): AgentActionClass {
   }
 
   throw new HttpError(400, "action.actionClass is not supported in mock mode.", "invalid_agent_action_request");
+}
+
+function readGuardrailSurface(value: unknown): GuardrailSurface {
+  if (value === "model-gateway" || value === "rag" || value === "agent-action" || value === "delivery") {
+    return value;
+  }
+
+  throw new HttpError(400, "surface is not supported in mock mode.", "invalid_guardrail_assessment_request");
+}
+
+function readGuardrailSignals(value: unknown): GuardrailSyntheticSignal[] {
+  if (!Array.isArray(value) || value.length === 0) {
+    throw new HttpError(
+      400,
+      "syntheticSignals must include at least one item.",
+      "invalid_guardrail_assessment_request"
+    );
+  }
+
+  const normalized = value.map((item) => {
+    if (
+      item === "none"
+      || item === "pii-detected"
+      || item === "prompt-injection"
+      || item === "jailbreak-attempt"
+      || item === "high-risk-action"
+    ) {
+      return item;
+    }
+
+    throw new HttpError(
+      400,
+      "syntheticSignals contains an unsupported value.",
+      "invalid_guardrail_assessment_request"
+    );
+  });
+
+  if (normalized.includes("none") && normalized.length > 1) {
+    throw new HttpError(
+      400,
+      "syntheticSignals.none cannot be combined with risk signals.",
+      "invalid_guardrail_assessment_request"
+    );
+  }
+
+  return normalized;
 }
 
 function isNonNegativeNumber(value: unknown): value is number {

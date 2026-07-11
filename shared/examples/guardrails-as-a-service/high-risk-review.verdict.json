@@ -1,0 +1,1 @@
+{"requestId":"guardrail_req_0004","verdict":"approval-required","reasonCode":"synthetic_high_risk_action_signal","policyProfile":"guardrails-demo","audit":{"traceId":"trace_guardrail_req_0004","recordedAt":"2026-07-11T00:00:00.000Z"}}

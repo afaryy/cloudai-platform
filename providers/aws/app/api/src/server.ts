@@ -13,6 +13,7 @@ import { postChat } from "./routes/chat.js";
 import { getRagArtifacts, getRagStatus } from "./routes/ragMetadata.js";
 import { postRagQuery } from "./routes/ragQuery.js";
 import { postAgentActionAuthorisation } from "./routes/agentActionAuthorisation.js";
+import { postGuardrailAssessment } from "./routes/guardrailAssessment.js";
 
 const DEFAULT_PORT = 3000;
 const MAX_BODY_BYTES = 1_000_000;
@@ -95,6 +96,21 @@ export function createMockApiServer(
           statusCode: 200,
           durationMs: Date.now() - startedAt,
           timestamp: decision.audit.recordedAt
+        }));
+        return;
+      }
+
+      if (method === "POST" && route === "/guardrails/assess") {
+        const body = await readJsonBody(request);
+        const verdict = postGuardrailAssessment(body);
+        writeJson(response, 200, verdict);
+        writeRequestLog(logger, buildRequestLogEvent({
+          requestId: verdict.requestId,
+          method,
+          route,
+          statusCode: 200,
+          durationMs: Date.now() - startedAt,
+          timestamp: verdict.audit.recordedAt
         }));
         return;
       }

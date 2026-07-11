@@ -33,6 +33,7 @@ The goal is to show practical architecture thinking and incremental platform del
 - Secure AI enablement for Cloud & AI platform workflows.
 - Governed access to foundation models and future AI services.
 - A model-access sub-layer through a GenAI / LLM Gateway.
+- Guardrails as a Service for synthetic PII, jailbreak, prompt-injection, safety, and review verdicts.
 - A broader AI traffic governance layer for future agent and tool flows.
 - Capability governance before runtime use: declared permissions, synthetic scan/evaluation evidence, admission decisions, and lifecycle status for reusable agent assets.
 - RAG knowledge lifecycle controls for source provenance, owner, classification, authorised knowledge bases, retention, review, and active/paused/retired status.
@@ -93,6 +94,7 @@ Current scope:
 - Mock-mode scripts for future cost and ingest examples.
 - Local mock GenAI / LLM Gateway API.
 - Request metadata, structured logs, token guardrail, API schemas, and default policy profile examples.
+- Guardrails as a Service assessment contracts for synthetic safety and review signals.
 - Synthetic demo fixtures for request, response, error, and request log examples.
 - Local governed RAG workflow examples for ingest, chunk metadata, evaluation dataset preparation, and response-quality scoring.
 
@@ -220,6 +222,7 @@ The API exposes:
 - `GET /rag/status`
 - `GET /rag/artifacts`
 - `POST /rag/query`
+- `POST /guardrails/assess`
 
 The current mock scripts are simple placeholders:
 
@@ -233,13 +236,12 @@ If you do not have a TypeScript runner installed, read the scripts as mock examp
 
 ## Roadmap
 
-Current milestone: mock GenAI gateway and governed RAG evidence are complete for the local demo scope.
+Current milestone: mock GenAI gateway, governed RAG evidence, AgentOps decisions, capability governance, RAG knowledge lifecycle, and Guardrails as a Service are complete for the local demo scope.
 
 Near-term:
 
-- Start a small AgentOps / AI Traffic Governance contract pack.
 - Keep API contracts, request metadata, token guardrails, policy profile examples, and RAG governance examples aligned.
-- Keep the next slice synthetic and contract-first before adding any runtime agent behavior.
+- Keep future slices synthetic and contract-first before adding any runtime agent behavior.
 - Continue refreshing status and planning docs as future slices land.
 
 Later:

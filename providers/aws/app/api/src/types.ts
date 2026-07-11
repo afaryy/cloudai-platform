@@ -176,3 +176,35 @@ export type AgentActionAuthorisationDecision = {
     recordedAt: string;
   };
 };
+
+export type GuardrailSurface = "model-gateway" | "rag" | "agent-action" | "delivery";
+export type GuardrailSyntheticSignal =
+  | "none"
+  | "pii-detected"
+  | "prompt-injection"
+  | "jailbreak-attempt"
+  | "high-risk-action";
+export type GuardrailVerdict = "allow" | "redact" | "deny" | "approval-required";
+export type GuardrailReasonCode =
+  | "no_synthetic_risk_signal"
+  | "synthetic_pii_signal"
+  | "synthetic_prompt_injection_signal"
+  | "synthetic_high_risk_action_signal";
+
+export type GuardrailAssessmentRequest = {
+  requestId: string;
+  policyProfile: string;
+  surface: GuardrailSurface;
+  syntheticSignals: GuardrailSyntheticSignal[];
+};
+
+export type GuardrailAssessmentVerdict = {
+  requestId: string;
+  verdict: GuardrailVerdict;
+  reasonCode: GuardrailReasonCode;
+  policyProfile: string;
+  audit: {
+    traceId: string;
+    recordedAt: string;
+  };
+};

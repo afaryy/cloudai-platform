@@ -1,0 +1,1 @@
+{"requestId":"guardrail_req_0003","verdict":"deny","reasonCode":"synthetic_prompt_injection_signal","policyProfile":"guardrails-demo","audit":{"traceId":"trace_guardrail_req_0003","recordedAt":"2026-07-11T00:00:00.000Z"}}

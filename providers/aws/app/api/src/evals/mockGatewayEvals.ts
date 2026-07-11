@@ -7,6 +7,7 @@ import { enforceInputTokenBudget } from "../lib/tokenBudget.js";
 import { authoriseAgentAction } from "../lib/agentOpsPolicy.js";
 import { normalizeChatRequest } from "../lib/validation.js";
 import { postChat } from "../routes/chat.js";
+import { postGuardrailAssessment } from "../routes/guardrailAssessment.js";
 import { postRagQuery } from "../routes/ragQuery.js";
 
 export type MockGatewayEvalCategory =
@@ -42,7 +43,8 @@ export async function runMockGatewayEvals(evaluatedAt = "2026-07-10T00:00:00.000
     evaluateGovernedRagQueryContract(),
     evaluateAgentOpsRuntimeDecisionContract(),
     await evaluateCapabilityAdmissionGovernance(),
-    evaluateRagKnowledgeLifecycleGovernance()
+    evaluateRagKnowledgeLifecycleGovernance(),
+    evaluateGuardrailsAsAServiceContract()
   ];
   const passedCases = results.filter((result) => result.passed).length;
 
@@ -334,6 +336,50 @@ function evaluateRagKnowledgeLifecycleGovernance(): MockGatewayEvalResult {
     evidence: passed
       ? "Active source returned governed evidence and retired source cannot produce a governed RAG response."
       : "RAG lifecycle did not preserve the active and retired source boundary."
+  };
+}
+
+function evaluateGuardrailsAsAServiceContract(): MockGatewayEvalResult {
+  const safeVerdict = postGuardrailAssessment({
+    requestId: "guardrail_eval_safe_0001",
+    policyProfile: "guardrails-demo",
+    surface: "model-gateway",
+    syntheticSignals: ["none"]
+  });
+  const piiVerdict = postGuardrailAssessment({
+    requestId: "guardrail_eval_pii_0001",
+    policyProfile: "guardrails-demo",
+    surface: "rag",
+    syntheticSignals: ["pii-detected"]
+  });
+  const jailbreakVerdict = postGuardrailAssessment({
+    requestId: "guardrail_eval_jailbreak_0001",
+    policyProfile: "guardrails-demo",
+    surface: "agent-action",
+    syntheticSignals: ["jailbreak-attempt"]
+  });
+  const highRiskVerdict = postGuardrailAssessment({
+    requestId: "guardrail_eval_high_risk_0001",
+    policyProfile: "guardrails-demo",
+    surface: "delivery",
+    syntheticSignals: ["high-risk-action"]
+  });
+  const serializedVerdicts = JSON.stringify([safeVerdict, piiVerdict, jailbreakVerdict, highRiskVerdict]);
+  const passed = safeVerdict.verdict === "allow"
+    && piiVerdict.verdict === "redact"
+    && jailbreakVerdict.verdict === "deny"
+    && highRiskVerdict.verdict === "approval-required"
+    && !serializedVerdicts.includes("\"content\"")
+    && !serializedVerdicts.includes("\"prompt\"");
+
+  return {
+    id: "guardrails-as-a-service-contract",
+    category: "guardrail",
+    description: "Mock GaaS converts synthetic risk signals into platform guardrail verdicts without inspecting raw content.",
+    passed,
+    evidence: passed
+      ? "Synthetic PII, jailbreak, high-risk, and safe signals produced redaction, denial, approval, and allow verdicts without raw content."
+      : "Synthetic guardrail signals did not produce the expected metadata-only verdicts."
   };
 }
 

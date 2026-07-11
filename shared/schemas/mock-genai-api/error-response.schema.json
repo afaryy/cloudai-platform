@@ -20,6 +20,7 @@
             "empty_rag_query",
             "invalid_body",
             "invalid_json",
+            "invalid_guardrail_assessment_request",
             "invalid_prompt",
             "invalid_rag_query",
             "invalid_rag_request",

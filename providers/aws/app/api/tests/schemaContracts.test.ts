@@ -65,6 +65,7 @@ test("error response schema documents mock API error codes", async () => {
   const errorCodes = schema.properties.error.properties.code.enum;
 
   assert.ok(errorCodes.includes("empty_prompt"));
+  assert.ok(errorCodes.includes("invalid_guardrail_assessment_request"));
   assert.ok(errorCodes.includes("token_budget_exceeded"));
   assert.ok(errorCodes.includes("unsupported_model"));
 });
