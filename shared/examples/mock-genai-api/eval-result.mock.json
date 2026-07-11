@@ -1,8 +1,8 @@
 {
   "mode": "mock",
   "evaluatedAt": "2026-07-10T00:00:00.000Z",
-  "totalCases": 6,
-  "passedCases": 6,
+  "totalCases": 7,
+  "passedCases": 7,
   "failedCases": 0,
   "results": [
     {
@@ -46,6 +46,13 @@
       "description": "Mock governed RAG query returns citation, egress decision, and audit evidence without echoing query text.",
       "passed": true,
       "evidence": "RAG response included citation, egress decision, and audit evidence without query text echo."
+    },
+    {
+      "id": "agentops-runtime-decision-contract",
+      "category": "contract",
+      "description": "Mock AgentOps authorisation returns a policy verdict and audit metadata without tool execution.",
+      "passed": true,
+      "evidence": "Allowed read action returned policy verdict, audit metadata, and no tool execution."
     }
   ]
 }

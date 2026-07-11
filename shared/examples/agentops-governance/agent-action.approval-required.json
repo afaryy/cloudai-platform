@@ -1,0 +1,22 @@
+{
+  "requestId": "agent_req_0002",
+  "session": {
+    "sessionId": "agent_session_0002",
+    "agentId": "demo-knowledge-agent",
+    "owner": "platform-demo-owner",
+    "delegatedUser": "synthetic-user",
+    "riskTier": "high",
+    "status": "active"
+  },
+  "action": {
+    "toolId": "case-summary",
+    "actionClass": "high-impact",
+    "leastPrivilegeScope": "synthetic-case-summary"
+  },
+  "governance": {
+    "policyProfile": "agentops-demo-governed",
+    "approvalId": null,
+    "budgetLimit": 10,
+    "budgetConsumed": 2
+  }
+}

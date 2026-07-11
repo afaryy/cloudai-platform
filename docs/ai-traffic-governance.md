@@ -4,7 +4,7 @@ AI traffic governance extends beyond LLM prompts. Future AI systems may include 
 
 In this project, the GenAI / LLM Gateway is the first model-access sub-layer. The broader AI Traffic Gateway / Governance Layer is a future governance layer for non-model traffic such as agent communication, tool calls, retrieval operations, workflow steps, integrations, and controlled data access.
 
-Track D is research-only in the initial roadmap. It defines questions and governance shape, but it does not implement an agent runtime, traffic proxy, policy engine, or tool-call enforcement layer.
+P6a adds a small local, deterministic mock authorisation decision for agent-action metadata. It demonstrates how a future traffic governance layer can return a policy verdict, approval requirement, budget state, and audit identifiers without becoming an agent runtime, traffic proxy, or enforcement integration.
 
 ## Layered Architecture
 
@@ -53,8 +53,10 @@ The GenAI / LLM Gateway handles model access. The broader traffic governance lay
 - Is human approval required before the action continues?
 - Does the flow need to be stopped, rate-limited, or escalated?
 
-## First Iteration Boundary
+## P6a Mock Decision Boundary
 
-This document defines the governance shape only. No runtime policy engine, agent gateway, retrieval service, traffic proxy, or tool-call enforcement is implemented in the foundation phase.
+`POST /agent-actions/authorize` evaluates synthetic metadata only. It applies a fixed local allowlist and simple decision order for session lifecycle, budget exhaustion, tool permission, and human approval. Its response is an evidence contract, not an executed action.
+
+P6a does not install or scan agent skills, invoke MCP tools, execute tool calls, contact models or cloud providers, persist audit records, proxy traffic, or enforce policy outside the local mock process. Capability governance (registry, signing, scanning, evaluation evidence, and lifecycle) remains a later P6 sub-slice.
 
 The RAG governance contract under `shared/schemas/rag-governance/` is a mock contract for retrieval evidence. It defines how future RAG flows can expose data classification, allowed knowledge base boundaries, citation checks, egress decisions, and audit metadata before any retrieval runtime is added.

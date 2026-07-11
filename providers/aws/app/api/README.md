@@ -10,6 +10,7 @@ It runs in mock mode only. It returns synthetic responses and does not call Amaz
 - `GET /rag/status`: returns local RAG governance workflow status and current boundaries.
 - `GET /rag/artifacts`: returns metadata for RAG contracts, sample outputs, and walkthrough documentation.
 - `POST /rag/query`: accepts a governed RAG request and returns a synthetic governed RAG response.
+- `POST /agent-actions/authorize`: evaluates metadata-only mock AgentOps policy and returns a deterministic authorisation decision.
 - `POST /chat`: accepts a prompt and returns a synthetic model response with request metadata.
 
 ## Chat Request
@@ -61,6 +62,11 @@ Lightweight JSON schemas document the current mock API request, response, and er
 - `shared/schemas/mock-genai-api/error-response.schema.json`
 - `shared/schemas/rag-governance/rag-status.schema.json`
 - `shared/schemas/rag-governance/rag-artifacts.schema.json`
+- `shared/schemas/agentops-governance/agent-session.schema.json`
+- `shared/schemas/agentops-governance/tool-authorisation-request.schema.json`
+- `shared/schemas/agentops-governance/tool-authorisation-decision.schema.json`
+- `shared/schemas/agentops-governance/human-approval.schema.json`
+- `shared/schemas/agentops-governance/agent-action-audit-event.schema.json`
 
 These schemas are documentation and test fixtures in this phase. Runtime schema validation can be added later if the API needs stricter client compatibility checks.
 
@@ -133,6 +139,28 @@ curl -s http://localhost:3000/rag/query \
 
 The endpoint returns a deterministic synthetic response with citation metadata, egress decision, and audit evidence. It does not perform retrieval, execute Python, call a model, create embeddings, or use a vector index.
 
+## Mock AgentOps Authorisation
+
+`POST /agent-actions/authorize` is a deterministic, metadata-only policy decision point for the P6a AgentOps demonstration.
+
+```bash
+curl -s http://localhost:3000/agent-actions/authorize \
+  -H "content-type: application/json" \
+  -d @../../../../shared/examples/agentops-governance/agent-action.allowed-read.json
+```
+
+The request contract identifies a synthetic agent session, requested tool, action class, least-privilege scope, approval reference, and synthetic budget state. It intentionally rejects `toolInput` and any other undeclared payload fields.
+
+The local policy returns one of `allow`, `deny`, `approval-required`, or `paused` using this fixed order:
+
+1. inactive sessions are paused;
+2. exhausted synthetic budgets are denied and reported as paused;
+3. tools outside the local allowlist are denied;
+4. unapproved `write` or `high-impact` actions require human approval;
+5. approved `write` or `high-impact` actions and approved `read` actions are allowed.
+
+This endpoint does not install a skill, call a tool, invoke a model, execute a shell command, contact a provider, persist evidence, or enforce policy outside the local mock response. Its audit fields are synthetic decision evidence only.
+
 ## Demo Fixtures
 
 Synthetic demo fixtures are available under `shared/examples/mock-genai-api/`.
@@ -146,6 +174,7 @@ They show:
 - a mock eval report
 - RAG governance metadata responses
 - a governed RAG request and response
+- AgentOps authorisation requests for allowed, approval-required, denied-tool, and budget-exhausted paths
 
 The test suite checks these examples against the documented contract shapes so the demo material stays aligned with the mock API.
 
@@ -161,6 +190,7 @@ The evals check:
 - response metadata presence
 - request log safety for prompt and request body omission
 - governed RAG query citation, egress decision, audit evidence, and no query text echo
+- AgentOps policy verdict, budget metadata, audit metadata, and no tool execution
 
 This is a lightweight mock-mode evaluation pattern. It is not a model judge, benchmark suite, or provider-hosted evaluation service.
 

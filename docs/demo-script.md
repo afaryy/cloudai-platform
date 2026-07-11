@@ -66,6 +66,7 @@ Highlight:
 - `GET /health`
 - `POST /chat`
 - `POST /rag/query`
+- `POST /agent-actions/authorize`
 - mock Bedrock client interface
 - default mock policy profile
 - request metadata
@@ -133,7 +134,17 @@ Talk track:
 
 The mock RAG query endpoint demonstrates the governed response contract. It returns synthetic citation metadata, retrieval metadata, an egress decision, and audit evidence without performing retrieval, executing Python, calling a model, creating embeddings, or using a vector index.
 
-### 7. Show The Runtime Request Flow
+### 7. Show The Mock AgentOps Decision
+
+Open `shared/examples/agentops-governance/agent-action.allowed-read.json` and `providers/aws/app/api/src/lib/agentOpsPolicy.ts`.
+
+Talk track:
+
+The AgentOps endpoint takes synthetic identity, requested tool, action class, least-privilege scope, approval reference, and budget metadata. It returns a deterministic `allow`, `deny`, `approval-required`, or `paused` verdict with audit identifiers. It does not execute a tool, invoke a model, install a skill, or call a cloud service.
+
+Point out the four additional fixtures for approval-required, denied-tool, and exhausted-budget paths. They show runtime governance as a testable contract rather than a live agent runtime.
+
+### 8. Show The Runtime Request Flow
 
 Open `docs/cloudai-platform-solution-walkthrough.md`.
 
@@ -153,7 +164,7 @@ Client
 
 Explain that this is the first practical slice of the GenAI / LLM Gateway. It is intentionally small, but it already shows where policy, model access, token controls, cost signals, and observability hooks fit.
 
-### 8. Show The Guardrail Path
+### 9. Show The Guardrail Path
 
 Open `shared/examples/mock-genai-api/chat-error-token-budget.json`.
 
@@ -163,7 +174,7 @@ The token budget guardrail is a local example of gateway-level control. In a lat
 
 Keep this framed as a pattern, not an operated implementation.
 
-### 9. Show What Is Deferred
+### 10. Show What Is Deferred
 
 Open `docs/cloudai-platform-solution-walkthrough.md`, then the “What Is Intentionally Mock-Only” and “Future Deployment Path” sections.
 
@@ -206,6 +217,12 @@ curl -s http://localhost:3000/chat \
 curl -s http://localhost:3000/rag/query \
   -H "content-type: application/json" \
   -d @../../../../shared/examples/rag-governance/rag-request.allowed.json
+```
+
+```bash
+curl -s http://localhost:3000/agent-actions/authorize \
+  -H "content-type: application/json" \
+  -d @../../../../shared/examples/agentops-governance/agent-action.allowed-read.json
 ```
 
 Stop the local server when finished.

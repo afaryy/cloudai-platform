@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/cloudai-platform/schemas/agentops-governance/agent-session.schema.json",
+  "title": "Mock Agent Session",
+  "description": "Metadata-only session identity and lifecycle contract for the public-safe AgentOps demonstration.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["sessionId", "agentId", "owner", "delegatedUser", "riskTier", "status"],
+  "properties": {
+    "sessionId": { "type": "string", "minLength": 1 },
+    "agentId": { "type": "string", "minLength": 1 },
+    "owner": { "type": "string", "minLength": 1 },
+    "delegatedUser": { "type": "string", "minLength": 1 },
+    "riskTier": { "type": "string", "enum": ["standard", "high"] },
+    "status": { "type": "string", "enum": ["active", "paused", "terminated"] }
+  }
+}

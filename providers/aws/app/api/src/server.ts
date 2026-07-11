@@ -12,6 +12,7 @@ import { getHealth } from "./routes/health.js";
 import { postChat } from "./routes/chat.js";
 import { getRagArtifacts, getRagStatus } from "./routes/ragMetadata.js";
 import { postRagQuery } from "./routes/ragQuery.js";
+import { postAgentActionAuthorisation } from "./routes/agentActionAuthorisation.js";
 
 const DEFAULT_PORT = 3000;
 const MAX_BODY_BYTES = 1_000_000;
@@ -79,6 +80,21 @@ export function createMockApiServer(
           statusCode: 200,
           durationMs: Date.now() - startedAt,
           timestamp: ragQueryResponse.audit.evaluatedAt
+        }));
+        return;
+      }
+
+      if (method === "POST" && route === "/agent-actions/authorize") {
+        const body = await readJsonBody(request);
+        const decision = postAgentActionAuthorisation(body);
+        writeJson(response, 200, decision);
+        writeRequestLog(logger, buildRequestLogEvent({
+          requestId: decision.requestId,
+          method,
+          route,
+          statusCode: 200,
+          durationMs: Date.now() - startedAt,
+          timestamp: decision.audit.recordedAt
         }));
         return;
       }
