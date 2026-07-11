@@ -64,3 +64,56 @@ export type RagArtifactsResponse = {
   workflow: "local-rag-governance";
   artifacts: RagArtifactMetadata[];
 };
+
+export type RagGovernanceRequest = {
+  requestId: string;
+  query: string;
+  dataClassification: "synthetic-public" | "synthetic-restricted";
+  retrieval: {
+    allowedKnowledgeBases: string[];
+    maxDocuments: number;
+    requiredMetadata: string[];
+  };
+  governance: {
+    requireCitations: boolean;
+    allowExternalEgress: boolean;
+    policyProfile: string;
+  };
+};
+
+export type RagGovernanceResponse = {
+  requestId: string;
+  response: {
+    answer: string;
+    citations: Array<{
+      sourceId: string;
+      sourceTitle: string;
+      citationUrl: string;
+    }>;
+  };
+  retrieval: {
+    knowledgeBase: string;
+    documentsConsidered: number;
+    documentsReturned: number;
+    sources: Array<{
+      sourceId: string;
+      sourceTitle: string;
+      citationUrl: string;
+      classification: "synthetic-public" | "synthetic-restricted";
+      retrievedAt: string;
+    }>;
+  };
+  governance: {
+    citationRequirementMet: boolean;
+    egressDecision: {
+      allowed: boolean;
+      scope: "controlled_response" | "external_network";
+      reason: "controlled_response_allowed_with_synthetic_sources" | "external_egress_not_allowed_for_demo_policy";
+    };
+  };
+  audit: {
+    requestId: string;
+    policyProfile: string;
+    evaluatedAt: string;
+  };
+};

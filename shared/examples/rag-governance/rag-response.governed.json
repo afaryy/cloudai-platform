@@ -28,8 +28,8 @@
     "citationRequirementMet": true,
     "egressDecision": {
       "allowed": true,
-      "scope": "internal_response",
-      "reason": "internal_response_allowed_with_synthetic_sources"
+      "scope": "controlled_response",
+      "reason": "controlled_response_allowed_with_synthetic_sources"
     }
   },
   "audit": {

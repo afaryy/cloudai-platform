@@ -24,8 +24,8 @@ test("governed RAG response fixture matches the response contract", async () => 
   assertMatchesSchema(fixture, schema);
   assert.equal(fixture.response.citations.length > 0, true);
   assert.equal(fixture.governance.egressDecision.allowed, true);
-  assert.equal(fixture.governance.egressDecision.scope, "internal_response");
-  assert.equal(fixture.governance.egressDecision.reason, "internal_response_allowed_with_synthetic_sources");
+  assert.equal(fixture.governance.egressDecision.scope, "controlled_response");
+  assert.equal(fixture.governance.egressDecision.reason, "controlled_response_allowed_with_synthetic_sources");
   assert.equal(fixture.retrieval.sources[0].citationUrl, fixture.response.citations[0].citationUrl);
   assert.equal(typeof fixture.audit.requestId, "string");
 });

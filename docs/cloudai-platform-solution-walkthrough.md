@@ -51,6 +51,7 @@ It currently supports:
 - `GET /health`
 - `GET /rag/status`
 - `GET /rag/artifacts`
+- `POST /rag/query`
 - `POST /chat`
 - mock Bedrock client interface
 - synthetic model responses
@@ -62,6 +63,7 @@ It currently supports:
 - demo request, response, error, and request log fixtures
 - local mock eval harness
 - RAG governance metadata endpoints
+- mock governed RAG response endpoint
 - local tests
 
 The mock API does not call Amazon Bedrock, deploy cloud resources, or require cloud account setup.
@@ -105,7 +107,8 @@ The repository has been built incrementally through small PRs.
 | #15-#21 | Local RAG workflow | Added Python ingest, chunk export, evaluation dataset preparation, synthetic mock response scoring, sample outputs, and a local RAG demo walkthrough. |
 | #22 | Demo index | Added an examples index that links the mock GenAI API and local RAG walkthrough. |
 | #23 | RAG documentation alignment | Aligned README and solution docs around the local RAG workflow and TypeScript/Python language boundary. |
-| Current | RAG governance API metadata | Adds mock API endpoints and contracts that expose local RAG workflow artifact metadata without adding retrieval runtime. |
+| #24 | RAG governance API metadata | Added mock API endpoints and contracts that expose local RAG workflow artifact metadata without adding retrieval runtime. |
+| Current | Mock governed RAG query | Adds a mock governed RAG response endpoint using existing contracts, without adding retrieval runtime or provider calls. |
 
 ## P0 Foundation Summary
 
@@ -178,7 +181,8 @@ A concise demo story:
 11. Show the local mock eval harness and eval result fixture as lightweight LLMOps evidence.
 12. Open `examples/README.md` and show the local RAG walkthrough.
 13. Call `/rag/status` and `/rag/artifacts` to show how the API describes local RAG contracts and sample outputs.
-14. Explain how AWS deployment and real Bedrock integration are future opt-in phases.
+14. Call `/rag/query` with the governed RAG request fixture and show the synthetic governed response.
+15. Explain how AWS deployment and real Bedrock integration are future opt-in phases.
 
 ## Future Deployment Path
 
