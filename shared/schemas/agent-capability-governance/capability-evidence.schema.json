@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/cloudai-platform/schemas/agent-capability-governance/capability-evidence.schema.json",
+  "title": "Mock Capability Governance Evidence",
+  "description": "Synthetic scan, evaluation, and integrity evidence; no real scan or signature verification is claimed.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["capabilityId", "scan", "evaluation", "integrity", "evidenceReferences"],
+  "properties": {
+    "capabilityId": { "type": "string", "minLength": 1 },
+    "scan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "summary"],
+      "properties": {
+        "status": { "type": "string", "enum": ["passed", "failed", "not-run"] },
+        "summary": { "type": "string", "minLength": 1 }
+      }
+    },
+    "evaluation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "summary"],
+      "properties": {
+        "status": { "type": "string", "enum": ["passed", "failed", "not-run"] },
+        "summary": { "type": "string", "minLength": 1 }
+      }
+    },
+    "integrity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "summary"],
+      "properties": {
+        "status": { "type": "string", "enum": ["not-implemented"] },
+        "summary": { "type": "string", "minLength": 1 }
+      }
+    },
+    "evidenceReferences": { "type": "array", "items": { "type": "string" } }
+  }
+}

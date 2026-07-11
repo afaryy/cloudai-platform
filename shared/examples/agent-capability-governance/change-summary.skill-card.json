@@ -1,0 +1,11 @@
+{
+  "capabilityId": "synthetic-change-summary",
+  "purpose": "Summarise a synthetic change set for a human reviewer.",
+  "intendedUsers": ["synthetic-agent", "human-reviewer"],
+  "inputCategories": ["synthetic-change-set"],
+  "outputCategories": ["synthetic-change-summary"],
+  "dataFlow": "Synthetic public change metadata remains within the reviewed response boundary.",
+  "knownRisks": ["Misleading summary"],
+  "mitigations": ["Human review", "No write permission"],
+  "references": ["https://example.com/cloudai-platform/change-summary"]
+}

@@ -4,7 +4,7 @@ This page summarizes the current public project state. Local planning notes and 
 
 ## Current Milestone
 
-The local mock GenAI gateway and governed RAG evidence path are complete for the current demo scope.
+The local mock GenAI gateway, governed RAG evidence path, and P6a mock AgentOps decision path are complete for the current demo scope.
 
 The repository can now demonstrate:
 
@@ -18,6 +18,8 @@ The repository can now demonstrate:
 - Python local RAG ingest, chunking, eval dataset, and scoring workflow
 - RAG metadata endpoints
 - mock governed RAG query response with citation, egress decision, and audit evidence
+- mock AgentOps authorisation decisions for allowed, denied, approval-required, and paused actions
+- capability-governance contracts for approved, blocked, and approval-required reusable assets
 
 ## Completed For Mock Scope
 
@@ -31,6 +33,8 @@ The repository can now demonstrate:
 | Local RAG workflow | Complete | `examples/rag-pattern/python/` |
 | RAG API metadata | Complete | `GET /rag/status` and `GET /rag/artifacts` |
 | Mock governed RAG query | Complete | `POST /rag/query` |
+| Mock AgentOps decision | Complete | `POST /agent-actions/authorize` |
+| Capability governance contracts | Complete | `shared/schemas/agent-capability-governance/` and `shared/examples/agent-capability-governance/` |
 
 ## Intentionally Deferred
 
@@ -51,17 +55,9 @@ These should remain opt-in future work with explicit cost, cleanup, and governan
 
 ## Recommended Next Slice
 
-The next public slice should be an AgentOps / AI Traffic Governance contract pack.
+The next public slice after capability admission is **P6c RAG Knowledge Lifecycle**: source provenance, owner, classification, authorised knowledge boundaries, retention, review, and `active | paused | retired` state.
 
-Keep it contract-first and mock-only:
-
-- agent session metadata contract
-- tool permission decision contract
-- audit and trace metadata example
-- human approval boundary example
-- token, quota, and cost metadata example
-
-Do not add a runtime agent, tool executor, provider call, cloud deployment, or traffic proxy in the first AgentOps increment.
+Keep it contract-first and mock-only. The key invariant is that a retired source cannot appear in a new governed RAG response. Do not add a real retrieval runtime, provider call, cloud deployment, or sensitive-data workflow.
 
 ## Portfolio Positioning
 

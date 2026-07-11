@@ -13,8 +13,8 @@ test("runMockGatewayEvals reports all default mock gateway eval cases as passed"
   const report = await runMockGatewayEvals();
 
   assert.equal(report.mode, "mock");
-  assert.equal(report.totalCases, 7);
-  assert.equal(report.passedCases, 7);
+  assert.equal(report.totalCases, 8);
+  assert.equal(report.passedCases, 8);
   assert.equal(report.failedCases, 0);
   assert.deepEqual(
     report.results.map((result) => result.id),
@@ -25,7 +25,8 @@ test("runMockGatewayEvals reports all default mock gateway eval cases as passed"
       "response-metadata-present",
       "request-log-omits-prompt",
       "governed-rag-query-contract",
-      "agentops-runtime-decision-contract"
+      "agentops-runtime-decision-contract",
+      "capability-admission-governance"
     ]
   );
   assert.ok(report.results.every((result) => result.passed));
@@ -59,6 +60,16 @@ test("mock gateway evals include AgentOps runtime decision evidence", async () =
   assert.equal(agentOpsEval.category, "contract");
   assert.equal(agentOpsEval.passed, true);
   assert.match(agentOpsEval.evidence, /policy verdict, audit metadata, and no tool execution/i);
+});
+
+test("mock gateway evals include capability admission evidence", async () => {
+  const report = await runMockGatewayEvals();
+  const capabilityEval = report.results.find((result) => result.id === "capability-admission-governance");
+
+  assert.ok(capabilityEval);
+  assert.equal(capabilityEval.category, "contract");
+  assert.equal(capabilityEval.passed, true);
+  assert.match(capabilityEval.evidence, /approved, blocked, and approval-required/i);
 });
 
 test("mock gateway eval report fixture matches the current report shape", async () => {

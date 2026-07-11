@@ -1,0 +1,11 @@
+{
+  "capabilityId": "synthetic-knowledge-search",
+  "purpose": "Retrieve synthetic public knowledge metadata.",
+  "intendedUsers": ["synthetic-agent"],
+  "inputCategories": ["synthetic-public-query"],
+  "outputCategories": ["synthetic-public-citation"],
+  "dataFlow": "Synthetic public knowledge remains within the governed response boundary.",
+  "knownRisks": ["Ungrounded result"],
+  "mitigations": ["Citation requirement", "Read-only scope"],
+  "references": ["https://example.com/cloudai-platform/knowledge-search"]
+}

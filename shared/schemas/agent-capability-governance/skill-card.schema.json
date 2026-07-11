@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/cloudai-platform/schemas/agent-capability-governance/skill-card.schema.json",
+  "title": "Mock Capability Skill Card",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["capabilityId", "purpose", "intendedUsers", "inputCategories", "outputCategories", "dataFlow", "knownRisks", "mitigations", "references"],
+  "properties": {
+    "capabilityId": { "type": "string", "minLength": 1 },
+    "purpose": { "type": "string", "minLength": 1 },
+    "intendedUsers": { "type": "array", "items": { "type": "string" } },
+    "inputCategories": { "type": "array", "items": { "type": "string" } },
+    "outputCategories": { "type": "array", "items": { "type": "string" } },
+    "dataFlow": { "type": "string", "minLength": 1 },
+    "knownRisks": { "type": "array", "items": { "type": "string" } },
+    "mitigations": { "type": "array", "items": { "type": "string" } },
+    "references": { "type": "array", "items": { "type": "string" } }
+  }
+}

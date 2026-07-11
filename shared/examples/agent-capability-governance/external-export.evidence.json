@@ -1,0 +1,7 @@
+{
+  "capabilityId": "synthetic-external-export",
+  "scan": { "status": "failed", "summary": "Synthetic review flagged external network write and workspace access." },
+  "evaluation": { "status": "not-run", "summary": "Evaluation is not run after the synthetic scan failure." },
+  "integrity": { "status": "not-implemented", "summary": "No signature verification is implemented in this mock reference." },
+  "evidenceReferences": ["https://example.com/cloudai-platform/external-export/evidence"]
+}

@@ -1,0 +1,9 @@
+{
+  "capabilityId": "synthetic-external-export",
+  "decision": "blocked",
+  "rationale": "Synthetic evidence records unapproved external egress and broad file access.",
+  "reviewerRole": "platform-governance-reviewer",
+  "decidedAt": "2026-07-11T00:00:00.000Z",
+  "reviewBy": "2026-10-11T00:00:00.000Z",
+  "evidenceReferences": ["https://example.com/cloudai-platform/external-export/evidence"]
+}

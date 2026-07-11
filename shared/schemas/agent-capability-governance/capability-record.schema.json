@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/cloudai-platform/schemas/agent-capability-governance/capability-record.schema.json",
+  "title": "Mock Agent Capability Record",
+  "description": "A metadata-only registry entry for a reusable agent capability.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["capabilityId", "name", "version", "ownerRole", "source", "declaredPermissions", "dependencies", "lifecycleStatus"],
+  "properties": {
+    "capabilityId": { "type": "string", "minLength": 1 },
+    "name": { "type": "string", "minLength": 1 },
+    "version": { "type": "string", "minLength": 1 },
+    "ownerRole": { "type": "string", "minLength": 1 },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["classification", "reference"],
+      "properties": {
+        "classification": { "type": "string", "enum": ["synthetic-public"] },
+        "reference": { "type": "string", "minLength": 1 }
+      }
+    },
+    "declaredPermissions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["network", "fileSystem", "tools"],
+      "properties": {
+        "network": { "type": "array", "items": { "type": "string" } },
+        "fileSystem": { "type": "array", "items": { "type": "string" } },
+        "tools": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "dependencies": { "type": "array", "items": { "type": "string" } },
+    "lifecycleStatus": { "type": "string", "enum": ["draft", "approved", "blocked", "retired"] }
+  }
+}

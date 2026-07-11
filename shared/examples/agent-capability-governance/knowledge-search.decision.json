@@ -1,0 +1,9 @@
+{
+  "capabilityId": "synthetic-knowledge-search",
+  "decision": "approved",
+  "rationale": "Synthetic evidence supports a narrow read-only capability.",
+  "reviewerRole": "platform-governance-reviewer",
+  "decidedAt": "2026-07-11T00:00:00.000Z",
+  "reviewBy": "2026-10-11T00:00:00.000Z",
+  "evidenceReferences": ["https://example.com/cloudai-platform/knowledge-search/evidence"]
+}

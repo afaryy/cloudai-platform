@@ -1,0 +1,10 @@
+{
+  "capabilityId": "synthetic-change-summary",
+  "name": "Synthetic Change Summary",
+  "version": "1.0.0",
+  "ownerRole": "platform-capability-owner",
+  "source": { "classification": "synthetic-public", "reference": "https://example.com/cloudai-platform/change-summary" },
+  "declaredPermissions": { "network": [], "fileSystem": ["synthetic-change-set:read"], "tools": ["change-summary:read"] },
+  "dependencies": [],
+  "lifecycleStatus": "draft"
+}

@@ -1,0 +1,7 @@
+{
+  "capabilityId": "synthetic-knowledge-search",
+  "scan": { "status": "passed", "summary": "Synthetic static review found no declared high-risk permission." },
+  "evaluation": { "status": "passed", "summary": "Synthetic evaluation confirmed citation-oriented read-only behavior." },
+  "integrity": { "status": "not-implemented", "summary": "No signature verification is implemented in this mock reference." },
+  "evidenceReferences": ["https://example.com/cloudai-platform/knowledge-search/evidence"]
+}
