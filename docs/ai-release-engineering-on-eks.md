@@ -2,7 +2,7 @@
 
 This track explores release engineering for AI services on Amazon EKS.
 
-The default path is public-safe and mock-first. It shows how an enterprise platform team would package, promote, observe, roll back, and govern AI platform components on Kubernetes without requiring a real cluster. A separate personal AWS sandbox path can be used later to prove practical EKS skills with synthetic workloads, explicit budget controls, and teardown guidance.
+The default path is synthetic-only and mock-first. It shows how an enterprise platform team would package, promote, observe, roll back, and govern AI platform components on Kubernetes without requiring a real cluster. A separate personal AWS sandbox path can be used later to prove practical EKS skills with synthetic workloads, explicit budget controls, and teardown guidance.
 
 ## Phase Split
 
@@ -50,7 +50,7 @@ ECS can be a useful simpler runtime pattern for API services, but P4 focuses on 
 
 Placeholder folders exist under `helm/`, `argocd/`, and `providers/aws/infra/terraform/modules/eks/`.
 
-This readiness slice adds public-safe scaffolding for the optional sandbox path:
+This readiness slice adds portfolio-ready scaffolding for the optional sandbox path:
 
 - CloudFormation bootstrap example for Terraform backend and GitHub Actions role/policy.
 - Terraform backend example for `eks-sandbox`.

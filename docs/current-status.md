@@ -64,7 +64,7 @@ The next public slice is **P4 EKS Release Engineering readiness**.
 
 Recommended split:
 
-- **P4a public-safe release engineering:** Helm/Kubernetes examples, probes, rollback notes, resource requests, policy gates, and synthetic deployment metadata.
+- **P4a portfolio-ready release engineering:** Helm/Kubernetes examples, probes, rollback notes, resource requests, policy gates, and synthetic deployment metadata.
 - **P4b optional personal AWS EKS sandbox POC:** Terraform-managed sandbox using a personal AWS account, S3 and DynamoDB backend, GitHub Actions OIDC, explicit budget, manual approval, synthetic workload only, and teardown guidance.
 - **P4c GitOps / Argo CD pattern:** application manifest pattern, promotion notes, and audit metadata for release decisions.
 - **Later P4d/P5 extension:** optional Bedrock Guardrails or AgentCore-aligned patterns after EKS, Terraform, and budget controls are established.

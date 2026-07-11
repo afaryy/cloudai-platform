@@ -1,6 +1,6 @@
 # AWS Bootstrap For Terraform And GitHub OIDC
 
-This folder contains public-safe bootstrap examples for a future personal AWS EKS sandbox.
+This folder contains portfolio-ready bootstrap examples for a future personal AWS EKS sandbox.
 
 The bootstrap layer exists because Terraform needs a backend before it can safely manage the EKS sandbox. A small CloudFormation stack can create the shared prerequisites:
 

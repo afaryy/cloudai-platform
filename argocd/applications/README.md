@@ -1,6 +1,6 @@
 # Argo CD Applications
 
-This folder will hold public-safe GitOps application examples for P4c.
+This folder will hold portfolio-ready GitOps application examples for P4c.
 
 The first Argo CD example should show:
 

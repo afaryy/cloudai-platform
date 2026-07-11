@@ -106,14 +106,14 @@ Future scope:
 
 ## Track B: AI Release Engineering on EKS
 
-Track B explores release engineering for AI services on Amazon EKS. It is split into a public-safe default path and an optional personal sandbox path so the portfolio can show real platform-engineering judgment without accidentally turning the public repository into a live cloud deployment.
+Track B explores release engineering for AI services on Amazon EKS. It is split into a synthetic-only default path and an optional personal sandbox path so the portfolio can show real platform-engineering judgment without accidentally turning the public repository into a live cloud deployment.
 
 Current scope:
 
 - Placeholder Helm chart folders.
 - Placeholder Argo CD application folder.
 - EKS module placeholder.
-- P4a public-safe release-engineering plan: Helm/Kubernetes packaging, probes, rollout/rollback notes, resource boundaries, and synthetic workload metadata.
+- P4a portfolio-ready release-engineering plan: Helm/Kubernetes packaging, probes, rollout/rollback notes, resource boundaries, and synthetic workload metadata.
 - P4b optional personal AWS EKS sandbox plan: Terraform-managed sandbox, explicit budget, manual approval, synthetic workload only, and teardown guidance.
 - P4c GitOps plan: Argo CD application pattern and release-promotion story.
 

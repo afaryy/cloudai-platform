@@ -59,4 +59,4 @@ The CDAO is an operating-model and governance role, not a service deployed by th
 
 ## Current State
 
-The repository contains public-safe scaffold examples only. No Terraform apply is performed, no live AWS resources are required, and no account-specific values should be committed.
+The repository contains synthetic-only scaffold examples. No Terraform apply is performed, no live AWS resources are required, and no account-specific values should be committed.

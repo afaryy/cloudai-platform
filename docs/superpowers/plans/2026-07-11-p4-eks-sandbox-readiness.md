@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Prepare the public-safe P4 release-engineering path for an optional personal AWS EKS sandbox without deploying cloud resources or committing account-specific data.
+**Goal:** Prepare the synthetic-only P4 release-engineering path for an optional personal AWS EKS sandbox without deploying cloud resources or committing account-specific data.
 
 **Architecture:** Keep the repository mock-first while documenting a clean progression from local Helm/Kubernetes examples to an optional Terraform-managed EKS sandbox. Use CloudFormation only as a bootstrap pattern for Terraform backend and GitHub Actions OIDC role/policy, reusing an existing account-level GitHub OIDC provider.
 
@@ -35,7 +35,7 @@
 Edit the P4 sections so they describe:
 
 ```text
-P4a: public-safe Helm/Kubernetes release-engineering examples.
+P4a: portfolio-ready Helm/Kubernetes release-engineering examples.
 P4b: optional personal AWS EKS sandbox POC with budget, teardown, and synthetic workload boundaries.
 P4c: Argo CD / GitOps promotion pattern.
 P4d/P5 later: optional Bedrock Guardrails / AgentCore-aligned extension.
@@ -62,7 +62,7 @@ Expected: only placeholder-safe references such as `ACCOUNT_ID` if they are expl
 
 **Interfaces:**
 - Consumes: existing empty Terraform placeholder structure.
-- Produces: public-safe bootstrap and backend examples for a future EKS sandbox.
+- Produces: portfolio-ready bootstrap and backend examples for a future EKS sandbox.
 
 - [ ] **Step 1: Add CloudFormation bootstrap template**
 
@@ -156,4 +156,4 @@ git diff --stat
 git diff --check
 ```
 
-Expected: no whitespace errors; only public-safe docs and examples changed.
+Expected: no whitespace errors; only synthetic-only docs and examples changed.

@@ -1,6 +1,6 @@
 # Helm: AI API Service
 
-This folder will hold the public-safe Helm release-engineering example for the mock AI API service.
+This folder will hold the synthetic-only Helm release-engineering example for the mock AI API service.
 
 The first chart should demonstrate platform controls rather than production complexity:
 

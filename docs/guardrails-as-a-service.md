@@ -55,7 +55,7 @@ The local policy is deterministic:
 3. `high-risk-action` returns `approval-required`.
 4. `none` returns `allow`.
 
-This is not a production safety classifier. It is a public-safe contract example for how a platform control could represent a safety verdict.
+This is not a production safety classifier. It is a synthetic-only contract example for how a platform control could represent a safety verdict.
 
 ## Relationship To Other Controls
 

@@ -14,7 +14,7 @@ AWS is the first implementation provider for `cloudai-platform`.
 
 ## Current State
 
-This folder contains public-safe examples only. No Terraform apply, credentials, kubeconfig, state files, tfvars, plan files, or live deployment outputs are committed.
+This folder contains synthetic-only examples. No Terraform apply, credentials, kubeconfig, state files, tfvars, plan files, or live deployment outputs are committed.
 
 ## P4 EKS Sandbox Readiness
 

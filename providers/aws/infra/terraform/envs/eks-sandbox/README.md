@@ -1,6 +1,6 @@
 # EKS Sandbox Terraform Environment
 
-This folder is a public-safe placeholder for a future personal AWS EKS sandbox.
+This folder is a synthetic-only placeholder for a future personal AWS EKS sandbox.
 
 The first implementation should prove release-engineering skills with the smallest useful scope:
 

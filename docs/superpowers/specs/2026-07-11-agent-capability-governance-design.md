@@ -2,7 +2,7 @@
 
 ## Goal
 
-Add a public-safe, mock-first capability governance layer that documents and validates how an enterprise platform can review reusable agent capabilities before they are available to an agent runtime.
+Add a synthetic-only, mock-first capability governance layer that documents and validates how an enterprise platform can review reusable agent capabilities before they are available to an agent runtime.
 
 ## Context
 
@@ -91,4 +91,4 @@ A change-summary capability has a legitimate use case but requires human review 
 - A reader can explain the difference between capability governance and runtime governance from the repository alone.
 - The repository contains a small, provider-neutral, testable contract pack for capability admission.
 - The three governance outcomes are demonstrated with synthetic examples and evaluation evidence.
-- The implementation remains mock-first, public-safe, and independent of external services.
+- The implementation remains mock-first, synthetic-only, and independent of external services.
