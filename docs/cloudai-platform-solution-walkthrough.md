@@ -108,7 +108,9 @@ The repository has been built incrementally through small PRs.
 | #22 | Demo index | Added an examples index that links the mock GenAI API and local RAG walkthrough. |
 | #23 | RAG documentation alignment | Aligned README and solution docs around the local RAG workflow and TypeScript/Python language boundary. |
 | #24 | RAG governance API metadata | Added mock API endpoints and contracts that expose local RAG workflow artifact metadata without adding retrieval runtime. |
-| Current | Mock governed RAG query | Adds a mock governed RAG response endpoint using existing contracts, without adding retrieval runtime or provider calls. |
+| #25 | Mock governed RAG query | Added a mock governed RAG response endpoint using existing contracts, without adding retrieval runtime or provider calls. |
+| #26 | Governed RAG query demo eval | Added eval evidence and demo documentation for the mock governed RAG query endpoint. |
+| Next planned | AgentOps / AI Traffic Governance contracts | Define synthetic agent-session and tool-permission evidence before any runtime agent behavior. |
 
 ## P0 Foundation Summary
 
@@ -128,7 +130,7 @@ P0 deliberately avoided real deployment and application complexity.
 
 P1 turns the architecture into a small working API while keeping the project local and low-cost.
 
-Current P1 capabilities:
+Current mock platform capabilities:
 
 - Health check endpoint
 - Chat endpoint
@@ -142,6 +144,10 @@ Current P1 capabilities:
 - JSON contract schemas
 - Synthetic demo fixtures
 - Local mock eval harness
+- RAG governance request and response contracts
+- RAG governance metadata endpoints
+- Mock governed RAG query endpoint
+- Python local RAG workflow artifacts for chunking, eval dataset preparation, and scoring
 - Local test suite
 - CI test job
 
@@ -188,12 +194,13 @@ A concise demo story:
 
 The project should move toward real resources gradually:
 
-1. Complete P1 mock gateway controls.
-2. Add P2 Terraform validation and AWS foundation skeletons.
-3. Add reviewed IAM, KMS, logging, and API runtime patterns.
-4. Add explicit cost and cleanup guidance.
-5. Add optional small AWS deployment, likely API Gateway + Lambda + CloudWatch first.
-6. Add real Bedrock integration only after cost and governance controls are clearly documented.
+1. Keep the current mock gateway and governed RAG contracts aligned with tests and fixtures.
+2. Add AgentOps / AI Traffic Governance contracts for agent identity, tool permissions, audit evidence, human approval, and cost metadata.
+3. Add P2 Terraform validation and AWS foundation skeletons.
+4. Add reviewed IAM, KMS, logging, and API runtime patterns.
+5. Add explicit cost and cleanup guidance.
+6. Add optional small AWS deployment, likely API Gateway + Lambda + CloudWatch first.
+7. Add real Bedrock integration only after cost and governance controls are clearly documented.
 
 Real AWS deployment should remain opt-in, reviewed, and easy to destroy.
 
@@ -202,6 +209,7 @@ Real AWS deployment should remain opt-in, reviewed, and easy to destroy.
 Useful entry points:
 
 - `README.md` for the high-level portfolio overview.
+- `docs/current-status.md` for the current milestone, deferred runtime work, and next planned slice.
 - `docs/architecture.md` for architecture layers and diagrams.
 - `docs/control-plane.md` for the CloudAI Control Plane concept.
 - `docs/genai-llm-gateway.md` for model-access gateway framing.

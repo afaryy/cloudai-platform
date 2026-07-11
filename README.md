@@ -212,6 +212,9 @@ The API exposes:
 
 - `GET /health`
 - `POST /chat`
+- `GET /rag/status`
+- `GET /rag/artifacts`
+- `POST /rag/query`
 
 The current mock scripts are simple placeholders:
 
@@ -225,14 +228,14 @@ If you do not have a TypeScript runner installed, read the scripts as mock examp
 
 ## Roadmap
 
-Current phase: P2 RAG governance and local AI workflow examples.
+Current milestone: mock GenAI gateway and governed RAG evidence are complete for the local demo scope.
 
 Near-term:
 
-- Complete local mock GenAI / LLM Gateway controls.
-- Keep API contracts, request metadata, token guardrails, and policy profile examples aligned.
-- Add focused tests for mock-mode behavior as each control is introduced.
-- Prepare the next AWS foundation skeletons without enabling real deployment by default.
+- Start a small AgentOps / AI Traffic Governance contract pack.
+- Keep API contracts, request metadata, token guardrails, policy profile examples, and RAG governance examples aligned.
+- Keep the next slice synthetic and contract-first before adding any runtime agent behavior.
+- Continue refreshing status and planning docs as future slices land.
 
 Later:
 
@@ -241,6 +244,8 @@ Later:
 - Add EKS release engineering examples.
 - Expand Azure and GCP provider mapping.
 - Explore agent runtime and LLMOps / GPU sandbox tracks.
+
+See `docs/current-status.md` for the current milestone, deferred runtime work, and recommended next slice.
 
 Detailed planning notes are kept locally. The public repository focuses on the reference architecture, examples, and mock-mode implementation path.
 
