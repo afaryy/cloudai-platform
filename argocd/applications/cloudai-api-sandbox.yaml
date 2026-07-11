@@ -1,0 +1,48 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cloudai-api-sandbox
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: cloudai-api
+    app.kubernetes.io/part-of: cloudai-platform
+    cloudai.openai.com/owner: platform-engineering
+    cloudai.openai.com/environment: sandbox
+    cloudai.openai.com/data-scope: synthetic-only
+    cloudai.openai.com/cost-center: portfolio
+  annotations:
+    cloudai.openai.com/release-boundary: synthetic-only
+    cloudai.openai.com/sync-mode: manual
+    cloudai.openai.com/rollback-runbook: docs/ai-release-engineering-on-eks.md
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/afaryy/cloudai-platform.git
+    targetRevision: main
+    path: helm/ai-api-service
+    helm:
+      releaseName: cloudai-api
+      values: |
+        platformLabels:
+          owner: platform-engineering
+          environment: sandbox
+          dataScope: synthetic-only
+          costCenter: portfolio
+          platformCapability: cloud-ai-platform
+        config:
+          mockMode: "true"
+          providerMode: mock
+          dataScope: synthetic-only
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: cloudai-sandbox
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=false
+      - PruneLast=true
+    retry:
+      limit: 1
+      backoff:
+        duration: 30s
+        factor: 2
+        maxDuration: 2m
