@@ -1,0 +1,27 @@
+{
+  "evidenceId": "p5b_release_note_draft_0001",
+  "evidenceType": "release-note-draft",
+  "phase": "P5",
+  "track": "AI-assisted DevSecOps",
+  "summary": "Synthetic release-note draft describing a docs-and-fixtures slice that adds reviewable AI-assisted DevSecOps evidence without changing runtime behavior.",
+  "safeContext": {
+    "contextSource": "synthetic-release",
+    "containsSensitiveData": false,
+    "containsPromptTranscript": false,
+    "allowedInputs": ["commit summary", "validation commands", "public file paths"]
+  },
+  "humanReview": {
+    "ownerRole": "release-owner",
+    "decision": "needs-changes",
+    "notes": "Release owner must edit final wording before publishing release notes or merging the pull request."
+  },
+  "checks": [
+    { "name": "documentation review", "status": "pass" },
+    { "name": "deployment", "status": "not-applicable" }
+  ],
+  "audit": {
+    "traceId": "trace_p5b_release_note_draft_0001",
+    "recordedAt": "2026-07-11T00:00:00.000Z",
+    "retention": "demo-evidence-only"
+  }
+}

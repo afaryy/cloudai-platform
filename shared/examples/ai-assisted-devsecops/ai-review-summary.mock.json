@@ -1,0 +1,27 @@
+{
+  "evidenceId": "p5b_ai_review_summary_0001",
+  "evidenceType": "ai-review-summary",
+  "phase": "P5",
+  "track": "AI-assisted DevSecOps",
+  "summary": "Synthetic review summary for a documentation and workflow-only change. The AI output is advisory and requires human review before merge.",
+  "safeContext": {
+    "contextSource": "synthetic-pr",
+    "containsSensitiveData": false,
+    "containsPromptTranscript": false,
+    "allowedInputs": ["pull request title", "changed file paths", "synthetic checklist"]
+  },
+  "humanReview": {
+    "ownerRole": "engineer",
+    "decision": "accepted",
+    "notes": "Engineer confirmed the summary matched the changed files and did not include private content."
+  },
+  "checks": [
+    { "name": "yq workflow validation", "status": "pass" },
+    { "name": "mock API tests", "status": "pass" }
+  ],
+  "audit": {
+    "traceId": "trace_p5b_ai_review_summary_0001",
+    "recordedAt": "2026-07-11T00:00:00.000Z",
+    "retention": "demo-evidence-only"
+  }
+}

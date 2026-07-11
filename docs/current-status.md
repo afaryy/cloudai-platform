@@ -26,6 +26,7 @@ The repository can now demonstrate:
 - P4c Argo CD Application pattern for manual GitOps promotion
 - P4d release gates and rollback pattern for synthetic EKS release engineering
 - P5a AI-assisted DevSecOps boundary for advisory AI use, human review, CI/security checks, and release evidence
+- P5b AI-assisted review evidence records for review summaries, threat-model checklists, CI failure summaries, and release-note drafts
 
 ## Completed For Mock Scope
 
@@ -47,6 +48,7 @@ The repository can now demonstrate:
 | P4c Argo CD pattern | Complete | `argocd/applications/cloudai-api-sandbox.yaml` |
 | P4d release gates and rollback | Complete | `docs/eks-release-gates-and-rollback.md` |
 | P5a AI-assisted DevSecOps boundary | Complete | `docs/ai-assisted-devsecops-pattern.md` and `.github/workflows/ai-assisted-devsecops.yml` |
+| P5b AI-assisted review evidence | Complete | `docs/ai-assisted-review-evidence.md`, `shared/schemas/ai-assisted-devsecops/`, and `shared/examples/ai-assisted-devsecops/` |
 
 ## Intentionally Deferred
 
@@ -69,7 +71,7 @@ These should remain opt-in future work with explicit cost, cleanup, and governan
 
 ## Recommended Next Slice
 
-The current slice has completed the core synthetic **P4 EKS Release Engineering readiness** documentation and the first **P5 AI-assisted DevSecOps** boundary.
+The current slice has completed the core synthetic **P4 EKS Release Engineering readiness** documentation and the **P5 AI-assisted DevSecOps** boundary/evidence path.
 
 Completed P4 split:
 
@@ -80,7 +82,6 @@ Completed P4 split:
 Recommended next choices:
 
 - **P4b optional personal AWS EKS sandbox POC:** Terraform-managed sandbox using a personal AWS account, S3 and DynamoDB backend, GitHub Actions OIDC, explicit budget, manual approval, synthetic workload only, and teardown guidance.
-- **P5b AI-assisted review evidence:** synthetic checklist examples for AI-assisted code review, threat-model prompts, CI failure summaries, and release notes that remain human-reviewed.
 - **P6 AI Traffic Governance:** runtime AgentOps contract pack for agent identity, tool permissions, policy verdicts, human approval, traceability, budgets, and pause/terminate state.
 
 The repository should not perform a real cloud deployment by default. Any personal sandbox work must keep account identifiers, state, kubeconfig, plan files, tfvars, credentials, and live endpoint details out of git.

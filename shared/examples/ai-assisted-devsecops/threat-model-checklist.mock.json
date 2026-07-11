@@ -1,0 +1,27 @@
+{
+  "evidenceId": "p5b_threat_model_checklist_0001",
+  "evidenceType": "threat-model-checklist",
+  "phase": "P5",
+  "track": "AI-assisted DevSecOps",
+  "summary": "Synthetic threat-model checklist for an AI-assisted delivery change, focused on safe context, review gates, and prohibited committed files.",
+  "safeContext": {
+    "contextSource": "synthetic-pr",
+    "containsSensitiveData": false,
+    "containsPromptTranscript": false,
+    "allowedInputs": ["control names", "risk categories", "test names"]
+  },
+  "humanReview": {
+    "ownerRole": "security-reviewer",
+    "decision": "informational",
+    "notes": "Reviewer confirmed that the checklist documents boundaries only and does not approve runtime agent execution."
+  },
+  "checks": [
+    { "name": "secret file pattern scan", "status": "pass" },
+    { "name": "scope boundary checklist", "status": "pass" }
+  ],
+  "audit": {
+    "traceId": "trace_p5b_threat_model_checklist_0001",
+    "recordedAt": "2026-07-11T00:00:00.000Z",
+    "retention": "demo-evidence-only"
+  }
+}

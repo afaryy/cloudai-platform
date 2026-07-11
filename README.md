@@ -129,6 +129,7 @@ Track C documents how AI assistance can support delivery without bypassing engin
 Current scope:
 
 - P5a AI-assisted DevSecOps boundary: advisory AI use only, human ownership, CI/security gates, prohibited-input rules, and auditable release evidence.
+- P5b AI-assisted review evidence: synthetic evidence records for review summaries, threat-model checklists, CI failure summaries, and release-note drafts.
 
 The pattern emphasizes:
 
@@ -138,6 +139,7 @@ The pattern emphasizes:
 - Synthetic examples only.
 - Clear separation between local working notes and public documentation.
 - No autonomous agent execution or deployment by default.
+- Human-owned sign-off for any AI-assisted recommendation.
 
 ## Track D: AI Traffic Gateway and Kubernetes-Native Agent Runtime Exploration
 
@@ -242,7 +244,7 @@ If you do not have a TypeScript runner installed, read the scripts as mock examp
 
 ## Roadmap
 
-Current milestone: mock GenAI gateway, governed RAG evidence, AgentOps decisions, capability governance, RAG knowledge lifecycle, Guardrails as a Service, P4 release engineering patterns, and the P5a AI-assisted DevSecOps boundary are complete for the local demo scope.
+Current milestone: mock GenAI gateway, governed RAG evidence, AgentOps decisions, capability governance, RAG knowledge lifecycle, Guardrails as a Service, P4 release engineering patterns, and P5 AI-assisted DevSecOps boundary/evidence are complete for the local demo scope.
 
 Near-term:
 

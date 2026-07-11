@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/cloudai-platform/schemas/ai-assisted-devsecops/review-evidence.schema.json",
+  "title": "Mock AI-Assisted DevSecOps Review Evidence",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "evidenceId",
+    "evidenceType",
+    "phase",
+    "track",
+    "summary",
+    "safeContext",
+    "humanReview",
+    "checks",
+    "audit"
+  ],
+  "properties": {
+    "evidenceId": { "type": "string", "pattern": "^p5b_[a-z0-9_]+$" },
+    "evidenceType": {
+      "type": "string",
+      "enum": ["ai-review-summary", "threat-model-checklist", "ci-failure-summary", "release-note-draft"]
+    },
+    "phase": { "type": "string", "const": "P5" },
+    "track": { "type": "string", "const": "AI-assisted DevSecOps" },
+    "summary": { "type": "string", "minLength": 10 },
+    "safeContext": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["contextSource", "containsSensitiveData", "containsPromptTranscript", "allowedInputs"],
+      "properties": {
+        "contextSource": { "type": "string", "enum": ["synthetic-pr", "synthetic-ci", "synthetic-release"] },
+        "containsSensitiveData": { "type": "boolean", "const": false },
+        "containsPromptTranscript": { "type": "boolean", "const": false },
+        "allowedInputs": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "humanReview": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ownerRole", "decision", "notes"],
+      "properties": {
+        "ownerRole": { "type": "string", "enum": ["engineer", "security-reviewer", "release-owner"] },
+        "decision": { "type": "string", "enum": ["accepted", "needs-changes", "informational"] },
+        "notes": { "type": "string", "minLength": 10 }
+      }
+    },
+    "checks": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "status"],
+        "properties": {
+          "name": { "type": "string" },
+          "status": { "type": "string", "enum": ["pass", "fail", "not-applicable"] }
+        }
+      }
+    },
+    "audit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["traceId", "recordedAt", "retention"],
+      "properties": {
+        "traceId": { "type": "string" },
+        "recordedAt": { "type": "string", "format": "date-time" },
+        "retention": { "type": "string", "enum": ["demo-evidence-only"] }
+      }
+    }
+  }
+}
