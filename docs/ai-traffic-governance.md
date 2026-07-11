@@ -62,3 +62,5 @@ P6a does not install or scan agent skills, invoke MCP tools, execute tool calls,
 P6b adds the separate mock capability-governance contract pack. It records registry metadata, skill cards, declared permissions, synthetic scan and evaluation evidence, integrity status, lifecycle, and admission decisions before a capability is eligible for future runtime use. See `docs/agent-capability-governance.md`. A blocked or approval-required capability is not treated as approved by the capability-admission evaluation.
 
 The RAG governance contract under `shared/schemas/rag-governance/` is a mock contract for retrieval evidence. It defines how future RAG flows can expose data classification, allowed knowledge base boundaries, citation checks, egress decisions, and audit metadata before any retrieval runtime is added.
+
+P6c adds synthetic knowledge-source lifecycle evidence for provenance, owner, classification, authorised knowledge bases, retention, review, and `active | paused | retired` state. The mock route rejects a retired source before it can return a governed response. See `docs/rag-knowledge-lifecycle.md`.

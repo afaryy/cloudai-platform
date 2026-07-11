@@ -41,7 +41,8 @@ export async function runMockGatewayEvals(evaluatedAt = "2026-07-10T00:00:00.000
     evaluateRequestLogOmitsPrompt(),
     evaluateGovernedRagQueryContract(),
     evaluateAgentOpsRuntimeDecisionContract(),
-    await evaluateCapabilityAdmissionGovernance()
+    await evaluateCapabilityAdmissionGovernance(),
+    evaluateRagKnowledgeLifecycleGovernance()
   ];
   const passedCases = results.filter((result) => result.passed).length;
 
@@ -285,6 +286,54 @@ async function evaluateCapabilityAdmissionGovernance(): Promise<MockGatewayEvalR
     evidence: passed
       ? "Synthetic capability evidence preserved approved, blocked, and approval-required outcomes; only the approved asset is eligible for a future runtime action."
       : "Synthetic capability evidence did not preserve the required admission outcomes."
+  };
+}
+
+function evaluateRagKnowledgeLifecycleGovernance(): MockGatewayEvalResult {
+  const activeResponse = postRagQuery({
+    requestId: "rag_lifecycle_eval_0001",
+    query: "Summarize the active synthetic platform handbook.",
+    dataClassification: "synthetic-public",
+    retrieval: {
+      allowedKnowledgeBases: ["demo-platform-handbook"],
+      maxDocuments: 1,
+      requiredMetadata: ["sourceId", "sourceTitle", "classification", "citationUrl", "retrievedAt"]
+    },
+    governance: {
+      requireCitations: true,
+      allowExternalEgress: false,
+      policyProfile: "rag-demo-governed"
+    }
+  });
+  const retiredBlocked = catchesHttpError(
+    () => postRagQuery({
+      requestId: "rag_lifecycle_eval_0002",
+      query: "Summarize the retired synthetic platform handbook.",
+      dataClassification: "synthetic-public",
+      retrieval: {
+        allowedKnowledgeBases: ["legacy-platform-handbook"],
+        maxDocuments: 1,
+        requiredMetadata: ["sourceId", "sourceTitle", "classification", "citationUrl", "retrievedAt"]
+      },
+      governance: {
+        requireCitations: true,
+        allowExternalEgress: false,
+        policyProfile: "rag-demo-governed"
+      }
+    }),
+    "retired_knowledge_source"
+  );
+  const passed = activeResponse.retrieval.sources[0]?.sourceId === "demo-platform-handbook-001"
+    && retiredBlocked;
+
+  return {
+    id: "rag-knowledge-lifecycle-governance",
+    category: "contract",
+    description: "Mock RAG lifecycle allows an active source and blocks a retired source before response generation.",
+    passed,
+    evidence: passed
+      ? "Active source returned governed evidence and retired source cannot produce a governed RAG response."
+      : "RAG lifecycle did not preserve the active and retired source boundary."
   };
 }
 

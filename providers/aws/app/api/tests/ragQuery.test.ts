@@ -116,6 +116,20 @@ test("POST /rag/query rejects unsupported required metadata values", async () =>
   assert.equal(response.body.error.code, "invalid_rag_request");
 });
 
+test("POST /rag/query rejects a retired knowledge source before returning a response", async () => {
+  const requestFixture = await readJson("rag-request.allowed.json");
+  const response = await postRagQuery({
+    ...requestFixture,
+    retrieval: {
+      ...requestFixture.retrieval,
+      allowedKnowledgeBases: ["legacy-platform-handbook"]
+    }
+  });
+
+  assert.equal(response.status, 400);
+  assert.equal(response.body.error.code, "retired_knowledge_source");
+});
+
 async function readJson(fileName: string): Promise<any> {
   const raw = await readFile(resolve(EXAMPLE_DIR, fileName), "utf8");
   return JSON.parse(raw);

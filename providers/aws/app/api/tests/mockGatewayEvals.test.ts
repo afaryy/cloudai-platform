@@ -13,8 +13,8 @@ test("runMockGatewayEvals reports all default mock gateway eval cases as passed"
   const report = await runMockGatewayEvals();
 
   assert.equal(report.mode, "mock");
-  assert.equal(report.totalCases, 8);
-  assert.equal(report.passedCases, 8);
+  assert.equal(report.totalCases, 9);
+  assert.equal(report.passedCases, 9);
   assert.equal(report.failedCases, 0);
   assert.deepEqual(
     report.results.map((result) => result.id),
@@ -26,7 +26,8 @@ test("runMockGatewayEvals reports all default mock gateway eval cases as passed"
       "request-log-omits-prompt",
       "governed-rag-query-contract",
       "agentops-runtime-decision-contract",
-      "capability-admission-governance"
+      "capability-admission-governance",
+      "rag-knowledge-lifecycle-governance"
     ]
   );
   assert.ok(report.results.every((result) => result.passed));
@@ -70,6 +71,16 @@ test("mock gateway evals include capability admission evidence", async () => {
   assert.equal(capabilityEval.category, "contract");
   assert.equal(capabilityEval.passed, true);
   assert.match(capabilityEval.evidence, /approved, blocked, and approval-required/i);
+});
+
+test("mock gateway evals include RAG knowledge lifecycle evidence", async () => {
+  const report = await runMockGatewayEvals();
+  const lifecycleEval = report.results.find((result) => result.id === "rag-knowledge-lifecycle-governance");
+
+  assert.ok(lifecycleEval);
+  assert.equal(lifecycleEval.category, "contract");
+  assert.equal(lifecycleEval.passed, true);
+  assert.match(lifecycleEval.evidence, /retired source cannot produce a governed RAG response/i);
 });
 
 test("mock gateway eval report fixture matches the current report shape", async () => {
