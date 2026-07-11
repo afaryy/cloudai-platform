@@ -1,8 +1,8 @@
 {
   "mode": "mock",
   "evaluatedAt": "2026-07-10T00:00:00.000Z",
-  "totalCases": 9,
-  "passedCases": 9,
+  "totalCases": 10,
+  "passedCases": 10,
   "failedCases": 0,
   "results": [
     {
@@ -67,6 +67,13 @@
       "description": "Mock RAG lifecycle allows an active source and blocks a retired source before response generation.",
       "passed": true,
       "evidence": "Active source returned governed evidence and retired source cannot produce a governed RAG response."
+    },
+    {
+      "id": "guardrails-as-a-service-contract",
+      "category": "guardrail",
+      "description": "Mock GaaS converts synthetic risk signals into platform guardrail verdicts without inspecting raw content.",
+      "passed": true,
+      "evidence": "Synthetic PII, jailbreak, high-risk, and safe signals produced redaction, denial, approval, and allow verdicts without raw content."
     }
   ]
 }

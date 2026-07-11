@@ -21,6 +21,8 @@ Application / Agent
 
 The GenAI / LLM Gateway handles model access. The broader traffic governance layer coordinates policy, traceability, approval, and safety boundaries across model calls and future non-model AI traffic.
 
+Guardrails as a Service adds a shared safety-verdict contract for model gateway, RAG, AgentOps, and delivery flows. It returns synthetic allow, redact, deny, or approval-required verdicts before a flow continues. It is not a runtime proxy, moderation provider, or real content scanner.
+
 ## Governed Traffic Types
 
 - Model prompts and completions.
@@ -41,6 +43,7 @@ The GenAI / LLM Gateway handles model access. The broader traffic governance lay
 - Cross-cloud traceability.
 - Kill switches for unsafe or unexpected flows.
 - Human approval boundaries for higher-risk actions.
+- Guardrails as a Service verdicts for synthetic PII, jailbreak, prompt-injection, high-risk, and safe signals.
 - Observability and audit events across model, agent, tool, and data flows.
 
 ## Governance Questions
@@ -64,3 +67,5 @@ P6b adds the separate mock capability-governance contract pack. It records regis
 The RAG governance contract under `shared/schemas/rag-governance/` is a mock contract for retrieval evidence. It defines how future RAG flows can expose data classification, allowed knowledge base boundaries, citation checks, egress decisions, and audit metadata before any retrieval runtime is added.
 
 P6c adds synthetic knowledge-source lifecycle evidence for provenance, owner, classification, authorised knowledge bases, retention, review, and `active | paused | retired` state. The mock route rejects a retired source before it can return a governed response. See `docs/rag-knowledge-lifecycle.md`.
+
+P2 Guardrails as a Service adds `POST /guardrails/assess` and a synthetic metadata-only contract for shared safety and review verdicts. It accepts no raw `content`, prompt text, tool payloads, credentials, or sensitive data. See `docs/guardrails-as-a-service.md`.

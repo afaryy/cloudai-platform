@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/cloudai-platform/schemas/guardrails-as-a-service/guardrail-verdict.schema.json",
+  "title": "Mock Guardrail Verdict",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["requestId", "verdict", "reasonCode", "policyProfile", "audit"],
+  "properties": {
+    "requestId": { "type": "string" },
+    "verdict": { "type": "string", "enum": ["allow", "redact", "deny", "approval-required"] },
+    "reasonCode": { "type": "string", "enum": ["no_synthetic_risk_signal", "synthetic_pii_signal", "synthetic_prompt_injection_signal", "synthetic_high_risk_action_signal"] },
+    "policyProfile": { "type": "string" },
+    "audit": { "type": "object", "additionalProperties": false, "required": ["traceId", "recordedAt"], "properties": { "traceId": { "type": "string" }, "recordedAt": { "type": "string", "format": "date-time" } } }
+  }
+}

@@ -4,7 +4,7 @@ This page summarizes the current public project state. Local planning notes and 
 
 ## Current Milestone
 
-The local mock GenAI gateway, governed RAG evidence path, and P6a mock AgentOps decision path are complete for the current demo scope.
+The local mock GenAI gateway, governed RAG evidence path, mock AgentOps decision path, capability-governance contracts, RAG knowledge lifecycle, and Guardrails as a Service path are complete for the current demo scope.
 
 The repository can now demonstrate:
 
@@ -21,6 +21,7 @@ The repository can now demonstrate:
 - mock AgentOps authorisation decisions for allowed, denied, approval-required, and paused actions
 - capability-governance contracts for approved, blocked, and approval-required reusable assets
 - RAG knowledge lifecycle records for active and retired synthetic sources
+- Guardrails as a Service contracts and `POST /guardrails/assess` for synthetic PII, jailbreak, prompt-injection, high-risk, and safe signals
 
 ## Completed For Mock Scope
 
@@ -37,6 +38,7 @@ The repository can now demonstrate:
 | Mock AgentOps decision | Complete | `POST /agent-actions/authorize` |
 | Capability governance contracts | Complete | `shared/schemas/agent-capability-governance/` and `shared/examples/agent-capability-governance/` |
 | RAG knowledge lifecycle | Complete | `shared/schemas/rag-knowledge-lifecycle/`, synthetic lifecycle fixtures, and retired-source route test |
+| Guardrails as a Service | Complete | `shared/schemas/guardrails-as-a-service/`, synthetic fixtures, `POST /guardrails/assess`, and mock eval evidence |
 
 ## Intentionally Deferred
 
@@ -49,6 +51,7 @@ The following are not part of the current mock scope:
 - vector indexes
 - provider-backed RAG answer generation
 - persistent audit storage
+- real PII detection, jailbreak detection, or safety classification
 - runtime agent execution
 - runtime traffic proxy
 - EKS runtime delivery
@@ -57,9 +60,7 @@ These should remain opt-in future work with explicit cost, cleanup, and governan
 
 ## Recommended Next Slice
 
-The next public slice should be **Guardrails as a Service**: mock policy profile, assessment request, and verdict contracts for synthetic PII/sensitive-data, prompt-injection/jailbreak, safety, and human-review scenarios.
-
-Keep it contract-first and mock-only. Do not inspect real content, call a moderation service, add a provider integration, or handle sensitive data.
+The next public slice can move toward **EKS Release Engineering** or **AI-assisted DevSecOps**, while keeping the same public-safe discipline: local examples first, synthetic evidence, documented controls, and no real cloud deployment unless a separate personal sandbox POC is explicitly scoped with cost and teardown guidance.
 
 ## Portfolio Positioning
 
