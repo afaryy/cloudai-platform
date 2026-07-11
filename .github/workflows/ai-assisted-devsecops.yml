@@ -1,0 +1,68 @@
+name: ai-assisted-devsecops-boundary
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - ".github/workflows/ai-assisted-devsecops.yml"
+      - "docs/**"
+      - "providers/aws/app/api/**"
+      - "shared/**"
+
+permissions:
+  contents: read
+  pull-requests: read
+  security-events: read
+
+jobs:
+  boundary-check:
+    name: AI-assisted delivery boundary
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Explain controlled scope
+        run: |
+          echo "P5a validates the AI-assisted DevSecOps boundary."
+          echo "No agent execution, model calls, cloud deployment, or credential use happens in this workflow."
+          echo "AI assistance is advisory; humans own changes, review, release decisions, and rollback."
+
+      - name: Check prohibited committed file patterns
+        run: |
+          if find . -path ./.git -prune -o -type f \( -name "*.pem" -o -name "*.key" -o -name ".env" -o -name "*.tfstate" -o -name "*.tfplan" -o -name "kubeconfig*" \) -print | grep .; then
+            echo "Potential credential, state, plan, or kubeconfig file detected."
+            exit 1
+          fi
+          echo "No prohibited committed file patterns found."
+
+      - name: Confirm required boundary documentation
+        run: |
+          test -f docs/ai-assisted-devsecops-pattern.md
+          grep -q "AI must not" docs/ai-assisted-devsecops-pattern.md
+          grep -q "P6 controls what agents and AI traffic can do at runtime" docs/ai-assisted-devsecops-pattern.md
+
+  mock-api-test:
+    name: Mock API contract tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11.7.0
+
+      - name: Install API dependencies
+        working-directory: providers/aws/app/api
+        run: pnpm install --frozen-lockfile
+
+      - name: Test mock API
+        working-directory: providers/aws/app/api
+        run: pnpm test
