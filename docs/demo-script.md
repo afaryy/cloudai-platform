@@ -13,7 +13,7 @@ The goal is to show how the repository turns a Cloud & AI platform architecture 
 
 ## Demo Length
 
-Target length: 5 to 8 minutes.
+Target length: 8 to 12 minutes.
 
 ## Setup
 
@@ -37,9 +37,9 @@ Open `README.md`.
 
 Talk track:
 
-`cloudai-platform` is an AWS-first, multi-cloud-ready Cloud & AI platform reference implementation. It demonstrates how a Cloud AI control plane can organize governed model access, AI traffic governance, provider adapters, FinOps, observability, and release engineering patterns.
+`cloudai-platform` is an AWS-first, multi-cloud-ready Cloud & AI platform reference implementation. It demonstrates how a CloudAI control plane can organize governed model access, AI traffic governance, provider adapters, FinOps, observability, and release engineering patterns.
 
-Emphasize that the project is incremental. P1 focuses on a local mock GenAI / LLM Gateway API so the control model, contracts, metadata, and guardrails can be tested before real cloud resources are introduced.
+Emphasize that the project is incremental. It starts with a local mock GenAI / LLM Gateway API, then adds guardrails, governed RAG, AgentOps, capability governance, release engineering, AI-assisted DevSecOps evidence, and a control-plane evidence map before any real cloud resources are introduced.
 
 ### 2. Show The Architecture View
 
@@ -49,7 +49,7 @@ Point out:
 
 - the CloudAI Control Plane as the governance and coordination layer
 - the GenAI / LLM Gateway as the model-access sub-layer
-- AI Traffic Governance as the future layer for agent, tool, retrieval, workflow, and data-access flows
+- AI Traffic Governance as the layer for agent, tool, retrieval, workflow, and data-access flows
 - provider adapters for AWS-first implementation with Azure and GCP mappings
 - cross-cutting concerns such as identity, policy, FinOps, observability, audit, and responsible AI review
 
@@ -67,6 +67,7 @@ Highlight:
 - `POST /chat`
 - `POST /rag/query`
 - `POST /agent-actions/authorize`
+- `POST /guardrails/assess`
 - mock Bedrock client interface
 - default mock policy profile
 - request metadata
@@ -134,7 +135,17 @@ Talk track:
 
 The mock RAG query endpoint demonstrates the governed response contract. It returns synthetic citation metadata, retrieval metadata, an egress decision, and audit evidence without performing retrieval, executing Python, calling a model, creating embeddings, or using a vector index.
 
-### 7. Show The Mock AgentOps Decision
+### 7. Show Guardrails As A Service
+
+Open `docs/guardrails-as-a-service.md` and `shared/examples/guardrails-as-a-service/`.
+
+Talk track:
+
+Guardrails as a Service is a shared safety-verdict contract for model gateway, RAG, AgentOps, and delivery flows. It returns synthetic `allow`, `redact`, `deny`, or `approval-required` verdicts without scanning real content or storing raw prompts.
+
+Point to the PII, jailbreak, high-risk review, and safe examples. Explain that this is a pattern for safety evidence, not a real moderation provider.
+
+### 8. Show The Mock AgentOps Decision
 
 Open `shared/examples/agentops-governance/agent-action.allowed-read.json` and `providers/aws/app/api/src/lib/agentOpsPolicy.ts`.
 
@@ -142,9 +153,24 @@ Talk track:
 
 The AgentOps endpoint takes synthetic identity, requested tool, action class, least-privilege scope, approval reference, and budget metadata. It returns a deterministic `allow`, `deny`, `approval-required`, or `paused` verdict with audit identifiers. It does not execute a tool, invoke a model, install a skill, or call a cloud service.
 
-Point out the four additional fixtures for approval-required, denied-tool, and exhausted-budget paths. They show runtime governance as a testable contract rather than a live agent runtime.
+Point out the additional fixtures for approval-required, denied-tool, and exhausted-budget paths. They show runtime governance as a testable contract rather than a live agent runtime.
 
-### 8. Show The Runtime Request Flow
+### 9. Show Capability Governance And RAG Lifecycle
+
+Open `docs/agent-capability-governance.md` and `docs/rag-knowledge-lifecycle.md`.
+
+Talk track:
+
+Capability governance controls whether a reusable skill, MCP tool, plugin, or adapter is eligible for the platform catalogue before runtime use. Runtime AgentOps still decides whether an admitted capability can act in a specific session.
+
+Then show the RAG lifecycle examples:
+
+- `shared/examples/rag-knowledge-lifecycle/demo-platform-handbook.active.json`
+- `shared/examples/rag-knowledge-lifecycle/legacy-platform-handbook.retired.json`
+
+Explain that a retired source cannot produce a new governed RAG response.
+
+### 10. Show The Runtime Request Flow
 
 Open `docs/cloudai-platform-solution-walkthrough.md`.
 
@@ -164,17 +190,43 @@ Client
 
 Explain that this is the first practical slice of the GenAI / LLM Gateway. It is intentionally small, but it already shows where policy, model access, token controls, cost signals, and observability hooks fit.
 
-### 9. Show The Guardrail Path
+### 11. Show EKS Release Engineering
 
-Open `shared/examples/mock-genai-api/chat-error-token-budget.json`.
+Open:
+
+- `helm/ai-api-service/`
+- `argocd/applications/cloudai-api-sandbox.yaml`
+- `docs/eks-release-gates-and-rollback.md`
 
 Talk track:
 
-The token budget guardrail is a local example of gateway-level control. In a later phase, similar control points could be connected to identity, policy profiles, provider quotas, approval workflows, or runtime rate limits.
+The P4 release engineering track shows how the mock AI API could be packaged and promoted using Helm, Argo CD, release gates, and rollback decisions. The default repo still does not deploy to AWS. The personal EKS sandbox remains optional and must keep state, kubeconfig, tfvars, account IDs, and credentials out of git.
 
-Keep this framed as a pattern, not an operated implementation.
+### 12. Show AI-Assisted DevSecOps Evidence
 
-### 10. Show What Is Deferred
+Open:
+
+- `docs/ai-assisted-devsecops-pattern.md`
+- `docs/ai-assisted-review-evidence.md`
+- `shared/examples/ai-assisted-devsecops/`
+
+Talk track:
+
+P5 shows how AI assistance can support delivery without owning the change. AI output is advisory; humans own review, security checks, release decisions, and rollback. The evidence fixtures show review summaries, threat-model checklists, CI failure summaries, and release-note drafts without storing prompts or sensitive content.
+
+### 13. Show The Control-Plane Evidence Map
+
+Open `docs/control-plane-evidence-map.md` and `shared/examples/control-plane-evidence/evidence-map.mock.json`.
+
+Talk track:
+
+This is the unifying P6d artifact. It links runtime AgentOps, capability admission, RAG lifecycle state, guardrail verdicts, and AI-assisted review evidence into one control-plane evidence map.
+
+Suggested line:
+
+The point is not that this repository runs an enterprise AI platform. The point is that it demonstrates how a platform team can model the evidence needed to make enterprise AI secure, governed, observable, and reviewable.
+
+### 14. Show What Is Deferred
 
 Open `docs/cloudai-platform-solution-walkthrough.md`, then the “What Is Intentionally Mock-Only” and “Future Deployment Path” sections.
 
@@ -187,6 +239,9 @@ Call out that these are future work:
 - external observability export
 - real provider quota integration
 - real cost allocation
+- real agent runtime or tool execution
+- real vector search, embeddings, or provider-backed RAG
+- real guardrail provider integration
 
 Suggested line:
 
@@ -229,6 +284,6 @@ Stop the local server when finished.
 
 ## Closing Message
 
-This repository shows a practical Cloud & AI platform engineering path: start with architecture, define the control model, build a local mock gateway, add metadata and guardrails, test the contracts, and then move carefully toward reviewed cloud foundations.
+This repository shows a practical Cloud & AI platform engineering path: start with architecture, define the control model, build a local mock gateway, add guardrails and governed RAG, model runtime AgentOps and capability governance, package release engineering patterns, document AI-assisted delivery controls, and connect the evidence through a control-plane map.
 
 The current phase is intentionally mock-first. That keeps the project understandable, reviewable, and low-cost while the platform design matures.

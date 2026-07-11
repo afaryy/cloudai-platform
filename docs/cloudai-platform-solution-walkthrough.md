@@ -6,9 +6,9 @@ The project is AWS-first and multi-cloud-ready. It uses synthetic examples, publ
 
 ## Solution Overview
 
-`cloudai-platform` models a Cloud AI control plane that coordinates governed model access, AI traffic governance, provider adapters, platform foundations, FinOps, observability, and release engineering patterns.
+`cloudai-platform` models a CloudAI control plane that coordinates governed model access, AI traffic governance, provider adapters, platform foundations, FinOps, observability, release engineering, AI-assisted delivery controls, and evidence mapping.
 
-The current implementation starts with a local mock GenAI / LLM Gateway API. This is intentional: the project first proves the control model, API shape, metadata, guardrails, tests, and documentation before introducing real cloud resources.
+The implementation starts with a local mock GenAI / LLM Gateway API, then layers governed RAG, Guardrails as a Service, AgentOps decisions, capability governance, RAG knowledge lifecycle, EKS release engineering patterns, AI-assisted DevSecOps evidence, and a control-plane evidence map. This is intentional: the project proves the control model, API shape, metadata, guardrails, tests, and documentation before introducing real cloud resources.
 
 ## Architecture Layers
 
@@ -18,10 +18,11 @@ The solution is organized around these layers:
 |---|---|---|
 | CloudAI Control Plane | Coordinates use case intake, policy, approval, audit, provider registry, and evaluation concepts. | Documented architecture. |
 | GenAI / LLM Gateway | Provides the first model-access sub-layer for governed model calls. | Local mock API implemented. |
-| AI Traffic Governance | Future broader governance layer for model, agent, tool, API, and data egress flows. | Documented roadmap and architecture. |
+| AI Traffic Governance | Broader governance layer for model, agent, tool, API, retrieval, workflow, and data egress flows. | Mock AgentOps, capability governance, RAG lifecycle, and evidence map implemented. |
 | Provider Adapters | Keep cloud-specific implementation behind provider boundaries. | AWS-first placeholders; Azure/GCP mappings documented. |
-| Platform Foundations | Provide IAM, KMS, network, API, runtime, CI/CD, and observability foundations. | Documentation and skeletons only. |
+| Platform Foundations | Provide IAM, KMS, network, API, runtime, CI/CD, release, and observability foundations. | Documentation, workflow skeletons, Helm, and Argo CD patterns. |
 | FinOps / Observability | Track token estimates, costs, logs, metrics, and operational signals. | Local metadata, token budget, and structured logs implemented. |
+| Evidence Layer | Connect control outcomes across runtime, capability, RAG, guardrail, and delivery evidence. | P6d control-plane evidence map implemented. |
 
 ## Language Boundary
 
@@ -53,6 +54,8 @@ It currently supports:
 - `GET /rag/artifacts`
 - `POST /rag/query`
 - `POST /chat`
+- `POST /guardrails/assess`
+- `POST /agent-actions/authorize`
 - mock Bedrock client interface
 - synthetic model responses
 - request metadata
@@ -64,6 +67,12 @@ It currently supports:
 - local mock eval harness
 - RAG governance metadata endpoints
 - mock governed RAG response endpoint
+- Guardrails as a Service endpoint and synthetic verdict contracts
+- AgentOps metadata-only authorisation endpoint
+- capability governance contract pack
+- RAG knowledge lifecycle contract pack and retired-source invariant
+- AI-assisted DevSecOps evidence contracts
+- control-plane evidence map contract
 - local tests
 
 The mock API does not call Amazon Bedrock, deploy cloud resources, or require cloud account setup.
@@ -111,8 +120,10 @@ The repository has been built incrementally through small PRs.
 | #25 | Mock governed RAG query | Added a mock governed RAG response endpoint using existing contracts, without adding retrieval runtime or provider calls. |
 | #26 | Governed RAG query demo eval | Added eval evidence and demo documentation for the mock governed RAG query endpoint. |
 | #29 | Mock AgentOps traffic governance | Added metadata-only authorisation decisions, session and action contracts, synthetic fixtures, audit evidence, and local evaluation without tool execution. |
-| Current slice | Capability governance | Adds synthetic asset registry, skill-card, evidence, and admission-decision contracts before future runtime use. |
-| Next planned | RAG knowledge lifecycle | Define source provenance, lifecycle, retention, review, and retired-source invariants. |
+| #30-#35 | Capability, RAG lifecycle, guardrails, and roadmap alignment | Added reusable capability governance, RAG source lifecycle, Guardrails as a Service, current-state refreshes, and AI factory positioning notes. |
+| #36-#38 | EKS release engineering readiness | Added Helm packaging, Argo CD application pattern, release gates, rollback notes, and status refresh. |
+| #39-#40 | AI-assisted DevSecOps | Added advisory AI-assisted delivery boundaries and synthetic review evidence records. |
+| #41-#42 | P6 status and control-plane evidence | Clarified P6a/P6b/P6c lanes and added the P6d control-plane evidence map. |
 
 ## P0 Foundation Summary
 
@@ -155,6 +166,40 @@ Current mock platform capabilities:
 
 This gives the project a concrete demonstration path without requiring real AWS resources.
 
+## P2-P3 Governance Summary
+
+The governance layer adds reusable controls around model, safety, and data access:
+
+- Guardrails as a Service contracts and `POST /guardrails/assess`
+- synthetic PII, jailbreak, prompt-injection, high-risk, and safe verdict examples
+- governed RAG request and response contracts
+- RAG metadata endpoints
+- mock governed RAG query response with citation, egress decision, and audit evidence
+- local Python RAG workflow for ingest, chunking, evaluation dataset preparation, and scoring
+
+These patterns demonstrate how enterprise AI platforms can expose safety and retrieval evidence without implementing a real scanner, vector store, or provider-backed RAG runtime.
+
+## P4-P6 Platform Story
+
+The later phases turn the project into a broader Cloud & AI platform portfolio:
+
+- **P4 EKS Release Engineering:** Helm packaging, Argo CD application pattern, release gates, rollback notes, and optional personal AWS/EKS sandbox guidance.
+- **P5 AI-Assisted DevSecOps:** advisory AI use boundary, human-owned review evidence, CI/security checks, and release evidence patterns.
+- **P6 AgentOps / AI Traffic Governance:** runtime AgentOps decisions, capability governance before runtime use, RAG knowledge lifecycle, and the P6d control-plane evidence map.
+
+The important architecture point is separation of concerns:
+
+```text
+Capability governance
+  -> runtime AgentOps decision
+  -> RAG knowledge lifecycle state
+  -> guardrail verdict
+  -> AI-assisted delivery evidence
+  -> control-plane evidence map
+```
+
+This shows how the CloudAI control plane can collect evidence across platform controls without executing an agent, calling a provider, storing sensitive payloads, or deploying cloud resources.
+
 ## What Is Intentionally Mock-Only
 
 The following are intentionally not implemented yet:
@@ -169,6 +214,10 @@ The following are intentionally not implemented yet:
 - external observability export
 - real provider quota integration
 - real cost allocation
+- real agent runtime or MCP tool execution
+- real skill scanning or cryptographic signing
+- real guardrail provider integration
+- real vector search or embeddings
 
 These are deferred until the control model, contract, guardrails, and local developer workflow are stable.
 
@@ -178,30 +227,28 @@ A concise demo story:
 
 1. Start with the CloudAI platform architecture.
 2. Show the GenAI / LLM Gateway as the first model-access layer.
-3. Run the mock API locally.
-4. Call `/health`.
-5. Call `/chat` with an allowed mock model.
-6. Show response metadata: request ID, model name, token estimates, cost estimate, timestamp.
-7. Show structured logs that omit prompt text and request bodies.
-8. Send an oversized prompt and show the token budget guardrail.
-9. Point to JSON schemas as the documented API contract.
-10. Open the synthetic fixtures under `shared/examples/mock-genai-api/` to show the demo request, response, error, and request log shapes.
-11. Show the local mock eval harness and eval result fixture as lightweight LLMOps evidence.
-12. Open `examples/README.md` and show the local RAG walkthrough.
-13. Call `/rag/status` and `/rag/artifacts` to show how the API describes local RAG contracts and sample outputs.
-14. Call `/rag/query` with the governed RAG request fixture and show the synthetic governed response.
-15. Explain how AWS deployment and real Bedrock integration are future opt-in phases.
+3. Run or describe the mock API and contract tests.
+4. Show `/chat` metadata: request ID, model name, token estimates, cost estimate, timestamp.
+5. Show structured logs that omit prompt text and request bodies.
+6. Show Guardrails as a Service verdict examples.
+7. Show governed RAG contracts, metadata endpoints, and mock query response.
+8. Show AgentOps authorisation decisions for allow, deny, approval-required, and paused outcomes.
+9. Show capability governance and RAG lifecycle records.
+10. Show P4 release engineering: Helm, Argo CD, release gates, and rollback.
+11. Show P5 AI-assisted DevSecOps boundary and review evidence.
+12. End with the P6d control-plane evidence map as the unifying portfolio artifact.
+13. Explain how AWS deployment, real Bedrock integration, and real EKS sandbox work are future opt-in phases.
 
 ## Future Deployment Path
 
 The project should move toward real resources gradually:
 
 1. Keep the current mock gateway and governed RAG contracts aligned with tests and fixtures.
-2. Add AgentOps / AI Traffic Governance contracts for agent identity, tool permissions, audit evidence, human approval, and cost metadata.
-3. Add P2 Terraform validation and AWS foundation skeletons.
+2. Expand P6 evidence maps with additional synthetic scenarios such as denied tool use, blocked capability, retired knowledge source, and guardrail deny.
+3. Add reviewed AWS Terraform module stubs and validation examples.
 4. Add reviewed IAM, KMS, logging, and API runtime patterns.
 5. Add explicit cost and cleanup guidance.
-6. Add optional small AWS deployment, likely API Gateway + Lambda + CloudWatch first.
+6. Add optional personal AWS EKS sandbox execution only after backend, OIDC, budget, teardown, and secret-handling controls are clear.
 7. Add real Bedrock integration only after cost and governance controls are clearly documented.
 
 Real AWS deployment should remain opt-in, reviewed, and easy to destroy.
@@ -215,7 +262,12 @@ Useful entry points:
 - `docs/architecture.md` for architecture layers and diagrams.
 - `docs/control-plane.md` for the CloudAI Control Plane concept.
 - `docs/genai-llm-gateway.md` for model-access gateway framing.
-- `docs/ai-traffic-governance.md` for future traffic governance scope.
+- `docs/ai-traffic-governance.md` for P6 AgentOps and AI Traffic Governance scope.
+- `docs/agent-capability-governance.md` for capability admission before runtime use.
+- `docs/rag-knowledge-lifecycle.md` for source lifecycle and retired-source controls.
+- `docs/guardrails-as-a-service.md` for shared safety verdict contracts.
+- `docs/ai-assisted-devsecops-pattern.md` and `docs/ai-assisted-review-evidence.md` for P5 delivery controls.
+- `docs/control-plane-evidence-map.md` for the P6d evidence map.
 - `docs/demo-script.md` for a short portfolio walkthrough.
 - `providers/aws/app/api/README.md` for the local mock API.
 - `shared/schemas/mock-genai-api/` for API contract schemas.
