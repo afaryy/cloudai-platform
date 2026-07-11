@@ -160,6 +160,7 @@ The evals check:
 - unsupported model policy behavior
 - response metadata presence
 - request log safety for prompt and request body omission
+- governed RAG query citation, egress decision, audit evidence, and no query text echo
 
 This is a lightweight mock-mode evaluation pattern. It is not a model judge, benchmark suite, or provider-hosted evaluation service.
 

@@ -4,6 +4,7 @@ import { buildRequestLogEvent } from "../lib/requestLogger.js";
 import { enforceInputTokenBudget } from "../lib/tokenBudget.js";
 import { normalizeChatRequest } from "../lib/validation.js";
 import { postChat } from "../routes/chat.js";
+import { postRagQuery } from "../routes/ragQuery.js";
 
 export type MockGatewayEvalCategory =
   | "contract"
@@ -34,7 +35,8 @@ export async function runMockGatewayEvals(evaluatedAt = "2026-07-10T00:00:00.000
     evaluateTokenBudgetBlockedRequest(),
     evaluateUnsupportedModelRequest(),
     await evaluateResponseMetadataPresent(),
-    evaluateRequestLogOmitsPrompt()
+    evaluateRequestLogOmitsPrompt(),
+    evaluateGovernedRagQueryContract()
   ];
   const passedCases = results.filter((result) => result.passed).length;
 
@@ -154,6 +156,57 @@ function evaluateRequestLogOmitsPrompt(): MockGatewayEvalResult {
     evidence: passed
       ? "Request log event contains metadata only."
       : "Request log event included prompt-like payload content."
+  };
+}
+
+function evaluateGovernedRagQueryContract(): MockGatewayEvalResult {
+  const query = "Summarize the CloudAI gateway guardrails from the demo handbook.";
+  const response = postRagQuery({
+    requestId: "rag_req_eval_0001",
+    query,
+    dataClassification: "synthetic-public",
+    retrieval: {
+      allowedKnowledgeBases: ["demo-platform-handbook"],
+      maxDocuments: 3,
+      requiredMetadata: [
+        "sourceId",
+        "sourceTitle",
+        "classification",
+        "citationUrl",
+        "retrievedAt"
+      ]
+    },
+    governance: {
+      requireCitations: true,
+      allowExternalEgress: false,
+      policyProfile: "rag-demo-governed"
+    }
+  });
+  const serializedResponse = JSON.stringify(response);
+  const citation = response.response.citations[0];
+  const egressDecision = response.governance.egressDecision;
+  const audit = response.audit;
+  const passed = response.response.citations.length === 1
+    && citation?.sourceId === "demo-platform-handbook-001"
+    && citation.sourceTitle === "CloudAI Demo Platform Handbook"
+    && citation.citationUrl === "https://example.com/cloudai-platform/demo-platform-handbook"
+    && response.governance.citationRequirementMet
+    && egressDecision.allowed
+    && egressDecision.scope === "controlled_response"
+    && egressDecision.reason === "controlled_response_allowed_with_synthetic_sources"
+    && audit.requestId === "rag_req_eval_0001"
+    && audit.policyProfile === "rag-demo-governed"
+    && audit.evaluatedAt === "2026-07-10T00:00:00.000Z"
+    && !serializedResponse.includes(query);
+
+  return {
+    id: "governed-rag-query-contract",
+    category: "contract",
+    description: "Mock governed RAG query returns citation, egress decision, and audit evidence without echoing query text.",
+    passed,
+    evidence: passed
+      ? "RAG response included citation, egress decision, and audit evidence without query text echo."
+      : "RAG response contract evidence was missing or query text was echoed."
   };
 }
 
