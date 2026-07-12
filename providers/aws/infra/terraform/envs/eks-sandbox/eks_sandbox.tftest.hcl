@@ -47,6 +47,16 @@ run "plans_eks_sandbox_environment_defaults" {
   }
 
   assert {
+    condition     = var.vpc_cidr == "10.42.0.0/24" && alltrue([for cidr in var.public_subnet_cidrs : endswith(cidr, "/26")])
+    error_message = "The default sandbox network must use a small VPC and /26 subnets."
+  }
+
+  assert {
+    condition     = !contains(var.endpoint_public_access_cidrs, "0.0.0.0/0") && alltrue([for cidr in var.endpoint_public_access_cidrs : endswith(cidr, "/32")])
+    error_message = "The default sandbox endpoint boundary must use explicit /32 public access CIDRs only."
+  }
+
+  assert {
     condition     = var.node_desired_size == 1 && var.node_min_size == 1 && var.node_max_size == 1
     error_message = "The default sandbox node group must remain bounded to one node."
   }

@@ -196,7 +196,7 @@ Explain that this is the first practical slice of the GenAI / LLM Gateway. It is
 Open:
 
 - `helm/ai-api-service/`
-- `docs/personal-eks-sandbox-readiness.md`
+- `docs/p4b-eks-sandbox-operator-runbook.md`
 - `argocd/applications/cloudai-api-sandbox.yaml`
 - `docs/eks-release-gates-and-rollback.md`
 

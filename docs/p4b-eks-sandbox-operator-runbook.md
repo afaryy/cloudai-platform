@@ -1,26 +1,117 @@
-# P4b EKS Sandbox Operator Runbook
+# P4b EKS Sandbox Runbook
 
-This runbook explains when to run the optional personal EKS sandbox and how to keep the run short-lived, budget-aware, and safe to document.
+This is the single public runbook for the optional personal EKS sandbox. It covers readiness, day-of-run steps, safety gates, and evidence boundaries.
 
 Do not use this runbook for production, customer, internal, or shared enterprise environments. The sandbox is for a personal AWS account with synthetic workloads only.
 
-## When To Apply
+## Scope
 
-Apply only when all of these are true:
+The first real apply proves the platform foundation only:
 
-- PR changes enabling the workflow have been merged to `main`.
-- GitHub environment `aws-sandbox` exists and requires manual approval.
-- `AWS_ROLE_TO_ASSUME` is configured as an environment secret or variable.
-- `AWS_REGION`, `TF_BACKEND_BUCKET`, `TF_BACKEND_LOCK_TABLE`, and `TF_STATE_KEY_PREFIX` are configured as environment variables.
-- AWS Budget and alarm are configured for the personal sandbox.
-- You have time to run `destroy` the same day.
-- You are ready to capture only sanitized evidence.
+- Terraform remote backend initialization.
+- GitHub Actions OIDC role assumption.
+- EKS control plane and managed node group creation.
+- Small no-NAT sandbox network.
+- Same-day destroy and sanitized evidence.
 
-If any item is missing, do not apply yet.
+The first apply does not run `kubectl`, Helm deployment, Argo CD sync, Bedrock, Bedrock AgentCore, GPU, or HyperPod resources. Those belong in later opt-in slices after the EKS foundation has been applied, destroyed, and reviewed.
 
-## Before Apply
+## Architecture Boundary
 
-Use `docs/p4b-eks-apply-readiness-check.md` as the final go/no-go check before running any real apply. If that checklist produces a no-go signal, stop before credentials are configured.
+```text
+Personal AWS account
+  -> existing GitHub Actions OIDC provider
+  -> CloudFormation bootstrap stack
+  -> S3 backend bucket + DynamoDB lock table
+  -> aws-sandbox GitHub environment with manual approval
+  -> terraform-eks-sandbox workflow
+  -> optional EKS apply/destroy slice
+```
+
+The normal delivery plane is GitHub Actions with OIDC and environment approval. Laptop-local commands are for learning or emergency inspection, not the default portfolio path.
+
+## Repository Evidence
+
+| Evidence | Path | Purpose |
+|---|---|---|
+| Bootstrap guide | `providers/aws/infra/bootstrap/README.md` | Explains the S3/DynamoDB backend and GitHub OIDC role boundary. |
+| Bootstrap template | `providers/aws/infra/bootstrap/github-oidc-terraform-backend.yaml` | CloudFormation example for backend bucket, lock table, and GitHub Actions role. |
+| Terraform stack | `providers/aws/infra/terraform/envs/eks-sandbox/` | Holds the optional EKS sandbox Terraform entry point. |
+| EKS workflow | `.github/workflows/terraform-eks-sandbox.yml` | Supports manual validate, plan, apply, and destroy. |
+| Design note | `docs/p4b-real-eks-sandbox-design.md` | Describes the validate-first personal EKS sandbox design. |
+| Evidence template | `docs/templates/p4b-eks-sandbox-apply-destroy-evidence.md` | Provides a sanitized apply/destroy evidence format. |
+
+## Readiness Gates
+
+Run `apply` only when every gate is true.
+
+| Gate | Go condition | No-go signal |
+|---|---|---|
+| Branch state | Workflow changes are merged to `main`. | Running from an unmerged branch or local-only workflow. |
+| GitHub environment | `aws-sandbox` exists and requires manual approval. | No environment protection or no human approval. |
+| OIDC role | GitHub Actions can assume the sandbox role through OIDC. | Static AWS keys, missing trust policy, or unclear role boundary. |
+| Backend | S3 backend bucket and DynamoDB lock table are configured as private GitHub environment values. | Backend names committed to git or copied into public notes. |
+| State key | State key is derived from project, stack, and environment naming. | Reusing one state key across unrelated stacks. |
+| Budget | Sandbox budget and alarm are active before apply. | No alarm recipient, no threshold, or no budget owner. |
+| Cost shape | Plan does not introduce NAT Gateway, GPU, HyperPod, Bedrock, AgentCore, or unexpected expensive resources. | Any expensive or unclear resource appears unexpectedly. |
+| Network | First sandbox uses a small VPC and subnet shape. | Enterprise-sized address ranges without a reason. |
+| EKS endpoint | Private endpoint access is enabled and public endpoint access is restricted to explicit operator `/32` CIDRs. | `0.0.0.0/0`, broad public ranges, documentation placeholders, or unclear API access boundary. |
+| Workload | Workload values are synthetic-only. | Real internal, customer, production, or personal sensitive data. |
+| Evidence | Evidence template is ready and will be sanitized. | Raw plan/apply output, screenshots, account IDs, ARNs, endpoints, or kubeconfig will be saved. |
+| Teardown | Destroy owner and same-day destroy window are confirmed. | No time to destroy after apply. |
+
+If any gate fails, do not apply yet.
+
+## GitHub Environment Contract
+
+Configure these values in the `aws-sandbox` GitHub environment.
+
+| Name | Type | Purpose |
+|---|---|---|
+| `AWS_ROLE_TO_ASSUME` | Environment secret or variable | GitHub Actions OIDC role assumption. |
+| `AWS_REGION` | Environment variable | Sandbox region, initially `ap-southeast-2`. |
+| `TF_BACKEND_BUCKET` | Environment variable | S3 bucket for Terraform state. |
+| `TF_BACKEND_LOCK_TABLE` | Environment variable | DynamoDB table for Terraform state locking. |
+| `TF_STATE_KEY_PREFIX` | Environment variable | Project state prefix, recommended `cloudai-platform`. |
+| `TF_VAR_ENDPOINT_PUBLIC_ACCESS_CIDRS` | Environment variable | Private list of operator `/32` CIDRs for the EKS public API endpoint before real apply. |
+
+The workflow derives the EKS sandbox state key as:
+
+```text
+cloudai-platform/eks-sandbox/terraform.tfstate
+```
+
+Use separate state keys for future stacks under the same backend bucket and lock table:
+
+```text
+cloudai-platform/platform-foundation/terraform.tfstate
+cloudai-platform/eks-sandbox/terraform.tfstate
+cloudai-platform/bedrock-sandbox/terraform.tfstate
+cloudai-platform/agentcore-sandbox/terraform.tfstate
+cloudai-platform/genai-gateway/terraform.tfstate
+```
+
+Before real apply, set `TF_VAR_ENDPOINT_PUBLIC_ACCESS_CIDRS` privately in GitHub to the operator public IP list, for example:
+
+```text
+["203.0.113.10/32"]
+```
+
+Use a real operator public IP in GitHub settings only. Do not commit it. Do not use `0.0.0.0/0`.
+
+## Network And Endpoint Defaults
+
+The sandbox defaults are intentionally small:
+
+```text
+VPC: 10.42.0.0/24
+public subnet A: 10.42.0.0/26
+public subnet B: 10.42.0.64/26
+```
+
+These defaults are enough for a short-lived one-node sandbox while avoiding an enterprise-sized address range. EKS private endpoint access is enabled by default; public API access must be restricted to explicit operator `/32` CIDRs.
+
+## Workflow Sequence
 
 Run `validate` first:
 
@@ -36,11 +127,9 @@ workflow: terraform-eks-sandbox
 mode: plan
 ```
 
-Review the plan in GitHub Actions. Do not copy raw plan output into git if it contains account identifiers, ARNs, endpoints, or provider-specific resource IDs.
+Review the plan in GitHub Actions. Do not copy raw plan output into git if it contains account identifiers, ARNs, endpoints, backend names, or provider-specific resource IDs.
 
-## Apply
-
-Run apply only through GitHub Actions:
+Run `apply` only through GitHub Actions:
 
 ```text
 workflow: terraform-eks-sandbox
@@ -48,18 +137,7 @@ mode: apply
 confirm_apply: I_UNDERSTAND_COST_AND_TEARDOWN
 ```
 
-Expected controls:
-
-- GitHub environment approval is required.
-- Confirmation phrase is required before AWS credentials are configured.
-- Terraform uses the S3 backend and DynamoDB lock table.
-- No `tfplan` artifact is saved.
-
-After apply, update `docs/templates/p4b-eks-sandbox-apply-destroy-evidence.md` in a private note or sanitized public evidence file. Keep real endpoints, kubeconfig, account IDs, ARNs, backend names, and billing details out of git.
-
-## Destroy
-
-Destroy should normally run the same day after evidence is captured:
+Run `destroy` the same day after evidence is captured:
 
 ```text
 workflow: terraform-eks-sandbox
@@ -67,17 +145,21 @@ mode: destroy
 confirm_destroy: I_UNDERSTAND_DESTROY
 ```
 
-After destroy, verify:
+The workflow uses the `terraform-eks-sandbox` concurrency group with `cancel-in-progress: false`. This queues overlapping manual runs instead of allowing two runs to compete for the same EKS sandbox state key. Terraform's DynamoDB backend lock remains the authoritative state lock.
+
+## After Destroy
+
+Verify:
 
 - EKS cluster is deleted.
 - Managed node group is deleted.
-- Load balancers are gone.
+- Load balancers and target groups are gone.
 - EBS volumes and snapshots created by the sandbox are reviewed.
-- Public IPs or elastic IPs are reviewed.
+- NAT gateways, elastic IPs, and public load balancers are absent or deleted.
 - CloudWatch log groups are reviewed.
 - Terraform backend is intentionally retained or intentionally cleaned.
 
-## Public-Safe Evidence
+## Evidence Boundary
 
 Good evidence:
 
@@ -105,16 +187,25 @@ Do not commit:
 - Terraform state;
 - raw Terraform plan;
 - command output containing account identifiers or ARNs;
-- screenshots showing account details.
+- screenshots showing account or billing details.
 
 ## Stop Conditions
 
-Stop and do not continue if:
+Stop before apply if:
 
 - budget alarm is missing;
+- manual environment approval is missing;
 - teardown time is not available;
 - plan shows unexpected expensive resources;
 - NAT Gateway appears unexpectedly;
 - non-synthetic workload values are present;
-- GitHub environment approval is missing;
-- any command output contains details that would be unsafe to commit.
+- evidence would require exposing private identifiers;
+- you are unsure whether the workload is synthetic-only.
+
+The safest professional answer is sometimes: do not apply yet.
+
+## Portfolio Explanation
+
+Use this short explanation:
+
+> P4b shows how I would move from mock Kubernetes release engineering into a bounded personal AWS EKS sandbox: Terraform backend first, GitHub OIDC identity, manual environment approval, budget and teardown controls, synthetic workload only, and no account-specific values committed to git.

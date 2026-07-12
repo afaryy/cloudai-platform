@@ -45,6 +45,7 @@ jobs:
       TF_STATE_KEY_PREFIX: ${{ vars.TF_STATE_KEY_PREFIX }}
       TF_STACK_NAME: eks-sandbox
       TF_STATE_KEY: ${{ vars.TF_STATE_KEY_PREFIX }}/eks-sandbox/terraform.tfstate
+      TF_VAR_endpoint_public_access_cidrs: ${{ vars.TF_VAR_ENDPOINT_PUBLIC_ACCESS_CIDRS || '["203.0.113.10/32"]' }}
     defaults:
       run:
         working-directory: providers/aws/infra/terraform/envs/eks-sandbox
@@ -68,6 +69,7 @@ jobs:
         run: |
           echo "Plan mode initializes the remote S3 backend from aws-sandbox environment variables."
           echo "It does not create a saved tfplan artifact and does not run apply or destroy."
+          echo "Set TF_VAR_ENDPOINT_PUBLIC_ACCESS_CIDRS in aws-sandbox to an operator /32 before real apply."
           echo "Do not commit tfvars, tfstate, tfplan, kubeconfig, account IDs, ARNs, endpoints, or credentials."
 
       - name: Confirm sandbox apply gate

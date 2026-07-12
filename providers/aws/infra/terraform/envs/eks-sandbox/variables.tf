@@ -19,13 +19,13 @@ variable "environment" {
 variable "vpc_cidr" {
   description = "CIDR block for the sandbox VPC."
   type        = string
-  default     = "10.42.0.0/16"
+  default     = "10.42.0.0/24"
 }
 
 variable "public_subnet_cidrs" {
   description = "Public subnet CIDR blocks for the no-NAT sandbox."
   type        = list(string)
-  default     = ["10.42.0.0/24", "10.42.1.0/24"]
+  default     = ["10.42.0.0/26", "10.42.0.64/26"]
 }
 
 variable "kubernetes_version" {
@@ -35,9 +35,17 @@ variable "kubernetes_version" {
 }
 
 variable "endpoint_public_access_cidrs" {
-  description = "CIDR blocks allowed to reach the public EKS API endpoint. Override privately before real apply."
+  description = "Explicit /32 CIDR blocks allowed to reach the public EKS API endpoint. Override privately with the operator public IP before real apply."
   type        = list(string)
-  default     = ["0.0.0.0/0"]
+  default     = ["203.0.113.10/32"]
+
+  validation {
+    condition = length(var.endpoint_public_access_cidrs) > 0 && alltrue([
+      for cidr in var.endpoint_public_access_cidrs :
+      cidr != "0.0.0.0/0" && endswith(cidr, "/32")
+    ])
+    error_message = "EKS public endpoint access must use explicit /32 CIDRs and must not include 0.0.0.0/0."
+  }
 }
 
 variable "node_instance_types" {

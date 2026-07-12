@@ -43,7 +43,7 @@ If the optional P4b sandbox is used, the design should include:
 
 Normal sandbox operation should not rely on laptop-local deploy commands. Local commands can be useful for learning and emergency inspection, but the portfolio pattern should show controlled delivery through GitHub Actions with OIDC identity and GitHub environment approval.
 
-See `docs/personal-eks-sandbox-readiness.md` for the P4b readiness checklist, budget and cleanup rules, GitHub Actions boundary, and future apply decision gate.
+See `docs/p4b-eks-sandbox-operator-runbook.md` for the P4b readiness checklist, budget and cleanup rules, GitHub Actions boundary, apply/destroy steps, and evidence gate.
 
 ## ECS And EKS Boundary
 
@@ -63,7 +63,7 @@ Current P4 evidence includes:
 - Manual sync posture with no automated sync enabled by default.
 - Argo CD labels and annotations for owner, environment, data scope, cost allocation, release boundary, and rollback/runbook metadata.
 - Release gates and rollback pattern in `docs/eks-release-gates-and-rollback.md`.
-- P4b readiness guidance in `docs/personal-eks-sandbox-readiness.md`.
+- P4b readiness and operator guidance in `docs/p4b-eks-sandbox-operator-runbook.md`.
 - CloudFormation bootstrap example for Terraform backend and GitHub Actions role/policy.
 - Terraform backend example and empty committed S3 backend block for `eks-sandbox`.
 - Manual GitHub Actions workflow for validation and backend-backed plan.
