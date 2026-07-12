@@ -1,2 +1,2 @@
 # Include all Python implementations in GitHub language statistics.
-*.py linguist-detectable=true
+*.py linguist-detectable=true linguist-documentation=false linguist-vendored=false linguist-generated=false
