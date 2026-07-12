@@ -11,6 +11,8 @@ on:
         options:
           - validate
           - plan
+          - apply
+          - destroy
 
 permissions:
   contents: read
@@ -56,3 +58,11 @@ jobs:
       - name: Terraform plan placeholder
         if: ${{ inputs.mode == 'plan' }}
         run: terraform init -backend=false && terraform validate
+
+      - name: Refuse apply or destroy until sandbox enablement PR
+        if: ${{ inputs.mode == 'apply' || inputs.mode == 'destroy' }}
+        run: |
+          echo "Mode '${{ inputs.mode }}' is intentionally disabled in this validate-only skeleton."
+          echo "Enable real apply/destroy only after private backend, budget alarm, environment approval, and teardown evidence are confirmed."
+          echo "Do not commit backend.tf, tfvars, tfstate, tfplan, kubeconfig, account IDs, ARNs, endpoints, or credentials."
+          exit 1

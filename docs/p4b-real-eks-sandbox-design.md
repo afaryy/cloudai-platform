@@ -96,6 +96,8 @@ providers/aws/infra/terraform/modules/
   eks/
 ```
 
+The validate-only Terraform skeleton now exists in those paths. It defines the intended VPC, public subnet, EKS cluster, and managed node group shape, but the workflow still refuses real `apply` and `destroy` until private backend, budget, approval, and teardown evidence are confirmed.
+
 Recommended defaults:
 
 - Region: `ap-southeast-2` unless explicitly changed.
