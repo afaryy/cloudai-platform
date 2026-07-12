@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/cloudai-platform/schemas/control-plane-evidence/evidence-scenarios.schema.json",
+  "title": "Mock CloudAI Control Plane Evidence Scenarios",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["scenarioSetId", "phase", "controlPlane", "purpose", "scenarios", "boundaries"],
+  "properties": {
+    "scenarioSetId": { "type": "string", "pattern": "^p6e_[a-z0-9_]+$" },
+    "phase": { "type": "string", "const": "P6e" },
+    "controlPlane": { "type": "string", "const": "CloudAI Control Plane" },
+    "purpose": { "type": "string", "minLength": 20 },
+    "scenarios": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["scenarioId", "title", "outcome", "narrative", "evidenceRefs", "controlImplication"],
+        "properties": {
+          "scenarioId": { "type": "string", "pattern": "^scenario_[a-z0-9_]+$" },
+          "title": { "type": "string", "minLength": 8 },
+          "outcome": {
+            "type": "string",
+            "enum": ["allowed", "denied", "approval-required", "blocked-before-runtime", "retired-source-blocked"]
+          },
+          "narrative": { "type": "string", "minLength": 20 },
+          "evidenceRefs": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 5,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["lane", "source", "referenceId", "decisionOrState", "evidencePath"],
+              "properties": {
+                "lane": {
+                  "type": "string",
+                  "enum": [
+                    "runtime-agentops",
+                    "capability-governance",
+                    "rag-knowledge-lifecycle",
+                    "guardrails-as-a-service",
+                    "ai-assisted-review-evidence"
+                  ]
+                },
+                "source": { "type": "string", "enum": ["P6a", "P6b", "P6c", "P2", "P5b"] },
+                "referenceId": { "type": "string", "minLength": 3 },
+                "decisionOrState": { "type": "string", "minLength": 3 },
+                "evidencePath": { "type": "string", "pattern": "^shared/examples/.+\\.json$" }
+              }
+            }
+          },
+          "controlImplication": { "type": "string", "minLength": 20 }
+        }
+      }
+    },
+    "boundaries": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["containsSensitiveData", "containsPromptTranscript", "executesRuntimeAction", "callsProvider", "deploysCloudResources", "persistsAuditRecords"],
+      "properties": {
+        "containsSensitiveData": { "type": "boolean", "const": false },
+        "containsPromptTranscript": { "type": "boolean", "const": false },
+        "executesRuntimeAction": { "type": "boolean", "const": false },
+        "callsProvider": { "type": "boolean", "const": false },
+        "deploysCloudResources": { "type": "boolean", "const": false },
+        "persistsAuditRecords": { "type": "boolean", "const": false }
+      }
+    }
+  }
+}

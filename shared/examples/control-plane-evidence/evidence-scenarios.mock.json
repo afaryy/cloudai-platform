@@ -1,0 +1,117 @@
+{
+  "scenarioSetId": "p6e_control_plane_evidence_scenarios_0001",
+  "phase": "P6e",
+  "controlPlane": "CloudAI Control Plane",
+  "purpose": "Synthetic scenario pack showing how a control plane can explain allowed, denied, approval-required, blocked, and retired-source AI governance outcomes.",
+  "scenarios": [
+    {
+      "scenarioId": "scenario_allowed_tool_call",
+      "title": "Allowed low-risk tool call",
+      "outcome": "allowed",
+      "narrative": "A governed knowledge agent requests a low-risk read action using an approved tool, valid session metadata, and available budget.",
+      "evidenceRefs": [
+        {
+          "lane": "runtime-agentops",
+          "source": "P6a",
+          "referenceId": "agent_req_0001",
+          "decisionOrState": "allow",
+          "evidencePath": "shared/examples/agentops-governance/agent-action.allowed-read.json"
+        },
+        {
+          "lane": "capability-governance",
+          "source": "P6b",
+          "referenceId": "synthetic-knowledge-search",
+          "decisionOrState": "approved",
+          "evidencePath": "shared/examples/agent-capability-governance/knowledge-search.decision.json"
+        }
+      ],
+      "controlImplication": "The platform can explain why a low-risk action was eligible to proceed without recording tool payloads or prompt text."
+    },
+    {
+      "scenarioId": "scenario_denied_tool_call",
+      "title": "Denied unapproved tool call",
+      "outcome": "denied",
+      "narrative": "An agent session requests a tool outside the approved allowlist, so runtime governance denies the action before execution.",
+      "evidenceRefs": [
+        {
+          "lane": "runtime-agentops",
+          "source": "P6a",
+          "referenceId": "agent_req_0003",
+          "decisionOrState": "deny",
+          "evidencePath": "shared/examples/agentops-governance/agent-action.denied-tool.json"
+        }
+      ],
+      "controlImplication": "The platform can show least-privilege enforcement for tool access without running the requested tool."
+    },
+    {
+      "scenarioId": "scenario_human_approval_required",
+      "title": "High-impact action requires approval",
+      "outcome": "approval-required",
+      "narrative": "A high-impact action reaches the governance layer and pauses for human approval before any runtime action can continue.",
+      "evidenceRefs": [
+        {
+          "lane": "runtime-agentops",
+          "source": "P6a",
+          "referenceId": "agent_req_0002",
+          "decisionOrState": "approval-required",
+          "evidencePath": "shared/examples/agentops-governance/agent-action.approval-required.json"
+        },
+        {
+          "lane": "guardrails-as-a-service",
+          "source": "P2",
+          "referenceId": "guardrail_req_0004",
+          "decisionOrState": "approval-required",
+          "evidencePath": "shared/examples/guardrails-as-a-service/high-risk-review.verdict.json"
+        }
+      ],
+      "controlImplication": "The platform can separate automated policy checks from human-owned approval for higher-risk actions."
+    },
+    {
+      "scenarioId": "scenario_blocked_capability",
+      "title": "Capability blocked before runtime",
+      "outcome": "blocked-before-runtime",
+      "narrative": "A reusable capability fails synthetic scan evidence, so the admission decision blocks it before any agent can use it at runtime.",
+      "evidenceRefs": [
+        {
+          "lane": "capability-governance",
+          "source": "P6b",
+          "referenceId": "synthetic-external-export",
+          "decisionOrState": "blocked",
+          "evidencePath": "shared/examples/agent-capability-governance/external-export.decision.json"
+        },
+        {
+          "lane": "capability-governance",
+          "source": "P6b",
+          "referenceId": "synthetic-external-export",
+          "decisionOrState": "scan-failed",
+          "evidencePath": "shared/examples/agent-capability-governance/external-export.evidence.json"
+        }
+      ],
+      "controlImplication": "The platform can govern what an agent may install or access before runtime policy evaluates a specific action."
+    },
+    {
+      "scenarioId": "scenario_retired_rag_source",
+      "title": "Retired RAG source blocked",
+      "outcome": "retired-source-blocked",
+      "narrative": "A knowledge source is retired, so it is no longer eligible to contribute to new governed RAG answers or citations.",
+      "evidenceRefs": [
+        {
+          "lane": "rag-knowledge-lifecycle",
+          "source": "P6c",
+          "referenceId": "legacy-platform-handbook-001",
+          "decisionOrState": "retired",
+          "evidencePath": "shared/examples/rag-knowledge-lifecycle/legacy-platform-handbook.retired.json"
+        }
+      ],
+      "controlImplication": "The platform can make source lifecycle state part of retrieval governance before producing new knowledge-grounded responses."
+    }
+  ],
+  "boundaries": {
+    "containsSensitiveData": false,
+    "containsPromptTranscript": false,
+    "executesRuntimeAction": false,
+    "callsProvider": false,
+    "deploysCloudResources": false,
+    "persistsAuditRecords": false
+  }
+}
