@@ -13,6 +13,16 @@ on:
           - plan
           - apply
           - destroy
+      confirm_apply:
+        description: "For apply only, type I_UNDERSTAND_COST_AND_TEARDOWN"
+        required: false
+        default: ""
+        type: string
+      confirm_destroy:
+        description: "For destroy only, type I_UNDERSTAND_DESTROY"
+        required: false
+        default: ""
+        type: string
 
 permissions:
   contents: read
@@ -45,14 +55,6 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
-      - name: Configure AWS credentials for sandbox plan
-        if: ${{ inputs.mode == 'plan' }}
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ env.AWS_ROLE_TO_ASSUME }}
-          aws-region: ${{ env.AWS_REGION }}
-          mask-aws-account-id: true
-
       - name: Terraform init without backend for validation
         if: ${{ inputs.mode == 'validate' }}
         run: terraform init -backend=false
@@ -68,8 +70,32 @@ jobs:
           echo "It does not create a saved tfplan artifact and does not run apply or destroy."
           echo "Do not commit tfvars, tfstate, tfplan, kubeconfig, account IDs, ARNs, endpoints, or credentials."
 
+      - name: Confirm sandbox apply gate
+        if: ${{ inputs.mode == 'apply' }}
+        env:
+          CONFIRM_APPLY: ${{ inputs.confirm_apply }}
+        run: |
+          if [ "$CONFIRM_APPLY" != "I_UNDERSTAND_COST_AND_TEARDOWN" ]; then
+            echo "::error::Apply requires confirm_apply=I_UNDERSTAND_COST_AND_TEARDOWN."
+            echo "::error::Confirm budget alarm, same-day teardown intent, synthetic-only workload, and aws-sandbox environment approval before applying."
+            exit 1
+          fi
+          echo "Apply confirmation accepted. Proceeding with backend initialization and Terraform apply."
+
+      - name: Confirm sandbox destroy gate
+        if: ${{ inputs.mode == 'destroy' }}
+        env:
+          CONFIRM_DESTROY: ${{ inputs.confirm_destroy }}
+        run: |
+          if [ "$CONFIRM_DESTROY" != "I_UNDERSTAND_DESTROY" ]; then
+            echo "::error::Destroy requires confirm_destroy=I_UNDERSTAND_DESTROY."
+            echo "::error::Confirm teardown owner, evidence capture, and aws-sandbox environment approval before destroying."
+            exit 1
+          fi
+          echo "Destroy confirmation accepted. Proceeding with backend initialization and Terraform destroy."
+
       - name: Check backend environment variables
-        if: ${{ inputs.mode == 'plan' }}
+        if: ${{ inputs.mode != 'validate' }}
         run: |
           missing=0
           for name in AWS_ROLE_TO_ASSUME AWS_REGION TF_BACKEND_BUCKET TF_BACKEND_LOCK_TABLE TF_STATE_KEY_PREFIX TF_STATE_KEY; do
@@ -82,8 +108,16 @@ jobs:
             exit 1
           fi
 
+      - name: Configure AWS credentials for sandbox operation
+        if: ${{ inputs.mode != 'validate' }}
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ env.AWS_REGION }}
+          mask-aws-account-id: true
+
       - name: Terraform init with remote backend
-        if: ${{ inputs.mode == 'plan' }}
+        if: ${{ inputs.mode != 'validate' }}
         run: |
           terraform init \
             -backend-config="bucket=${TF_BACKEND_BUCKET}" \
@@ -92,19 +126,24 @@ jobs:
             -backend-config="dynamodb_table=${TF_BACKEND_LOCK_TABLE}" \
             -backend-config="encrypt=true"
 
-      - name: Terraform validate before plan
-        if: ${{ inputs.mode == 'plan' }}
+      - name: Terraform validate before remote operation
+        if: ${{ inputs.mode != 'validate' }}
         run: terraform validate
 
       - name: Terraform plan without saved artifact
         if: ${{ inputs.mode == 'plan' }}
         run: terraform plan -input=false -no-color
 
-      - name: Refuse apply or destroy until sandbox enablement PR
-        if: ${{ inputs.mode == 'apply' || inputs.mode == 'destroy' }}
+      - name: Terraform apply sandbox
+        if: ${{ inputs.mode == 'apply' }}
         run: |
-          echo "Mode '${{ inputs.mode }}' is intentionally disabled in this validate-only skeleton."
-          echo "Enable real apply/destroy only after an explicit enablement PR adds budget evidence, approval gates, teardown evidence, and release evidence."
-          echo "The current workflow supports validate and backend-backed plan only."
-          echo "Do not commit backend.tf, tfvars, tfstate, tfplan, kubeconfig, account IDs, ARNs, endpoints, or credentials."
-          exit 1
+          echo "Running Terraform apply for the short-lived EKS sandbox."
+          echo "Do not copy account IDs, ARNs, endpoints, kubeconfig, tfstate, or plan output into git."
+          terraform apply -input=false -auto-approve -no-color
+
+      - name: Terraform destroy sandbox
+        if: ${{ inputs.mode == 'destroy' }}
+        run: |
+          echo "Running Terraform destroy for the short-lived EKS sandbox."
+          echo "Capture only sanitized teardown evidence."
+          terraform destroy -input=false -auto-approve -no-color

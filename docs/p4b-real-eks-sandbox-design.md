@@ -98,9 +98,11 @@ providers/aws/infra/terraform/modules/
   eks/
 ```
 
-The Terraform skeleton now exists in those paths. It defines the intended VPC, public subnet, EKS cluster, and managed node group shape. The workflow can run a backend-backed `plan` through the `aws-sandbox` GitHub environment, but still refuses real `apply` and `destroy` until budget, approval, and teardown evidence are confirmed.
+The Terraform skeleton now exists in those paths. It defines the intended VPC, public subnet, EKS cluster, and managed node group shape. The workflow can run backend-backed `plan`, confirmation-gated `apply`, and confirmation-gated `destroy` through the `aws-sandbox` GitHub environment.
 
 The workflow uses a fixed GitHub Actions concurrency group for the EKS sandbox stack. This queues overlapping manual runs instead of allowing them to compete for the same state key, while Terraform's DynamoDB backend lock remains the authoritative state lock.
+
+Real `apply` requires the exact `confirm_apply` input value `I_UNDERSTAND_COST_AND_TEARDOWN`. Real `destroy` requires the exact `confirm_destroy` input value `I_UNDERSTAND_DESTROY`. These confirmation strings are not secrets; they are deliberate friction so sandbox mutation only happens after budget, teardown, and evidence boundaries are reviewed.
 
 State key pattern:
 

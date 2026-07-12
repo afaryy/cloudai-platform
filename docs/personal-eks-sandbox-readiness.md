@@ -41,6 +41,7 @@ The normal delivery plane should be GitHub Actions with OIDC and environment app
 | Backend example | `providers/aws/infra/terraform/envs/eks-sandbox/backend.tf.example` | Documents the private Terraform backend shape without real names. |
 | Terraform environment | `providers/aws/infra/terraform/envs/eks-sandbox/` | Holds the future sandbox Terraform entry point. |
 | Manual workflow | `.github/workflows/terraform-eks-sandbox.yml` | Supports manual validate and backend-backed plan flow. |
+| Evidence template | `docs/templates/p4b-eks-sandbox-apply-destroy-evidence.md` | Provides a public-safe checklist for apply and destroy evidence. |
 | Release controls | `docs/eks-release-gates-and-rollback.md` | Defines release gates, rollout observation, rollback, and evidence. |
 | Helm package | `helm/ai-api-service/` | Synthetic mock API workload package for future deployment evidence. |
 | Argo CD pattern | `argocd/applications/cloudai-api-sandbox.yaml` | Manual GitOps promotion pattern for the mock API. |
@@ -83,6 +84,28 @@ workflow_dispatch
   -> terraform plan without saving a tfplan artifact
 ```
 
+```text
+workflow_dispatch
+  -> mode: apply
+  -> confirm_apply: I_UNDERSTAND_COST_AND_TEARDOWN
+  -> aws-sandbox environment approval
+  -> configure AWS credentials through OIDC
+  -> terraform init with S3 backend
+  -> terraform validate
+  -> terraform apply -auto-approve
+```
+
+```text
+workflow_dispatch
+  -> mode: destroy
+  -> confirm_destroy: I_UNDERSTAND_DESTROY
+  -> aws-sandbox environment approval
+  -> configure AWS credentials through OIDC
+  -> terraform init with S3 backend
+  -> terraform validate
+  -> terraform destroy -auto-approve
+```
+
 Recommended environment variable contract:
 
 | Name | Type | Purpose |
@@ -99,9 +122,11 @@ The EKS sandbox state key is derived as:
 cloudai-platform/eks-sandbox/terraform.tfstate
 ```
 
-The workflow does not run `terraform apply`, `terraform destroy`, Helm deployment, Argo CD sync, or kubectl commands. Those actions belong in later opt-in slices after the budget, teardown, identity, and release gates are reviewed.
+The workflow can run `terraform apply` and `terraform destroy` only through manual dispatch, exact confirmation phrases, and the `aws-sandbox` environment. It does not run Helm deployment, Argo CD sync, or kubectl commands. Those actions belong in later opt-in slices after the first EKS apply/destroy evidence is captured.
 
 The workflow uses the `terraform-eks-sandbox` concurrency group with `cancel-in-progress: false`. This queues overlapping manual runs instead of allowing two runs to compete for the same EKS sandbox state key. Terraform's DynamoDB backend lock remains the authoritative state lock; GitHub Actions concurrency is an additional delivery-plane guardrail.
+
+Use `docs/templates/p4b-eks-sandbox-apply-destroy-evidence.md` after each real run. Keep the evidence sanitized and do not commit live command output containing account identifiers, ARNs, endpoints, kubeconfig, state, or billing details.
 
 ## Budget And Cleanup Rules
 
@@ -126,11 +151,9 @@ Teardown is complete only when:
 
 ## Future Apply Decision
 
-A future PR may add `apply` and `destroy` modes only after this readiness pack is accepted.
+The workflow now contains an opt-in apply/destroy path for the Terraform EKS sandbox. The design boundary for this real-cloud step is documented in `docs/p4b-real-eks-sandbox-design.md`. The first real slice should focus on EKS, Terraform, GitHub Actions OIDC, apply evidence, and teardown before adding Helm deployment, Bedrock, or Bedrock AgentCore.
 
-The design boundary for that real-cloud step is documented in `docs/p4b-real-eks-sandbox-design.md`. The first real slice should focus on EKS, Terraform, GitHub Actions OIDC, Helm deployment, rollout evidence, and teardown before adding Bedrock or Bedrock AgentCore.
-
-That PR must:
+Before using `apply`, confirm:
 
 - keep `workflow_dispatch`;
 - use the `aws-sandbox` environment;
@@ -138,7 +161,7 @@ That PR must:
 - document the budget and teardown gates;
 - keep workload values synthetic;
 - avoid committing account-specific values;
-- include a rollback and destroy path.
+- include a destroy path.
 
 ## Portfolio Explanation
 

@@ -98,9 +98,9 @@ The workflow also uses a fixed GitHub Actions concurrency group, `terraform-eks-
 - kubeconfig.
 - real account IDs, role ARNs, endpoints, or generated credentials.
 
-## Future Apply Boundary
+## Apply And Destroy Boundary
 
-Before any real `terraform apply`, define:
+Before any real `terraform apply`, confirm:
 
 1. AWS account and region.
 2. Budget limit and alarm.
@@ -109,7 +109,7 @@ Before any real `terraform apply`, define:
 5. Synthetic workload evidence to capture.
 6. GitHub environment approval rule.
 
-Until then, this environment is validate/plan-only. When apply is introduced, it should run through GitHub Actions with OIDC and environment approval, not as the normal laptop-local path.
+Apply and destroy run through GitHub Actions with OIDC, `aws-sandbox` environment approval, remote backend locking, and exact confirmation inputs. Apply requires `confirm_apply=I_UNDERSTAND_COST_AND_TEARDOWN`. Destroy requires `confirm_destroy=I_UNDERSTAND_DESTROY`.
 
 ## Current Workflow Boundary
 
@@ -117,7 +117,7 @@ The current `.github/workflows/terraform-eks-sandbox.yml` workflow supports:
 
 - `validate`: local Terraform initialization without backend and `terraform validate`;
 - `plan`: OIDC credential configuration, remote S3 backend initialization from GitHub environment values, validation, and `terraform plan`;
-- `apply`: visible but intentionally refused in code until a later enablement PR;
-- `destroy`: visible but intentionally refused in code until a later enablement PR.
+- `apply`: confirmation gate, OIDC credential configuration, remote backend initialization, validation, and `terraform apply`;
+- `destroy`: confirmation gate, OIDC credential configuration, remote backend initialization, validation, and `terraform destroy`.
 
-It does not run real `terraform apply`, real `terraform destroy`, Helm deploy, Argo CD sync, or kubectl commands. Those operations require a later explicitly approved slice with budget evidence, environment approval, teardown evidence, and release evidence.
+It does not run Helm deploy, Argo CD sync, or kubectl commands. Those operations require a later explicitly approved slice with rollout, rollback, and release evidence.
