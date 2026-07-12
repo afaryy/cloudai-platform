@@ -1,6 +1,6 @@
 # EKS Sandbox Terraform Environment
 
-This folder is a synthetic-only placeholder for a future personal AWS EKS sandbox.
+This folder contains a validate-only Terraform skeleton for a future personal AWS EKS sandbox.
 
 The first implementation should prove release-engineering skills with the smallest useful scope:
 
@@ -8,7 +8,7 @@ The first implementation should prove release-engineering skills with the smalle
 - DynamoDB state locking.
 - GitHub Actions OIDC role assumption.
 - GitHub Actions as the normal delivery plane for apply, deploy, and teardown.
-- Minimal EKS cluster only after explicit approval.
+- Minimal EKS cluster and managed node group skeleton only after explicit approval.
 - Synthetic workload only.
 - Budget alarm and teardown runbook before apply.
 - P4b readiness checklist in `docs/personal-eks-sandbox-readiness.md`.
@@ -16,7 +16,34 @@ The first implementation should prove release-engineering skills with the smalle
 ## Files
 
 - `backend.tf.example` documents the remote backend shape with placeholders.
-- `versions.tf` pins the Terraform and provider requirements for future validation.
+- `versions.tf` pins the Terraform and provider requirements for validation.
+- `main.tf` wires the `network` and `eks` modules together.
+- `variables.tf` defines public-safe defaults for the sandbox shape.
+- `outputs.tf` defines sanitized output names. Do not commit live output values.
+
+## Terraform Shape
+
+The current skeleton includes:
+
+- a no-NAT VPC module;
+- public subnets for the first low-cost sandbox path;
+- an internet gateway and public route table;
+- an EKS cluster module;
+- a single managed node group with one small instance by default;
+- project, environment, data-scope, cost-boundary, and teardown tags.
+
+It does not include Bedrock, Bedrock AgentCore, Argo CD installation, Helm deployment, real model calls, or any production data path.
+
+## Validate Locally
+
+Run from the repository root:
+
+```bash
+terraform -chdir=providers/aws/infra/terraform/envs/eks-sandbox init -backend=false
+terraform -chdir=providers/aws/infra/terraform/envs/eks-sandbox validate
+```
+
+This validation does not use the real remote backend and does not deploy AWS resources.
 
 ## Do Not Commit
 
@@ -47,5 +74,7 @@ The current `.github/workflows/terraform-eks-sandbox.yml` workflow supports:
 
 - `validate`: local Terraform initialization without backend and `terraform validate`;
 - `plan`: OIDC credential configuration followed by a readiness placeholder and validation.
+- `apply`: visible but intentionally refused until a later enablement PR;
+- `destroy`: visible but intentionally refused until a later enablement PR.
 
-It does not run `terraform apply`, `terraform destroy`, Helm deploy, Argo CD sync, or kubectl commands. Those operations require a later explicitly approved slice with budget and teardown evidence.
+It does not run real `terraform apply`, real `terraform destroy`, Helm deploy, Argo CD sync, or kubectl commands. Those operations require a later explicitly approved slice with budget and teardown evidence.
