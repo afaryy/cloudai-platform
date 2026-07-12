@@ -18,6 +18,10 @@ permissions:
   contents: read
   id-token: write
 
+concurrency:
+  group: terraform-eks-sandbox
+  cancel-in-progress: false
+
 jobs:
   terraform:
     name: Terraform EKS sandbox readiness
@@ -100,6 +104,7 @@ jobs:
         if: ${{ inputs.mode == 'apply' || inputs.mode == 'destroy' }}
         run: |
           echo "Mode '${{ inputs.mode }}' is intentionally disabled in this validate-only skeleton."
-          echo "Enable real apply/destroy only after private backend, budget alarm, environment approval, and teardown evidence are confirmed."
+          echo "Enable real apply/destroy only after an explicit enablement PR adds budget evidence, approval gates, teardown evidence, and release evidence."
+          echo "The current workflow supports validate and backend-backed plan only."
           echo "Do not commit backend.tf, tfvars, tfstate, tfplan, kubeconfig, account IDs, ARNs, endpoints, or credentials."
           exit 1

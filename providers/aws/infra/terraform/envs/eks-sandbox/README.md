@@ -86,6 +86,8 @@ cloudai-platform/genai-gateway/terraform.tfstate
 
 The workflow does not save a `tfplan` artifact. This avoids persisting account-specific plan output while still proving backend initialization, validation, and plan generation.
 
+The workflow also uses a fixed GitHub Actions concurrency group, `terraform-eks-sandbox`, with `cancel-in-progress: false`. This queues overlapping manual runs instead of allowing two EKS sandbox runs to compete for the same state key and backend lock at the same time.
+
 ## Do Not Commit
 
 - `backend.tf` with real bucket names.
@@ -115,7 +117,7 @@ The current `.github/workflows/terraform-eks-sandbox.yml` workflow supports:
 
 - `validate`: local Terraform initialization without backend and `terraform validate`;
 - `plan`: OIDC credential configuration, remote S3 backend initialization from GitHub environment values, validation, and `terraform plan`;
-- `apply`: visible but intentionally refused until a later enablement PR;
-- `destroy`: visible but intentionally refused until a later enablement PR.
+- `apply`: visible but intentionally refused in code until a later enablement PR;
+- `destroy`: visible but intentionally refused in code until a later enablement PR.
 
-It does not run real `terraform apply`, real `terraform destroy`, Helm deploy, Argo CD sync, or kubectl commands. Those operations require a later explicitly approved slice with budget and teardown evidence.
+It does not run real `terraform apply`, real `terraform destroy`, Helm deploy, Argo CD sync, or kubectl commands. Those operations require a later explicitly approved slice with budget evidence, environment approval, teardown evidence, and release evidence.
