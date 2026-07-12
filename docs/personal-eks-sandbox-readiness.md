@@ -42,6 +42,7 @@ The normal delivery plane should be GitHub Actions with OIDC and environment app
 | Terraform environment | `providers/aws/infra/terraform/envs/eks-sandbox/` | Holds the future sandbox Terraform entry point. |
 | Manual workflow | `.github/workflows/terraform-eks-sandbox.yml` | Supports manual validate and backend-backed plan flow. |
 | Evidence template | `docs/templates/p4b-eks-sandbox-apply-destroy-evidence.md` | Provides a public-safe checklist for apply and destroy evidence. |
+| Operator runbook | `docs/p4b-eks-sandbox-operator-runbook.md` | Defines when to apply, when to destroy, and what evidence is safe to keep. |
 | Release controls | `docs/eks-release-gates-and-rollback.md` | Defines release gates, rollout observation, rollback, and evidence. |
 | Helm package | `helm/ai-api-service/` | Synthetic mock API workload package for future deployment evidence. |
 | Argo CD pattern | `argocd/applications/cloudai-api-sandbox.yaml` | Manual GitOps promotion pattern for the mock API. |
@@ -127,6 +128,8 @@ The workflow can run `terraform apply` and `terraform destroy` only through manu
 The workflow uses the `terraform-eks-sandbox` concurrency group with `cancel-in-progress: false`. This queues overlapping manual runs instead of allowing two runs to compete for the same EKS sandbox state key. Terraform's DynamoDB backend lock remains the authoritative state lock; GitHub Actions concurrency is an additional delivery-plane guardrail.
 
 Use `docs/templates/p4b-eks-sandbox-apply-destroy-evidence.md` after each real run. Keep the evidence sanitized and do not commit live command output containing account identifiers, ARNs, endpoints, kubeconfig, state, or billing details.
+
+Use `docs/p4b-eks-sandbox-operator-runbook.md` as the day-of-run checklist. If the runbook's pre-apply conditions are not met, do not apply yet.
 
 ## Budget And Cleanup Rules
 
