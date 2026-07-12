@@ -101,6 +101,8 @@ cloudai-platform/eks-sandbox/terraform.tfstate
 
 The workflow does not run `terraform apply`, `terraform destroy`, Helm deployment, Argo CD sync, or kubectl commands. Those actions belong in later opt-in slices after the budget, teardown, identity, and release gates are reviewed.
 
+The workflow uses the `terraform-eks-sandbox` concurrency group with `cancel-in-progress: false`. This queues overlapping manual runs instead of allowing two runs to compete for the same EKS sandbox state key. Terraform's DynamoDB backend lock remains the authoritative state lock; GitHub Actions concurrency is an additional delivery-plane guardrail.
+
 ## Budget And Cleanup Rules
 
 Before creating an EKS cluster:

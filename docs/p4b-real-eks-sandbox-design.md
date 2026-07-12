@@ -100,6 +100,8 @@ providers/aws/infra/terraform/modules/
 
 The Terraform skeleton now exists in those paths. It defines the intended VPC, public subnet, EKS cluster, and managed node group shape. The workflow can run a backend-backed `plan` through the `aws-sandbox` GitHub environment, but still refuses real `apply` and `destroy` until budget, approval, and teardown evidence are confirmed.
 
+The workflow uses a fixed GitHub Actions concurrency group for the EKS sandbox stack. This queues overlapping manual runs instead of allowing them to compete for the same state key, while Terraform's DynamoDB backend lock remains the authoritative state lock.
+
 State key pattern:
 
 ```text
