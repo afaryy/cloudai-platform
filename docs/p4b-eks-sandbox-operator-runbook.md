@@ -20,6 +20,8 @@ If any item is missing, do not apply yet.
 
 ## Before Apply
 
+Use `docs/p4b-eks-apply-readiness-check.md` as the final go/no-go check before running any real apply. If that checklist produces a no-go signal, stop before credentials are configured.
+
 Run `validate` first:
 
 ```text

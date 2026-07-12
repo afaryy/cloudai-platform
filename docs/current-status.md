@@ -101,6 +101,8 @@ Recommended next choices:
 - **P4b budget and teardown setup:** confirm AWS Budget, teardown owner, and environment protection before enabling real apply/destroy. The workflow can now run a backend-backed `plan` through the `aws-sandbox` environment.
 - **P6 AI Traffic Governance evidence expansion:** add more synthetic scenario variants only if they explain a new governance outcome that is not already covered by P6e/P6f.
 - **P4b future apply/destroy slice:** add live sandbox apply and destroy only after explicit approval, budget alarm, private backend setup, environment protection, and teardown path are confirmed.
+- **P4b pre-apply readiness check:** use `docs/p4b-eks-apply-readiness-check.md` as the final go/no-go checklist before any real personal EKS sandbox apply.
+- **P7 AI Factory learning note:** use `docs/ai-factory-learning-note.md` to explain why cloud architecture is evolving into AI-ready platform architecture rather than disappearing.
 
 The repository should not perform a real cloud deployment by default. Any personal sandbox work must keep account identifiers, state, kubeconfig, plan files, tfvars, credentials, and live endpoint details out of git.
 
