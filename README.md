@@ -60,6 +60,7 @@ RAG, AgentOps, and evidence:
 Release engineering and delivery:
 
 - [AI release engineering on EKS](docs/ai-release-engineering-on-eks.md) - P4 EKS release-engineering track.
+- [Personal EKS sandbox readiness](docs/personal-eks-sandbox-readiness.md) - P4b optional personal AWS sandbox boundary, budget, OIDC, backend, and teardown guidance.
 - [EKS release gates and rollback](docs/eks-release-gates-and-rollback.md) - P4d gates, rollout observation, rollback, and evidence expectations.
 - [AI-assisted DevSecOps pattern](docs/ai-assisted-devsecops-pattern.md) - P5a advisory AI delivery boundary.
 - [AI-assisted review evidence](docs/ai-assisted-review-evidence.md) - P5b synthetic review, CI, threat-model, and release-note evidence.
@@ -86,7 +87,7 @@ The goal is to show practical architecture thinking and incremental platform del
 - **P2 Secure AI Enablement:** secure AI enablement for Cloud & AI platform workflows.
 - **P2 Guardrails as a Service:** synthetic PII, jailbreak, prompt-injection, safety, and review verdicts.
 - **P2 AI FinOps and Observability:** token cost tracking, evaluation, runbook, and operations practices.
-- **P4 EKS Release Engineering:** future EKS-based AI release engineering and Terraform-oriented AWS platform foundations as placeholders.
+- **P4 EKS Release Engineering:** future EKS-based AI release engineering, optional personal sandbox readiness, and Terraform-oriented AWS platform foundations.
 - **P5 AI-Assisted DevSecOps:** GitHub Actions CI/CD skeletons and human-owned delivery controls.
 - **P6 AI Traffic Governance:** a broader traffic governance layer for future agent and tool flows.
 - **P6b Capability Governance:** declared permissions, synthetic scan/evaluation evidence, admission decisions, and lifecycle status for reusable agent assets.
@@ -159,7 +160,7 @@ Track B explores release engineering for AI services on Amazon EKS. It is split 
 Current scope:
 
 - **P4a Helm Packaging:** portfolio-ready Helm chart for the mock AI API service, including Kubernetes packaging, probes, resource boundaries, synthetic labels, and optional PodDisruptionBudget.
-- **P4b Optional Personal EKS Sandbox:** Terraform-managed sandbox, explicit budget, manual approval, synthetic workload only, and teardown guidance.
+- **P4b Optional Personal EKS Sandbox:** Terraform-managed sandbox readiness, explicit budget, manual approval, synthetic workload only, and teardown guidance.
 - **P4c GitOps Pattern:** synthetic Argo CD Application manifest, manual sync posture, release metadata, and promotion boundaries.
 - **P4d Release Gates and Rollback:** pre-deploy gates, rollout observation, rollback choices, failure modes, and evidence expectations.
 - EKS module placeholder remains deferred until the personal sandbox path is explicitly approved.

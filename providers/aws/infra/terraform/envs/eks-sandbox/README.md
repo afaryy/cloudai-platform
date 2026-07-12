@@ -11,6 +11,7 @@ The first implementation should prove release-engineering skills with the smalle
 - Minimal EKS cluster only after explicit approval.
 - Synthetic workload only.
 - Budget alarm and teardown runbook before apply.
+- P4b readiness checklist in `docs/personal-eks-sandbox-readiness.md`.
 
 ## Files
 
@@ -39,3 +40,12 @@ Before any real `terraform apply`, define:
 6. GitHub environment approval rule.
 
 Until then, this environment is validate/plan-readiness only. When apply is introduced, it should run through GitHub Actions with OIDC and environment approval, not as the normal laptop-local path.
+
+## Current Workflow Boundary
+
+The current `.github/workflows/terraform-eks-sandbox.yml` workflow supports:
+
+- `validate`: local Terraform initialization without backend and `terraform validate`;
+- `plan`: OIDC credential configuration followed by a readiness placeholder and validation.
+
+It does not run `terraform apply`, `terraform destroy`, Helm deploy, Argo CD sync, or kubectl commands. Those operations require a later explicitly approved slice with budget and teardown evidence.
