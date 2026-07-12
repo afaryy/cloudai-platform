@@ -96,6 +96,7 @@ Completed P4 split:
 
 Recommended next choices:
 
+- **P4b real EKS sandbox design:** use `docs/p4b-real-eks-sandbox-design.md` as the design-only bridge from readiness docs to a future personal AWS EKS apply/destroy path.
 - **P6 AI Traffic Governance evidence expansion:** add more synthetic scenario variants only if they explain a new governance outcome that is not already covered by P6e/P6f.
 - **P4b future apply/destroy slice:** add live sandbox apply and destroy only after explicit approval, budget alarm, private backend setup, environment protection, and teardown path are confirmed.
 
