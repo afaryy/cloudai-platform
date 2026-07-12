@@ -87,11 +87,12 @@ The goal is to show practical architecture thinking and incremental platform del
 - **P2 Secure AI Enablement:** secure AI enablement for Cloud & AI platform workflows.
 - **P2 Guardrails as a Service:** synthetic PII, jailbreak, prompt-injection, safety, and review verdicts.
 - **P2 AI FinOps and Observability:** token cost tracking, evaluation, runbook, and operations practices.
-- **P4 EKS Release Engineering:** future EKS-based AI release engineering, optional personal sandbox readiness, and Terraform-oriented AWS platform foundations.
-- **P5 AI-Assisted DevSecOps:** GitHub Actions CI/CD skeletons and human-owned delivery controls.
-- **P6 AI Traffic Governance:** a broader traffic governance layer for future agent and tool flows.
+- **P4 EKS Release Engineering:** Helm, Argo CD, release gates, rollback guidance, optional personal sandbox readiness, and Terraform-oriented AWS platform foundations.
+- **P5 AI-Assisted DevSecOps:** GitHub Actions CI/CD skeletons, advisory AI boundaries, review evidence, and human-owned delivery controls.
+- **P6 AI Traffic Governance:** mock Runtime AgentOps, capability governance, RAG knowledge lifecycle, control-plane evidence, scenario outcomes, and security/operations controls.
 - **P6b Capability Governance:** declared permissions, synthetic scan/evaluation evidence, admission decisions, and lifecycle status for reusable agent assets.
 - **P6c RAG Knowledge Lifecycle:** source provenance, owner, classification, authorised knowledge bases, retention, review, and active/paused/retired status.
+- **P6d Control-Plane Evidence Map:** connected evidence across runtime AgentOps, capability admission, RAG lifecycle, guardrails, and AI-assisted review.
 - **P6e Control-Plane Evidence Scenarios:** allowed, denied, approval-required, blocked-before-runtime, and retired-source-blocked AI governance outcomes.
 - **P6f AI Platform Security and Operations Controls:** identity, data protection, AI AppSec, delivery gates, operations, and FinOps.
 
@@ -308,8 +309,9 @@ Current milestone: mock GenAI gateway, governed RAG evidence, AgentOps decisions
 Near-term:
 
 - Keep API contracts, request metadata, token guardrails, policy profile examples, and RAG governance examples aligned.
-- Make P6 AgentOps / AI Traffic Governance the next mock-first focus by improving runtime decision evidence, capability lifecycle examples, and traffic governance documentation.
-- Keep future slices synthetic and contract-first before adding any runtime agent behavior.
+- Deepen optional P4b personal EKS sandbox evidence before any real `apply`, especially readiness, approval, plan, rollback, teardown, and cost evidence.
+- Add future P6 AgentOps / AI Traffic Governance scenarios only when they explain a new governance outcome not already covered by the current evidence set.
+- Keep future slices synthetic and contract-first before adding any runtime agent behavior or cloud deployment.
 - Continue refreshing status and planning docs as future slices land.
 
 Later:
