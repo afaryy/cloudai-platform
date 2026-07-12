@@ -272,7 +272,7 @@ Useful entry points:
 - `docs/agent-capability-governance.md` for capability admission before runtime use.
 - `docs/rag-knowledge-lifecycle.md` for source lifecycle and retired-source controls.
 - `docs/guardrails-as-a-service.md` for shared safety verdict contracts.
-- `docs/personal-eks-sandbox-readiness.md` for the P4b optional personal AWS EKS sandbox readiness boundary.
+- `docs/p4b-eks-sandbox-operator-runbook.md` for the P4b optional personal AWS EKS sandbox readiness, apply/destroy, and evidence boundary.
 - `docs/ai-assisted-devsecops-pattern.md` and `docs/ai-assisted-review-evidence.md` for P5 delivery controls.
 - `docs/control-plane-evidence-map.md` for the P6d evidence map.
 - `docs/control-plane-evidence-scenarios.md` for the P6e evidence scenario pack.

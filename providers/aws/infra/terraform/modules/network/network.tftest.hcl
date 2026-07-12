@@ -5,8 +5,8 @@ run "plans_public_sandbox_network" {
 
   variables {
     name_prefix         = "cloudai-platform-eks-sandbox"
-    vpc_cidr            = "10.42.0.0/16"
-    public_subnet_cidrs = ["10.42.0.0/24", "10.42.1.0/24"]
+    vpc_cidr            = "10.42.0.0/24"
+    public_subnet_cidrs = ["10.42.0.0/26", "10.42.0.64/26"]
     availability_zones  = ["ap-southeast-2a", "ap-southeast-2b"]
     tags = {
       Project     = "cloudai-platform"
@@ -16,8 +16,8 @@ run "plans_public_sandbox_network" {
   }
 
   assert {
-    condition     = aws_vpc.this.cidr_block == "10.42.0.0/16"
-    error_message = "The sandbox VPC must use the requested CIDR block."
+    condition     = aws_vpc.this.cidr_block == "10.42.0.0/24"
+    error_message = "The sandbox VPC must stay small for the personal EKS sandbox."
   }
 
   assert {
@@ -46,8 +46,8 @@ run "rejects_missing_availability_zone" {
 
   variables {
     name_prefix         = "cloudai-platform-eks-sandbox"
-    vpc_cidr            = "10.42.0.0/16"
-    public_subnet_cidrs = ["10.42.0.0/24", "10.42.1.0/24"]
+    vpc_cidr            = "10.42.0.0/24"
+    public_subnet_cidrs = ["10.42.0.0/26", "10.42.0.64/26"]
     availability_zones  = ["ap-southeast-2a"]
   }
 

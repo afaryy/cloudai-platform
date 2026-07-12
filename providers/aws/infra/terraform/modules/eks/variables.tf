@@ -17,7 +17,7 @@ variable "kubernetes_version" {
 variable "endpoint_private_access" {
   description = "Whether the EKS API endpoint is reachable privately."
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "endpoint_public_access" {
@@ -27,9 +27,17 @@ variable "endpoint_public_access" {
 }
 
 variable "endpoint_public_access_cidrs" {
-  description = "CIDR blocks allowed to reach the public EKS API endpoint. Override in private settings before real apply."
+  description = "Explicit /32 CIDR blocks allowed to reach the public EKS API endpoint. Override with the operator public IP before real apply."
   type        = list(string)
-  default     = ["0.0.0.0/0"]
+  default     = ["203.0.113.10/32"]
+
+  validation {
+    condition = length(var.endpoint_public_access_cidrs) > 0 && alltrue([
+      for cidr in var.endpoint_public_access_cidrs :
+      cidr != "0.0.0.0/0" && endswith(cidr, "/32")
+    ])
+    error_message = "EKS public endpoint access must use explicit /32 CIDRs and must not include 0.0.0.0/0."
+  }
 }
 
 variable "node_ami_type" {

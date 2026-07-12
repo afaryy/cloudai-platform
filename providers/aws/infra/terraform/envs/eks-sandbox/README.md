@@ -11,7 +11,7 @@ The first implementation should prove release-engineering skills with the smalle
 - Minimal EKS cluster and managed node group skeleton only after explicit approval.
 - Synthetic workload only.
 - Budget alarm and teardown runbook before apply.
-- P4b readiness checklist in `docs/personal-eks-sandbox-readiness.md`.
+- P4b operator runbook in `docs/p4b-eks-sandbox-operator-runbook.md`.
 
 ## Files
 
@@ -31,6 +31,9 @@ The current skeleton includes:
 - an internet gateway and public route table;
 - an EKS cluster module;
 - a single managed node group with one small instance by default;
+- a small default VPC CIDR, `10.42.0.0/24`, with two `/26` public subnets;
+- EKS private endpoint access enabled by default;
+- EKS public endpoint access restricted to explicit `/32` CIDRs and never `0.0.0.0/0`;
 - project, environment, data-scope, cost-boundary, and teardown tags.
 
 It does not include Bedrock, Bedrock AgentCore, Argo CD installation, Helm deployment, real model calls, or any production data path.
@@ -67,6 +70,7 @@ Required `aws-sandbox` environment values:
 - variable: `TF_BACKEND_BUCKET`
 - variable: `TF_BACKEND_LOCK_TABLE`
 - variable: `TF_STATE_KEY_PREFIX`
+- optional variable before real apply: `TF_VAR_ENDPOINT_PUBLIC_ACCESS_CIDRS`
 
 The EKS sandbox workflow derives the state key as:
 
@@ -87,6 +91,8 @@ cloudai-platform/genai-gateway/terraform.tfstate
 The workflow does not save a `tfplan` artifact. This avoids persisting account-specific plan output while still proving backend initialization, validation, and plan generation.
 
 The workflow also uses a fixed GitHub Actions concurrency group, `terraform-eks-sandbox`, with `cancel-in-progress: false`. This queues overlapping manual runs instead of allowing two EKS sandbox runs to compete for the same state key and backend lock at the same time.
+
+Before any real apply, set `TF_VAR_ENDPOINT_PUBLIC_ACCESS_CIDRS` in the `aws-sandbox` GitHub environment to the operator's current public IP as a `/32` CIDR list, for example `["203.0.113.10/32"]`. Use a real operator IP privately in GitHub settings only. The committed default uses a documentation-safe placeholder and is not intended as a usable operator access path. Do not use `0.0.0.0/0` for the EKS API endpoint.
 
 ## Do Not Commit
 
@@ -120,4 +126,4 @@ The current `.github/workflows/terraform-eks-sandbox.yml` workflow supports:
 - `apply`: confirmation gate, OIDC credential configuration, remote backend initialization, validation, and `terraform apply`;
 - `destroy`: confirmation gate, OIDC credential configuration, remote backend initialization, validation, and `terraform destroy`.
 
-It does not run Helm deploy, Argo CD sync, or kubectl commands. Those operations require a later explicitly approved slice with rollout, rollback, and release evidence.
+It does not run Helm deploy, Argo CD sync, or kubectl commands. Those operations require a later explicitly approved slice with rollout, rollback, release evidence, and a safe Kubernetes API access model.
