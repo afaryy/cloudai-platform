@@ -22,6 +22,55 @@ At a high level, it explores:
 
 For an end-to-end reader guide, including the TypeScript/Python language boundary, see `docs/cloudai-platform-solution-walkthrough.md`. For runnable local examples, see `examples/README.md`. For a short walkthrough flow, see `docs/demo-script.md`.
 
+## Documentation Guide
+
+Start here:
+
+- [Solution walkthrough](docs/cloudai-platform-solution-walkthrough.md) - end-to-end reader guide for the repository.
+- [Current status](docs/current-status.md) - current mock scope, completed evidence, and recommended next slice.
+- [Demo script](docs/demo-script.md) - short portfolio walkthrough flow.
+
+Core architecture:
+
+- [Architecture](docs/architecture.md) - CloudAI platform architecture and enterprise AI layers.
+- [CloudAI control plane](docs/control-plane.md) - policy, approval, audit, registry, cost, and observability responsibilities.
+- [GenAI / LLM gateway](docs/genai-llm-gateway.md) - governed model-access sub-layer.
+- [Governed model access](docs/governed-model-access.md) - approved model access patterns and controls.
+- [Cloud provider abstraction](docs/cloud-provider-abstraction.md) - provider boundary for AWS-first, multi-cloud-ready design.
+
+Security, governance, and operations:
+
+- [Secure AI enablement](docs/secure-ai-enablement.md) - cloud foundations for secure AI adoption.
+- [Guardrails as a Service](docs/guardrails-as-a-service.md) - synthetic safety verdict contracts.
+- [Responsible AI checklist](docs/responsible-ai-checklist.md) - governance and review checklist.
+- [AI platform security and operations controls](docs/ai-platform-security-operations-controls.md) - P6f identity, data protection, AI AppSec, delivery, operations, and FinOps matrix.
+- [Observability](docs/observability.md) - telemetry and evidence concepts.
+- [Operations runbook](docs/operations-runbook.md) - operational response and support guidance.
+- [AI FinOps](docs/ai-finops.md) - token, model, usage, and cost-control concepts.
+
+RAG, AgentOps, and evidence:
+
+- [AI traffic governance](docs/ai-traffic-governance.md) - P6a runtime AgentOps decision boundary.
+- [Agent capability governance](docs/agent-capability-governance.md) - P6b capability registry, admission, scan, evaluation, and lifecycle pattern.
+- [RAG knowledge lifecycle](docs/rag-knowledge-lifecycle.md) - P6c source provenance, status, retention, and review controls.
+- [Control-plane evidence map](docs/control-plane-evidence-map.md) - P6d unified evidence story.
+- [Control-plane evidence scenarios](docs/control-plane-evidence-scenarios.md) - P6e allowed, denied, approval-required, blocked-before-runtime, and retired-source-blocked outcomes.
+- [Agent runtime exploration](docs/agent-runtime-exploration.md) - future agent-runtime design boundary.
+
+Release engineering and delivery:
+
+- [AI release engineering on EKS](docs/ai-release-engineering-on-eks.md) - P4 EKS release-engineering track.
+- [EKS release gates and rollback](docs/eks-release-gates-and-rollback.md) - P4d gates, rollout observation, rollback, and evidence expectations.
+- [AI-assisted DevSecOps pattern](docs/ai-assisted-devsecops-pattern.md) - P5a advisory AI delivery boundary.
+- [AI-assisted review evidence](docs/ai-assisted-review-evidence.md) - P5b synthetic review, CI, threat-model, and release-note evidence.
+
+Provider reference architecture:
+
+- [AWS reference architecture](docs/aws-reference-architecture.md)
+- [Azure reference architecture](docs/azure-reference-architecture.md)
+- [GCP reference architecture](docs/gcp-reference-architecture.md)
+- [Multi-cloud strategy](docs/multi-cloud-strategy.md)
+
 ## Why This Project Exists
 
 AI platform work often spans cloud engineering, security, governance, developer experience, data access, cost controls, and operations. This repository gives those concerns a concrete shape in a practical portfolio project.
@@ -30,22 +79,20 @@ The goal is to show practical architecture thinking and incremental platform del
 
 ## What This Project Demonstrates
 
-- Secure AI enablement for Cloud & AI platform workflows.
-- Governed access to foundation models and future AI services.
-- A model-access sub-layer through a GenAI / LLM Gateway.
-- Guardrails as a Service for synthetic PII, jailbreak, prompt-injection, safety, and review verdicts.
-- A broader AI traffic governance layer for future agent and tool flows.
-- Capability governance before runtime use: declared permissions, synthetic scan/evaluation evidence, admission decisions, and lifecycle status for reusable agent assets.
-- RAG knowledge lifecycle controls for source provenance, owner, classification, authorised knowledge bases, retention, review, and active/paused/retired status.
-- Control-plane evidence scenarios for allowed, denied, approval-required, blocked-before-runtime, and retired-source-blocked AI governance outcomes.
-- AWS Bedrock integration pattern at the architecture level.
-- Terraform-oriented AWS platform foundations as placeholders.
-- GitHub Actions CI/CD skeletons.
-- AI FinOps and token cost tracking concepts.
-- Observability, evaluation, runbook, and operations practices.
-- Responsible AI checklist and project scope guidance.
-- Future EKS-based AI release engineering.
-- Future multi-cloud provider mapping for Azure and GCP.
+- **P0 Foundation:** responsible AI checklist, project scope guidance, and future multi-cloud provider mapping.
+- **P1 Mock GenAI Gateway:** a model-access sub-layer through a GenAI / LLM Gateway.
+- **P1 AWS GenAI Pattern:** AWS Bedrock integration pattern at the architecture level.
+- **P1/P2 Governed Model Access:** governed access to foundation models and future AI services.
+- **P2 Secure AI Enablement:** secure AI enablement for Cloud & AI platform workflows.
+- **P2 Guardrails as a Service:** synthetic PII, jailbreak, prompt-injection, safety, and review verdicts.
+- **P2 AI FinOps and Observability:** token cost tracking, evaluation, runbook, and operations practices.
+- **P4 EKS Release Engineering:** future EKS-based AI release engineering and Terraform-oriented AWS platform foundations as placeholders.
+- **P5 AI-Assisted DevSecOps:** GitHub Actions CI/CD skeletons and human-owned delivery controls.
+- **P6 AI Traffic Governance:** a broader traffic governance layer for future agent and tool flows.
+- **P6b Capability Governance:** declared permissions, synthetic scan/evaluation evidence, admission decisions, and lifecycle status for reusable agent assets.
+- **P6c RAG Knowledge Lifecycle:** source provenance, owner, classification, authorised knowledge bases, retention, review, and active/paused/retired status.
+- **P6e Control-Plane Evidence Scenarios:** allowed, denied, approval-required, blocked-before-runtime, and retired-source-blocked AI governance outcomes.
+- **P6f AI Platform Security and Operations Controls:** identity, data protection, AI AppSec, delivery gates, operations, and FinOps.
 
 ## AWS-First, Multi-Cloud-Ready
 
@@ -111,10 +158,10 @@ Track B explores release engineering for AI services on Amazon EKS. It is split 
 
 Current scope:
 
-- P4a portfolio-ready Helm chart for the mock AI API service, including Kubernetes packaging, probes, resource boundaries, synthetic labels, and optional PodDisruptionBudget.
-- P4b optional personal AWS EKS sandbox plan: Terraform-managed sandbox, explicit budget, manual approval, synthetic workload only, and teardown guidance.
-- P4c GitOps pattern: synthetic Argo CD Application manifest, manual sync posture, release metadata, and promotion boundaries.
-- P4d release gates and rollback pattern: pre-deploy gates, rollout observation, rollback choices, failure modes, and evidence expectations.
+- **P4a Helm Packaging:** portfolio-ready Helm chart for the mock AI API service, including Kubernetes packaging, probes, resource boundaries, synthetic labels, and optional PodDisruptionBudget.
+- **P4b Optional Personal EKS Sandbox:** Terraform-managed sandbox, explicit budget, manual approval, synthetic workload only, and teardown guidance.
+- **P4c GitOps Pattern:** synthetic Argo CD Application manifest, manual sync posture, release metadata, and promotion boundaries.
+- **P4d Release Gates and Rollback:** pre-deploy gates, rollout observation, rollback choices, failure modes, and evidence expectations.
 - EKS module placeholder remains deferred until the personal sandbox path is explicitly approved.
 
 Future scope:
@@ -129,8 +176,8 @@ Track C documents how AI assistance can support delivery without bypassing engin
 
 Current scope:
 
-- P5a AI-assisted DevSecOps boundary: advisory AI use only, human ownership, CI/security gates, prohibited-input rules, and auditable release evidence.
-- P5b AI-assisted review evidence: synthetic evidence records for review summaries, threat-model checklists, CI failure summaries, and release-note drafts.
+- **P5a AI-Assisted DevSecOps Boundary:** advisory AI use only, human ownership, CI/security gates, prohibited-input rules, and auditable release evidence.
+- **P5b AI-Assisted Review Evidence:** synthetic evidence records for review summaries, threat-model checklists, CI failure summaries, and release-note drafts.
 
 The pattern emphasizes:
 
@@ -153,6 +200,7 @@ Current mock scope:
 - **P6c RAG Knowledge Lifecycle:** source provenance, owner, classification, authorised knowledge-base boundary, retention, review, and active/paused/retired source states.
 - **P6d Control-Plane Evidence Map:** one synthetic map that links runtime AgentOps, capability admission, RAG lifecycle, guardrail verdicts, and AI-assisted review evidence.
 - **P6e Control-Plane Evidence Scenarios:** a scenario pack that explains allowed, denied, approval-required, blocked-before-runtime, and retired-source-blocked outcomes through existing synthetic evidence.
+- **P6f AI Platform Security and Operations Controls:** a docs-first control matrix for identity, data protection, AI AppSec, delivery controls, operations, and FinOps.
 
 It asks:
 
@@ -161,6 +209,7 @@ It asks:
 - Which events should be audited?
 - What runtime isolation model is appropriate?
 - How could Kubernetes-native agents inherit platform controls?
+- Which platform security and operations controls must exist before a future agent or EKS sandbox becomes production-like?
 
 No real agent runtime, MCP execution, traffic proxy, cloud deployment, or provider integration is implemented in the current scope.
 

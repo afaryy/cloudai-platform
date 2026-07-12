@@ -6,9 +6,9 @@ The project is AWS-first and multi-cloud-ready. It uses synthetic examples, publ
 
 ## Solution Overview
 
-`cloudai-platform` models a CloudAI control plane that coordinates governed model access, AI traffic governance, provider adapters, platform foundations, FinOps, observability, release engineering, AI-assisted delivery controls, and evidence mapping.
+`cloudai-platform` models a CloudAI control plane that coordinates governed model access, AI traffic governance, provider adapters, platform foundations, FinOps, observability, release engineering, AI-assisted delivery controls, security and operations controls, and evidence mapping.
 
-The implementation starts with a local mock GenAI / LLM Gateway API, then layers governed RAG, Guardrails as a Service, AgentOps decisions, capability governance, RAG knowledge lifecycle, EKS release engineering patterns, AI-assisted DevSecOps evidence, a control-plane evidence map, and control-plane evidence scenarios. This is intentional: the project proves the control model, API shape, metadata, guardrails, tests, and documentation before introducing real cloud resources.
+The implementation starts with a local mock GenAI / LLM Gateway API, then layers governed RAG, Guardrails as a Service, AgentOps decisions, capability governance, RAG knowledge lifecycle, EKS release engineering patterns, AI-assisted DevSecOps evidence, a control-plane evidence map, control-plane evidence scenarios, and an AI platform security/operations control matrix. This is intentional: the project proves the control model, API shape, metadata, guardrails, tests, and documentation before introducing real cloud resources.
 
 ## Architecture Layers
 
@@ -23,6 +23,7 @@ The solution is organized around these layers:
 | Platform Foundations | Provide IAM, KMS, network, API, runtime, CI/CD, release, and observability foundations. | Documentation, workflow skeletons, Helm, and Argo CD patterns. |
 | FinOps / Observability | Track token estimates, costs, logs, metrics, and operational signals. | Local metadata, token budget, and structured logs implemented. |
 | Evidence Layer | Connect control outcomes across runtime, capability, RAG, guardrail, and delivery evidence. | P6d control-plane evidence map and P6e scenario pack implemented. |
+| Security / Operations Controls | Connect identity, data protection, AI AppSec, delivery gates, operations, and FinOps to platform evidence. | P6f control matrix documented. |
 
 ## Language Boundary
 
@@ -126,6 +127,7 @@ The repository has been built incrementally through small PRs.
 | #39-#40 | AI-assisted DevSecOps | Added advisory AI-assisted delivery boundaries and synthetic review evidence records. |
 | #41-#42 | P6 status and control-plane evidence | Clarified P6a/P6b/P6c lanes and added the P6d control-plane evidence map. |
 | P6e | P6 evidence scenarios | Added scenario coverage for allowed, denied, approval-required, blocked-before-runtime, and retired-source-blocked governance outcomes. |
+| P6f | AI platform security and operations controls | Added a control matrix for identity, data protection, AI AppSec, delivery controls, operations, and FinOps. |
 
 ## P0 Foundation Summary
 
@@ -187,7 +189,7 @@ The later phases turn the project into a broader Cloud & AI platform portfolio:
 
 - **P4 EKS Release Engineering:** Helm packaging, Argo CD application pattern, release gates, rollback notes, and optional personal AWS/EKS sandbox guidance.
 - **P5 AI-Assisted DevSecOps:** advisory AI use boundary, human-owned review evidence, CI/security checks, and release evidence patterns.
-- **P6 AgentOps / AI Traffic Governance:** runtime AgentOps decisions, capability governance before runtime use, RAG knowledge lifecycle, the P6d control-plane evidence map, and P6e evidence scenarios.
+- **P6 AgentOps / AI Traffic Governance:** runtime AgentOps decisions, capability governance before runtime use, RAG knowledge lifecycle, the P6d control-plane evidence map, P6e evidence scenarios, and the P6f security/operations control matrix.
 
 The important architecture point is separation of concerns:
 
@@ -197,7 +199,7 @@ Capability governance
   -> RAG knowledge lifecycle state
   -> guardrail verdict
   -> AI-assisted delivery evidence
-  -> control-plane evidence map and scenarios
+  -> control-plane evidence map, scenarios, and security/operations control matrix
 ```
 
 This shows how the CloudAI control plane can collect evidence across platform controls without executing an agent, calling a provider, storing sensitive payloads, or deploying cloud resources.
@@ -238,8 +240,9 @@ A concise demo story:
 9. Show capability governance and RAG lifecycle records.
 10. Show P4 release engineering: Helm, Argo CD, release gates, and rollback.
 11. Show P5 AI-assisted DevSecOps boundary and review evidence.
-12. End with the P6d control-plane evidence map as the unifying portfolio artifact.
-13. Explain how AWS deployment, real Bedrock integration, and real EKS sandbox work are future opt-in phases.
+12. Show the P6d/P6e control-plane evidence map and scenarios as the unifying portfolio artifacts.
+13. Show the P6f security and operations control matrix as the interview-ready architecture bridge.
+14. Explain how AWS deployment, real Bedrock integration, and real EKS sandbox work are future opt-in phases.
 
 ## Future Deployment Path
 
@@ -270,6 +273,8 @@ Useful entry points:
 - `docs/guardrails-as-a-service.md` for shared safety verdict contracts.
 - `docs/ai-assisted-devsecops-pattern.md` and `docs/ai-assisted-review-evidence.md` for P5 delivery controls.
 - `docs/control-plane-evidence-map.md` for the P6d evidence map.
+- `docs/control-plane-evidence-scenarios.md` for the P6e evidence scenario pack.
+- `docs/ai-platform-security-operations-controls.md` for the P6f security and operations control matrix.
 - `docs/demo-script.md` for a short portfolio walkthrough.
 - `providers/aws/app/api/README.md` for the local mock API.
 - `shared/schemas/mock-genai-api/` for API contract schemas.
