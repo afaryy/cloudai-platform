@@ -106,22 +106,44 @@ Variable ownership should be separated:
 
 For the personal sandbox in this repository, GitHub Actions with an S3 backend and DynamoDB locking is the simpler learning path. Terraform Enterprise remains a professional operating-model reference rather than a requirement for the P4b EKS sandbox.
 
-## AI Factory Operating Model
+## AI Factory Infrastructure Lens
 
-For the later P7 stretch track, an AWS AI Factory reference pattern separates accountable governance from the platform and compute layers:
+For the later P7 stretch track, an AWS AI Factory reference pattern separates accountable governance from the platform, runtime, and compute layers. The useful portfolio framing is that an AI Factory is not just a GPU cluster. It is an integrated operating and infrastructure pattern for turning foundation models, enterprise data, AI tools, and compute capacity into repeatable business AI capability.
 
 ```text
 CDAO or equivalent data-and-AI governance owner
   -> use-case, data, model-risk, Responsible AI, and investment accountability
 Central Cloud & AI platform team
   -> landing zones, IAM, network, KMS, CI/CD, model and agent controls, observability, FinOps
+AI platform and runtime layer
+  -> model access, RAG, agents, evaluation, release gates, runtime policy, and evidence
 AI Factory compute plane
   -> SageMaker AI lifecycle services and optional HyperPod accelerated clusters with EKS or Slurm
 Product and ML teams
   -> approved training, evaluation, deployment, inference, and operational outcomes
 ```
 
-The CDAO is an operating-model and governance role, not a service deployed by this repository. HyperPod is similarly a future compute-capacity option. Any personal sandbox POC must use synthetic data, no committed credentials or state, a defined budget, and explicit cleanup.
+The AI Factory lifecycle can be described as:
+
+```text
+foundation models + enterprise data + AI tools
+  -> evaluation and customization
+  -> deployment and inference
+  -> monitoring, audit, and cost evidence
+  -> feedback and continuous improvement
+```
+
+This lifecycle explains why the repository already emphasizes platform controls around inference and agents:
+
+- **Cloud foundations:** Terraform, backend locking, GitHub OIDC, IAM, network, KMS, secrets, and cleanup boundaries.
+- **Release engineering:** EKS, Helm, Argo CD, release gates, rollback guidance, and evidence capture.
+- **Governance:** governed model access, RAG lifecycle, capability governance, AgentOps policy decisions, and Responsible AI evidence.
+- **Operations:** observability, token and cost metadata, budget states, audit events, resilience, and teardown.
+- **Future compute plane:** SageMaker AI and optional HyperPod references for training, fine-tuning, batch inference, and high-throughput serving.
+
+The CDAO is an operating-model and governance role, not a service deployed by this repository. HyperPod is similarly a future compute-capacity option. Larger models, longer reasoning, larger context windows, and agentic tool use increase inference cost, telemetry, capacity, and governance pressure; they do not change the current project boundary. Any personal sandbox POC must use synthetic data, no committed credentials or state, a defined budget, and explicit cleanup.
+
+For a provider-aware overview, see `docs/ai-factory-infrastructure-lens.md`.
 
 ## Current State
 

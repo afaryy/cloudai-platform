@@ -69,6 +69,7 @@ Release engineering and delivery:
 Provider reference architecture:
 
 - [AWS reference architecture](docs/aws-reference-architecture.md)
+- [AI Factory infrastructure lens](docs/ai-factory-infrastructure-lens.md)
 - [Azure reference architecture](docs/azure-reference-architecture.md)
 - [GCP reference architecture](docs/gcp-reference-architecture.md)
 - [Multi-cloud strategy](docs/multi-cloud-strategy.md)
@@ -223,6 +224,8 @@ Track E is a future design-first exploration of an Enterprise AI Factory: the op
 Potential areas:
 
 - AI Factory operating model: CDAO or equivalent governance ownership, central platform ownership, and product-team delivery responsibilities.
+- AI Factory infrastructure lifecycle: foundation models, enterprise data, AI tools, evaluation, customization, deployment, inference, evidence, and feedback loops.
+- Inference scaling pressure from larger models, longer reasoning, larger context windows, agentic workflows, and production telemetry.
 - Model evaluation workflows.
 - Prompt and response quality checks.
 - Synthetic benchmark datasets.
