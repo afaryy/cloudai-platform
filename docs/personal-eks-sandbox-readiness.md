@@ -107,6 +107,8 @@ Teardown is complete only when:
 
 A future PR may add `apply` and `destroy` modes only after this readiness pack is accepted.
 
+The design boundary for that real-cloud step is documented in `docs/p4b-real-eks-sandbox-design.md`. The first real slice should focus on EKS, Terraform, GitHub Actions OIDC, Helm deployment, rollout evidence, and teardown before adding Bedrock or Bedrock AgentCore.
+
 That PR must:
 
 - keep `workflow_dispatch`;
@@ -122,4 +124,3 @@ That PR must:
 Use this short explanation:
 
 > P4b shows how I would move from mock Kubernetes release engineering into a bounded personal AWS EKS sandbox: Terraform backend first, GitHub OIDC identity, manual environment approval, budget and teardown controls, synthetic workload only, and no account-specific values committed to git.
-
