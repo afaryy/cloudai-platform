@@ -42,6 +42,70 @@ The next real-cloud design step is documented in `docs/p4b-real-eks-sandbox-desi
 
 Bedrock Guardrails and AgentCore-aligned resources remain later optional extensions. They should not be added to the EKS sandbox until the Terraform backend, identity, release, observability, and cleanup controls are proven with synthetic examples.
 
+## Landing Zone Scale Boundary
+
+This repository uses a small/medium Terraform pattern for a bounded sandbox:
+
+- reusable Terraform modules;
+- deployable Terraform stacks;
+- environment-specific example values;
+- one backend bucket;
+- one DynamoDB lock table;
+- unique state keys per stack.
+
+That pattern is appropriate for a personal sandbox, portfolio demonstration, or a small number of platform stacks. For tens of stacks, the same structure can still work with GitHub Actions matrix workflows, consistent state-key naming, and clear ownership metadata.
+
+For hundreds, thousands, or more landing zones and AWS accounts, the model should change. Enterprises should not create one hand-written folder per account or landing zone. At that scale, the better pattern is a landing-zone factory:
+
+- account inventory;
+- landing-zone blueprint catalog;
+- account vending;
+- baseline stacks for identity, network, logging, security, and observability;
+- policy-as-code;
+- AWS Organizations, Control Tower, StackSets, or equivalent baseline rollout mechanisms;
+- CI/CD orchestration by account, region, and stack;
+- drift detection;
+- ownership, cost, and lifecycle metadata.
+
+In that model, Terraform state keys are generated from inventory metadata rather than manually maintained folders, for example:
+
+```text
+cloudai-platform/<account-name>/<region>/<stack-name>/terraform.tfstate
+```
+
+Terraform workspaces can separate state, but they are not a complete landing-zone operating model. For enterprise landing zones, explicit account and stack identity should come from inventory, IAM role selection, backend key strategy, approval rules, policy controls, and drift detection.
+
+## Terraform Enterprise Workspace Pattern
+
+If a later enterprise reference design uses Terraform Enterprise or HCP Terraform, Terraform Enterprise should own state, run history, variable sets, policy checks, and approvals. Git remains the source of truth for Terraform code, safe examples, and non-sensitive inventory. Secrets and environment-specific values should be stored in Terraform Enterprise variables, variable sets, or an external secret manager rather than committed to the repository.
+
+Use one workspace for each deployable unit that should be planned, approved, applied, locked, and rolled back independently. A landing zone usually contains several deployable units, so the enterprise pattern is not simply one huge workspace per landing zone.
+
+Example workspace shape:
+
+```text
+<platform>-<landing-zone>-<region>-<stack>
+
+cloudai-lz-sandbox-ap-southeast-2-account-baseline
+cloudai-lz-sandbox-ap-southeast-2-network
+cloudai-lz-sandbox-ap-southeast-2-eks
+cloudai-lz-sandbox-ap-southeast-2-bedrock
+cloudai-lz-sandbox-ap-southeast-2-agent-platform
+```
+
+This keeps blast radius, ownership, approval, and rollback boundaries clear. It also avoids very large plans where unrelated network, EKS, IAM, AI service, and runtime changes are reviewed together.
+
+Variable ownership should be separated:
+
+- safe defaults live in `variables.tf`;
+- safe examples live in committed `*.tfvars.example` files;
+- real non-sensitive environment values live in Terraform Enterprise workspace variables or variable sets;
+- sensitive values live in Terraform Enterprise sensitive variables, Vault, AWS Secrets Manager, or equivalent;
+- runtime outputs live in Terraform state and outputs;
+- business ownership and lifecycle metadata live in an inventory, service catalog, or CMDB.
+
+For the personal sandbox in this repository, GitHub Actions with an S3 backend and DynamoDB locking is the simpler learning path. Terraform Enterprise remains a professional operating-model reference rather than a requirement for the P4b EKS sandbox.
+
 ## AI Factory Operating Model
 
 For the later P7 stretch track, an AWS AI Factory reference pattern separates accountable governance from the platform and compute layers:

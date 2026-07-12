@@ -23,6 +23,7 @@ The repository can now demonstrate:
 - **P6c RAG Knowledge Lifecycle:** records for active and retired synthetic sources
 - **P4a Helm Packaging:** synthetic Kubernetes packaging of the mock AI API service
 - **P4b Personal EKS Sandbox Readiness:** Terraform backend, GitHub OIDC, budget, manual approval, synthetic workload, and teardown guidance
+- **P4b Terraform Static Tests:** native Terraform tests for the network module, EKS module, and EKS sandbox environment
 - **P4c Argo CD Pattern:** manual GitOps promotion
 - **P4d Release Gates and Rollback:** synthetic EKS release engineering
 - **P5a AI-Assisted DevSecOps Boundary:** advisory AI use, human review, CI/security checks, and release evidence
@@ -55,7 +56,7 @@ The next main portfolio focus is **P6 AI Traffic Governance / AgentOps**. P6 cur
 | P6c RAG knowledge lifecycle | Complete | `shared/schemas/rag-knowledge-lifecycle/`, synthetic lifecycle fixtures, and retired-source route test |
 | P2 Guardrails as a Service | Complete | `shared/schemas/guardrails-as-a-service/`, synthetic fixtures, `POST /guardrails/assess`, and mock eval evidence |
 | P4a Helm packaging | Complete | `helm/ai-api-service/` |
-| P4b personal EKS sandbox readiness and Terraform skeleton | Complete | `docs/personal-eks-sandbox-readiness.md`, `docs/p4b-real-eks-sandbox-design.md`, `providers/aws/infra/bootstrap/`, `providers/aws/infra/terraform/envs/eks-sandbox/`, `providers/aws/infra/terraform/modules/network/`, `providers/aws/infra/terraform/modules/eks/`, and `.github/workflows/terraform-eks-sandbox.yml` |
+| P4b personal EKS sandbox readiness, Terraform skeleton, backend-backed plan, and static tests | Complete | `docs/personal-eks-sandbox-readiness.md`, `docs/p4b-real-eks-sandbox-design.md`, `providers/aws/infra/bootstrap/`, `providers/aws/infra/terraform/envs/eks-sandbox/`, `providers/aws/infra/terraform/modules/network/`, `providers/aws/infra/terraform/modules/eks/`, `.github/workflows/terraform-eks-sandbox.yml`, and `.github/workflows/terraform-tests.yaml` |
 | P4c Argo CD pattern | Complete | `argocd/applications/cloudai-api-sandbox.yaml` |
 | P4d release gates and rollback | Complete | `docs/eks-release-gates-and-rollback.md` |
 | P5a AI-assisted DevSecOps boundary | Complete | `docs/ai-assisted-devsecops-pattern.md` and `.github/workflows/ai-assisted-devsecops.yml` |
@@ -97,7 +98,7 @@ Completed P4 split:
 Recommended next choices:
 
 - **P4b real EKS sandbox design:** use `docs/p4b-real-eks-sandbox-design.md` as the design-only bridge from readiness docs to a future personal AWS EKS apply/destroy path.
-- **P4b private backend and budget setup:** confirm the private `backend.tf`, GitHub `aws-sandbox` environment, AWS Budget, and teardown owner before enabling real apply/destroy.
+- **P4b budget and teardown setup:** confirm AWS Budget, teardown owner, and environment protection before enabling real apply/destroy. The workflow can now run a backend-backed `plan` through the `aws-sandbox` environment.
 - **P6 AI Traffic Governance evidence expansion:** add more synthetic scenario variants only if they explain a new governance outcome that is not already covered by P6e/P6f.
 - **P4b future apply/destroy slice:** add live sandbox apply and destroy only after explicit approval, budget alarm, private backend setup, environment protection, and teardown path are confirmed.
 

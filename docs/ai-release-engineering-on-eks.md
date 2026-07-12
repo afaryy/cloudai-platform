@@ -51,7 +51,7 @@ ECS can be a useful simpler runtime pattern for API services, but P4 focuses on 
 
 ## Current State
 
-The P4a chart exists under `helm/ai-api-service/`. The P4c Argo CD application example exists under `argocd/applications/`. EKS Terraform module work remains deferred until a personal sandbox apply path is explicitly approved.
+The P4a chart exists under `helm/ai-api-service/`. The P4c Argo CD application example exists under `argocd/applications/`. The EKS Terraform skeleton exists under `providers/aws/infra/terraform/`, and the manual workflow can run validation plus a backend-backed Terraform plan through the `aws-sandbox` GitHub environment. Real apply and destroy remain deferred until budget, approval, and teardown controls are confirmed.
 
 Current P4 evidence includes:
 
@@ -65,8 +65,8 @@ Current P4 evidence includes:
 - Release gates and rollback pattern in `docs/eks-release-gates-and-rollback.md`.
 - P4b readiness guidance in `docs/personal-eks-sandbox-readiness.md`.
 - CloudFormation bootstrap example for Terraform backend and GitHub Actions role/policy.
-- Terraform backend example for `eks-sandbox`.
-- Manual GitHub Actions workflow example for future validate/plan flow.
+- Terraform backend example and empty committed S3 backend block for `eks-sandbox`.
+- Manual GitHub Actions workflow for validation and backend-backed plan.
 - Argo CD README guidance for local validation and future GitOps sandbox use.
 
 ## P4c Argo CD Boundary

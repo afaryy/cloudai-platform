@@ -37,9 +37,10 @@ The normal delivery plane should be GitHub Actions with OIDC and environment app
 |---|---|---|
 | Bootstrap guide | `providers/aws/infra/bootstrap/README.md` | Explains the S3/DynamoDB backend and GitHub OIDC role boundary. |
 | Bootstrap template | `providers/aws/infra/bootstrap/github-oidc-terraform-backend.yaml` | CloudFormation example for backend bucket, lock table, and GitHub Actions role. |
+| Empty backend block | `providers/aws/infra/terraform/envs/eks-sandbox/backend.s3.tf` | Enables S3 backend initialization while keeping private backend values in GitHub environment variables. |
 | Backend example | `providers/aws/infra/terraform/envs/eks-sandbox/backend.tf.example` | Documents the private Terraform backend shape without real names. |
 | Terraform environment | `providers/aws/infra/terraform/envs/eks-sandbox/` | Holds the future sandbox Terraform entry point. |
-| Manual workflow | `.github/workflows/terraform-eks-sandbox.yml` | Supports manual validate and plan-readiness flow. |
+| Manual workflow | `.github/workflows/terraform-eks-sandbox.yml` | Supports manual validate and backend-backed plan flow. |
 | Release controls | `docs/eks-release-gates-and-rollback.md` | Defines release gates, rollout observation, rollback, and evidence. |
 | Helm package | `helm/ai-api-service/` | Synthetic mock API workload package for future deployment evidence. |
 | Argo CD pattern | `argocd/applications/cloudai-api-sandbox.yaml` | Manual GitOps promotion pattern for the mock API. |
@@ -76,8 +77,26 @@ workflow_dispatch
 workflow_dispatch
   -> mode: plan
   -> configure AWS credentials through OIDC
-  -> explain plan boundary
-  -> validate only until reviewed modules and private backend setup exist
+  -> read backend values from aws-sandbox environment
+  -> terraform init with S3 backend
+  -> terraform validate
+  -> terraform plan without saving a tfplan artifact
+```
+
+Recommended environment variable contract:
+
+| Name | Type | Purpose |
+|---|---|---|
+| `AWS_ROLE_TO_ASSUME` | Environment secret or variable | GitHub Actions OIDC role assumption. |
+| `AWS_REGION` | Environment variable | Sandbox region, initially `ap-southeast-2`. |
+| `TF_BACKEND_BUCKET` | Environment variable | S3 bucket for Terraform state. |
+| `TF_BACKEND_LOCK_TABLE` | Environment variable | DynamoDB table for Terraform state locking. |
+| `TF_STATE_KEY_PREFIX` | Environment variable | Project state prefix, recommended `cloudai-platform`. |
+
+The EKS sandbox state key is derived as:
+
+```text
+cloudai-platform/eks-sandbox/terraform.tfstate
 ```
 
 The workflow does not run `terraform apply`, `terraform destroy`, Helm deployment, Argo CD sync, or kubectl commands. Those actions belong in later opt-in slices after the budget, teardown, identity, and release gates are reviewed.
