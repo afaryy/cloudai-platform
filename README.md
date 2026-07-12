@@ -37,6 +37,7 @@ The goal is to show practical architecture thinking and incremental platform del
 - A broader AI traffic governance layer for future agent and tool flows.
 - Capability governance before runtime use: declared permissions, synthetic scan/evaluation evidence, admission decisions, and lifecycle status for reusable agent assets.
 - RAG knowledge lifecycle controls for source provenance, owner, classification, authorised knowledge bases, retention, review, and active/paused/retired status.
+- Control-plane evidence scenarios for allowed, denied, approval-required, blocked-before-runtime, and retired-source-blocked AI governance outcomes.
 - AWS Bedrock integration pattern at the architecture level.
 - Terraform-oriented AWS platform foundations as placeholders.
 - GitHub Actions CI/CD skeletons.
@@ -151,6 +152,7 @@ Current mock scope:
 - **P6b Capability Governance:** registry, skill card, synthetic scan/evaluation evidence, admission decision, and lifecycle records for reusable agent capabilities.
 - **P6c RAG Knowledge Lifecycle:** source provenance, owner, classification, authorised knowledge-base boundary, retention, review, and active/paused/retired source states.
 - **P6d Control-Plane Evidence Map:** one synthetic map that links runtime AgentOps, capability admission, RAG lifecycle, guardrail verdicts, and AI-assisted review evidence.
+- **P6e Control-Plane Evidence Scenarios:** a scenario pack that explains allowed, denied, approval-required, blocked-before-runtime, and retired-source-blocked outcomes through existing synthetic evidence.
 
 It asks:
 

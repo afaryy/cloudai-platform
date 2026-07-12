@@ -214,7 +214,7 @@ Talk track:
 
 P5 shows how AI assistance can support delivery without owning the change. AI output is advisory; humans own review, security checks, release decisions, and rollback. The evidence fixtures show review summaries, threat-model checklists, CI failure summaries, and release-note drafts without storing prompts or sensitive content.
 
-### 13. Show The Control-Plane Evidence Map
+### 13. Show The Control-Plane Evidence Map And Scenarios
 
 Open `docs/control-plane-evidence-map.md` and `shared/examples/control-plane-evidence/evidence-map.mock.json`.
 
@@ -222,9 +222,15 @@ Talk track:
 
 This is the unifying P6d artifact. It links runtime AgentOps, capability admission, RAG lifecycle state, guardrail verdicts, and AI-assisted review evidence into one control-plane evidence map.
 
+Then open `docs/control-plane-evidence-scenarios.md` and `shared/examples/control-plane-evidence/evidence-scenarios.mock.json`.
+
+Talk track:
+
+P6e turns the evidence map into scenario outcomes. It shows how the same control-plane lanes explain allowed, denied, approval-required, blocked-before-runtime, and retired-source-blocked decisions.
+
 Suggested line:
 
-The point is not that this repository runs an enterprise AI platform. The point is that it demonstrates how a platform team can model the evidence needed to make enterprise AI secure, governed, observable, and reviewable.
+The point is not that this repository runs an enterprise AI platform. The point is that it demonstrates how a platform team can model the evidence needed to explain why enterprise AI actions are allowed, denied, paused for approval, blocked before runtime, or excluded because source lifecycle has changed.
 
 ### 14. Show What Is Deferred
 
@@ -284,6 +290,6 @@ Stop the local server when finished.
 
 ## Closing Message
 
-This repository shows a practical Cloud & AI platform engineering path: start with architecture, define the control model, build a local mock gateway, add guardrails and governed RAG, model runtime AgentOps and capability governance, package release engineering patterns, document AI-assisted delivery controls, and connect the evidence through a control-plane map.
+This repository shows a practical Cloud & AI platform engineering path: start with architecture, define the control model, build a local mock gateway, add guardrails and governed RAG, model runtime AgentOps and capability governance, package release engineering patterns, document AI-assisted delivery controls, and connect the evidence through a control-plane map and scenario pack.
 
 The current phase is intentionally mock-first. That keeps the project understandable, reviewable, and low-cost while the platform design matures.
