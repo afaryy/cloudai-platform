@@ -23,6 +23,14 @@ jobs:
     name: Terraform EKS sandbox readiness
     runs-on: ubuntu-latest
     environment: aws-sandbox
+    env:
+      AWS_ROLE_TO_ASSUME: ${{ vars.AWS_ROLE_TO_ASSUME || secrets.AWS_ROLE_TO_ASSUME }}
+      AWS_REGION: ${{ vars.AWS_REGION || 'ap-southeast-2' }}
+      TF_BACKEND_BUCKET: ${{ vars.TF_BACKEND_BUCKET }}
+      TF_BACKEND_LOCK_TABLE: ${{ vars.TF_BACKEND_LOCK_TABLE }}
+      TF_STATE_KEY_PREFIX: ${{ vars.TF_STATE_KEY_PREFIX }}
+      TF_STACK_NAME: eks-sandbox
+      TF_STATE_KEY: ${{ vars.TF_STATE_KEY_PREFIX }}/eks-sandbox/terraform.tfstate
     defaults:
       run:
         working-directory: providers/aws/infra/terraform/envs/eks-sandbox
@@ -37,8 +45,9 @@ jobs:
         if: ${{ inputs.mode == 'plan' }}
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ vars.AWS_ROLE_TO_ASSUME || secrets.AWS_ROLE_TO_ASSUME }}
-          aws-region: ap-southeast-2
+          role-to-assume: ${{ env.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ env.AWS_REGION }}
+          mask-aws-account-id: true
 
       - name: Terraform init without backend for validation
         if: ${{ inputs.mode == 'validate' }}
@@ -51,13 +60,41 @@ jobs:
       - name: Explain sandbox plan boundary
         if: ${{ inputs.mode == 'plan' }}
         run: |
-          echo "Plan mode is intentionally a readiness placeholder."
-          echo "Add backend.tf privately from backend.tf.example before any real plan."
-          echo "Do not commit backend.tf, tfvars, tfstate, tfplan, kubeconfig, or account-specific values."
+          echo "Plan mode initializes the remote S3 backend from aws-sandbox environment variables."
+          echo "It does not create a saved tfplan artifact and does not run apply or destroy."
+          echo "Do not commit tfvars, tfstate, tfplan, kubeconfig, account IDs, ARNs, endpoints, or credentials."
 
-      - name: Terraform plan placeholder
+      - name: Check backend environment variables
         if: ${{ inputs.mode == 'plan' }}
-        run: terraform init -backend=false && terraform validate
+        run: |
+          missing=0
+          for name in AWS_ROLE_TO_ASSUME AWS_REGION TF_BACKEND_BUCKET TF_BACKEND_LOCK_TABLE TF_STATE_KEY_PREFIX TF_STATE_KEY; do
+            if [ -z "${!name}" ]; then
+              echo "::error::$name is required in the aws-sandbox environment."
+              missing=1
+            fi
+          done
+          if [ "$missing" -ne 0 ]; then
+            exit 1
+          fi
+
+      - name: Terraform init with remote backend
+        if: ${{ inputs.mode == 'plan' }}
+        run: |
+          terraform init \
+            -backend-config="bucket=${TF_BACKEND_BUCKET}" \
+            -backend-config="key=${TF_STATE_KEY}" \
+            -backend-config="region=${AWS_REGION}" \
+            -backend-config="dynamodb_table=${TF_BACKEND_LOCK_TABLE}" \
+            -backend-config="encrypt=true"
+
+      - name: Terraform validate before plan
+        if: ${{ inputs.mode == 'plan' }}
+        run: terraform validate
+
+      - name: Terraform plan without saved artifact
+        if: ${{ inputs.mode == 'plan' }}
+        run: terraform plan -input=false -no-color
 
       - name: Refuse apply or destroy until sandbox enablement PR
         if: ${{ inputs.mode == 'apply' || inputs.mode == 'destroy' }}

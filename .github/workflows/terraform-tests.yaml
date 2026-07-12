@@ -1,0 +1,60 @@
+name: terraform-tests
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/terraform-tests.yaml"
+      - "providers/aws/infra/terraform/**"
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/terraform-tests.yaml"
+      - "providers/aws/infra/terraform/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  terraform:
+    name: Terraform tests
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        terraform_dir:
+          - providers/aws/infra/terraform/modules/network
+          - providers/aws/infra/terraform/modules/eks
+          - providers/aws/infra/terraform/envs/eks-sandbox
+    defaults:
+      run:
+        working-directory: ${{ matrix.terraform_dir }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Setup TFLint
+        uses: terraform-linters/setup-tflint@v4
+
+      - name: Terraform fmt
+        working-directory: providers/aws/infra/terraform
+        run: terraform fmt -check -recursive
+
+      - name: Terraform init without backend
+        run: terraform init -backend=false
+
+      - name: TFLint init
+        run: tflint --init
+
+      - name: TFLint
+        run: tflint
+
+      - name: Terraform validate
+        run: terraform validate
+
+      - name: Terraform test
+        run: terraform test

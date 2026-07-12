@@ -77,6 +77,7 @@ Required private values:
 | AWS region | GitHub environment variable | Region label can be documented. |
 | Terraform backend bucket | Private backend file or environment value | Do not commit real bucket name. |
 | Terraform lock table | Private backend file or environment value | Do not commit real table name. |
+| Terraform state key prefix | GitHub environment variable | Use a generic project prefix such as `cloudai-platform`. |
 | Budget owner or alarm recipient | AWS Budget or private note | Do not commit billing details. |
 
 ## Terraform Shape
@@ -86,6 +87,7 @@ The first Terraform implementation should be intentionally small:
 ```text
 providers/aws/infra/terraform/envs/eks-sandbox/
   versions.tf
+  backend.s3.tf
   backend.tf.example
   main.tf
   variables.tf
@@ -96,7 +98,23 @@ providers/aws/infra/terraform/modules/
   eks/
 ```
 
-The validate-only Terraform skeleton now exists in those paths. It defines the intended VPC, public subnet, EKS cluster, and managed node group shape, but the workflow still refuses real `apply` and `destroy` until private backend, budget, approval, and teardown evidence are confirmed.
+The Terraform skeleton now exists in those paths. It defines the intended VPC, public subnet, EKS cluster, and managed node group shape. The workflow can run a backend-backed `plan` through the `aws-sandbox` GitHub environment, but still refuses real `apply` and `destroy` until budget, approval, and teardown evidence are confirmed.
+
+State key pattern:
+
+```text
+cloudai-platform/<stack-name>/terraform.tfstate
+```
+
+Initial stack:
+
+```text
+cloudai-platform/eks-sandbox/terraform.tfstate
+```
+
+Future Bedrock, AgentCore, GenAI gateway, and platform foundation stacks should use separate keys under the same prefix. This keeps state isolated by stack while reusing the same backend bucket and lock table.
+
+This sandbox pattern is intentionally small-scale. It is suitable for a personal account, a portfolio POC, or a small number of platform stacks. It should not be presented as the operating model for hundreds or thousands of landing zones. At enterprise scale, use a landing-zone factory model with account inventory, blueprint catalogs, account vending, baseline rollout, policy-as-code, CI/CD orchestration, drift detection, and generated state keys. See `docs/aws-reference-architecture.md` for the scale boundary.
 
 Recommended defaults:
 
