@@ -22,6 +22,7 @@ The repository can now demonstrate:
 - **P6b Capability Governance:** contracts for approved, blocked, and approval-required reusable assets
 - **P6c RAG Knowledge Lifecycle:** records for active and retired synthetic sources
 - **P4a Helm Packaging:** synthetic Kubernetes packaging of the mock AI API service
+- **P4b Personal EKS Sandbox Readiness:** Terraform backend, GitHub OIDC, budget, manual approval, synthetic workload, and teardown guidance
 - **P4c Argo CD Pattern:** manual GitOps promotion
 - **P4d Release Gates and Rollback:** synthetic EKS release engineering
 - **P5a AI-Assisted DevSecOps Boundary:** advisory AI use, human review, CI/security checks, and release evidence
@@ -54,6 +55,7 @@ The next main portfolio focus is **P6 AI Traffic Governance / AgentOps**. P6 cur
 | P6c RAG knowledge lifecycle | Complete | `shared/schemas/rag-knowledge-lifecycle/`, synthetic lifecycle fixtures, and retired-source route test |
 | P2 Guardrails as a Service | Complete | `shared/schemas/guardrails-as-a-service/`, synthetic fixtures, `POST /guardrails/assess`, and mock eval evidence |
 | P4a Helm packaging | Complete | `helm/ai-api-service/` |
+| P4b personal EKS sandbox readiness | Complete | `docs/personal-eks-sandbox-readiness.md`, `providers/aws/infra/bootstrap/`, `providers/aws/infra/terraform/envs/eks-sandbox/`, and `.github/workflows/terraform-eks-sandbox.yml` |
 | P4c Argo CD pattern | Complete | `argocd/applications/cloudai-api-sandbox.yaml` |
 | P4d release gates and rollback | Complete | `docs/eks-release-gates-and-rollback.md` |
 | P5a AI-assisted DevSecOps boundary | Complete | `docs/ai-assisted-devsecops-pattern.md` and `.github/workflows/ai-assisted-devsecops.yml` |
@@ -83,18 +85,19 @@ These should remain opt-in future work with explicit cost, cleanup, and governan
 
 ## Recommended Next Slice
 
-The current slice has completed the core synthetic **P4 EKS Release Engineering readiness** documentation and the **P5 AI-assisted DevSecOps** boundary/evidence path.
+The current slice has completed the core synthetic **P4 EKS Release Engineering readiness** documentation, the **P4b optional personal EKS sandbox readiness** boundary, and the **P5 AI-assisted DevSecOps** boundary/evidence path.
 
 Completed P4 split:
 
 - **P4a portfolio-ready release engineering:** Helm/Kubernetes chart for the mock AI API service, probes, rollback notes, resource requests, policy gates, and synthetic deployment metadata.
+- **P4b optional personal EKS sandbox readiness:** Terraform backend bootstrap, GitHub OIDC delivery plane, budget and teardown gates, synthetic workload boundary, and no-account-specific-value rules.
 - **P4c GitOps / Argo CD pattern:** application manifest pattern, promotion notes, and audit metadata for release decisions.
 - **P4d release gates and rollback:** pre-deploy gates, rollout observation, rollback choices, failure modes, and synthetic evidence expectations.
 
 Recommended next choices:
 
 - **P6 AI Traffic Governance evidence expansion:** add more synthetic scenario variants only if they explain a new governance outcome that is not already covered by P6e/P6f.
-- **P4b optional personal AWS EKS sandbox POC:** Terraform-managed sandbox using a personal AWS account, S3 and DynamoDB backend, GitHub Actions OIDC, explicit budget, manual approval, synthetic workload only, and teardown guidance.
+- **P4b future apply/destroy slice:** add live sandbox apply and destroy only after explicit approval, budget alarm, private backend setup, environment protection, and teardown path are confirmed.
 
 The repository should not perform a real cloud deployment by default. Any personal sandbox work must keep account identifiers, state, kubeconfig, plan files, tfvars, credentials, and live endpoint details out of git.
 

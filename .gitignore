@@ -19,6 +19,9 @@ coverage/
 
 # Terraform local state and cache
 .terraform/
+backend.tf
+*.tfvars
+*.tfvars.json
 *.tfstate
 *.tfstate.*
 *.tfplan
@@ -27,3 +30,7 @@ override.tf
 override.tf.json
 *_override.tf
 *_override.tf.json
+
+# Kubernetes and sandbox runtime files
+kubeconfig*
+*.kubeconfig

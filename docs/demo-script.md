@@ -196,12 +196,13 @@ Explain that this is the first practical slice of the GenAI / LLM Gateway. It is
 Open:
 
 - `helm/ai-api-service/`
+- `docs/personal-eks-sandbox-readiness.md`
 - `argocd/applications/cloudai-api-sandbox.yaml`
 - `docs/eks-release-gates-and-rollback.md`
 
 Talk track:
 
-The P4 release engineering track shows how the mock AI API could be packaged and promoted using Helm, Argo CD, release gates, and rollback decisions. The default repo still does not deploy to AWS. The personal EKS sandbox remains optional and must keep state, kubeconfig, tfvars, account IDs, and credentials out of git.
+The P4 release engineering track shows how the mock AI API could be packaged and promoted using Helm, optional personal EKS sandbox readiness, Argo CD, release gates, and rollback decisions. The default repo still does not deploy to AWS. P4b explains the Terraform backend, GitHub OIDC, budget, manual approval, synthetic workload, and teardown gates required before any personal sandbox apply.
 
 ### 12. Show AI-Assisted DevSecOps Evidence
 

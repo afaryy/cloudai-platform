@@ -124,6 +124,7 @@ The repository has been built incrementally through small PRs.
 | #29 | Mock AgentOps traffic governance | Added metadata-only authorisation decisions, session and action contracts, synthetic fixtures, audit evidence, and local evaluation without tool execution. |
 | #30-#35 | Capability, RAG lifecycle, guardrails, and roadmap alignment | Added reusable capability governance, RAG source lifecycle, Guardrails as a Service, current-state refreshes, and AI factory positioning notes. |
 | #36-#38 | EKS release engineering readiness | Added Helm packaging, Argo CD application pattern, release gates, rollback notes, and status refresh. |
+| P4b | Personal EKS sandbox readiness | Added the optional personal AWS sandbox readiness boundary for Terraform backend, OIDC, budget, approval, synthetic workload, and teardown. |
 | #39-#40 | AI-assisted DevSecOps | Added advisory AI-assisted delivery boundaries and synthetic review evidence records. |
 | #41-#42 | P6 status and control-plane evidence | Clarified P6a/P6b/P6c lanes and added the P6d control-plane evidence map. |
 | P6e | P6 evidence scenarios | Added scenario coverage for allowed, denied, approval-required, blocked-before-runtime, and retired-source-blocked governance outcomes. |
@@ -187,7 +188,7 @@ These patterns demonstrate how enterprise AI platforms can expose safety and ret
 
 The later phases turn the project into a broader Cloud & AI platform portfolio:
 
-- **P4 EKS Release Engineering:** Helm packaging, Argo CD application pattern, release gates, rollback notes, and optional personal AWS/EKS sandbox guidance.
+- **P4 EKS Release Engineering:** Helm packaging, Argo CD application pattern, personal AWS/EKS sandbox readiness, release gates, rollback notes, and optional future apply/destroy guidance.
 - **P5 AI-Assisted DevSecOps:** advisory AI use boundary, human-owned review evidence, CI/security checks, and release evidence patterns.
 - **P6 AgentOps / AI Traffic Governance:** runtime AgentOps decisions, capability governance before runtime use, RAG knowledge lifecycle, the P6d control-plane evidence map, P6e evidence scenarios, and the P6f security/operations control matrix.
 
@@ -238,7 +239,7 @@ A concise demo story:
 7. Show governed RAG contracts, metadata endpoints, and mock query response.
 8. Show AgentOps authorisation decisions for allow, deny, approval-required, and paused outcomes.
 9. Show capability governance and RAG lifecycle records.
-10. Show P4 release engineering: Helm, Argo CD, release gates, and rollback.
+10. Show P4 release engineering: Helm, optional personal EKS sandbox readiness, Argo CD, release gates, and rollback.
 11. Show P5 AI-assisted DevSecOps boundary and review evidence.
 12. Show the P6d/P6e control-plane evidence map and scenarios as the unifying portfolio artifacts.
 13. Show the P6f security and operations control matrix as the interview-ready architecture bridge.
@@ -271,6 +272,7 @@ Useful entry points:
 - `docs/agent-capability-governance.md` for capability admission before runtime use.
 - `docs/rag-knowledge-lifecycle.md` for source lifecycle and retired-source controls.
 - `docs/guardrails-as-a-service.md` for shared safety verdict contracts.
+- `docs/personal-eks-sandbox-readiness.md` for the P4b optional personal AWS EKS sandbox readiness boundary.
 - `docs/ai-assisted-devsecops-pattern.md` and `docs/ai-assisted-review-evidence.md` for P5 delivery controls.
 - `docs/control-plane-evidence-map.md` for the P6d evidence map.
 - `docs/control-plane-evidence-scenarios.md` for the P6e evidence scenario pack.
