@@ -39,7 +39,7 @@ Talk track:
 
 `cloudai-platform` is an AWS-first, multi-cloud-ready Cloud & AI platform reference implementation. It demonstrates how a CloudAI control plane can organize governed model access, AI traffic governance, provider adapters, FinOps, observability, and release engineering patterns.
 
-Emphasize that the project is incremental. It starts with a local mock GenAI / LLM Gateway API, then adds guardrails, governed RAG, AgentOps, capability governance, release engineering, AI-assisted DevSecOps evidence, and a control-plane evidence map before any real cloud resources are introduced.
+Emphasize that the project is incremental. It starts with a local mock GenAI / LLM Gateway API, then adds guardrails, governed RAG, AgentOps, capability governance, release engineering, AI-assisted DevSecOps evidence, control-plane evidence, and security/operations controls before any real cloud resources are introduced.
 
 ### 2. Show The Architecture View
 
@@ -52,6 +52,7 @@ Point out:
 - AI Traffic Governance as the layer for agent, tool, retrieval, workflow, and data-access flows
 - provider adapters for AWS-first implementation with Azure and GCP mappings
 - cross-cutting concerns such as identity, policy, FinOps, observability, audit, and responsible AI review
+- the P6f security and operations control matrix as the bridge from evidence contracts to platform-operating responsibilities
 
 Suggested line:
 
@@ -232,7 +233,19 @@ Suggested line:
 
 The point is not that this repository runs an enterprise AI platform. The point is that it demonstrates how a platform team can model the evidence needed to explain why enterprise AI actions are allowed, denied, paused for approval, blocked before runtime, or excluded because source lifecycle has changed.
 
-### 14. Show What Is Deferred
+### 14. Show Security And Operations Controls
+
+Open `docs/ai-platform-security-operations-controls.md`.
+
+Talk track:
+
+P6f turns the project into an interview-ready operating model. It connects six enterprise AI controls: identity, data protection, AI AppSec, delivery controls, operations, and FinOps. Each row explains the threat, platform control, implementation pattern, audit evidence, existing repo evidence, and gap to study.
+
+Suggested line:
+
+Production enterprise AI is not just a model problem. It is a platform control problem: identity, data protection, AI AppSec, release gates, operations evidence, rollback, and cost control.
+
+### 15. Show What Is Deferred
 
 Open `docs/cloudai-platform-solution-walkthrough.md`, then the “What Is Intentionally Mock-Only” and “Future Deployment Path” sections.
 
@@ -290,6 +303,6 @@ Stop the local server when finished.
 
 ## Closing Message
 
-This repository shows a practical Cloud & AI platform engineering path: start with architecture, define the control model, build a local mock gateway, add guardrails and governed RAG, model runtime AgentOps and capability governance, package release engineering patterns, document AI-assisted delivery controls, and connect the evidence through a control-plane map and scenario pack.
+This repository shows a practical Cloud & AI platform engineering path: start with architecture, define the control model, build a local mock gateway, add guardrails and governed RAG, model runtime AgentOps and capability governance, package release engineering patterns, document AI-assisted delivery controls, connect the evidence through a control-plane map and scenario pack, and summarize the security/operations controls required for production enterprise AI.
 
 The current phase is intentionally mock-first. That keeps the project understandable, reviewable, and low-cost while the platform design matures.
