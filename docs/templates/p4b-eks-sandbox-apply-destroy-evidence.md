@@ -36,6 +36,31 @@ Do not include account IDs, role ARNs, backend bucket names, state object names 
 - Public-safe outputs captured:
 - No live endpoint or kubeconfig committed:
 
+## Optional Helm Evidence
+
+Use this section only if the sandbox run includes the future Helm release-engineering slice.
+
+- Helm chart rendered:
+- Helm lint completed:
+- Namespace pattern:
+- Release name:
+- Mock provider mode confirmed:
+- Kubernetes rollout status summarized:
+- Health check summarized:
+- No Kubernetes secrets or provider credentials introduced:
+
+## Optional Argo CD Evidence
+
+Use this section only if the sandbox run includes the future Argo CD GitOps slice.
+
+- Argo CD install or connection method summarized:
+- Application name:
+- Manual sync used:
+- Sync status summarized:
+- Health status summarized:
+- Rollback or Git revert path recorded:
+- No Argo CD tokens, cluster endpoints, or kubeconfig committed:
+
 ## Teardown Evidence
 
 - Terraform destroy completed:

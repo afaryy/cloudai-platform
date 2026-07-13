@@ -22,7 +22,7 @@ The repository can now demonstrate:
 - **P6b Capability Governance:** contracts for approved, blocked, and approval-required reusable assets
 - **P6c RAG Knowledge Lifecycle:** records for active and retired synthetic sources
 - **P4a Helm Packaging:** synthetic Kubernetes packaging of the mock AI API service
-- **P4b Personal EKS Sandbox Readiness:** hardened Terraform backend path, GitHub OIDC, budget, manual approval, small no-NAT network defaults, restricted EKS API endpoint CIDRs, synthetic workload, and teardown guidance
+- **P4b Personal EKS Sandbox Readiness:** hardened Terraform backend path, GitHub OIDC, budget, manual approval, small no-NAT network defaults, restricted EKS API endpoint CIDRs, synthetic workload, apply/destroy workflow evidence, and teardown guidance
 - **P4b Terraform Static Tests:** native Terraform tests for the network module, EKS module, and EKS sandbox environment
 - **P4c Argo CD Pattern:** manual GitOps promotion
 - **P4d Release Gates and Rollback:** synthetic EKS release engineering
@@ -56,7 +56,7 @@ The next main portfolio focus is **P6 AI Traffic Governance / AgentOps**. P6 cur
 | P6c RAG knowledge lifecycle | Complete | `shared/schemas/rag-knowledge-lifecycle/`, synthetic lifecycle fixtures, and retired-source route test |
 | P2 Guardrails as a Service | Complete | `shared/schemas/guardrails-as-a-service/`, synthetic fixtures, `POST /guardrails/assess`, and mock eval evidence |
 | P4a Helm packaging | Complete | `helm/ai-api-service/` |
-| P4b personal EKS sandbox runbook, Terraform skeleton, backend-backed plan, and static tests | Complete | `docs/p4b-eks-sandbox-operator-runbook.md`, `docs/p4b-real-eks-sandbox-design.md`, `providers/aws/infra/bootstrap/`, `providers/aws/infra/terraform/envs/eks-sandbox/`, `providers/aws/infra/terraform/modules/network/`, `providers/aws/infra/terraform/modules/eks/`, `.github/workflows/terraform-eks-sandbox.yml`, and `.github/workflows/terraform-tests.yaml` |
+| P4b personal EKS sandbox runbook, Terraform skeleton, backend-backed validate/plan/apply/destroy path, and static tests | Complete | `docs/p4b-eks-sandbox-operator-runbook.md`, `docs/p4b-real-eks-sandbox-design.md`, `providers/aws/infra/bootstrap/`, `providers/aws/infra/terraform/envs/eks-sandbox/`, `providers/aws/infra/terraform/modules/network/`, `providers/aws/infra/terraform/modules/eks/`, `.github/workflows/terraform-eks-sandbox.yml`, and `.github/workflows/terraform-tests.yaml` |
 | P4c Argo CD pattern | Complete | `argocd/applications/cloudai-api-sandbox.yaml` |
 | P4d release gates and rollback | Complete | `docs/eks-release-gates-and-rollback.md` |
 | P5a AI-assisted DevSecOps boundary | Complete | `docs/ai-assisted-devsecops-pattern.md` and `.github/workflows/ai-assisted-devsecops.yml` |
@@ -88,19 +88,21 @@ These should remain opt-in future work with explicit cost, cleanup, and governan
 
 The current slice has completed the core synthetic **P4 EKS Release Engineering readiness** documentation, the hardened **P4b optional personal EKS sandbox readiness** boundary, and the **P5 AI-assisted DevSecOps** boundary/evidence path.
 
+The optional P4b personal EKS sandbox path has also been exercised through the manual GitHub Actions validate, plan, apply, and destroy sequence with synthetic workload boundaries and public-safe evidence handling.
+
 Completed P4 split:
 
 - **P4a portfolio-ready release engineering:** Helm/Kubernetes chart for the mock AI API service, probes, rollback notes, resource requests, policy gates, and synthetic deployment metadata.
-- **P4b optional personal EKS sandbox readiness:** Terraform backend bootstrap, GitHub OIDC delivery plane, small no-NAT network defaults, restricted EKS API endpoint CIDRs, budget and teardown gates, synthetic workload boundary, and no-account-specific-value rules.
+- **P4b optional personal EKS sandbox readiness:** Terraform backend bootstrap, GitHub OIDC delivery plane, small no-NAT network defaults, restricted EKS API endpoint CIDRs, budget and teardown gates, synthetic workload boundary, manual apply/destroy path, and no-account-specific-value rules.
 - **P4c GitOps / Argo CD pattern:** application manifest pattern, promotion notes, and audit metadata for release decisions.
 - **P4d release gates and rollback:** pre-deploy gates, rollout observation, rollback choices, failure modes, and synthetic evidence expectations.
 
 Recommended next choices:
 
-- **P4b real EKS sandbox design:** use `docs/p4b-real-eks-sandbox-design.md` as the design-only bridge from readiness docs to a future personal AWS EKS apply/destroy path.
-- **P4b budget, endpoint, and teardown setup:** confirm AWS Budget, operator `/32` endpoint CIDR, teardown owner, and environment protection before enabling real apply/destroy. The workflow can now run a backend-backed `plan` through the `aws-sandbox` environment.
+- **P4b real EKS sandbox design:** keep `docs/p4b-real-eks-sandbox-design.md` as the design bridge for the optional personal AWS EKS apply/destroy path.
+- **P4b budget, endpoint, and teardown setup:** keep AWS Budget, operator `/32` endpoint CIDR, teardown owner, and environment protection as required gates before any repeat apply. The workflow can run backend-backed validate, plan, apply, and destroy through the `aws-sandbox` environment.
 - **P6 AI Traffic Governance evidence expansion:** add more synthetic scenario variants only if they explain a new governance outcome that is not already covered by P6e/P6f.
-- **P4b future apply/destroy slice:** add live sandbox apply and destroy only after explicit approval, budget alarm, private backend setup, environment protection, and teardown path are confirmed.
+- **P4b future evidence refresh:** capture only sanitized apply/destroy observations when needed; do not commit account identifiers, live endpoints, kubeconfig, raw plans, state, tfvars, backend names, or screenshots with private details.
 - **P4b pre-apply readiness check:** use `docs/p4b-eks-sandbox-operator-runbook.md` as the single go/no-go runbook before any real personal EKS sandbox apply.
 - **P7 AI Factory learning note:** use `docs/ai-factory-learning-note.md` to explain why cloud architecture is evolving into AI-ready platform architecture rather than disappearing.
 
