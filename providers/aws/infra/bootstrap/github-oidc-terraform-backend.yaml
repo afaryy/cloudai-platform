@@ -176,10 +176,14 @@ Resources:
                 Effect: Allow
                 Action:
                   - iam:CreateServiceLinkedRole
-                Resource: !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/aws-service-role/eks.amazonaws.com/AWSServiceRoleForAmazonEKS"
+                Resource:
+                  - !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/aws-service-role/eks.amazonaws.com/AWSServiceRoleForAmazonEKS"
+                  - !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/aws-service-role/eks-nodegroup.amazonaws.com/AWSServiceRoleForAmazonEKSNodegroup"
                 Condition:
                   StringEquals:
-                    iam:AWSServiceName: eks.amazonaws.com
+                    iam:AWSServiceName:
+                      - eks.amazonaws.com
+                      - eks-nodegroup.amazonaws.com
               - Sid: EksSandboxManagedPolicyRead
                 Effect: Allow
                 Action:
