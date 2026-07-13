@@ -16,6 +16,8 @@ The first real apply proves the platform foundation only:
 
 The first apply does not run `kubectl`, Helm deployment, Argo CD sync, Bedrock, Bedrock AgentCore, GPU, or HyperPod resources. Those belong in later opt-in slices after the EKS foundation has been applied, destroyed, and reviewed.
 
+A later sandbox slice may add controlled Helm and Argo CD evidence, but it should keep the same safety model: synthetic workload only, manual approval, public-safe evidence, and same-day teardown.
+
 ## Architecture Boundary
 
 ```text
@@ -50,6 +52,7 @@ Run `apply` only when every gate is true.
 | Branch state | Workflow changes are merged to `main`. | Running from an unmerged branch or local-only workflow. |
 | GitHub environment | `aws-sandbox` exists and requires manual approval. | No environment protection or no human approval. |
 | OIDC role | GitHub Actions can assume the sandbox role through OIDC. | Static AWS keys, missing trust policy, or unclear role boundary. |
+| Bootstrap policy | The CloudFormation bootstrap stack has been updated with current EKS sandbox apply/destroy permissions. | `AccessDenied` for `iam:CreateRole`, `ec2:CreateVpc`, `eks:CreateCluster`, or `eks:CreateNodegroup`. |
 | Backend | S3 backend bucket and DynamoDB lock table are configured as private GitHub environment values. | Backend names committed to git or copied into public notes. |
 | State key | State key is derived from project, stack, and environment naming. | Reusing one state key across unrelated stacks. |
 | Budget | Sandbox budget and alarm are active before apply. | No alarm recipient, no threshold, or no budget owner. |
@@ -146,6 +149,55 @@ confirm_destroy: I_UNDERSTAND_DESTROY
 ```
 
 The workflow uses the `terraform-eks-sandbox` concurrency group with `cancel-in-progress: false`. This queues overlapping manual runs instead of allowing two runs to compete for the same EKS sandbox state key. Terraform's DynamoDB backend lock remains the authoritative state lock.
+
+## Future Helm And Argo CD Sandbox Slice
+
+Run this slice only after the base EKS apply/destroy path has already succeeded at least once. The goal is to prove Kubernetes release engineering for the mock AI API service, not to add a production runtime.
+
+Recommended sequence:
+
+```text
+terraform validate
+  -> terraform plan
+  -> terraform apply
+  -> verify EKS cluster access
+  -> render and lint Helm chart
+  -> deploy mock API service with Helm
+  -> observe rollout and health
+  -> optionally install or connect Argo CD
+  -> manually sync the Argo CD Application
+  -> capture sanitized evidence
+  -> terraform destroy the same day
+```
+
+Keep the first Helm slice smaller than the first Argo CD slice:
+
+- **Helm first:** validate the chart, install or upgrade the mock AI API service, inspect rollout status, and confirm mock-mode health.
+- **Argo CD second:** install or connect Argo CD only after the Helm release path is understood, then manually sync the existing sandbox Application pattern.
+
+Do not add Bedrock, Bedrock AgentCore, real model calls, real retrieval runtime, live customer data, GPU workloads, or HyperPod resources to this release-engineering slice.
+
+Additional gates before Helm or Argo CD:
+
+| Gate | Go condition | No-go signal |
+|---|---|---|
+| Cluster access | `kubectl` access is temporary, controlled, and limited to the sandbox. | Kubeconfig is committed, shared, or copied into public evidence. |
+| Namespace | The target namespace is sandbox-only and synthetic. | Namespace naming suggests production, shared, internal, or customer use. |
+| Helm chart | `helm template` and `helm lint` pass before install or upgrade. | Rendered manifests introduce secrets, real provider settings, or unclear image sources. |
+| Workload mode | The mock API runs in mock mode with synthetic labels and no provider credentials. | Bedrock, AgentCore, retrieval, or provider credentials are required. |
+| Argo CD posture | Sync is manual and limited to the sandbox Application. | Automated sync, broad cluster access, or unclear rollback ownership. |
+| Evidence | Evidence is summarized and sanitized. | Raw kubeconfig, endpoint, account ID, ARN, logs, screenshots, or provider output would be exposed. |
+| Teardown | Destroy still happens the same day. | The cluster remains running without an explicit reason and budget owner. |
+
+Example evidence to capture:
+
+- Helm chart version and release name.
+- Namespace name pattern.
+- Rollout status summarized without raw cluster endpoint details.
+- Health check result for mock mode.
+- Argo CD Application sync status if Argo CD is included.
+- Rollback or Git revert decision if the deployment fails.
+- Destroy confirmation after the sandbox run.
 
 ## After Destroy
 
