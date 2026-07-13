@@ -93,6 +93,12 @@ variable "local_operator_principal_arn" {
   default     = ""
 }
 
+variable "enable_eks_access_entries" {
+  description = "Whether Terraform should manage EKS access entries. Disable only for the first apply when the cluster does not exist yet."
+  type        = bool
+  default     = true
+}
+
 variable "tags" {
   description = "Tags applied to all sandbox EKS resources."
   type        = map(string)

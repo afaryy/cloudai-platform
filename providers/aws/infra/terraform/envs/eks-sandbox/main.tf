@@ -38,5 +38,6 @@ module "eks" {
   node_max_size                = var.node_max_size
   github_actions_principal_arn = var.github_actions_principal_arn
   local_operator_principal_arn = var.local_operator_principal_arn
+  enable_eks_access_entries    = var.enable_eks_access_entries
   tags                         = local.common_tags
 }

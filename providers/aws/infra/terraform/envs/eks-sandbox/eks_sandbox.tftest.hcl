@@ -75,4 +75,9 @@ run "plans_eks_sandbox_environment_defaults" {
     condition     = module.eks.github_actions_principal_arn == "arn:aws:iam::123456789012:role/cloudai-platform-aws-sandbox-terraform"
     error_message = "The environment must pass the GitHub Actions identity into the EKS module."
   }
+
+  assert {
+    condition     = var.enable_eks_access_entries
+    error_message = "The sandbox should manage EKS access entries by default."
+  }
 }
