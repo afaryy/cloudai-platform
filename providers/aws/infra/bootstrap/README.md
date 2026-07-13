@@ -32,6 +32,12 @@ Replace `<ACCOUNT_ID>` only in your private local command or AWS console. Do not
 6. Run future apply, deploy, GitOps update, and teardown through GitHub Actions rather than laptop-local commands.
 7. Add apply only after budget alarm, teardown, and synthetic workload boundaries are reviewed.
 
+## Updating The Bootstrap Stack
+
+If a Terraform apply fails with `AccessDenied` for sandbox resources such as `iam:CreateRole`, `ec2:CreateVpc`, `eks:CreateCluster`, or `eks:CreateNodegroup`, update the existing CloudFormation bootstrap stack with the latest template in this folder.
+
+The bootstrap role needs both backend access and bounded sandbox apply/destroy permissions. The policy intentionally grants the EKS sandbox role enough access to create and delete the small VPC, EKS cluster, managed node group, and associated sandbox IAM roles. It should not be reused for production, shared enterprise, or non-synthetic workloads.
+
 ## Safety Notes
 
 - Prefer `ap-southeast-2` for Australia-first examples unless there is a reason to choose another region.
