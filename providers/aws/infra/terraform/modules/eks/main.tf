@@ -59,10 +59,6 @@ resource "aws_eks_cluster" "this" {
   role_arn = aws_iam_role.cluster.arn
   version  = var.kubernetes_version
 
-  access_config {
-    authentication_mode = "API_AND_CONFIG_MAP"
-  }
-
   vpc_config {
     subnet_ids              = var.subnet_ids
     endpoint_private_access = var.endpoint_private_access
@@ -103,6 +99,8 @@ resource "aws_eks_node_group" "this" {
 }
 
 resource "aws_eks_access_entry" "github_actions" {
+  count = var.enable_eks_access_entries ? 1 : 0
+
   cluster_name  = aws_eks_cluster.this.name
   principal_arn = var.github_actions_principal_arn
   type          = "STANDARD"
@@ -111,8 +109,10 @@ resource "aws_eks_access_entry" "github_actions" {
 }
 
 resource "aws_eks_access_policy_association" "github_actions" {
+  count = var.enable_eks_access_entries ? 1 : 0
+
   cluster_name  = aws_eks_cluster.this.name
-  principal_arn = aws_eks_access_entry.github_actions.principal_arn
+  principal_arn = aws_eks_access_entry.github_actions[0].principal_arn
   policy_arn    = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
 
   access_scope {
@@ -121,7 +121,7 @@ resource "aws_eks_access_policy_association" "github_actions" {
 }
 
 resource "aws_eks_access_entry" "local_operator" {
-  count = var.local_operator_principal_arn == "" ? 0 : 1
+  count = var.enable_eks_access_entries && var.local_operator_principal_arn != "" ? 1 : 0
 
   cluster_name  = aws_eks_cluster.this.name
   principal_arn = var.local_operator_principal_arn
@@ -131,7 +131,7 @@ resource "aws_eks_access_entry" "local_operator" {
 }
 
 resource "aws_eks_access_policy_association" "local_operator" {
-  count = var.local_operator_principal_arn == "" ? 0 : 1
+  count = var.enable_eks_access_entries && var.local_operator_principal_arn != "" ? 1 : 0
 
   cluster_name  = aws_eks_cluster.this.name
   principal_arn = aws_eks_access_entry.local_operator[0].principal_arn

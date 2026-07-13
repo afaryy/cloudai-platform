@@ -83,6 +83,12 @@ variable "local_operator_principal_arn" {
   default     = ""
 }
 
+variable "enable_eks_access_entries" {
+  description = "Whether Terraform should manage EKS access entries for the sandbox."
+  type        = bool
+  default     = true
+}
+
 variable "tags" {
   description = "Additional tags to apply to sandbox resources."
   type        = map(string)

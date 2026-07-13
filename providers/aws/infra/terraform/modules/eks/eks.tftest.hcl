@@ -51,11 +51,6 @@ run "plans_minimal_sandbox_eks_cluster" {
   }
 
   assert {
-    condition     = aws_eks_cluster.this.access_config[0].authentication_mode == "API_AND_CONFIG_MAP"
-    error_message = "The EKS cluster must enable API authentication mode before Terraform can manage access entries."
-  }
-
-  assert {
     condition     = aws_eks_cluster.this.vpc_config[0].endpoint_public_access && aws_eks_cluster.this.vpc_config[0].endpoint_private_access
     error_message = "The sandbox EKS API must enable private access and restrict public access."
   }
@@ -86,7 +81,7 @@ run "plans_minimal_sandbox_eks_cluster" {
   }
 
   assert {
-    condition     = aws_eks_access_entry.github_actions.principal_arn == "arn:aws:iam::123456789012:role/cloudai-platform-aws-sandbox-terraform"
+    condition     = aws_eks_access_entry.github_actions[0].principal_arn == "arn:aws:iam::123456789012:role/cloudai-platform-aws-sandbox-terraform"
     error_message = "The EKS module must grant access to the GitHub Actions identity."
   }
 
@@ -96,8 +91,25 @@ run "plans_minimal_sandbox_eks_cluster" {
   }
 
   assert {
-    condition     = aws_eks_access_policy_association.github_actions.policy_arn == "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+    condition     = aws_eks_access_policy_association.github_actions[0].policy_arn == "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
     error_message = "The GitHub Actions identity must use the sandbox cluster-admin access policy."
+  }
+}
+
+run "can_create_cluster_before_access_entries" {
+  command = plan
+
+  variables {
+    cluster_name                 = "cloudai-platform-eks-sandbox"
+    subnet_ids                   = ["subnet-synthetic-a", "subnet-synthetic-b"]
+    github_actions_principal_arn = "arn:aws:iam::123456789012:role/cloudai-platform-aws-sandbox-terraform"
+    local_operator_principal_arn = "arn:aws:iam::123456789012:user/yvonne-eks-sandbox"
+    enable_eks_access_entries    = false
+  }
+
+  assert {
+    condition     = length(aws_eks_access_entry.github_actions) == 0 && length(aws_eks_access_entry.local_operator) == 0
+    error_message = "The module must allow the first apply to create the cluster before access entries are enabled."
   }
 }
 

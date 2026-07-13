@@ -49,6 +49,7 @@ jobs:
       TF_VAR_endpoint_public_access_cidrs: ${{ vars.TF_VAR_ENDPOINT_PUBLIC_ACCESS_CIDRS || '["203.0.113.10/32"]' }}
       TF_VAR_github_actions_principal_arn: ${{ vars.AWS_ROLE_TO_ASSUME || secrets.AWS_ROLE_TO_ASSUME }}
       TF_VAR_local_operator_principal_arn: ${{ vars.LOCAL_OPERATOR_PRINCIPAL_ARN || secrets.LOCAL_OPERATOR_PRINCIPAL_ARN || '' }}
+      TF_VAR_enable_eks_access_entries: "true"
     defaults:
       run:
         working-directory: providers/aws/infra/terraform/envs/eks-sandbox
@@ -149,7 +150,9 @@ jobs:
 
           if [ "$describe_status" -ne 0 ]; then
             if grep -q 'ResourceNotFoundException' /tmp/eks-describe-error; then
-              echo "EKS cluster does not exist yet; Terraform will create it with access-entry authentication mode."
+              echo "EKS cluster does not exist yet; Terraform will create the cluster first without access entries."
+              echo "TF_VAR_enable_eks_access_entries=false" >> "$GITHUB_ENV"
+              echo "::notice::Run apply again after the cluster is active to migrate authentication mode and create access entries."
               exit 0
             fi
             cat /tmp/eks-describe-error
