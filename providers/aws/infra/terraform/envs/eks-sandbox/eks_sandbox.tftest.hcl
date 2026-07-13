@@ -26,6 +26,11 @@ mock_provider "aws" {
 run "plans_eks_sandbox_environment_defaults" {
   command = plan
 
+  variables {
+    github_actions_principal_arn = "arn:aws:iam::123456789012:role/cloudai-platform-aws-sandbox-terraform"
+    local_operator_principal_arn = "arn:aws:iam::123456789012:user/yvonne-eks-sandbox"
+  }
+
   assert {
     condition     = var.project_name == "cloudai-platform"
     error_message = "The sandbox project name must remain aligned to the repository name."
@@ -64,5 +69,10 @@ run "plans_eks_sandbox_environment_defaults" {
   assert {
     condition     = local.common_tags.DataScope == "synthetic-only" && local.common_tags.CostBoundary == "personal-sandbox" && local.common_tags.TeardownRequired == "true"
     error_message = "The sandbox must keep synthetic data, personal cost, and teardown tags."
+  }
+
+  assert {
+    condition     = module.eks.github_actions_principal_arn == "arn:aws:iam::123456789012:role/cloudai-platform-aws-sandbox-terraform"
+    error_message = "The environment must pass the GitHub Actions identity into the EKS module."
   }
 }

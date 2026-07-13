@@ -27,6 +27,8 @@ run "plans_minimal_sandbox_eks_cluster" {
     endpoint_private_access      = true
     endpoint_public_access       = true
     endpoint_public_access_cidrs = ["203.0.113.10/32"]
+    github_actions_principal_arn = "arn:aws:iam::123456789012:role/cloudai-platform-aws-sandbox-terraform"
+    local_operator_principal_arn = "arn:aws:iam::123456789012:user/yvonne-eks-sandbox"
     node_instance_types          = ["t3.small"]
     node_desired_size            = 1
     node_min_size                = 1
@@ -77,15 +79,31 @@ run "plans_minimal_sandbox_eks_cluster" {
     condition     = length(aws_eks_node_group.this.instance_types) == 1 && contains(aws_eks_node_group.this.instance_types, "t3.small")
     error_message = "The first sandbox node group must use the expected small instance type."
   }
+
+  assert {
+    condition     = aws_eks_access_entry.github_actions.principal_arn == "arn:aws:iam::123456789012:role/cloudai-platform-aws-sandbox-terraform"
+    error_message = "The EKS module must grant access to the GitHub Actions identity."
+  }
+
+  assert {
+    condition     = aws_eks_access_entry.local_operator[0].principal_arn == "arn:aws:iam::123456789012:user/yvonne-eks-sandbox"
+    error_message = "The EKS module must grant optional access to the local operator identity."
+  }
+
+  assert {
+    condition     = aws_eks_access_policy_association.github_actions.policy_arn == "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+    error_message = "The GitHub Actions identity must use the sandbox cluster-admin access policy."
+  }
 }
 
 run "defaults_restrict_eks_api_endpoint" {
   command = plan
 
   variables {
-    cluster_name        = "cloudai-platform-eks-sandbox"
-    subnet_ids          = ["subnet-synthetic-a", "subnet-synthetic-b"]
-    node_instance_types = ["t3.small"]
+    cluster_name                 = "cloudai-platform-eks-sandbox"
+    subnet_ids                   = ["subnet-synthetic-a", "subnet-synthetic-b"]
+    github_actions_principal_arn = "arn:aws:iam::123456789012:role/cloudai-platform-aws-sandbox-terraform"
+    node_instance_types          = ["t3.small"]
   }
 
   assert {
@@ -105,6 +123,7 @@ run "rejects_open_eks_api_endpoint" {
   variables {
     cluster_name                 = "cloudai-platform-eks-sandbox"
     subnet_ids                   = ["subnet-synthetic-a", "subnet-synthetic-b"]
+    github_actions_principal_arn = "arn:aws:iam::123456789012:role/cloudai-platform-aws-sandbox-terraform"
     endpoint_public_access_cidrs = ["0.0.0.0/0"]
   }
 

@@ -46,6 +46,8 @@ jobs:
       TF_STACK_NAME: eks-sandbox
       TF_STATE_KEY: ${{ vars.TF_STATE_KEY_PREFIX }}/eks-sandbox/terraform.tfstate
       TF_VAR_endpoint_public_access_cidrs: ${{ vars.TF_VAR_ENDPOINT_PUBLIC_ACCESS_CIDRS || '["203.0.113.10/32"]' }}
+      TF_VAR_github_actions_principal_arn: ${{ vars.AWS_ROLE_TO_ASSUME || secrets.AWS_ROLE_TO_ASSUME }}
+      TF_VAR_local_operator_principal_arn: ${{ vars.LOCAL_OPERATOR_PRINCIPAL_ARN || '' }}
     defaults:
       run:
         working-directory: providers/aws/infra/terraform/envs/eks-sandbox

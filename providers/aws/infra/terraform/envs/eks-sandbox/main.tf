@@ -36,5 +36,7 @@ module "eks" {
   node_desired_size            = var.node_desired_size
   node_min_size                = var.node_min_size
   node_max_size                = var.node_max_size
+  github_actions_principal_arn = var.github_actions_principal_arn
+  local_operator_principal_arn = var.local_operator_principal_arn
   tags                         = local.common_tags
 }

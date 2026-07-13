@@ -197,10 +197,17 @@ Resources:
               - Sid: EksSandboxClusterApply
                 Effect: Allow
                 Action:
+                  - eks:AssociateAccessPolicy
                   - eks:CreateCluster
+                  - eks:CreateAccessEntry
                   - eks:CreateNodegroup
+                  - eks:DeleteAccessEntry
                   - eks:DeleteCluster
                   - eks:DeleteNodegroup
+                  - eks:DescribeAccessEntry
+                  - eks:DisassociateAccessPolicy
+                  - eks:ListAccessEntries
+                  - eks:ListAssociatedAccessPolicies
                   - eks:TagResource
                   - eks:UntagResource
                   - eks:UpdateClusterConfig
