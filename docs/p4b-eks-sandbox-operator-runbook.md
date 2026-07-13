@@ -52,7 +52,7 @@ Run `apply` only when every gate is true.
 | Branch state | Workflow changes are merged to `main`. | Running from an unmerged branch or local-only workflow. |
 | GitHub environment | `aws-sandbox` exists and requires manual approval. | No environment protection or no human approval. |
 | OIDC role | GitHub Actions can assume the sandbox role through OIDC. | Static AWS keys, missing trust policy, or unclear role boundary. |
-| Bootstrap policy | The CloudFormation bootstrap stack has been updated with current EKS sandbox apply/destroy permissions. | `AccessDenied` for `iam:CreateRole`, `iam:CreateServiceLinkedRole`, `ec2:CreateVpc`, `eks:CreateCluster`, or `eks:CreateNodegroup`. |
+| Bootstrap policy | The CloudFormation bootstrap stack has been updated with current EKS sandbox apply/destroy permissions, including EKS and EKS node group service-linked role creation. | `AccessDenied` for `iam:CreateRole`, `iam:CreateServiceLinkedRole`, `ec2:CreateVpc`, `eks:CreateCluster`, or `eks:CreateNodegroup`. |
 | Backend | S3 backend bucket and DynamoDB lock table are configured as private GitHub environment values. | Backend names committed to git or copied into public notes. |
 | State key | State key is derived from project, stack, and environment naming. | Reusing one state key across unrelated stacks. |
 | Budget | Sandbox budget and alarm are active before apply. | No alarm recipient, no threshold, or no budget owner. |
