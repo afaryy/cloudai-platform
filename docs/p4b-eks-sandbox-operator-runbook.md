@@ -77,6 +77,7 @@ Configure these values in the `aws-sandbox` GitHub environment.
 | `TF_BACKEND_LOCK_TABLE` | Environment variable | DynamoDB table for Terraform state locking. |
 | `TF_STATE_KEY_PREFIX` | Environment variable | Project state prefix, recommended `cloudai-platform`. |
 | `TF_VAR_ENDPOINT_PUBLIC_ACCESS_CIDRS` | Environment variable | Private list of operator `/32` CIDRs for the EKS public API endpoint before real apply. |
+| `LOCAL_OPERATOR_PRINCIPAL_ARN` | Environment variable | Optional local operator identity for workstation `kubectl` inspection. Keep private and do not commit. |
 
 The workflow derives the EKS sandbox state key as:
 
@@ -101,6 +102,17 @@ Before real apply, set `TF_VAR_ENDPOINT_PUBLIC_ACCESS_CIDRS` privately in GitHub
 ```
 
 Use a real operator public IP in GitHub settings only. Do not commit it. Do not use `0.0.0.0/0`.
+
+## Kubernetes Access Identities
+
+The sandbox uses EKS access entries rather than manual `aws-auth` edits.
+
+Two identities are supported:
+
+- **GitHub Actions identity:** the OIDC role used by workflows. This is the preferred delivery-plane identity for future `kubectl`, Helm, and Argo CD evidence.
+- **Local operator identity:** an optional IAM user or role used from a workstation for learning and inspection.
+
+Both identities use cluster-admin access in this personal sandbox only. This is not a production permission model. Do not commit the local operator ARN, kubeconfig, cluster endpoint, or raw `kubectl` output containing account details.
 
 ## Network And Endpoint Defaults
 

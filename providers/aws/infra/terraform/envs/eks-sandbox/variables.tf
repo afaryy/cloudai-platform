@@ -72,6 +72,17 @@ variable "node_max_size" {
   default     = 1
 }
 
+variable "github_actions_principal_arn" {
+  description = "IAM principal ARN for the GitHub Actions identity that can operate the sandbox Kubernetes API."
+  type        = string
+}
+
+variable "local_operator_principal_arn" {
+  description = "Optional IAM principal ARN for a local operator identity used for sandbox inspection from a workstation."
+  type        = string
+  default     = ""
+}
+
 variable "tags" {
   description = "Additional tags to apply to sandbox resources."
   type        = map(string)

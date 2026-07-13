@@ -36,7 +36,7 @@ Replace `<ACCOUNT_ID>` only in your private local command or AWS console. Do not
 
 If a Terraform apply fails with `AccessDenied` for sandbox resources such as `iam:CreateRole`, `iam:CreateServiceLinkedRole`, `ec2:CreateVpc`, `eks:CreateCluster`, or `eks:CreateNodegroup`, update the existing CloudFormation bootstrap stack with the latest template in this folder.
 
-The bootstrap role needs both backend access and bounded sandbox apply/destroy permissions. The policy intentionally grants the EKS sandbox role enough access to create and delete the small VPC, EKS cluster, managed node group, the EKS and EKS node group service-linked roles, and associated sandbox IAM roles. It should not be reused for production, shared enterprise, or non-synthetic workloads.
+The bootstrap role needs both backend access and bounded sandbox apply/destroy permissions. The policy intentionally grants the EKS sandbox role enough access to create and delete the small VPC, EKS cluster, managed node group, the EKS and EKS node group service-linked roles, sandbox access entries, and associated sandbox IAM roles. It should not be reused for production, shared enterprise, or non-synthetic workloads.
 
 ## Safety Notes
 
