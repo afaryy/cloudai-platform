@@ -173,6 +173,84 @@ jobs:
             --region "${AWS_REGION}" \
             --name "${EKS_CLUSTER_NAME}"
 
+      - name: Import existing EKS access entries
+        if: ${{ inputs.mode == 'apply' }}
+        run: |
+          if [ "${TF_VAR_enable_eks_access_entries}" != "true" ]; then
+            echo "EKS access entries are disabled for this apply; skipping import preflight."
+            exit 0
+          fi
+
+          policy_arn="arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+
+          import_access_entry() {
+            address="$1"
+            principal_arn="$2"
+
+            if [ -z "$principal_arn" ]; then
+              return 0
+            fi
+
+            if terraform state show "$address" >/dev/null 2>&1; then
+              echo "EKS access entry is already managed in Terraform state."
+              return 0
+            fi
+
+            if aws eks describe-access-entry \
+              --region "${AWS_REGION}" \
+              --cluster-name "${EKS_CLUSTER_NAME}" \
+              --principal-arn "$principal_arn" >/dev/null 2>&1; then
+              echo "Importing existing EKS access entry into Terraform state."
+              terraform import -no-color "$address" "${EKS_CLUSTER_NAME}:${principal_arn}" >/dev/null || {
+                echo "::error::Failed to import existing EKS access entry."
+                exit 1
+              }
+            fi
+          }
+
+          import_access_policy_association() {
+            address="$1"
+            principal_arn="$2"
+
+            if [ -z "$principal_arn" ]; then
+              return 0
+            fi
+
+            if terraform state show "$address" >/dev/null 2>&1; then
+              echo "EKS access policy association is already managed in Terraform state."
+              return 0
+            fi
+
+            existing_policy=$(aws eks list-associated-access-policies \
+              --region "${AWS_REGION}" \
+              --cluster-name "${EKS_CLUSTER_NAME}" \
+              --principal-arn "$principal_arn" \
+              --query "associatedAccessPolicies[?policyArn=='${policy_arn}'].policyArn | [0]" \
+              --output text 2>/dev/null || true)
+
+            if [ "$existing_policy" = "$policy_arn" ]; then
+              echo "Importing existing EKS access policy association into Terraform state."
+              terraform import -no-color "$address" "${EKS_CLUSTER_NAME}#${principal_arn}#${policy_arn}" >/dev/null || {
+                echo "::error::Failed to import existing EKS access policy association."
+                exit 1
+              }
+            fi
+          }
+
+          import_access_entry \
+            'module.eks.aws_eks_access_entry.github_actions[0]' \
+            "${TF_VAR_github_actions_principal_arn}"
+          import_access_policy_association \
+            'module.eks.aws_eks_access_policy_association.github_actions[0]' \
+            "${TF_VAR_github_actions_principal_arn}"
+
+          import_access_entry \
+            'module.eks.aws_eks_access_entry.local_operator[0]' \
+            "${TF_VAR_local_operator_principal_arn}"
+          import_access_policy_association \
+            'module.eks.aws_eks_access_policy_association.local_operator[0]' \
+            "${TF_VAR_local_operator_principal_arn}"
+
       - name: Terraform plan without saved artifact
         if: ${{ inputs.mode == 'plan' }}
         run: terraform plan -input=false -no-color
