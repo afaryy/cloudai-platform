@@ -43,6 +43,7 @@ jobs:
       TF_BACKEND_BUCKET: ${{ vars.TF_BACKEND_BUCKET }}
       TF_BACKEND_LOCK_TABLE: ${{ vars.TF_BACKEND_LOCK_TABLE }}
       TF_STATE_KEY_PREFIX: ${{ vars.TF_STATE_KEY_PREFIX }}
+      EKS_CLUSTER_NAME: cloudai-platform-eks-sandbox
       TF_STACK_NAME: eks-sandbox
       TF_STATE_KEY: ${{ vars.TF_STATE_KEY_PREFIX }}/eks-sandbox/terraform.tfstate
       TF_VAR_endpoint_public_access_cidrs: ${{ vars.TF_VAR_ENDPOINT_PUBLIC_ACCESS_CIDRS || '["203.0.113.10/32"]' }}
@@ -133,6 +134,41 @@ jobs:
       - name: Terraform validate before remote operation
         if: ${{ inputs.mode != 'validate' }}
         run: terraform validate
+
+      - name: Ensure EKS access-entry authentication mode
+        if: ${{ inputs.mode == 'apply' }}
+        run: |
+          set +e
+          current_mode=$(aws eks describe-cluster \
+            --region "${AWS_REGION}" \
+            --name "${EKS_CLUSTER_NAME}" \
+            --query 'cluster.accessConfig.authenticationMode' \
+            --output text 2>/tmp/eks-describe-error)
+          describe_status=$?
+          set -e
+
+          if [ "$describe_status" -ne 0 ]; then
+            if grep -q 'ResourceNotFoundException' /tmp/eks-describe-error; then
+              echo "EKS cluster does not exist yet; Terraform will create it with access-entry authentication mode."
+              exit 0
+            fi
+            cat /tmp/eks-describe-error
+            exit "$describe_status"
+          fi
+
+          if [ "$current_mode" = "API" ] || [ "$current_mode" = "API_AND_CONFIG_MAP" ]; then
+            echo "EKS cluster authentication mode already supports access entries."
+            exit 0
+          fi
+
+          echo "Updating EKS cluster authentication mode to API_AND_CONFIG_MAP before Terraform creates access entries."
+          aws eks update-cluster-config \
+            --region "${AWS_REGION}" \
+            --name "${EKS_CLUSTER_NAME}" \
+            --access-config authenticationMode=API_AND_CONFIG_MAP
+          aws eks wait cluster-active \
+            --region "${AWS_REGION}" \
+            --name "${EKS_CLUSTER_NAME}"
 
       - name: Terraform plan without saved artifact
         if: ${{ inputs.mode == 'plan' }}
