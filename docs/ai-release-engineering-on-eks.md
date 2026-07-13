@@ -12,7 +12,9 @@ The default path is synthetic-only and mock-first. It shows how an enterprise pl
 | P4b | Optional personal AWS EKS sandbox POC | Personal account only, manual approval, budget alarm, synthetic workload, teardown required. |
 | P4c | Argo CD / GitOps release pattern | Synthetic Application manifest and promotion notes only until a sandbox is explicitly approved. |
 | P4d | Release gates and rollback pattern | Documentation-only gates, rollout observation, failure modes, and rollback choices. |
-| P4e/P5 later | Bedrock Guardrails or AgentCore-aligned extension | Optional after EKS, Terraform, OIDC, FinOps, and cleanup controls are established. |
+| P4e | Future Helm-on-EKS sandbox evidence | Optional after the base EKS apply/destroy path succeeds; deploys mock API only and captures sanitized rollout evidence. |
+| P4f | Future Argo CD sandbox sync evidence | Optional after the Helm-on-EKS path is understood; manual sync only and same-day teardown. |
+| P7 later | Bedrock Guardrails, AgentCore, or AI Factory extension | Optional after EKS, Terraform, OIDC, FinOps, cleanup, and release controls are established. |
 
 ## Candidate Topics
 
@@ -45,6 +47,60 @@ Normal sandbox operation should not rely on laptop-local deploy commands. Local 
 
 See `docs/p4b-eks-sandbox-operator-runbook.md` for the P4b readiness checklist, budget and cleanup rules, GitHub Actions boundary, apply/destroy steps, and evidence gate.
 
+## P4e Helm-On-EKS Readiness
+
+P4e should prove the smallest useful real Kubernetes release path after the base EKS sandbox is active. It should not introduce Bedrock, AgentCore, Argo CD, real provider calls, real retrieval, GPU workloads, or production-like data.
+
+Run P4e only when:
+
+- the EKS cluster is `Active`;
+- the managed node group is `Active`;
+- the budget and same-day destroy plan are still valid;
+- kubeconfig or cluster access is temporary and not committed;
+- the workload remains the mock AI API service with synthetic data only.
+
+Recommended P4e sequence:
+
+```text
+confirm EKS and node group are active
+  -> render Helm chart locally
+  -> lint Helm chart
+  -> create sandbox namespace
+  -> install or upgrade the mock API Helm release
+  -> observe rollout status
+  -> run a synthetic health check
+  -> capture sanitized evidence
+  -> destroy the sandbox the same day
+```
+
+Evidence should be summarized, not copied raw:
+
+- workflow run reference or commit SHA;
+- chart name and version;
+- release name pattern;
+- namespace pattern;
+- rendered/lint status;
+- rollout status summary;
+- mock-mode health result;
+- teardown confirmation.
+
+Do not commit kubeconfig, cluster endpoint, account ID, role ARN, backend values, raw command output, screenshots with private details, or live service endpoints.
+
+## P4f Argo CD Sandbox Sync Readiness
+
+P4f should come after P4e. The first Argo CD slice should validate GitOps promotion behavior, not broaden the runtime.
+
+Recommended P4f boundary:
+
+- install or connect Argo CD only inside the short-lived sandbox;
+- keep sync manual;
+- use the existing `argocd/applications/cloudai-api-sandbox.yaml` Application pattern;
+- sync the mock API release only;
+- capture sanitized sync and health status;
+- destroy the sandbox the same day.
+
+Do not enable automated sync, broad cluster administration, real provider credentials, or long-lived Argo CD access in the first sandbox slice.
+
 ## ECS And EKS Boundary
 
 ECS can be a useful simpler runtime pattern for API services, but P4 focuses on EKS because the portfolio goal is Kubernetes release engineering: Helm, Argo CD, rollout, rollback, probes, policy gates, and cluster-operational thinking. The first real sandbox should not deploy ECS and EKS at the same time.
@@ -68,6 +124,7 @@ Current P4 evidence includes:
 - Terraform backend example and empty committed S3 backend block for `eks-sandbox`.
 - Manual GitHub Actions workflow for validation and backend-backed plan.
 - Argo CD README guidance for local validation and future GitOps sandbox use.
+- P4e/P4f readiness guidance for future Helm-on-EKS and manual Argo CD sandbox evidence.
 
 ## P4c Argo CD Boundary
 

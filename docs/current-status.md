@@ -101,6 +101,8 @@ Recommended next choices:
 
 - **P4b real EKS sandbox design:** keep `docs/p4b-real-eks-sandbox-design.md` as the design bridge for the optional personal AWS EKS apply/destroy path.
 - **P4b budget, endpoint, and teardown setup:** keep AWS Budget, operator `/32` endpoint CIDR, teardown owner, and environment protection as required gates before any repeat apply. The workflow can run backend-backed validate, plan, apply, and destroy through the `aws-sandbox` environment.
+- **P4e Helm-on-EKS sandbox evidence:** after the EKS cluster and managed node group are active, deploy only the mock AI API Helm release, capture sanitized rollout/health evidence, and destroy the sandbox the same day.
+- **P4f Argo CD sandbox sync evidence:** after P4e, optionally validate manual GitOps sync for the same mock API release and capture sanitized sync/health evidence.
 - **P6 AI Traffic Governance evidence expansion:** add more synthetic scenario variants only if they explain a new governance outcome that is not already covered by P6e/P6f.
 - **P4b future evidence refresh:** capture only sanitized apply/destroy observations when needed; do not commit account identifiers, live endpoints, kubeconfig, raw plans, state, tfvars, backend names, or screenshots with private details.
 - **P4b pre-apply readiness check:** use `docs/p4b-eks-sandbox-operator-runbook.md` as the single go/no-go runbook before any real personal EKS sandbox apply.
