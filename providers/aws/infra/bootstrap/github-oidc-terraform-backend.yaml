@@ -172,6 +172,14 @@ Resources:
                     iam:PassedToService:
                       - eks.amazonaws.com
                       - ec2.amazonaws.com
+              - Sid: EksSandboxServiceLinkedRole
+                Effect: Allow
+                Action:
+                  - iam:CreateServiceLinkedRole
+                Resource: !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/aws-service-role/eks.amazonaws.com/AWSServiceRoleForAmazonEKS"
+                Condition:
+                  StringEquals:
+                    iam:AWSServiceName: eks.amazonaws.com
               - Sid: EksSandboxManagedPolicyRead
                 Effect: Allow
                 Action:
