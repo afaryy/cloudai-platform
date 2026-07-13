@@ -51,6 +51,11 @@ run "plans_minimal_sandbox_eks_cluster" {
   }
 
   assert {
+    condition     = aws_eks_cluster.this.access_config[0].authentication_mode == "API_AND_CONFIG_MAP"
+    error_message = "The EKS cluster must enable API authentication mode before Terraform can manage access entries."
+  }
+
+  assert {
     condition     = aws_eks_cluster.this.vpc_config[0].endpoint_public_access && aws_eks_cluster.this.vpc_config[0].endpoint_private_access
     error_message = "The sandbox EKS API must enable private access and restrict public access."
   }
