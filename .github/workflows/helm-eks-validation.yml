@@ -62,6 +62,36 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
           mask-aws-account-id: true
 
+      - name: Capture current EKS public access CIDRs
+        run: |
+          original_cidrs=$(aws eks describe-cluster \
+            --region "${AWS_REGION}" \
+            --name "${EKS_CLUSTER_NAME}" \
+            --query 'cluster.resourcesVpcConfig.publicAccessCidrs' \
+            --output json)
+          echo "${original_cidrs}" > "${RUNNER_TEMP}/eks-public-access-cidrs.original.json"
+          echo "Captured current EKS public access CIDR count."
+
+      - name: Allow GitHub runner CIDR
+        run: |
+          runner_ip=$(curl -fsSL https://checkip.amazonaws.com | tr -d '[:space:]')
+          if ! [[ "${runner_ip}" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Unable to determine a valid GitHub runner IPv4 address."
+            exit 1
+          fi
+
+          runner_cidr="${runner_ip}/32"
+          updated_cidrs=$(jq -r --arg cidr "${runner_cidr}" '. + [$cidr] | unique | join(",")' "${RUNNER_TEMP}/eks-public-access-cidrs.original.json")
+
+          echo "Temporarily allowing current GitHub runner /32 for EKS API validation."
+          aws eks update-cluster-config \
+            --region "${AWS_REGION}" \
+            --name "${EKS_CLUSTER_NAME}" \
+            --resources-vpc-config "publicAccessCidrs=${updated_cidrs}"
+          aws eks wait cluster-active \
+            --region "${AWS_REGION}" \
+            --name "${EKS_CLUSTER_NAME}"
+
       - name: Update kubeconfig
         env:
           KUBECONFIG: ${{ runner.temp }}/cloudai-eks-kubeconfig
@@ -117,3 +147,21 @@ jobs:
           echo "P4e Helm-on-EKS validation completed without installing workloads."
           echo "Do not copy account IDs, ARNs, live endpoints, kubeconfig, backend values, or raw cluster output into git."
           echo "Next optional slice can add a separate manual Helm install/rollback workflow after approval."
+
+      - name: Restore EKS public access CIDRs
+        if: ${{ always() }}
+        run: |
+          if [ ! -f "${RUNNER_TEMP}/eks-public-access-cidrs.original.json" ]; then
+            echo "::warning::Original EKS public access CIDRs were not captured; nothing to restore."
+            exit 0
+          fi
+
+          original_cidrs=$(jq -r 'join(",")' "${RUNNER_TEMP}/eks-public-access-cidrs.original.json")
+          echo "Restoring original EKS public access CIDR allowlist."
+          aws eks update-cluster-config \
+            --region "${AWS_REGION}" \
+            --name "${EKS_CLUSTER_NAME}" \
+            --resources-vpc-config "publicAccessCidrs=${original_cidrs}"
+          aws eks wait cluster-active \
+            --region "${AWS_REGION}" \
+            --name "${EKS_CLUSTER_NAME}"
