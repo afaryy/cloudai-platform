@@ -66,11 +66,14 @@ Recommended P4e sequence:
 ```text
 confirm EKS and node group are active
   -> assume GitHub Actions OIDC identity
+  -> capture current EKS public access CIDRs
+  -> temporarily allow the current GitHub runner /32
   -> create temporary runner kubeconfig
   -> confirm kubectl can read nodes
   -> lint Helm chart
   -> render Helm chart for the sandbox namespace
   -> dry-run the namespace manifest
+  -> restore the original EKS public access CIDRs
   -> capture sanitized evidence
 ```
 
@@ -83,9 +86,12 @@ Evidence should be summarized, not copied raw:
 - rendered/lint status;
 - node readiness summary;
 - namespace dry-run status;
+- endpoint allowlist restore status;
 - confirmation that no workload was installed.
 
 Do not commit kubeconfig, cluster endpoint, account ID, role ARN, backend values, raw command output, screenshots with private details, or live service endpoints.
+
+Do not allowlist the full GitHub-hosted runner IP range set for this sandbox. Standard GitHub-hosted runner IP ranges are broad and change over time. For this portfolio, the safer pattern is a short-lived access window for the current runner `/32`, followed by an `always()` restore step.
 
 ## P4f Helm Install And Rollback Readiness
 
@@ -124,7 +130,7 @@ ECS can be a useful simpler runtime pattern for API services, but P4 focuses on 
 
 ## Current State
 
-The P4a chart exists under `helm/ai-api-service/`. The P4c Argo CD application example exists under `argocd/applications/`. The EKS Terraform stack exists under `providers/aws/infra/terraform/`, and the manual workflow can run validation, backend-backed plan, apply, and destroy through the `aws-sandbox` GitHub environment. The optional personal EKS sandbox has been exercised with a managed node group and EKS access entries. P4e now adds a manual Helm-on-EKS validation workflow that proves GitHub Actions can reach the sandbox, check node readiness, lint and render the Helm chart, and dry-run the namespace without installing workloads.
+The P4a chart exists under `helm/ai-api-service/`. The P4c Argo CD application example exists under `argocd/applications/`. The EKS Terraform stack exists under `providers/aws/infra/terraform/`, and the manual workflow can run validation, backend-backed plan, apply, and destroy through the `aws-sandbox` GitHub environment. The optional personal EKS sandbox has been exercised with a managed node group and EKS access entries. P4e now adds a manual Helm-on-EKS validation workflow that temporarily allows only the current GitHub runner `/32`, proves GitHub Actions can reach the sandbox, checks node readiness, lints and renders the Helm chart, dry-runs the namespace, and restores the original EKS endpoint allowlist without installing workloads.
 
 Current P4 evidence includes:
 
