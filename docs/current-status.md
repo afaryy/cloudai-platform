@@ -27,6 +27,7 @@ The repository can now demonstrate:
 - **P4c Argo CD Pattern:** manual GitOps promotion
 - **P4d Release Gates and Rollback:** synthetic EKS release engineering
 - **P4e Helm-on-EKS Validation Workflow:** GitHub Actions OIDC, temporary kubeconfig, node readiness check, Helm lint/render, and namespace dry-run against the active sandbox without installing workloads
+- **P4f Helm Release Workflow:** optional sandbox Helm install, rollout observation, rollback, uninstall, and namespace cleanup with ClusterIP-only exposure and synthetic workload boundaries
 - **P5a AI-Assisted DevSecOps Boundary:** advisory AI use, human review, CI/security checks, and release evidence
 - **P5b AI-Assisted Review Evidence:** review summaries, threat-model checklists, CI failure summaries, and release-note drafts
 - **P6f AI Platform Security and Operations Controls:** identity, data protection, AI AppSec, delivery, operations, and FinOps
@@ -61,6 +62,7 @@ The next main portfolio focus is **P6 AI Traffic Governance / AgentOps**. P6 cur
 | P4c Argo CD pattern | Complete | `argocd/applications/cloudai-api-sandbox.yaml` |
 | P4d release gates and rollback | Complete | `docs/eks-release-gates-and-rollback.md` |
 | P4e Helm-on-EKS validation workflow | Ready for manual run | `.github/workflows/helm-eks-validation.yml` and `docs/ai-release-engineering-on-eks.md` |
+| P4f Helm release workflow | Ready for manual run | `.github/workflows/helm-eks-release.yml` and `docs/ai-release-engineering-on-eks.md` |
 | P5a AI-assisted DevSecOps boundary | Complete | `docs/ai-assisted-devsecops-pattern.md` and `.github/workflows/ai-assisted-devsecops.yml` |
 | P5b AI-assisted review evidence | Complete | `docs/ai-assisted-review-evidence.md`, `shared/schemas/ai-assisted-devsecops/`, and `shared/examples/ai-assisted-devsecops/` |
 | P6d control-plane evidence map | Complete | `docs/control-plane-evidence-map.md`, `shared/schemas/control-plane-evidence/`, and `shared/examples/control-plane-evidence/` |
@@ -99,12 +101,13 @@ Completed P4 split:
 - **P4c GitOps / Argo CD pattern:** application manifest pattern, promotion notes, and audit metadata for release decisions.
 - **P4d release gates and rollback:** pre-deploy gates, rollout observation, rollback choices, failure modes, and synthetic evidence expectations.
 - **P4e Helm-on-EKS validation workflow:** GitHub Actions OIDC access to the active sandbox, temporary runner kubeconfig, node readiness check, Helm lint/render, namespace dry-run, and no workload install. Manual GitHub Actions execution evidence is the next confirmation step.
+- **P4f Helm release workflow:** optional install/rollback/uninstall workflow for the mock API Helm chart, using temporary runner `/32` access, a public test image override, ClusterIP-only exposure, rollout status, synthetic health check, and cleanup.
 
 Recommended next choices:
 
 - **P4b real EKS sandbox design:** keep `docs/p4b-real-eks-sandbox-design.md` as the design bridge for the optional personal AWS EKS apply/destroy path.
 - **P4b budget, endpoint, and teardown setup:** keep AWS Budget, operator `/32` endpoint CIDR, teardown owner, and environment protection as required gates before any repeat apply. The workflow can run backend-backed validate, plan, apply, and destroy through the `aws-sandbox` environment.
-- **P4f Helm install and rollback evidence:** after P4e validation, optionally install only the mock AI API Helm release, capture sanitized rollout/health evidence, and test rollback or uninstall.
+- **P4f Helm install and rollback evidence:** run the manual P4f workflow to install only the mock AI API Helm release, capture sanitized rollout/health evidence, and test rollback or uninstall.
 - **P4g Argo CD sandbox sync evidence:** after P4f, optionally validate manual GitOps sync for the same mock API release and capture sanitized sync/health evidence.
 - **P6 AI Traffic Governance evidence expansion:** add more synthetic scenario variants only if they explain a new governance outcome that is not already covered by P6e/P6f.
 - **P4b future evidence refresh:** capture only sanitized apply/destroy observations when needed; do not commit account identifiers, live endpoints, kubeconfig, raw plans, state, tfvars, backend names, or screenshots with private details.

@@ -13,7 +13,7 @@ The default path is synthetic-only and mock-first. It shows how an enterprise pl
 | P4c | Argo CD / GitOps release pattern | Synthetic Application manifest and promotion notes only until a sandbox is explicitly approved. |
 | P4d | Release gates and rollback pattern | Documentation-only gates, rollout observation, failure modes, and rollback choices. |
 | P4e | Helm-on-EKS sandbox validation | Optional after the base EKS sandbox is active; verifies GitHub Actions access, node readiness, Helm lint/render, and namespace dry-run without installing workloads. |
-| P4f | Future Helm install and rollback evidence | Optional after P4e; installs the mock API only, observes rollout, captures sanitized health evidence, and supports rollback or uninstall. |
+| P4f | Helm install, rollback, and uninstall workflow | Optional after P4e; installs the mock API only, observes rollout, captures sanitized health evidence, and supports rollback, uninstall, or namespace cleanup. |
 | P4g | Future Argo CD sandbox sync evidence | Optional after the Helm install path is understood; manual sync only and same-day teardown. |
 | P7 later | Bedrock Guardrails, AgentCore, or AI Factory extension | Optional after EKS, Terraform, OIDC, FinOps, cleanup, and release controls are established. |
 
@@ -100,11 +100,14 @@ P4f should come after P4e. This is the first optional slice that may install the
 Recommended P4f boundary:
 
 - install or upgrade only the existing mock API Helm chart;
+- use a known public test image override until the mock API image build/publish path exists;
 - keep provider mode as `mock` and data scope as `synthetic`;
+- keep service exposure as `ClusterIP`;
 - observe Deployment rollout and Kubernetes events;
-- run only synthetic health checks;
+- run only synthetic health checks through `kubectl port-forward`;
 - capture sanitized rollout evidence;
-- test rollback, uninstall, or teardown behavior;
+- support `install`, `rollback`, and `uninstall` workflow modes;
+- support optional namespace cleanup during uninstall;
 - destroy the sandbox the same day unless there is an explicit learning reason to keep it briefly.
 
 Do not add ingress, public load balancers, real provider credentials, real retrieval, Bedrock, AgentCore, GPU workloads, or long-lived runtime data in the first Helm install slice.
@@ -130,7 +133,7 @@ ECS can be a useful simpler runtime pattern for API services, but P4 focuses on 
 
 ## Current State
 
-The P4a chart exists under `helm/ai-api-service/`. The P4c Argo CD application example exists under `argocd/applications/`. The EKS Terraform stack exists under `providers/aws/infra/terraform/`, and the manual workflow can run validation, backend-backed plan, apply, and destroy through the `aws-sandbox` GitHub environment. The optional personal EKS sandbox has been exercised with a managed node group and EKS access entries. P4e now adds a manual Helm-on-EKS validation workflow that temporarily allows only the current GitHub runner `/32`, proves GitHub Actions can reach the sandbox, checks node readiness, lints and renders the Helm chart, dry-runs the namespace, and restores the original EKS endpoint allowlist without installing workloads.
+The P4a chart exists under `helm/ai-api-service/`. The P4c Argo CD application example exists under `argocd/applications/`. The EKS Terraform stack exists under `providers/aws/infra/terraform/`, and the manual workflow can run validation, backend-backed plan, apply, and destroy through the `aws-sandbox` GitHub environment. The optional personal EKS sandbox has been exercised with a managed node group and EKS access entries. P4e adds a manual Helm-on-EKS validation workflow that temporarily allows only the current GitHub runner `/32`, proves GitHub Actions can reach the sandbox, checks node readiness, lints and renders the Helm chart, dry-runs the namespace, and restores the original EKS endpoint allowlist without installing workloads. P4f adds a separate manual Helm release workflow for optional install, rollback, uninstall, and namespace cleanup.
 
 Current P4 evidence includes:
 
@@ -147,6 +150,7 @@ Current P4 evidence includes:
 - Terraform backend example and empty committed S3 backend block for `eks-sandbox`.
 - Manual GitHub Actions workflow for validation and backend-backed plan.
 - Manual GitHub Actions workflow for P4e Helm-on-EKS validation without workload install.
+- Manual GitHub Actions workflow for P4f Helm install, rollout, synthetic health check, rollback, uninstall, and namespace cleanup.
 - Argo CD README guidance for local validation and future GitOps sandbox use.
 - P4f/P4g readiness guidance for future Helm install/rollback and manual Argo CD sandbox evidence.
 

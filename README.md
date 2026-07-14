@@ -168,10 +168,10 @@ Current scope:
 - **P4c GitOps Pattern:** synthetic Argo CD Application manifest, manual sync posture, release metadata, and promotion boundaries.
 - **P4d Release Gates and Rollback:** pre-deploy gates, rollout observation, rollback choices, failure modes, and evidence expectations.
 - **P4e Helm-on-EKS Validation:** manual GitHub Actions workflow that reaches the active sandbox, checks node readiness, lints/renders the Helm chart, and dry-runs the namespace without installing workloads.
+- **P4f Helm Release Workflow:** manual GitHub Actions workflow for optional sandbox Helm install, rollout observation, rollback, uninstall, and namespace cleanup using a public test image override.
 
 Future scope:
 
-- Optional Helm install, rollout observation, rollback, and uninstall evidence from the bounded sandbox, if approved.
 - Optional manual Argo CD sync evidence after the Helm install path is understood.
 - Optional Bedrock Guardrails or AgentCore-aligned extension after the EKS and Terraform foundations are clear.
 

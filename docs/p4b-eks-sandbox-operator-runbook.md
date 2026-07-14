@@ -190,7 +190,7 @@ terraform validate
 Keep the first Helm slice smaller than the first Argo CD slice:
 
 - **P4e Helm validation first:** confirm GitHub Actions can reach EKS through a temporary runner `/32`, validate node readiness, lint/render the chart, dry-run the namespace, and restore the endpoint allowlist without installing workloads.
-- **P4f Helm install second:** install or upgrade the mock AI API service, inspect rollout status, confirm mock-mode health, and test rollback or uninstall.
+- **P4f Helm install second:** install or upgrade the mock AI API service with a public test image override, inspect rollout status, confirm synthetic health through port-forward, and test rollback or uninstall.
 - **P4g Argo CD third:** install or connect Argo CD only after the Helm release path is understood, then manually sync the existing sandbox Application pattern.
 
 Do not add Bedrock, Bedrock AgentCore, real model calls, real retrieval runtime, live customer data, GPU workloads, or HyperPod resources to this release-engineering slice.
