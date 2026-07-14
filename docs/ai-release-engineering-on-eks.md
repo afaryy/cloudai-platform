@@ -12,8 +12,9 @@ The default path is synthetic-only and mock-first. It shows how an enterprise pl
 | P4b | Optional personal AWS EKS sandbox POC | Personal account only, manual approval, budget alarm, synthetic workload, teardown required. |
 | P4c | Argo CD / GitOps release pattern | Synthetic Application manifest and promotion notes only until a sandbox is explicitly approved. |
 | P4d | Release gates and rollback pattern | Documentation-only gates, rollout observation, failure modes, and rollback choices. |
-| P4e | Future Helm-on-EKS sandbox evidence | Optional after the base EKS apply/destroy path succeeds; deploys mock API only and captures sanitized rollout evidence. |
-| P4f | Future Argo CD sandbox sync evidence | Optional after the Helm-on-EKS path is understood; manual sync only and same-day teardown. |
+| P4e | Helm-on-EKS sandbox validation | Optional after the base EKS sandbox is active; verifies GitHub Actions access, node readiness, Helm lint/render, and namespace dry-run without installing workloads. |
+| P4f | Future Helm install and rollback evidence | Optional after P4e; installs the mock API only, observes rollout, captures sanitized health evidence, and supports rollback or uninstall. |
+| P4g | Future Argo CD sandbox sync evidence | Optional after the Helm install path is understood; manual sync only and same-day teardown. |
 | P7 later | Bedrock Guardrails, AgentCore, or AI Factory extension | Optional after EKS, Terraform, OIDC, FinOps, cleanup, and release controls are established. |
 
 ## Candidate Topics
@@ -47,9 +48,9 @@ Normal sandbox operation should not rely on laptop-local deploy commands. Local 
 
 See `docs/p4b-eks-sandbox-operator-runbook.md` for the P4b readiness checklist, budget and cleanup rules, GitHub Actions boundary, apply/destroy steps, and evidence gate.
 
-## P4e Helm-On-EKS Readiness
+## P4e Helm-On-EKS Validation
 
-P4e should prove the smallest useful real Kubernetes release path after the base EKS sandbox is active. It should not introduce Bedrock, AgentCore, Argo CD, real provider calls, real retrieval, GPU workloads, or production-like data.
+P4e proves the smallest useful real Kubernetes access and release-validation path after the base EKS sandbox is active. It should not install workloads yet, and it should not introduce Bedrock, AgentCore, Argo CD, real provider calls, real retrieval, GPU workloads, or production-like data.
 
 Run P4e only when:
 
@@ -57,20 +58,20 @@ Run P4e only when:
 - the managed node group is `Active`;
 - the budget and same-day destroy plan are still valid;
 - kubeconfig or cluster access is temporary and not committed;
-- the workload remains the mock AI API service with synthetic data only.
+- the workflow runs through the `aws-sandbox` GitHub environment;
+- the chart remains the mock AI API service with synthetic data only.
 
 Recommended P4e sequence:
 
 ```text
 confirm EKS and node group are active
-  -> render Helm chart locally
+  -> assume GitHub Actions OIDC identity
+  -> create temporary runner kubeconfig
+  -> confirm kubectl can read nodes
   -> lint Helm chart
-  -> create sandbox namespace
-  -> install or upgrade the mock API Helm release
-  -> observe rollout status
-  -> run a synthetic health check
+  -> render Helm chart for the sandbox namespace
+  -> dry-run the namespace manifest
   -> capture sanitized evidence
-  -> destroy the sandbox the same day
 ```
 
 Evidence should be summarized, not copied raw:
@@ -80,17 +81,33 @@ Evidence should be summarized, not copied raw:
 - release name pattern;
 - namespace pattern;
 - rendered/lint status;
-- rollout status summary;
-- mock-mode health result;
-- teardown confirmation.
+- node readiness summary;
+- namespace dry-run status;
+- confirmation that no workload was installed.
 
 Do not commit kubeconfig, cluster endpoint, account ID, role ARN, backend values, raw command output, screenshots with private details, or live service endpoints.
 
-## P4f Argo CD Sandbox Sync Readiness
+## P4f Helm Install And Rollback Readiness
 
-P4f should come after P4e. The first Argo CD slice should validate GitOps promotion behavior, not broaden the runtime.
+P4f should come after P4e. This is the first optional slice that may install the mock AI API service into the short-lived sandbox.
 
 Recommended P4f boundary:
+
+- install or upgrade only the existing mock API Helm chart;
+- keep provider mode as `mock` and data scope as `synthetic`;
+- observe Deployment rollout and Kubernetes events;
+- run only synthetic health checks;
+- capture sanitized rollout evidence;
+- test rollback, uninstall, or teardown behavior;
+- destroy the sandbox the same day unless there is an explicit learning reason to keep it briefly.
+
+Do not add ingress, public load balancers, real provider credentials, real retrieval, Bedrock, AgentCore, GPU workloads, or long-lived runtime data in the first Helm install slice.
+
+## P4g Argo CD Sandbox Sync Readiness
+
+P4g should come after P4f. The first Argo CD slice should validate GitOps promotion behavior, not broaden the runtime.
+
+Recommended P4g boundary:
 
 - install or connect Argo CD only inside the short-lived sandbox;
 - keep sync manual;
@@ -107,7 +124,7 @@ ECS can be a useful simpler runtime pattern for API services, but P4 focuses on 
 
 ## Current State
 
-The P4a chart exists under `helm/ai-api-service/`. The P4c Argo CD application example exists under `argocd/applications/`. The EKS Terraform skeleton exists under `providers/aws/infra/terraform/`, and the manual workflow can run validation plus a backend-backed Terraform plan through the `aws-sandbox` GitHub environment. Real apply and destroy remain deferred until budget, approval, and teardown controls are confirmed.
+The P4a chart exists under `helm/ai-api-service/`. The P4c Argo CD application example exists under `argocd/applications/`. The EKS Terraform stack exists under `providers/aws/infra/terraform/`, and the manual workflow can run validation, backend-backed plan, apply, and destroy through the `aws-sandbox` GitHub environment. The optional personal EKS sandbox has been exercised with a managed node group and EKS access entries. P4e now adds a manual Helm-on-EKS validation workflow that proves GitHub Actions can reach the sandbox, check node readiness, lint and render the Helm chart, and dry-run the namespace without installing workloads.
 
 Current P4 evidence includes:
 
@@ -123,8 +140,9 @@ Current P4 evidence includes:
 - CloudFormation bootstrap example for Terraform backend and GitHub Actions role/policy.
 - Terraform backend example and empty committed S3 backend block for `eks-sandbox`.
 - Manual GitHub Actions workflow for validation and backend-backed plan.
+- Manual GitHub Actions workflow for P4e Helm-on-EKS validation without workload install.
 - Argo CD README guidance for local validation and future GitOps sandbox use.
-- P4e/P4f readiness guidance for future Helm-on-EKS and manual Argo CD sandbox evidence.
+- P4f/P4g readiness guidance for future Helm install/rollback and manual Argo CD sandbox evidence.
 
 ## P4c Argo CD Boundary
 

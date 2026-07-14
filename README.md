@@ -167,12 +167,12 @@ Current scope:
 - **P4b Optional Personal EKS Sandbox:** Terraform-managed sandbox readiness, explicit budget, manual approval, synthetic workload only, and teardown guidance.
 - **P4c GitOps Pattern:** synthetic Argo CD Application manifest, manual sync posture, release metadata, and promotion boundaries.
 - **P4d Release Gates and Rollback:** pre-deploy gates, rollout observation, rollback choices, failure modes, and evidence expectations.
-- EKS module placeholder remains deferred until the personal sandbox path is explicitly approved.
+- **P4e Helm-on-EKS Validation:** manual GitHub Actions workflow that reaches the active sandbox, checks node readiness, lints/renders the Helm chart, and dry-runs the namespace without installing workloads.
 
 Future scope:
 
-- Optional personal EKS sandbox execution through GitHub Actions OIDC, budget controls, and teardown.
-- Progressive delivery and runtime observability evidence from a bounded sandbox, if approved.
+- Optional Helm install, rollout observation, rollback, and uninstall evidence from the bounded sandbox, if approved.
+- Optional manual Argo CD sync evidence after the Helm install path is understood.
 - Optional Bedrock Guardrails or AgentCore-aligned extension after the EKS and Terraform foundations are clear.
 
 ## Track C: AI-Assisted DevSecOps Pattern
