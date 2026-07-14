@@ -1,0 +1,119 @@
+name: helm-eks-validation
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm_cluster_access:
+        description: "Type I_UNDERSTAND_SANDBOX_ONLY to confirm this is the personal EKS sandbox."
+        required: true
+        default: ""
+        type: string
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: helm-eks-validation
+  cancel-in-progress: false
+
+jobs:
+  helm:
+    name: Helm-on-EKS validation
+    runs-on: ubuntu-latest
+    environment: aws-sandbox
+    env:
+      AWS_ROLE_TO_ASSUME: ${{ vars.AWS_ROLE_TO_ASSUME || secrets.AWS_ROLE_TO_ASSUME }}
+      AWS_REGION: ${{ vars.AWS_REGION || 'ap-southeast-2' }}
+      EKS_CLUSTER_NAME: cloudai-platform-eks-sandbox
+      K8S_NAMESPACE: cloudai-sandbox
+      HELM_RELEASE_NAME: cloudai-api
+    steps:
+      - name: Confirm sandbox access gate
+        env:
+          CONFIRM_CLUSTER_ACCESS: ${{ inputs.confirm_cluster_access }}
+        run: |
+          if [ "$CONFIRM_CLUSTER_ACCESS" != "I_UNDERSTAND_SANDBOX_ONLY" ]; then
+            echo "::error::Cluster validation requires confirm_cluster_access=I_UNDERSTAND_SANDBOX_ONLY."
+            echo "::error::Use this workflow only for the personal EKS sandbox and synthetic Helm chart."
+            exit 1
+          fi
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check environment variables
+        run: |
+          missing=0
+          for name in AWS_ROLE_TO_ASSUME AWS_REGION EKS_CLUSTER_NAME K8S_NAMESPACE HELM_RELEASE_NAME; do
+            if [ -z "${!name}" ]; then
+              echo "::error::$name is required for Helm-on-EKS validation."
+              missing=1
+            fi
+          done
+          if [ "$missing" -ne 0 ]; then
+            exit 1
+          fi
+
+      - name: Configure AWS credentials for sandbox access
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ env.AWS_REGION }}
+          mask-aws-account-id: true
+
+      - name: Update kubeconfig
+        env:
+          KUBECONFIG: ${{ runner.temp }}/cloudai-eks-kubeconfig
+        run: |
+          aws eks update-kubeconfig \
+            --region "${AWS_REGION}" \
+            --name "${EKS_CLUSTER_NAME}" \
+            --kubeconfig "${KUBECONFIG}" \
+            >/dev/null
+          echo "KUBECONFIG=${KUBECONFIG}" >> "$GITHUB_ENV"
+          echo "Kubeconfig created in runner temp storage only."
+
+      - name: Check client tools
+        run: |
+          kubectl version --client
+          helm version
+
+      - name: Check EKS nodes
+        run: |
+          kubectl auth can-i get nodes
+          node_count=$(kubectl get nodes --no-headers 2>/dev/null | wc -l | tr -d ' ')
+          if [ "$node_count" -lt 1 ]; then
+            echo "::error::Expected at least one EKS worker node."
+            exit 1
+          fi
+          echo "EKS node readiness check passed with ${node_count} node(s)."
+
+      - name: Helm lint
+        run: helm lint helm/ai-api-service
+
+      - name: Helm template
+        run: |
+          helm template "${HELM_RELEASE_NAME}" helm/ai-api-service \
+            --namespace "${K8S_NAMESPACE}" \
+            --set platform.environment=sandbox \
+            --set platform.dataScope=synthetic \
+            --set config.mockMode=true \
+            --set config.providerMode=mock \
+            >/tmp/cloudai-api-rendered.yaml
+          grep -q 'kind: Deployment' /tmp/cloudai-api-rendered.yaml
+          echo "Helm template rendered successfully for the sandbox target."
+
+      - name: Namespace dry run
+        run: |
+          kubectl create namespace "${K8S_NAMESPACE}" \
+            --dry-run=client \
+            -o yaml \
+            >/tmp/cloudai-sandbox-namespace.yaml
+          grep -q 'kind: Namespace' /tmp/cloudai-sandbox-namespace.yaml
+
+      - name: Evidence boundary
+        run: |
+          echo "P4e Helm-on-EKS validation completed without installing workloads."
+          echo "Do not copy account IDs, ARNs, live endpoints, kubeconfig, backend values, or raw cluster output into git."
+          echo "Next optional slice can add a separate manual Helm install/rollback workflow after approval."

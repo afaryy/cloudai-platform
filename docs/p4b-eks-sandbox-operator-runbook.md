@@ -16,7 +16,7 @@ The first real apply proves the platform foundation only:
 
 The first apply does not run `kubectl`, Helm deployment, Argo CD sync, Bedrock, Bedrock AgentCore, GPU, or HyperPod resources. Those belong in later opt-in slices after the EKS foundation has been applied, destroyed, and reviewed.
 
-A later sandbox slice may add controlled Helm and Argo CD evidence, but it should keep the same safety model: synthetic workload only, manual approval, public-safe evidence, and same-day teardown.
+A later sandbox slice may add controlled Helm and Argo CD evidence, but it should keep the same safety model: synthetic workload only, manual approval, public-safe evidence, and same-day teardown. The first post-EKS slice should validate GitHub Actions `kubectl` access and Helm rendering before installing any workload.
 
 ## Architecture Boundary
 
@@ -173,19 +173,21 @@ terraform validate
   -> terraform plan
   -> terraform apply
   -> verify EKS cluster access
-  -> render and lint Helm chart
-  -> deploy mock API service with Helm
-  -> observe rollout and health
-  -> optionally install or connect Argo CD
-  -> manually sync the Argo CD Application
+  -> render and lint Helm chart without install
+  -> dry-run the sandbox namespace
+  -> optionally deploy mock API service with Helm in a later run
+  -> observe rollout and health if a workload is installed
+  -> optionally install or connect Argo CD after the Helm path is understood
+  -> manually sync the Argo CD Application only after approval
   -> capture sanitized evidence
   -> terraform destroy the same day
 ```
 
 Keep the first Helm slice smaller than the first Argo CD slice:
 
-- **Helm first:** validate the chart, install or upgrade the mock AI API service, inspect rollout status, and confirm mock-mode health.
-- **Argo CD second:** install or connect Argo CD only after the Helm release path is understood, then manually sync the existing sandbox Application pattern.
+- **P4e Helm validation first:** confirm GitHub Actions can reach EKS, validate node readiness, lint/render the chart, and dry-run the namespace without installing workloads.
+- **P4f Helm install second:** install or upgrade the mock AI API service, inspect rollout status, confirm mock-mode health, and test rollback or uninstall.
+- **P4g Argo CD third:** install or connect Argo CD only after the Helm release path is understood, then manually sync the existing sandbox Application pattern.
 
 Do not add Bedrock, Bedrock AgentCore, real model calls, real retrieval runtime, live customer data, GPU workloads, or HyperPod resources to this release-engineering slice.
 
