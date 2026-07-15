@@ -29,7 +29,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: terraform-eks-sandbox
+  group: cloudai-eks-sandbox-control-plane
   cancel-in-progress: false
 
 jobs:

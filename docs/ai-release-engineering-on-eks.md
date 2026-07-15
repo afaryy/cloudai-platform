@@ -14,7 +14,7 @@ The default path is synthetic-only and mock-first. It shows how an enterprise pl
 | P4d | Release gates and rollback pattern | Documentation-only gates, rollout observation, failure modes, and rollback choices. |
 | P4e | Helm-on-EKS sandbox validation | Optional after the base EKS sandbox is active; verifies GitHub Actions access, node readiness, Helm lint/render, and namespace dry-run without installing workloads. |
 | P4f | Helm install, rollback, and uninstall workflow | Optional after P4e; installs the mock API only, observes rollout, captures sanitized health evidence, and supports rollback, uninstall, or namespace cleanup. |
-| P4g | Future Argo CD sandbox sync evidence | Optional after the Helm install path is understood; manual sync only and same-day teardown. |
+| P4g | Live Argo CD sandbox GitOps workflow | Optional after P4f; pinned non-HA Argo CD bootstrap, Application registration, manual sync, health evidence, and ordered cleanup. |
 | P7 later | Bedrock Guardrails, AgentCore, or AI Factory extension | Optional after EKS, Terraform, OIDC, FinOps, cleanup, and release controls are established. |
 
 ## Candidate Topics
@@ -112,20 +112,32 @@ Recommended P4f boundary:
 
 Do not add ingress, public load balancers, real provider credentials, real retrieval, Bedrock, AgentCore, GPU workloads, or long-lived runtime data in the first Helm install slice.
 
-## P4g Argo CD Sandbox Sync Readiness
+## P4g Argo CD Sandbox GitOps
 
-P4g should come after P4f. The first Argo CD slice should validate GitOps promotion behavior, not broaden the runtime.
+P4g comes after P4f and validates GitOps promotion behavior without broadening the runtime. The workflow pins Argo CD `v3.4.5`, uses the official non-HA install manifest, and keeps GitHub Actions as the bounded bootstrap and verification plane.
 
-Recommended P4g boundary:
+The workflow supports four manual modes:
+
+- `bootstrap`: install the pinned Argo CD control plane and register the sandbox Application without syncing it;
+- `sync`: register the Application, request an explicit sync at the workflow commit SHA, wait for Argo CD and Kubernetes health, and run a synthetic service check;
+- `status`: report sanitized Application sync/health and workload status;
+- `uninstall`: delete the Application and its managed resources, remove the repository Secret, and optionally delete the workload and Argo CD namespaces.
+
+P4g boundary:
 
 - install or connect Argo CD only inside the short-lived sandbox;
 - keep sync manual;
 - use the existing `argocd/applications/cloudai-api-sandbox.yaml` Application pattern;
 - sync the mock API release only;
+- use the same pinned public synthetic image behavior proven by P4f;
+- use anonymous Git access for a public repository or a runtime-injected, read-only token for a private repository;
 - capture sanitized sync and health status;
-- destroy the sandbox the same day.
+- restore the original EKS public endpoint CIDRs on every workflow exit path;
+- tear down Argo CD and the EKS sandbox when the learning exercise is complete.
 
 Do not enable automated sync, broad cluster administration, real provider credentials, or long-lived Argo CD access in the first sandbox slice.
+
+If private repository access is needed, create `ARGOCD_REPO_TOKEN` as an `aws-sandbox` GitHub environment secret. Use a fine-grained token scoped to read repository contents only. Do not store it as a repository variable or commit it in an Argo CD Secret manifest.
 
 ## ECS And EKS Boundary
 
@@ -133,7 +145,7 @@ ECS can be a useful simpler runtime pattern for API services, but P4 focuses on 
 
 ## Current State
 
-The P4a chart exists under `helm/ai-api-service/`. The P4c Argo CD application example exists under `argocd/applications/`. The EKS Terraform stack exists under `providers/aws/infra/terraform/`, and the manual workflow can run validation, backend-backed plan, apply, and destroy through the `aws-sandbox` GitHub environment. The optional personal EKS sandbox has been exercised with a managed node group and EKS access entries. P4e adds a manual Helm-on-EKS validation workflow that temporarily allows only the current GitHub runner `/32`, proves GitHub Actions can reach the sandbox, checks node readiness, lints and renders the Helm chart, dry-runs the namespace, and restores the original EKS endpoint allowlist without installing workloads. P4f adds a separate manual Helm release workflow for optional install, rollback, uninstall, and namespace cleanup.
+The P4a chart exists under `helm/ai-api-service/`. The P4c Argo CD Application exists under `argocd/applications/`. The EKS Terraform stack exists under `providers/aws/infra/terraform/`, and the manual workflow can run validation, backend-backed plan, apply, and destroy through the `aws-sandbox` GitHub environment. The personal EKS sandbox has been exercised with a managed node group and EKS access entries. P4e validates live GitHub Actions access, node readiness, Helm lint/render, and endpoint allowlist restoration. P4f has exercised Helm install, synthetic health, revision history, rollback, and uninstall. P4g adds the live manual Argo CD bootstrap, sync, status, health, and cleanup workflow for the same synthetic Helm workload.
 
 Current P4 evidence includes:
 
@@ -151,8 +163,8 @@ Current P4 evidence includes:
 - Manual GitHub Actions workflow for validation and backend-backed plan.
 - Manual GitHub Actions workflow for P4e Helm-on-EKS validation without workload install.
 - Manual GitHub Actions workflow for P4f Helm install, rollout, synthetic health check, rollback, uninstall, and namespace cleanup.
-- Argo CD README guidance for local validation and future GitOps sandbox use.
-- P4f/P4g readiness guidance for future Helm install/rollback and manual Argo CD sandbox evidence.
+- Manual GitHub Actions workflow for P4g pinned Argo CD bootstrap, explicit sync, status, health verification, and ordered cleanup.
+- Argo CD README guidance for local validation, public/private repository access, and optional live GitOps sandbox use.
 
 ## P4c Argo CD Boundary
 

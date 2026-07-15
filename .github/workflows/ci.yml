@@ -19,6 +19,9 @@ jobs:
           test -f docs/architecture.md
           grep -R "mock" README.md docs
 
+      - name: Validate P4g Argo CD GitOps contract
+        run: scripts/validate-argocd-gitops.sh
+
   mock-genai-api:
     runs-on: ubuntu-latest
     steps:

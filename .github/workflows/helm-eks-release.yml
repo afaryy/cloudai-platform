@@ -33,7 +33,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: helm-eks-release
+  group: cloudai-eks-sandbox-control-plane
   cancel-in-progress: false
 
 jobs:
