@@ -79,6 +79,9 @@ Configure these values in the `aws-sandbox` GitHub environment.
 | `TF_BACKEND_LOCK_TABLE` | Environment variable | DynamoDB table for Terraform state locking. |
 | `TF_STATE_KEY_PREFIX` | Environment variable | Project state prefix, recommended `cloudai-platform`. |
 | `TF_VAR_ENDPOINT_PUBLIC_ACCESS_CIDRS` | Environment variable | Private list of operator `/32` CIDRs for the EKS public API endpoint before real apply. |
+| `TF_VAR_NODE_DESIRED_SIZE` | Environment variable | Optional live node-count override; defaults to `1`. |
+| `TF_VAR_NODE_MIN_SIZE` | Environment variable | Optional live minimum-node override; defaults to `1`. |
+| `TF_VAR_NODE_MAX_SIZE` | Environment variable | Optional live maximum-node override; defaults to `1`. |
 | `LOCAL_OPERATOR_PRINCIPAL_ARN` | Environment variable | Optional local operator identity for workstation `kubectl` inspection. Keep private and do not commit. |
 
 The workflow derives the EKS sandbox state key as:
@@ -127,6 +130,20 @@ public subnet B: 10.42.0.64/26
 ```
 
 These defaults are enough for a short-lived one-node sandbox while avoiding an enterprise-sized address range. EKS private endpoint access is enabled by default; public API access must be restricted to explicit operator `/32` CIDRs.
+
+### Temporary Argo CD capacity override
+
+The one-node default remains the cost-safe baseline. The standard Argo CD control plane plus EKS system Pods can exhaust the Pod capacity of one `t3.small`, leaving the synthetic workload unschedulable. For the bounded live GitOps exercise, set these protected `aws-sandbox` environment variables:
+
+```text
+TF_VAR_NODE_DESIRED_SIZE = 2
+TF_VAR_NODE_MIN_SIZE = 1
+TF_VAR_NODE_MAX_SIZE = 2
+```
+
+Run Terraform `plan`, review the node-group-only capacity change, then run `apply`. After both nodes report `Ready`, Argo CD can schedule the already-synced workload without changing Git desired state. Rerun the GitOps `sync` mode once to capture complete `Synced` and `Healthy` evidence.
+
+After the GitOps exercise, either destroy the sandbox or restore all three environment values to `1` and run Terraform `plan` and `apply` again. Do not resize the managed node group in the AWS console because that creates drift from Terraform state.
 
 ## Workflow Sequence
 

@@ -53,6 +53,11 @@ assert_not_contains "$workflow_file" 'kubectl rollout status deployment' 'kubect
 assert_contains "$workflow_file" "revision_status=" 'P4g must read the revision reported by Argo CD.'
 assert_contains "$workflow_file" '[ "$revision_status" = "$GITHUB_SHA" ]' 'P4g must not accept stale sync success from another revision.'
 
+terraform_workflow='.github/workflows/terraform-eks-sandbox.yml'
+assert_contains "$terraform_workflow" 'TF_VAR_node_desired_size: ${{ vars.TF_VAR_NODE_DESIRED_SIZE || '\''1'\'' }}' 'The EKS workflow must support a protected desired-node override with a one-node default.'
+assert_contains "$terraform_workflow" 'TF_VAR_node_min_size: ${{ vars.TF_VAR_NODE_MIN_SIZE || '\''1'\'' }}' 'The EKS workflow must support a protected minimum-node override with a one-node default.'
+assert_contains "$terraform_workflow" 'TF_VAR_node_max_size: ${{ vars.TF_VAR_NODE_MAX_SIZE || '\''1'\'' }}' 'The EKS workflow must support a protected maximum-node override with a one-node default.'
+
 for control_workflow in \
   .github/workflows/terraform-eks-sandbox.yml \
   .github/workflows/helm-eks-validation.yml \
