@@ -169,10 +169,10 @@ Current scope:
 - **P4d Release Gates and Rollback:** pre-deploy gates, rollout observation, rollback choices, failure modes, and evidence expectations.
 - **P4e Helm-on-EKS Validation:** manual GitHub Actions workflow that reaches the active sandbox, checks node readiness, lints/renders the Helm chart, and dry-runs the namespace without installing workloads.
 - **P4f Helm Release Workflow:** manual GitHub Actions workflow for optional sandbox Helm install, rollout observation, rollback, uninstall, and namespace cleanup using a public test image override.
+- **P4g Argo CD GitOps Workflow:** manual GitHub Actions workflow for pinned Argo CD bootstrap, optional private-repository access, explicit Application sync, health verification, status, and ordered cleanup on the EKS sandbox.
 
 Future scope:
 
-- Optional manual Argo CD sync evidence after the Helm install path is understood.
 - Optional Bedrock Guardrails or AgentCore-aligned extension after the EKS and Terraform foundations are clear.
 
 ## Track C: AI-Assisted DevSecOps Pattern

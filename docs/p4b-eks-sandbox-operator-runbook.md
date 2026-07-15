@@ -162,7 +162,7 @@ mode: destroy
 confirm_destroy: I_UNDERSTAND_DESTROY
 ```
 
-The workflow uses the `terraform-eks-sandbox` concurrency group with `cancel-in-progress: false`. This queues overlapping manual runs instead of allowing two runs to compete for the same EKS sandbox state key. Terraform's DynamoDB backend lock remains the authoritative state lock.
+Terraform, Helm validation/release, and Argo CD GitOps workflows share the `cloudai-eks-sandbox-control-plane` concurrency group with `cancel-in-progress: false`. This queues overlapping manual runs so they cannot race while changing Terraform state or temporarily updating the EKS API endpoint allowlist. Terraform's DynamoDB backend lock remains the authoritative Terraform state lock.
 
 ## Future Helm And Argo CD Sandbox Slice
 

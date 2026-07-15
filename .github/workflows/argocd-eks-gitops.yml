@@ -1,0 +1,353 @@
+name: argocd-eks-gitops
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "Argo CD sandbox operation"
+        required: true
+        default: "bootstrap"
+        type: choice
+        options:
+          - bootstrap
+          - sync
+          - status
+          - uninstall
+      repository_access:
+        description: "How Argo CD reads this repository"
+        required: true
+        default: "public"
+        type: choice
+        options:
+          - public
+          - private
+      confirm_gitops:
+        description: "Type I_UNDERSTAND_SANDBOX_GITOPS to confirm this is the personal EKS sandbox."
+        required: true
+        default: ""
+        type: string
+      cleanup_workload_namespace:
+        description: "For uninstall only, delete the synthetic workload namespace after the Application is removed."
+        required: false
+        default: true
+        type: boolean
+      cleanup_argocd:
+        description: "For uninstall only, delete the Argo CD namespace after the Application is removed."
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: cloudai-eks-sandbox-control-plane
+  cancel-in-progress: false
+
+jobs:
+  gitops:
+    name: Argo CD EKS sandbox GitOps
+    runs-on: ubuntu-latest
+    environment: aws-sandbox
+    env:
+      AWS_ROLE_TO_ASSUME: ${{ vars.AWS_ROLE_TO_ASSUME || secrets.AWS_ROLE_TO_ASSUME }}
+      AWS_REGION: ${{ vars.AWS_REGION || 'ap-southeast-2' }}
+      EKS_CLUSTER_NAME: cloudai-platform-eks-sandbox
+      ARGOCD_VERSION: "v3.4.5"
+      ARGOCD_NAMESPACE: argocd
+      ARGOCD_APPLICATION: cloudai-api-sandbox
+      ARGOCD_REPOSITORY_SECRET: cloudai-platform-repository
+      ARGOCD_REPO_URL: https://github.com/afaryy/cloudai-platform.git
+      K8S_NAMESPACE: cloudai-sandbox
+      HELM_RELEASE_NAME: cloudai-api
+    steps:
+      - name: Confirm sandbox GitOps gate
+        env:
+          CONFIRM_GITOPS: ${{ inputs.confirm_gitops }}
+        run: |
+          if [ "$CONFIRM_GITOPS" != "I_UNDERSTAND_SANDBOX_GITOPS" ]; then
+            echo "::error::GitOps operation requires confirm_gitops=I_UNDERSTAND_SANDBOX_GITOPS."
+            echo "::error::Use this workflow only for the personal EKS sandbox and synthetic workload."
+            exit 1
+          fi
+
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Check environment configuration
+        env:
+          ARGOCD_REPO_TOKEN: ${{ secrets.ARGOCD_REPO_TOKEN }}
+          MODE: ${{ inputs.mode }}
+          REPOSITORY_ACCESS: ${{ inputs.repository_access }}
+        run: |
+          missing=0
+          for name in AWS_ROLE_TO_ASSUME AWS_REGION EKS_CLUSTER_NAME ARGOCD_VERSION ARGOCD_NAMESPACE ARGOCD_APPLICATION ARGOCD_REPO_URL K8S_NAMESPACE HELM_RELEASE_NAME; do
+            if [ -z "${!name}" ]; then
+              echo "::error::$name is required for Argo CD sandbox operations."
+              missing=1
+            fi
+          done
+          if { [ "$MODE" = "bootstrap" ] || [ "$MODE" = "sync" ]; } && [ "$REPOSITORY_ACCESS" = "private" ] && [ -z "$ARGOCD_REPO_TOKEN" ]; then
+            echo "::error::Private repository access requires the ARGOCD_REPO_TOKEN aws-sandbox environment secret."
+            missing=1
+          fi
+          if [ "$GITHUB_REF" != "refs/heads/main" ]; then
+            echo "::error::Run P4g from merged main so the requested Git revision is available to Argo CD."
+            missing=1
+          fi
+          if [ "$missing" -ne 0 ]; then
+            exit 1
+          fi
+
+      - name: Configure AWS credentials for sandbox access
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ env.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ env.AWS_REGION }}
+          mask-aws-account-id: true
+
+      - name: Capture current EKS public access CIDRs
+        run: |
+          original_cidrs=$(aws eks describe-cluster \
+            --region "${AWS_REGION}" \
+            --name "${EKS_CLUSTER_NAME}" \
+            --query 'cluster.resourcesVpcConfig.publicAccessCidrs' \
+            --output json)
+          echo "${original_cidrs}" > "${RUNNER_TEMP}/eks-public-access-cidrs.original.json"
+          echo "Captured current EKS public access CIDR count."
+
+      - name: Allow GitHub runner CIDR
+        run: |
+          runner_ip=$(curl -fsSL https://checkip.amazonaws.com | tr -d '[:space:]')
+          if ! [[ "${runner_ip}" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Unable to determine a valid GitHub runner IPv4 address."
+            exit 1
+          fi
+
+          runner_cidr="${runner_ip}/32"
+          updated_cidrs=$(jq -r --arg cidr "${runner_cidr}" '. + [$cidr] | unique | join(",")' "${RUNNER_TEMP}/eks-public-access-cidrs.original.json")
+
+          echo "Temporarily allowing current GitHub runner /32 for EKS API GitOps operation."
+          aws eks update-cluster-config \
+            --region "${AWS_REGION}" \
+            --name "${EKS_CLUSTER_NAME}" \
+            --resources-vpc-config "publicAccessCidrs=${updated_cidrs}"
+          aws eks wait cluster-active \
+            --region "${AWS_REGION}" \
+            --name "${EKS_CLUSTER_NAME}"
+
+      - name: Update kubeconfig
+        env:
+          KUBECONFIG: ${{ runner.temp }}/cloudai-eks-kubeconfig
+        run: |
+          aws eks update-kubeconfig \
+            --region "${AWS_REGION}" \
+            --name "${EKS_CLUSTER_NAME}" \
+            --kubeconfig "${KUBECONFIG}" \
+            >/dev/null
+          echo "KUBECONFIG=${KUBECONFIG}" >> "$GITHUB_ENV"
+          echo "Kubeconfig created in runner temp storage only."
+
+      - name: Confirm EKS node readiness
+        run: |
+          kubectl auth can-i get nodes
+          node_count=$(kubectl get nodes --no-headers 2>/dev/null | wc -l | tr -d ' ')
+          if [ "$node_count" -lt 1 ]; then
+            echo "::error::Expected at least one EKS worker node."
+            exit 1
+          fi
+          echo "EKS node readiness check passed with ${node_count} node(s)."
+
+      - name: Bootstrap Argo CD
+        if: ${{ inputs.mode == 'bootstrap' }}
+        run: |
+          kubectl create namespace "${ARGOCD_NAMESPACE}" \
+            --dry-run=client \
+            -o yaml \
+            | kubectl apply -f -
+
+          kubectl apply \
+            --namespace "${ARGOCD_NAMESPACE}" \
+            --server-side \
+            --force-conflicts \
+            -f "https://raw.githubusercontent.com/argoproj/argo-cd/${ARGOCD_VERSION}/manifests/install.yaml"
+
+          kubectl rollout status deployment \
+            --all \
+            --namespace "${ARGOCD_NAMESPACE}" \
+            --timeout 8m
+          kubectl rollout status statefulset/argocd-application-controller \
+            --namespace "${ARGOCD_NAMESPACE}" \
+            --timeout 8m
+
+      - name: Confirm Argo CD readiness
+        if: ${{ inputs.mode != 'uninstall' }}
+        run: |
+          kubectl get customresourcedefinition applications.argoproj.io >/dev/null
+          kubectl get statefulset argocd-application-controller \
+            --namespace "${ARGOCD_NAMESPACE}" >/dev/null
+          kubectl get deployment argocd-repo-server \
+            --namespace "${ARGOCD_NAMESPACE}" >/dev/null
+          echo "Argo CD control-plane readiness check passed."
+
+      - name: Configure repository access
+        if: ${{ inputs.mode == 'bootstrap' || inputs.mode == 'sync' }}
+        env:
+          ARGOCD_REPO_TOKEN: ${{ secrets.ARGOCD_REPO_TOKEN }}
+          REPOSITORY_ACCESS: ${{ inputs.repository_access }}
+        run: |
+          if [ "$REPOSITORY_ACCESS" = "private" ]; then
+            kubectl create secret generic "${ARGOCD_REPOSITORY_SECRET}" \
+              --namespace "${ARGOCD_NAMESPACE}" \
+              --from-literal=type=git \
+              --from-literal=url="${ARGOCD_REPO_URL}" \
+              --from-literal=username=x-access-token \
+              --from-literal=password="${ARGOCD_REPO_TOKEN}" \
+              --dry-run=client \
+              -o yaml \
+              | kubectl apply -f -
+            kubectl label secret "${ARGOCD_REPOSITORY_SECRET}" \
+              --namespace "${ARGOCD_NAMESPACE}" \
+              argocd.argoproj.io/secret-type=repository \
+              --overwrite
+            echo "Configured runtime-only read access for the private repository."
+          else
+            kubectl delete secret "${ARGOCD_REPOSITORY_SECRET}" \
+              --namespace "${ARGOCD_NAMESPACE}" \
+              --ignore-not-found
+            echo "Using anonymous read access for the public repository."
+          fi
+
+      - name: Register sandbox Application
+        if: ${{ inputs.mode == 'bootstrap' || inputs.mode == 'sync' }}
+        run: |
+          kubectl create namespace "${K8S_NAMESPACE}" \
+            --dry-run=client \
+            -o yaml \
+            | kubectl apply -f -
+          kubectl apply -f argocd/applications/cloudai-api-sandbox.yaml
+          kubectl get application "${ARGOCD_APPLICATION}" \
+            --namespace "${ARGOCD_NAMESPACE}" \
+            -o custom-columns='NAME:.metadata.name,SYNC:.status.sync.status,HEALTH:.status.health.status,REVISION:.status.sync.revision'
+
+      - name: Manually sync sandbox Application
+        if: ${{ inputs.mode == 'sync' }}
+        run: |
+          sync_patch=$(jq -cn --arg revision "${GITHUB_SHA}" '{operation:{sync:{revision:$revision,prune:false}}}')
+          kubectl patch application "${ARGOCD_APPLICATION}" \
+            --namespace "${ARGOCD_NAMESPACE}" \
+            --type merge \
+            --patch "${sync_patch}"
+
+          for attempt in $(seq 1 72); do
+            phase=$(kubectl get application "${ARGOCD_APPLICATION}" --namespace "${ARGOCD_NAMESPACE}" -o jsonpath='{.status.operationState.phase}' 2>/dev/null || true)
+            sync_status=$(kubectl get application "${ARGOCD_APPLICATION}" --namespace "${ARGOCD_NAMESPACE}" -o jsonpath='{.status.sync.status}' 2>/dev/null || true)
+            health_status=$(kubectl get application "${ARGOCD_APPLICATION}" --namespace "${ARGOCD_NAMESPACE}" -o jsonpath='{.status.health.status}' 2>/dev/null || true)
+            revision_status=$(kubectl get application "${ARGOCD_APPLICATION}" --namespace "${ARGOCD_NAMESPACE}" -o jsonpath='{.status.sync.revision}' 2>/dev/null || true)
+            echo "Argo CD sync attempt ${attempt}/72: phase=${phase:-Pending}, sync=${sync_status:-Unknown}, health=${health_status:-Unknown}, revision=${revision_status:-Unknown}."
+
+            if [ "$phase" = "Succeeded" ] && [ "$sync_status" = "Synced" ] && [ "$health_status" = "Healthy" ] && [ "$revision_status" = "$GITHUB_SHA" ]; then
+              echo "Argo CD manual sync and health checks passed."
+              break
+            fi
+            if [ "$phase" = "Failed" ] || [ "$phase" = "Error" ]; then
+              echo "::error::Argo CD sync ended with phase=${phase}."
+              kubectl get application "${ARGOCD_APPLICATION}" \
+                --namespace "${ARGOCD_NAMESPACE}" \
+                -o custom-columns='NAME:.metadata.name,SYNC:.status.sync.status,HEALTH:.status.health.status,MESSAGE:.status.operationState.message'
+              exit 1
+            fi
+            if [ "$attempt" -eq 72 ]; then
+              echo "::error::Timed out waiting for Argo CD sync and health."
+              exit 1
+            fi
+            sleep 5
+          done
+
+          kubectl rollout status "deployment/${HELM_RELEASE_NAME}-ai-api-service" \
+            --namespace "${K8S_NAMESPACE}" \
+            --timeout 3m
+
+      - name: Synthetic GitOps health check
+        if: ${{ inputs.mode == 'sync' }}
+        run: |
+          kubectl port-forward \
+            --namespace "${K8S_NAMESPACE}" \
+            "svc/${HELM_RELEASE_NAME}-ai-api-service" \
+            18080:80 \
+            >"${RUNNER_TEMP}/cloudai-argocd-port-forward.log" 2>&1 &
+          port_forward_pid=$!
+          trap 'kill "${port_forward_pid}" 2>/dev/null || true' EXIT
+
+          for attempt in $(seq 1 15); do
+            if curl -fsS http://127.0.0.1:18080/ -o "${RUNNER_TEMP}/cloudai-argocd-health-response.txt" 2>/dev/null; then
+              if grep -q 'cloudai-api mock healthy' "${RUNNER_TEMP}/cloudai-argocd-health-response.txt"; then
+                echo "Synthetic GitOps health check passed through kubectl port-forward."
+                exit 0
+              fi
+            fi
+            echo "Waiting for synthetic GitOps service response; attempt ${attempt}/15."
+            sleep 2
+          done
+
+          echo "::error::Synthetic GitOps service did not return the expected mock response."
+          cat "${RUNNER_TEMP}/cloudai-argocd-port-forward.log" || true
+          exit 1
+
+      - name: Report GitOps status
+        if: ${{ inputs.mode == 'status' || inputs.mode == 'sync' || inputs.mode == 'bootstrap' }}
+        run: |
+          kubectl get application "${ARGOCD_APPLICATION}" \
+            --namespace "${ARGOCD_NAMESPACE}" \
+            -o custom-columns='NAME:.metadata.name,SYNC:.status.sync.status,HEALTH:.status.health.status,REVISION:.status.sync.revision'
+          kubectl get deploy,pods,svc \
+            --namespace "${K8S_NAMESPACE}" \
+            --selector "app.kubernetes.io/instance=${HELM_RELEASE_NAME}" \
+            --ignore-not-found
+
+      - name: Remove sandbox Application
+        if: ${{ inputs.mode == 'uninstall' }}
+        run: |
+          if kubectl get application "${ARGOCD_APPLICATION}" --namespace "${ARGOCD_NAMESPACE}" >/dev/null 2>&1; then
+            kubectl delete application "${ARGOCD_APPLICATION}" \
+              --namespace "${ARGOCD_NAMESPACE}" \
+              --timeout 5m
+          else
+            echo "Sandbox Application is already absent."
+          fi
+          kubectl delete secret "${ARGOCD_REPOSITORY_SECRET}" \
+            --namespace "${ARGOCD_NAMESPACE}" \
+            --ignore-not-found
+
+      - name: Delete synthetic workload namespace
+        if: ${{ inputs.mode == 'uninstall' && inputs.cleanup_workload_namespace }}
+        run: kubectl delete namespace "${K8S_NAMESPACE}" --ignore-not-found --timeout 5m
+
+      - name: Delete Argo CD namespace
+        if: ${{ inputs.mode == 'uninstall' && inputs.cleanup_argocd }}
+        run: kubectl delete namespace "${ARGOCD_NAMESPACE}" --ignore-not-found --timeout 8m
+
+      - name: Evidence boundary
+        run: |
+          echo "P4g Argo CD GitOps operation completed for mode=${{ inputs.mode }}."
+          echo "Do not copy account IDs, ARNs, live endpoints, kubeconfig, repository credentials, or raw cluster output into git."
+          echo "The synced workload uses synthetic data and ClusterIP-only exposure."
+
+      - name: Restore EKS public access CIDRs
+        if: ${{ always() }}
+        run: |
+          if [ ! -f "${RUNNER_TEMP}/eks-public-access-cidrs.original.json" ]; then
+            echo "::warning::Original EKS public access CIDRs were not captured; nothing to restore."
+            exit 0
+          fi
+
+          original_cidrs=$(jq -r 'join(",")' "${RUNNER_TEMP}/eks-public-access-cidrs.original.json")
+          echo "Restoring original EKS public access CIDR allowlist."
+          aws eks update-cluster-config \
+            --region "${AWS_REGION}" \
+            --name "${EKS_CLUSTER_NAME}" \
+            --resources-vpc-config "publicAccessCidrs=${original_cidrs}"
+          aws eks wait cluster-active \
+            --region "${AWS_REGION}" \
+            --name "${EKS_CLUSTER_NAME}"
