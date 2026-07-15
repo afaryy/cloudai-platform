@@ -47,6 +47,9 @@ assert_contains "$workflow_file" 'publicAccessCidrs' 'P4g must bound and restore
 assert_contains "$workflow_file" 'inputs.mode == '\''sync'\''' 'P4g must keep workload sync as an explicit manual mode.'
 assert_contains "$workflow_file" 'inputs.mode == '\''uninstall'\''' 'P4g must provide a cleanup mode.'
 assert_contains "$workflow_file" 'Synthetic GitOps health check passed' 'P4g must verify the synced mock workload.'
+assert_contains "$workflow_file" 'kubectl wait deployment' 'P4g must wait for every Argo CD Deployment using a supported kubectl command.'
+assert_contains "$workflow_file" '--for=condition=Available' 'P4g must wait for Argo CD Deployments to become available.'
+assert_not_contains "$workflow_file" 'kubectl rollout status deployment' 'kubectl rollout status does not support selecting every Deployment with --all.'
 assert_contains "$workflow_file" "revision_status=" 'P4g must read the revision reported by Argo CD.'
 assert_contains "$workflow_file" '[ "$revision_status" = "$GITHUB_SHA" ]' 'P4g must not accept stale sync success from another revision.'
 
