@@ -46,9 +46,12 @@ The chart defaults to:
 - no image pull secret
 - read-only root filesystem with a small writable `/tmp` volume
 - no provider credentials
+- optional command and args overrides for sandbox test images
 
 ## Boundary
 
 The chart should deploy only synthetic/mock behavior. It should not invoke Amazon Bedrock, create agent runtime actions, connect to real RAG sources, or require a real cloud account by default.
 
 Real deployment belongs in a later P4b sandbox path through GitHub Actions OIDC, environment approval, budget guardrails, and teardown.
+
+P4f can override `containerCommand` and `containerArgs` at workflow time to use a known public test image while preserving the chart's default mock API image values.

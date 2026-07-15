@@ -1,0 +1,249 @@
+name: helm-eks-release
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "Helm release operation"
+        required: true
+        default: "install"
+        type: choice
+        options:
+          - install
+          - rollback
+          - uninstall
+      confirm_release:
+        description: "Type I_UNDERSTAND_SANDBOX_RELEASE to confirm this is the personal EKS sandbox."
+        required: true
+        default: ""
+        type: string
+      rollback_revision:
+        description: "Optional Helm revision for rollback. Leave empty to use the previous revision."
+        required: false
+        default: ""
+        type: string
+      cleanup_namespace:
+        description: "For uninstall only, also delete the sandbox namespace."
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: helm-eks-release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Helm EKS sandbox release
+    runs-on: ubuntu-latest
+    environment: aws-sandbox
+    env:
+      AWS_ROLE_TO_ASSUME: ${{ vars.AWS_ROLE_TO_ASSUME || secrets.AWS_ROLE_TO_ASSUME }}
+      AWS_REGION: ${{ vars.AWS_REGION || 'ap-southeast-2' }}
+      EKS_CLUSTER_NAME: cloudai-platform-eks-sandbox
+      K8S_NAMESPACE: cloudai-sandbox
+      HELM_RELEASE_NAME: cloudai-api
+      TEST_IMAGE_REPOSITORY: hashicorp/http-echo
+      TEST_IMAGE_TAG: "1.0"
+    steps:
+      - name: Confirm sandbox release gate
+        env:
+          CONFIRM_RELEASE: ${{ inputs.confirm_release }}
+        run: |
+          if [ "$CONFIRM_RELEASE" != "I_UNDERSTAND_SANDBOX_RELEASE" ]; then
+            echo "::error::Release operation requires confirm_release=I_UNDERSTAND_SANDBOX_RELEASE."
+            echo "::error::Use this workflow only for the personal EKS sandbox and synthetic Helm release."
+            exit 1
+          fi
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check environment variables
+        run: |
+          missing=0
+          for name in AWS_ROLE_TO_ASSUME AWS_REGION EKS_CLUSTER_NAME K8S_NAMESPACE HELM_RELEASE_NAME TEST_IMAGE_REPOSITORY TEST_IMAGE_TAG; do
+            if [ -z "${!name}" ]; then
+              echo "::error::$name is required for Helm release operations."
+              missing=1
+            fi
+          done
+          if [ "$missing" -ne 0 ]; then
+            exit 1
+          fi
+
+      - name: Configure AWS credentials for sandbox access
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ env.AWS_REGION }}
+          mask-aws-account-id: true
+
+      - name: Capture current EKS public access CIDRs
+        run: |
+          original_cidrs=$(aws eks describe-cluster \
+            --region "${AWS_REGION}" \
+            --name "${EKS_CLUSTER_NAME}" \
+            --query 'cluster.resourcesVpcConfig.publicAccessCidrs' \
+            --output json)
+          echo "${original_cidrs}" > "${RUNNER_TEMP}/eks-public-access-cidrs.original.json"
+          echo "Captured current EKS public access CIDR count."
+
+      - name: Allow GitHub runner CIDR
+        run: |
+          runner_ip=$(curl -fsSL https://checkip.amazonaws.com | tr -d '[:space:]')
+          if ! [[ "${runner_ip}" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Unable to determine a valid GitHub runner IPv4 address."
+            exit 1
+          fi
+
+          runner_cidr="${runner_ip}/32"
+          updated_cidrs=$(jq -r --arg cidr "${runner_cidr}" '. + [$cidr] | unique | join(",")' "${RUNNER_TEMP}/eks-public-access-cidrs.original.json")
+
+          echo "Temporarily allowing current GitHub runner /32 for EKS API release operation."
+          aws eks update-cluster-config \
+            --region "${AWS_REGION}" \
+            --name "${EKS_CLUSTER_NAME}" \
+            --resources-vpc-config "publicAccessCidrs=${updated_cidrs}"
+          aws eks wait cluster-active \
+            --region "${AWS_REGION}" \
+            --name "${EKS_CLUSTER_NAME}"
+
+      - name: Update kubeconfig
+        env:
+          KUBECONFIG: ${{ runner.temp }}/cloudai-eks-kubeconfig
+        run: |
+          aws eks update-kubeconfig \
+            --region "${AWS_REGION}" \
+            --name "${EKS_CLUSTER_NAME}" \
+            --kubeconfig "${KUBECONFIG}" \
+            >/dev/null
+          echo "KUBECONFIG=${KUBECONFIG}" >> "$GITHUB_ENV"
+          echo "Kubeconfig created in runner temp storage only."
+
+      - name: Check client tools
+        run: |
+          kubectl version --client
+          helm version
+
+      - name: Confirm EKS node readiness
+        run: |
+          kubectl auth can-i get nodes
+          node_count=$(kubectl get nodes --no-headers 2>/dev/null | wc -l | tr -d ' ')
+          if [ "$node_count" -lt 1 ]; then
+            echo "::error::Expected at least one EKS worker node."
+            exit 1
+          fi
+          echo "EKS node readiness check passed with ${node_count} node(s)."
+
+      - name: Helm lint
+        run: helm lint helm/ai-api-service
+
+      - name: Helm install mock API
+        if: ${{ inputs.mode == 'install' }}
+        run: |
+          kubectl create namespace "${K8S_NAMESPACE}" \
+            --dry-run=client \
+            -o yaml \
+            | kubectl apply -f -
+
+          helm upgrade --install "${HELM_RELEASE_NAME}" helm/ai-api-service \
+            --namespace "${K8S_NAMESPACE}" \
+            --wait \
+            --timeout 5m \
+            --set replicaCount=1 \
+            --set image.repository="${TEST_IMAGE_REPOSITORY}" \
+            --set image.tag="${TEST_IMAGE_TAG}" \
+            --set image.pullPolicy=IfNotPresent \
+            --set 'containerArgs[0]=-listen=:3000' \
+            --set-string 'containerArgs[1]=-text=cloudai-api mock healthy' \
+            --set platformLabels.environment=sandbox \
+            --set platformLabels.dataScope=synthetic-only \
+            --set config.mockMode=true \
+            --set config.providerMode=mock \
+            --set podSecurityContext.runAsNonRoot=false \
+            --set securityContext.runAsNonRoot=false
+
+          kubectl rollout status "deployment/${HELM_RELEASE_NAME}-ai-api-service" \
+            --namespace "${K8S_NAMESPACE}" \
+            --timeout 3m
+          kubectl get deploy,pods,svc \
+            --namespace "${K8S_NAMESPACE}" \
+            --selector "app.kubernetes.io/instance=${HELM_RELEASE_NAME}"
+
+      - name: Synthetic health check
+        if: ${{ inputs.mode == 'install' }}
+        run: |
+          kubectl port-forward \
+            --namespace "${K8S_NAMESPACE}" \
+            "svc/${HELM_RELEASE_NAME}-ai-api-service" \
+            18080:80 \
+            >/tmp/cloudai-port-forward.log 2>&1 &
+          port_forward_pid=$!
+          trap 'kill "${port_forward_pid}" 2>/dev/null || true' EXIT
+          sleep 5
+          curl -fsS http://127.0.0.1:18080/health | grep -q 'cloudai-api mock healthy'
+          echo "Synthetic in-cluster service health check passed through kubectl port-forward."
+
+      - name: Rollback Helm release
+        if: ${{ inputs.mode == 'rollback' }}
+        env:
+          ROLLBACK_REVISION: ${{ inputs.rollback_revision }}
+        run: |
+          helm history "${HELM_RELEASE_NAME}" --namespace "${K8S_NAMESPACE}"
+          revision="${ROLLBACK_REVISION}"
+          if [ -z "$revision" ]; then
+            revision=$(helm history "${HELM_RELEASE_NAME}" --namespace "${K8S_NAMESPACE}" -o json | jq -r '.[-2].revision // empty')
+          fi
+          if [ -z "$revision" ]; then
+            echo "::error::No previous Helm revision is available for rollback. Provide rollback_revision or run install twice first."
+            exit 1
+          fi
+
+          helm rollback "${HELM_RELEASE_NAME}" "$revision" \
+            --namespace "${K8S_NAMESPACE}" \
+            --wait \
+            --timeout 5m
+          kubectl rollout status "deployment/${HELM_RELEASE_NAME}-ai-api-service" \
+            --namespace "${K8S_NAMESPACE}" \
+            --timeout 3m
+
+      - name: Uninstall Helm release
+        if: ${{ inputs.mode == 'uninstall' }}
+        run: |
+          helm uninstall "${HELM_RELEASE_NAME}" \
+            --namespace "${K8S_NAMESPACE}" \
+            --ignore-not-found
+
+      - name: Delete sandbox namespace
+        if: ${{ inputs.mode == 'uninstall' && inputs.cleanup_namespace }}
+        run: |
+          kubectl delete namespace "${K8S_NAMESPACE}" --ignore-not-found
+
+      - name: Evidence boundary
+        run: |
+          echo "P4f Helm release operation completed for mode=${{ inputs.mode }}."
+          echo "Do not copy account IDs, ARNs, live endpoints, kubeconfig, backend values, or raw cluster output into git."
+          echo "This workflow uses ClusterIP only and does not create an ingress or public load balancer."
+
+      - name: Restore EKS public access CIDRs
+        if: ${{ always() }}
+        run: |
+          if [ ! -f "${RUNNER_TEMP}/eks-public-access-cidrs.original.json" ]; then
+            echo "::warning::Original EKS public access CIDRs were not captured; nothing to restore."
+            exit 0
+          fi
+
+          original_cidrs=$(jq -r 'join(",")' "${RUNNER_TEMP}/eks-public-access-cidrs.original.json")
+          echo "Restoring original EKS public access CIDR allowlist."
+          aws eks update-cluster-config \
+            --region "${AWS_REGION}" \
+            --name "${EKS_CLUSTER_NAME}" \
+            --resources-vpc-config "publicAccessCidrs=${original_cidrs}"
+          aws eks wait cluster-active \
+            --region "${AWS_REGION}" \
+            --name "${EKS_CLUSTER_NAME}"
