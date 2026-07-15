@@ -185,9 +185,26 @@ jobs:
             >/tmp/cloudai-port-forward.log 2>&1 &
           port_forward_pid=$!
           trap 'kill "${port_forward_pid}" 2>/dev/null || true' EXIT
-          sleep 5
-          curl -fsS http://127.0.0.1:18080/health | grep -q 'cloudai-api mock healthy'
-          echo "Synthetic in-cluster service health check passed through kubectl port-forward."
+
+          for attempt in $(seq 1 15); do
+            if curl -fsS http://127.0.0.1:18080/ -o /tmp/cloudai-health-response.txt 2>/tmp/cloudai-health-error.log; then
+              if grep -q 'cloudai-api mock healthy' /tmp/cloudai-health-response.txt; then
+                echo "Synthetic in-cluster service health check passed through kubectl port-forward."
+                exit 0
+              fi
+            fi
+            echo "Waiting for synthetic service response through port-forward; attempt ${attempt}/15."
+            sleep 2
+          done
+
+          echo "::error::Synthetic service did not return the expected mock response."
+          echo "Last curl error:"
+          cat /tmp/cloudai-health-error.log || true
+          echo "Last service response:"
+          cat /tmp/cloudai-health-response.txt || true
+          echo "Port-forward log:"
+          cat /tmp/cloudai-port-forward.log || true
+          exit 1
 
       - name: Rollback Helm release
         if: ${{ inputs.mode == 'rollback' }}
