@@ -173,8 +173,9 @@ jobs:
             --force-conflicts \
             -f "https://raw.githubusercontent.com/argoproj/argo-cd/${ARGOCD_VERSION}/manifests/install.yaml"
 
-          kubectl rollout status deployment \
+          kubectl wait deployment \
             --all \
+            --for=condition=Available \
             --namespace "${ARGOCD_NAMESPACE}" \
             --timeout 8m
           kubectl rollout status statefulset/argocd-application-controller \
