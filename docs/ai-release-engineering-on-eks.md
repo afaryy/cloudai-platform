@@ -2,7 +2,7 @@
 
 This track explores release engineering for AI services on Amazon EKS.
 
-The default path is synthetic-only and mock-first. It shows how an enterprise platform team would package, promote, observe, roll back, and govern AI platform components on Kubernetes without requiring a real cluster. A separate personal AWS sandbox path can be used later to prove practical EKS skills with synthetic workloads, explicit budget controls, and teardown guidance.
+The default path is synthetic-only and mock-first. It shows how an enterprise platform team would package, promote, observe, roll back, and govern AI platform components on Kubernetes without requiring a real cluster. A separate personal AWS sandbox path can be used to prove practical EKS skills with synthetic workloads, explicit budget controls, and teardown guidance.
 
 ## Phase Split
 
@@ -139,13 +139,37 @@ Do not enable automated sync, broad cluster administration, real provider creden
 
 If private repository access is needed, create `ARGOCD_REPO_TOKEN` as an `aws-sandbox` GitHub environment secret. Use a fine-grained token scoped to read repository contents only. Do not store it as a repository variable or commit it in an Argo CD Secret manifest.
 
+## Production Hardening Boundary
+
+The live P4g sandbox proves the core GitOps path: GitHub Actions OIDC access, a private Git source, Argo CD reconciliation, Helm rendering, an exact revision check, Kubernetes rollout, and `Synced` plus `Healthy` evidence. It is a working reference implementation, not a production platform.
+
+The live EKS exercise validated the release foundation for future AI platform services, not a production AI inference workload. The deployed workload is synthetic and is used to prove GitHub Actions OIDC, EKS access, Argo CD reconciliation, Helm rendering, exact revision verification, Kubernetes rollout checks, and health evidence.
+
+A real AI model service would add model artifact and version management, model server images such as vLLM, TGI, Triton, BentoML, or custom FastAPI, GPU or accelerator capacity, inference readiness checks, secure model and data access, evaluation evidence, AI observability, and FinOps controls.
+
+A production implementation would add:
+
+- separate development, test, staging, and production accounts governed through an enterprise landing zone;
+- private EKS API access through controlled runner or platform connectivity rather than temporary public `/32` access;
+- least-privilege GitHub Actions, Argo CD, administrator, and workload identities instead of sandbox cluster-admin permissions;
+- highly available Argo CD with SSO, RBAC, Argo CD Projects, backup, recovery, and controlled administration;
+- dedicated repository machine identity with ownership, rotation, and audit controls;
+- private images referenced by immutable digest with vulnerability scanning, SBOM, signing, and provenance evidence;
+- managed secrets, KMS, and EKS Pod Identity or IRSA instead of application credentials in Git or workflow configuration;
+- admission policy, namespace boundaries, image policy, and continuous compliance evidence;
+- central logs, metrics, traces, alerts, SLOs, security monitoring, and incident-response integration;
+- multi-AZ capacity, autoscaling, topology controls, Pod disruption budgets, backup, and recovery testing;
+- controlled environment promotion, separation of duties, change evidence, and ongoing FinOps ownership.
+
+In the bounded sandbox, GitHub Actions connects to EKS, requests the exact Argo CD sync, and verifies the result. In a mature production design, GitHub Actions would normally build, test, scan, sign, and promote an immutable artifact or Git revision, while an in-cluster Argo CD control plane reconciles the approved desired state with tightly scoped permissions.
+
 ## ECS And EKS Boundary
 
 ECS can be a useful simpler runtime pattern for API services, but P4 focuses on EKS because the portfolio goal is Kubernetes release engineering: Helm, Argo CD, rollout, rollback, probes, policy gates, and cluster-operational thinking. The first real sandbox should not deploy ECS and EKS at the same time.
 
 ## Current State
 
-The P4a chart exists under `helm/ai-api-service/`. The P4c Argo CD Application exists under `argocd/applications/`. The EKS Terraform stack exists under `providers/aws/infra/terraform/`, and the manual workflow can run validation, backend-backed plan, apply, and destroy through the `aws-sandbox` GitHub environment. The personal EKS sandbox has been exercised with a managed node group and EKS access entries. P4e validates live GitHub Actions access, node readiness, Helm lint/render, and endpoint allowlist restoration. P4f has exercised Helm install, synthetic health, revision history, rollback, and uninstall. P4g adds the live manual Argo CD bootstrap, sync, status, health, and cleanup workflow for the same synthetic Helm workload.
+The P4a chart exists under `helm/ai-api-service/`. The P4c Argo CD Application exists under `argocd/applications/`. The EKS Terraform stack exists under `providers/aws/infra/terraform/`, and the manual workflow can run validation, backend-backed plan, apply, and destroy through the `aws-sandbox` GitHub environment. The personal EKS sandbox has been exercised with a managed node group and EKS access entries, then destroyed after evidence capture to keep the POC cost-bounded. P4e validated live GitHub Actions access, node readiness, Helm lint/render, and endpoint allowlist restoration. P4f exercised Helm install, synthetic health, revision history, rollback, and uninstall. P4g exercised pinned Argo CD bootstrap, private repository access, exact-revision manual sync, Helm rendering, Kubernetes rollout, `Synced` and `Healthy` verification, synthetic service health, status, and cleanup paths. A Pod-capacity failure on the original one-node sandbox was diagnosed through Kubernetes events and corrected through a bounded Terraform-managed node-count override.
 
 Current P4 evidence includes:
 
@@ -168,7 +192,7 @@ Current P4 evidence includes:
 
 ## P4c Argo CD Boundary
 
-The Argo CD example is a release-engineering contract, not a live deployment. It intentionally uses:
+The P4c Argo CD Application is the reusable release-engineering contract; the manifest alone is not evidence of a live deployment. P4g has now exercised that contract in the approved personal EKS sandbox. The committed Application intentionally uses:
 
 - `destination.server: https://kubernetes.default.svc` as the in-cluster Argo CD destination placeholder.
 - `destination.namespace: cloudai-sandbox` as a synthetic namespace.
