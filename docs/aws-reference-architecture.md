@@ -38,9 +38,11 @@ P4 keeps EKS release engineering separate from general AWS runtime choices:
 - **OIDC boundary:** the repository should reuse an existing `token.actions.githubusercontent.com` OIDC provider where one already exists in the account, rather than creating duplicates.
 - **Cost boundary:** avoid NAT-heavy defaults and long-lived clusters until the sandbox workload, budget, and teardown process are explicit.
 
-The next real-cloud design step is documented in `docs/p4b-real-eks-sandbox-design.md`. It includes a validate-only Terraform skeleton and keeps the first real deployment focused on EKS, Terraform, GitHub Actions OIDC, Helm, rollout evidence, and teardown before adding Bedrock or Bedrock AgentCore.
+The completed EKS sandbox design is documented in `docs/p4b-real-eks-sandbox-design.md`. It keeps the first real deployment focused on EKS, Terraform, GitHub Actions OIDC, Helm, rollout evidence, and teardown before adding Bedrock or Bedrock AgentCore.
 
-Bedrock Guardrails and AgentCore-aligned resources remain later optional extensions. They should not be added to the EKS sandbox until the Terraform backend, identity, release, observability, and cleanup controls are proven with synthetic examples.
+The next Bedrock-specific design step is documented in `docs/p8-real-bedrock-sandbox-design.md`. It defines a tiny governed Bedrock access path with synthetic prompts, IAM least privilege, manual approval, budget controls, and sanitized evidence.
+
+Bedrock Guardrails and AgentCore-aligned resources remain later optional extensions. Guardrails should come after the basic Bedrock access boundary is clear. AgentCore should come later still because it introduces agent runtime, tool, memory, gateway, observability, and evaluation concerns.
 
 ## Landing Zone Scale Boundary
 

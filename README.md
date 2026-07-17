@@ -62,6 +62,7 @@ Release engineering and delivery:
 - [AI release engineering on EKS](docs/ai-release-engineering-on-eks.md) - P4 EKS release-engineering track.
 - [P4b EKS sandbox runbook](docs/p4b-eks-sandbox-operator-runbook.md) - optional personal AWS sandbox readiness, budget, OIDC, backend, apply/destroy, and evidence guidance.
 - [Real EKS sandbox design](docs/p4b-real-eks-sandbox-design.md) - P4b design and validate-only Terraform skeleton for a future personal AWS EKS apply/destroy path.
+- [P8 real Bedrock sandbox design](docs/p8-real-bedrock-sandbox-design.md) - bounded real Bedrock access design with synthetic prompts, IAM boundaries, and sanitized evidence.
 - [EKS release gates and rollback](docs/eks-release-gates-and-rollback.md) - P4d gates, rollout observation, rollback, and evidence expectations.
 - [AI-assisted DevSecOps pattern](docs/ai-assisted-devsecops-pattern.md) - P5a advisory AI delivery boundary.
 - [AI-assisted review evidence](docs/ai-assisted-review-evidence.md) - P5b synthetic review, CI, threat-model, and release-note evidence.
