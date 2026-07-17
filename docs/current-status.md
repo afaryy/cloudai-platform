@@ -30,6 +30,7 @@ The repository can now demonstrate:
 - **P4f Helm Release Workflow:** optional sandbox Helm install, rollout observation, rollback, uninstall, and namespace cleanup with ClusterIP-only exposure and synthetic workload boundaries
 - **P4g Argo CD GitOps Workflow:** pinned Argo CD bootstrap, private-repository access, explicit manual sync, exact revision verification, health verification, status, ordered cleanup, and post-exercise destroy for the synthetic Helm workload
 - **P8 Real Bedrock Sandbox Design:** bounded design for future real Bedrock access using synthetic prompts, IAM least privilege, manual approval, budget controls, and sanitized evidence
+- **P8a Bedrock Access Readiness:** go/no-go checklist, GitHub environment contract, IAM intent, synthetic prompt rules, failure modes, and sanitized evidence template before Terraform or model invocation
 - **P5a AI-Assisted DevSecOps Boundary:** advisory AI use, human review, CI/security checks, and release evidence
 - **P5b AI-Assisted Review Evidence:** review summaries, threat-model checklists, CI failure summaries, and release-note drafts
 - **P6f AI Platform Security and Operations Controls:** identity, data protection, AI AppSec, delivery, operations, and FinOps
@@ -67,6 +68,7 @@ The current control-plane track is **P6 AI Traffic Governance / AgentOps**. P6 c
 | P4f Helm release workflow | Live install, rollback, and uninstall validated | `.github/workflows/helm-eks-release.yml` and `docs/ai-release-engineering-on-eks.md` |
 | P4g Argo CD GitOps workflow | Live GitOps sync, health, status, cleanup, and destroy validated | `.github/workflows/argocd-eks-gitops.yml`, `argocd/applications/cloudai-api-sandbox.yaml`, and `docs/ai-release-engineering-on-eks.md` |
 | P8 Real Bedrock Sandbox design | Design complete | `docs/p8-real-bedrock-sandbox-design.md` |
+| P8a Bedrock access readiness | Complete | `docs/p8a-bedrock-access-readiness.md` and `docs/templates/p8a-bedrock-smoke-test-evidence.md` |
 | P5a AI-assisted DevSecOps boundary | Complete | `docs/ai-assisted-devsecops-pattern.md` and `.github/workflows/ai-assisted-devsecops.yml` |
 | P5b AI-assisted review evidence | Complete | `docs/ai-assisted-review-evidence.md`, `shared/schemas/ai-assisted-devsecops/`, and `shared/examples/ai-assisted-devsecops/` |
 | P6d control-plane evidence map | Complete | `docs/control-plane-evidence-map.md`, `shared/schemas/control-plane-evidence/`, and `shared/examples/control-plane-evidence/` |
@@ -117,7 +119,7 @@ Recommended next choices:
 - **P6 AI Traffic Governance evidence expansion:** add more synthetic scenario variants only if they explain a new governance outcome that is not already covered by P6e/P6f.
 - **P4b future evidence refresh:** capture only sanitized apply/destroy observations when needed; do not commit account identifiers, live endpoints, kubeconfig, raw plans, state, tfvars, backend names, or screenshots with private details.
 - **P4b pre-apply readiness check:** use `docs/p4b-eks-sandbox-operator-runbook.md` as the single go/no-go runbook before any real personal EKS sandbox apply.
-- **P8a Bedrock access readiness:** use `docs/p8-real-bedrock-sandbox-design.md` to define the first readiness checklist, GitHub environment values, IAM intent, and smoke-test evidence template before Terraform or model invocation.
+- **P8b Terraform plan for Bedrock IAM boundary:** use the P8a readiness checklist and evidence template before adding Terraform-managed IAM/logging resources. Do not apply infrastructure or invoke a model until the plan, manual approval, budget, and evidence rules are reviewed.
 - **P7 AI Factory learning note:** use `docs/ai-factory-learning-note.md` to explain why cloud architecture is evolving into AI-ready platform architecture rather than disappearing.
 
 The repository should not perform a real cloud deployment by default. Any personal sandbox work must keep account identifiers, state, kubeconfig, plan files, tfvars, credentials, and live endpoint details out of git.

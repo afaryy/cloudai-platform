@@ -63,6 +63,7 @@ Release engineering and delivery:
 - [P4b EKS sandbox runbook](docs/p4b-eks-sandbox-operator-runbook.md) - optional personal AWS sandbox readiness, budget, OIDC, backend, apply/destroy, and evidence guidance.
 - [Real EKS sandbox design](docs/p4b-real-eks-sandbox-design.md) - P4b design and validate-only Terraform skeleton for a future personal AWS EKS apply/destroy path.
 - [P8 real Bedrock sandbox design](docs/p8-real-bedrock-sandbox-design.md) - bounded real Bedrock access design with synthetic prompts, IAM boundaries, and sanitized evidence.
+- [P8a Bedrock access readiness](docs/p8a-bedrock-access-readiness.md) - go/no-go checklist before Terraform-managed Bedrock IAM or model invocation.
 - [EKS release gates and rollback](docs/eks-release-gates-and-rollback.md) - P4d gates, rollout observation, rollback, and evidence expectations.
 - [AI-assisted DevSecOps pattern](docs/ai-assisted-devsecops-pattern.md) - P5a advisory AI delivery boundary.
 - [AI-assisted review evidence](docs/ai-assisted-review-evidence.md) - P5b synthetic review, CI, threat-model, and release-note evidence.
@@ -171,10 +172,11 @@ Current scope:
 - **P4e Helm-on-EKS Validation:** manual GitHub Actions workflow that reached the active sandbox, checked node readiness, linted/rendered the Helm chart, and dry-ran the namespace without installing workloads.
 - **P4f Helm Release Workflow:** manual GitHub Actions workflow that exercised sandbox Helm install, rollout observation, rollback, uninstall, and namespace cleanup using a public test image override.
 - **P4g Argo CD GitOps Workflow:** manual GitHub Actions workflow that exercised pinned Argo CD bootstrap, private-repository access, exact-revision Application sync, health verification, status, ordered cleanup, and post-exercise destroy on the EKS sandbox.
+- **P8a Bedrock Access Readiness:** docs-only go/no-go checklist for model access, manual approval, budget, IAM intent, synthetic prompt boundaries, and sanitized evidence before Terraform or invocation.
 
 Future scope:
 
-- P8 Real Bedrock Sandbox design for a tiny governed model-access smoke test with synthetic prompts, IAM least privilege, budget controls, and sanitized evidence.
+- P8b/P8c/P8d Real Bedrock Sandbox follow-up for Terraform-managed IAM, optional apply, and one governed synthetic model-access smoke test.
 - Optional Bedrock Guardrails or AgentCore-aligned extension after the Bedrock access boundary is clear.
 
 ## Track C: AI-Assisted DevSecOps Pattern

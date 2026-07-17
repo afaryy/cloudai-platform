@@ -228,6 +228,8 @@ P8a Bedrock access readiness
 
 Only after that should the project add Terraform and a manual smoke-test workflow.
 
+The P8a readiness runbook is `docs/p8a-bedrock-access-readiness.md`. Its public-safe evidence template is `docs/templates/p8a-bedrock-smoke-test-evidence.md`.
+
 ## Interview / CTO Story
 
 ```text
