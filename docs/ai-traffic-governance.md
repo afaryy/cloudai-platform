@@ -6,6 +6,35 @@ In this project, the GenAI / LLM Gateway is the first model-access sub-layer. Th
 
 P6a adds a small local, deterministic mock authorisation decision for agent-action metadata. It demonstrates how a future traffic governance layer can return a policy verdict, approval requirement, budget state, and audit identifiers without becoming an agent runtime, traffic proxy, or enforcement integration.
 
+## Agent As A Service And Agent As A Teammate
+
+The enterprise direction can be described in two complementary ways:
+
+- **Agent as a Service** is the platform/product model. Agents are packaged, registered, governed, discoverable, and consumed like approved enterprise services.
+- **Agent as a Teammate** is the operating and user-experience model. Agents participate in day-to-day work with humans, but with clear accountability, boundaries, handoff, review, and escalation.
+
+In this project, the control layer for both ideas is intentionally mock-first:
+
+```text
+Agent as a Service
+  -> capability registry
+  -> skill card
+  -> synthetic scan and evaluation evidence
+  -> admission decision
+  -> lifecycle status
+
+Agent as a Teammate
+  -> runtime AgentOps
+  -> agent identity
+  -> tool permissions
+  -> human approval
+  -> trace and audit evidence
+  -> budget state
+  -> pause, terminate, or retire lifecycle controls
+```
+
+The key platform principle is that an enterprise agent should not be treated as an uncontrolled chat tool. It should have identity, approved capabilities, least-privilege tool access, policy checks, observability, audit evidence, cost controls, and lifecycle management.
+
 ## Layered Architecture
 
 ```text

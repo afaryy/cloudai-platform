@@ -28,7 +28,7 @@ The repository can now demonstrate:
 - **P4d Release Gates and Rollback:** synthetic EKS release engineering
 - **P4e Helm-on-EKS Validation Workflow:** GitHub Actions OIDC, temporary kubeconfig, node readiness check, Helm lint/render, and namespace dry-run against the active sandbox without installing workloads
 - **P4f Helm Release Workflow:** optional sandbox Helm install, rollout observation, rollback, uninstall, and namespace cleanup with ClusterIP-only exposure and synthetic workload boundaries
-- **P4g Argo CD GitOps Workflow:** pinned Argo CD bootstrap, optional private-repository access, explicit manual sync, health verification, status, and ordered cleanup for the synthetic Helm workload
+- **P4g Argo CD GitOps Workflow:** pinned Argo CD bootstrap, private-repository access, explicit manual sync, exact revision verification, health verification, status, ordered cleanup, and post-exercise destroy for the synthetic Helm workload
 - **P5a AI-Assisted DevSecOps Boundary:** advisory AI use, human review, CI/security checks, and release evidence
 - **P5b AI-Assisted Review Evidence:** review summaries, threat-model checklists, CI failure summaries, and release-note drafts
 - **P6f AI Platform Security and Operations Controls:** identity, data protection, AI AppSec, delivery, operations, and FinOps
@@ -64,7 +64,7 @@ The next main portfolio focus is **P6 AI Traffic Governance / AgentOps**. P6 cur
 | P4d release gates and rollback | Complete | `docs/eks-release-gates-and-rollback.md` |
 | P4e Helm-on-EKS validation workflow | Live sandbox validated | `.github/workflows/helm-eks-validation.yml` and `docs/ai-release-engineering-on-eks.md` |
 | P4f Helm release workflow | Live install, rollback, and uninstall validated | `.github/workflows/helm-eks-release.yml` and `docs/ai-release-engineering-on-eks.md` |
-| P4g Argo CD GitOps workflow | Ready for manual live run | `.github/workflows/argocd-eks-gitops.yml`, `argocd/applications/cloudai-api-sandbox.yaml`, and `docs/ai-release-engineering-on-eks.md` |
+| P4g Argo CD GitOps workflow | Live GitOps sync, health, status, cleanup, and destroy validated | `.github/workflows/argocd-eks-gitops.yml`, `argocd/applications/cloudai-api-sandbox.yaml`, and `docs/ai-release-engineering-on-eks.md` |
 | P5a AI-assisted DevSecOps boundary | Complete | `docs/ai-assisted-devsecops-pattern.md` and `.github/workflows/ai-assisted-devsecops.yml` |
 | P5b AI-assisted review evidence | Complete | `docs/ai-assisted-review-evidence.md`, `shared/schemas/ai-assisted-devsecops/`, and `shared/examples/ai-assisted-devsecops/` |
 | P6d control-plane evidence map | Complete | `docs/control-plane-evidence-map.md`, `shared/schemas/control-plane-evidence/`, and `shared/examples/control-plane-evidence/` |
@@ -86,6 +86,7 @@ The following are not part of the current mock scope:
 - runtime agent execution
 - runtime traffic proxy
 - production-like EKS runtime delivery
+- real AI model inference on EKS
 - autonomous AI-assisted delivery
 
 These should remain opt-in future work with explicit cost, cleanup, and governance guidance.
@@ -94,7 +95,7 @@ These should remain opt-in future work with explicit cost, cleanup, and governan
 
 The current slice has completed the core synthetic **P4 EKS Release Engineering readiness** documentation, the hardened **P4b optional personal EKS sandbox readiness** boundary, and the **P5 AI-assisted DevSecOps** boundary/evidence path.
 
-The optional P4b personal EKS sandbox path has also been exercised through the manual GitHub Actions validate, plan, and apply sequence with synthetic workload boundaries. The destroy mode remains available for teardown when the current EKS and GitOps learning exercise is complete.
+The optional P4b personal EKS sandbox path has also been exercised through the manual GitHub Actions validate, plan, apply, Helm, Argo CD sync, status, cleanup, and destroy sequence with synthetic workload boundaries. The sandbox was destroyed after evidence capture to keep the POC cost-bounded.
 
 Completed P4 split:
 
@@ -104,17 +105,17 @@ Completed P4 split:
 - **P4d release gates and rollback:** pre-deploy gates, rollout observation, rollback choices, failure modes, and synthetic evidence expectations.
 - **P4e Helm-on-EKS validation workflow:** GitHub Actions OIDC access to the active sandbox, temporary runner kubeconfig, node readiness check, Helm lint/render, namespace dry-run, endpoint allowlist restoration, and no workload install; live validation has passed.
 - **P4f Helm release workflow:** optional install/rollback/uninstall workflow for the mock API Helm chart, using temporary runner `/32` access, a public test image override, ClusterIP-only exposure, rollout status, synthetic health check, and cleanup.
-- **P4g Argo CD GitOps workflow:** optional pinned Argo CD bootstrap and explicit GitOps sync for the same synthetic Helm workload, with public/private repository access modes, sync/health evidence, and ordered cleanup.
+- **P4g Argo CD GitOps workflow:** optional pinned Argo CD bootstrap and explicit GitOps sync for the same synthetic Helm workload, with private repository access, exact revision verification, sync/health evidence, ordered cleanup, and post-exercise destroy.
 
 Recommended next choices:
 
-- **P4b real EKS sandbox design:** keep `docs/p4b-real-eks-sandbox-design.md` as the design bridge for the optional personal AWS EKS apply/destroy path.
-- **P4b budget, endpoint, and teardown setup:** keep AWS Budget, operator `/32` endpoint CIDR, teardown owner, and environment protection as required gates before any repeat apply. The workflow can run backend-backed validate, plan, apply, and destroy through the `aws-sandbox` environment.
-- **P4f Helm install and rollback evidence:** the manual P4f workflow has exercised install, synthetic health, multiple revisions, rollback, and uninstall for the mock AI API Helm release.
-- **P4g Argo CD sandbox sync evidence:** run `bootstrap`, then `sync`, for the same mock API release; capture only sanitized sync/health evidence and use `uninstall` when the exercise is complete.
+- **P4b repeat-run discipline:** keep AWS Budget, operator `/32` endpoint CIDR, teardown owner, and environment protection as required gates before any repeat apply. The workflow can run backend-backed validate, plan, apply, and destroy through the `aws-sandbox` environment.
+- **P4f/P4g evidence reuse:** treat the completed Helm and Argo CD live validations as release-engineering evidence. Repeat them only when there is a new learning goal or changed implementation.
+- **Synthetic-vs-real AI boundary:** keep public wording clear that the live EKS workload was synthetic. Real AI inference would require model artifacts, model server images, GPU or accelerator capacity, readiness checks, secure model/data access, evaluation evidence, observability, and FinOps.
 - **P6 AI Traffic Governance evidence expansion:** add more synthetic scenario variants only if they explain a new governance outcome that is not already covered by P6e/P6f.
 - **P4b future evidence refresh:** capture only sanitized apply/destroy observations when needed; do not commit account identifiers, live endpoints, kubeconfig, raw plans, state, tfvars, backend names, or screenshots with private details.
 - **P4b pre-apply readiness check:** use `docs/p4b-eks-sandbox-operator-runbook.md` as the single go/no-go runbook before any real personal EKS sandbox apply.
+- **P8 Real Bedrock Sandbox design:** next real-cloud design candidate for a tiny governed Bedrock access smoke test behind the existing GenAI Gateway boundary, with synthetic prompts, IAM least privilege, budget controls, and sanitized evidence.
 - **P7 AI Factory learning note:** use `docs/ai-factory-learning-note.md` to explain why cloud architecture is evolving into AI-ready platform architecture rather than disappearing.
 
 The repository should not perform a real cloud deployment by default. Any personal sandbox work must keep account identifiers, state, kubeconfig, plan files, tfvars, credentials, and live endpoint details out of git.

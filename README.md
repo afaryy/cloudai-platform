@@ -167,13 +167,14 @@ Current scope:
 - **P4b Optional Personal EKS Sandbox:** Terraform-managed sandbox readiness, explicit budget, manual approval, synthetic workload only, and teardown guidance.
 - **P4c GitOps Pattern:** synthetic Argo CD Application manifest, manual sync posture, release metadata, and promotion boundaries.
 - **P4d Release Gates and Rollback:** pre-deploy gates, rollout observation, rollback choices, failure modes, and evidence expectations.
-- **P4e Helm-on-EKS Validation:** manual GitHub Actions workflow that reaches the active sandbox, checks node readiness, lints/renders the Helm chart, and dry-runs the namespace without installing workloads.
-- **P4f Helm Release Workflow:** manual GitHub Actions workflow for optional sandbox Helm install, rollout observation, rollback, uninstall, and namespace cleanup using a public test image override.
-- **P4g Argo CD GitOps Workflow:** manual GitHub Actions workflow for pinned Argo CD bootstrap, optional private-repository access, explicit Application sync, health verification, status, and ordered cleanup on the EKS sandbox.
+- **P4e Helm-on-EKS Validation:** manual GitHub Actions workflow that reached the active sandbox, checked node readiness, linted/rendered the Helm chart, and dry-ran the namespace without installing workloads.
+- **P4f Helm Release Workflow:** manual GitHub Actions workflow that exercised sandbox Helm install, rollout observation, rollback, uninstall, and namespace cleanup using a public test image override.
+- **P4g Argo CD GitOps Workflow:** manual GitHub Actions workflow that exercised pinned Argo CD bootstrap, private-repository access, exact-revision Application sync, health verification, status, ordered cleanup, and post-exercise destroy on the EKS sandbox.
 
 Future scope:
 
-- Optional Bedrock Guardrails or AgentCore-aligned extension after the EKS and Terraform foundations are clear.
+- P8 Real Bedrock Sandbox design for a tiny governed model-access smoke test with synthetic prompts, IAM least privilege, budget controls, and sanitized evidence.
+- Optional Bedrock Guardrails or AgentCore-aligned extension after the Bedrock access boundary is clear.
 
 ## Track C: AI-Assisted DevSecOps Pattern
 
