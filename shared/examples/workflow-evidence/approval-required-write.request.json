@@ -1,0 +1,16 @@
+{
+  "workflowId": "workflow_demo_approval_0001",
+  "objective": "Prepare a synthetic case summary for human approval.",
+  "owner": "platform-demo-owner",
+  "riskTier": "high",
+  "agentAction": {
+    "requestId": "agent_req_0002",
+    "session": { "sessionId": "agent_session_0002", "agentId": "demo-knowledge-agent", "owner": "platform-demo-owner", "delegatedUser": "synthetic-user", "riskTier": "high", "status": "active" },
+    "action": { "toolId": "case-summary", "actionClass": "high-impact", "leastPrivilegeScope": "synthetic-case-summary" },
+    "governance": { "policyProfile": "agentops-demo-governed", "approvalId": null, "budgetLimit": 10, "budgetConsumed": 2 }
+  },
+  "capability": { "capabilityId": "case-summary", "admissionStatus": "admitted" },
+  "knowledgeSource": { "sourceId": "demo-platform-handbook-001", "allowedKnowledgeBase": "demo-platform-handbook" },
+  "guardrails": { "requestId": "guardrail_req_0002", "policyProfile": "guardrails-demo", "surface": "agent-action", "syntheticSignals": ["none"] },
+  "acceptanceChecks": ["capability-admitted", "source-active", "guardrails-allow", "within-budget"]
+}

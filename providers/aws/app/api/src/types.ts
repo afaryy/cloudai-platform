@@ -208,3 +208,27 @@ export type GuardrailAssessmentVerdict = {
     recordedAt: string;
   };
 };
+
+export type WorkflowAcceptanceCheck =
+  | "capability-admitted"
+  | "source-active"
+  | "guardrails-allow"
+  | "within-budget";
+
+export type WorkflowRunRequest = {
+  workflowId: string;
+  objective: string;
+  owner: string;
+  riskTier: AgentRiskTier;
+  agentAction: AgentActionAuthorisationRequest;
+  capability: {
+    capabilityId: string;
+    admissionStatus: "admitted" | "blocked";
+  };
+  knowledgeSource: {
+    sourceId: string;
+    allowedKnowledgeBase: string;
+  };
+  guardrails: GuardrailAssessmentRequest;
+  acceptanceChecks: WorkflowAcceptanceCheck[];
+};
