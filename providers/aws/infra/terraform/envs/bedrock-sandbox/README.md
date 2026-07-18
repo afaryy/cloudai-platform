@@ -17,8 +17,13 @@ The first safe actions are Terraform validation and plan. P8b.2 adds a manually 
 
 Provide these through the protected `aws-sandbox` GitHub environment or local, ignored tfvars:
 
-- `TF_VAR_github_oidc_provider_arn`
+- `TF_VAR_github_oidc_provider_arn` (local, ignored configuration only)
 - `TF_VAR_allowed_model_arns`
+
+For GitHub Actions, set `AWS_OIDC_PROVIDER_ARN` in the protected
+`aws-sandbox` environment. The workflow maps it to
+`TF_VAR_github_oidc_provider_arn` for Terraform. GitHub does not permit
+configuration names beginning with `GITHUB_`.
 
 For GitHub Actions, store the model boundary as a JSON list in `BEDROCK_ALLOWED_MODEL_ARNS`, for example:
 

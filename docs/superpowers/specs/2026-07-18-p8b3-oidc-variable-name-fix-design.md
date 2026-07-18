@@ -44,9 +44,8 @@ create `GITHUB_OIDC_PROVIDER_ARN`. Each must instead name
 `AWS_OIDC_PROVIDER_ARN` and explicitly explain the mapping to the internal
 Terraform runtime variable.
 
-Historical P8b.1 planning records are retained as historical evidence and are
-not rewritten. The current readiness runbook and P8b.2 design record describe
-the operative configuration contract.
+The P8b.1 design and planning records are updated as well, so no P8b guidance
+instructs an operator to create a GitHub-invalid configuration name.
 
 ## Verification
 

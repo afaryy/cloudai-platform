@@ -67,9 +67,15 @@ TF_BACKEND_BUCKET
 TF_BACKEND_LOCK_TABLE
 TF_STATE_KEY_PREFIX
 TF_STATE_KEY
+AWS_OIDC_PROVIDER_ARN
 TF_VAR_github_oidc_provider_arn
 TF_VAR_allowed_model_arns
 ```
+
+`AWS_OIDC_PROVIDER_ARN` is the protected GitHub Environment variable holding
+the existing AWS IAM provider ARN. The workflow maps it to Terraform's runtime
+input `TF_VAR_github_oidc_provider_arn`; GitHub does not permit configuration
+names beginning with `GITHUB_`.
 
 The workflow obtains temporary credentials only through `aws-actions/configure-aws-credentials@v4` and the protected OIDC role. No static key path is added. The role must already meet the P8b.1 backend and IAM permission checklist; a permission error is a fail-closed result, not authority to broaden the policy.
 

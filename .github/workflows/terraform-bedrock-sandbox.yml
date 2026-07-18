@@ -39,7 +39,7 @@ jobs:
       TF_STATE_KEY_PREFIX: ${{ vars.TF_STATE_KEY_PREFIX }}
       TF_STACK_NAME: bedrock-sandbox
       TF_STATE_KEY: ${{ vars.TF_STATE_KEY_PREFIX }}/bedrock-sandbox/terraform.tfstate
-      TF_VAR_github_oidc_provider_arn: ${{ vars.GITHUB_OIDC_PROVIDER_ARN || secrets.GITHUB_OIDC_PROVIDER_ARN }}
+      TF_VAR_github_oidc_provider_arn: ${{ vars.AWS_OIDC_PROVIDER_ARN }}
       TF_VAR_allowed_model_arns: ${{ vars.BEDROCK_ALLOWED_MODEL_ARNS || secrets.BEDROCK_ALLOWED_MODEL_ARNS }}
     defaults:
       run:

@@ -57,7 +57,7 @@ The runbook will use this contract for the protected `aws-sandbox` GitHub enviro
 | `TF_BACKEND_BUCKET` | Protected variable | Remote Terraform state | Never commit the real bucket name. |
 | `TF_BACKEND_LOCK_TABLE` | Protected variable | Terraform state locking | Never commit the real table name. |
 | `TF_STATE_KEY_PREFIX` | Protected variable | Derived P8b state key | Use a generic stack prefix. |
-| `GITHUB_OIDC_PROVIDER_ARN` | Secret or protected variable | P8b role trust policy input | Never commit the provider ARN. |
+| `AWS_OIDC_PROVIDER_ARN` | Protected variable | Existing AWS IAM OIDC provider ARN, mapped by the workflow to Terraform's `TF_VAR_github_oidc_provider_arn` | Never commit the provider ARN. |
 | `BEDROCK_ALLOWED_MODEL_ARNS` | Secret or protected variable | P8b invoke-policy resource boundary | Store a JSON list containing only approved model resources. |
 
 `TF_STATE_KEY` is derived by the workflow as `${TF_STATE_KEY_PREFIX}/bedrock-sandbox/terraform.tfstate`; it is not a separately maintained environment value. `BEDROCK_MODEL_ID` is not required for the P8b IAM apply gate and remains a later P8c smoke-test input.
