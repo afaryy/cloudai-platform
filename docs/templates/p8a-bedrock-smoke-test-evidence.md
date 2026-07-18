@@ -1,4 +1,4 @@
-# P8a/P8d Bedrock Smoke Test Evidence Template
+# P8 Bedrock Apply and Smoke-Test Evidence Template
 
 Use this template for public-safe notes after a future Bedrock access readiness or smoke-test run.
 
@@ -29,7 +29,7 @@ Do not include account IDs, role ARNs, backend bucket/table names, raw prompts, 
 
 ## Terraform Evidence
 
-Use this section only for future P8b/P8c work.
+Use this section only for future P8b/P8b.1 and separately reviewed IAM apply work.
 
 - Backend initialized:
 - Terraform validation completed:
@@ -40,7 +40,7 @@ Use this section only for future P8b/P8c work.
 
 ## Smoke Test Evidence
 
-Use this section only for future P8d work.
+Use this section only for future P8c work.
 
 - Model family label:
 - Prompt synthetic:

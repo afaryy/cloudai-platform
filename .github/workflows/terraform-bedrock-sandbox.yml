@@ -49,7 +49,7 @@ jobs:
         run: |
           echo "P8b is a Terraform validate/plan boundary for Bedrock IAM only."
           echo "This workflow does not apply Terraform, invoke Bedrock, store prompt text, or capture provider responses."
-          echo "Use P8a readiness and evidence rules before any future apply or smoke test."
+          echo "P8b.1 apply readiness must be complete before any separately reviewed apply workflow is introduced."
 
       - name: Terraform init without backend for validation
         if: ${{ inputs.mode == 'validate' }}
