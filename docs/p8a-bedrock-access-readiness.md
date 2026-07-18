@@ -42,7 +42,7 @@ P8a does not include:
 
 ## Readiness Checklist
 
-Before P8b/P8c/P8d, confirm:
+Before P8b/P8b.1/P8c, confirm:
 
 | Area | Question | Required answer |
 | --- | --- | --- |
@@ -125,7 +125,7 @@ The smoke test should prove provider access only. It should not be used to evalu
 
 ## Evidence To Capture
 
-Use `docs/templates/p8a-bedrock-smoke-test-evidence.md` when P8d eventually runs a smoke test.
+Use `docs/templates/p8a-bedrock-smoke-test-evidence.md` when P8c eventually runs a smoke test.
 
 Public-safe evidence may include:
 
@@ -191,12 +191,16 @@ Do not go to P8b if:
 ```text
 P8a readiness
   -> P8b Terraform plan for Bedrock IAM boundary
-  -> P8c Terraform apply for Bedrock IAM boundary
-  -> P8d one synthetic Bedrock smoke test
-  -> P8e optional Bedrock adapter or Guardrails mapping
+  -> P8b.1 IAM apply-readiness gate
+  -> separately reviewed Terraform apply for the IAM boundary
+  -> P8c one synthetic Bedrock smoke test
+  -> P8d optional gateway adapter
+  -> P8e optional Guardrails mapping
 ```
 
 Do not combine these into one PR.
+
+Before any separate apply-workflow change, use the [P8b.1 Bedrock IAM Apply Readiness](p8b1-bedrock-iam-apply-readiness.md) gate.
 
 ## Interview / CTO Wording
 

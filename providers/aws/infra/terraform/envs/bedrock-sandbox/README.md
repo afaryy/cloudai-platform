@@ -11,7 +11,7 @@ Use this stack only after the P8a readiness checklist is complete:
 - `docs/p8a-bedrock-access-readiness.md`
 - `docs/templates/p8a-bedrock-smoke-test-evidence.md`
 
-The first safe action is Terraform validation and plan. Apply should remain deferred until P8c is explicitly reviewed.
+The first safe action is Terraform validation and plan. Apply remains unavailable until a separately reviewed implementation follows the [P8b.1 IAM apply-readiness gate](../../../../../docs/p8b1-bedrock-iam-apply-readiness.md).
 
 ## Required Private Inputs
 
