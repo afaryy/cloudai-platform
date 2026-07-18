@@ -14,6 +14,24 @@ not alter the Terraform module, IAM policy scope, OIDC trust policy semantics,
 AWS permissions, backend configuration, confirmation gate, or Bedrock model
 invocation boundary.
 
+The existing P8b.1 execution-role checklist is also corrected to match the
+Terraform module's existing `tags` arguments on both its IAM role and
+customer-managed IAM policy. The checklist must include the complete scoped
+tag lifecycle actions:
+
+```text
+iam:ListRoleTags
+iam:TagRole
+iam:UntagRole
+iam:ListPolicyTags
+iam:TagPolicy
+iam:UntagPolicy
+```
+
+This is documentation-only. It does not grant the actions, change the
+Terraform resources, or broaden the execution role beyond the named P8b role
+and policy boundary.
+
 ## Configuration Contract
 
 | Boundary | Name | Purpose |
