@@ -5,14 +5,18 @@ on:
     paths:
       - ".github/workflows/terraform-tests.yaml"
       - ".github/workflows/terraform-bedrock-sandbox.yml"
+      - ".github/workflows/bedrock-gateway-adapter.yml"
       - "providers/aws/infra/terraform/**"
+      - "providers/aws/app/api/**"
   push:
     branches:
       - main
     paths:
       - ".github/workflows/terraform-tests.yaml"
       - ".github/workflows/terraform-bedrock-sandbox.yml"
+      - ".github/workflows/bedrock-gateway-adapter.yml"
       - "providers/aws/infra/terraform/**"
+      - "providers/aws/app/api/**"
   workflow_dispatch:
 
 permissions:
@@ -94,3 +98,25 @@ jobs:
           ! grep -q 'terraform destroy' "$workflow"
           ! grep -q 'bedrock:InvokeModel' "$workflow"
           ! grep -q 'aws bedrock ' "$workflow"
+
+  bedrock_gateway_adapter_workflow_boundary:
+    name: Bedrock gateway adapter workflow boundary
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Check manual adapter smoke boundary
+        run: |
+          workflow=.github/workflows/bedrock-gateway-adapter.yml
+          grep -q 'workflow_dispatch:' "$workflow"
+          grep -q 'I_UNDERSTAND_ONE_SYNTHETIC_BEDROCK_CALL' "$workflow"
+          grep -q 'environment: aws-sandbox' "$workflow"
+          grep -q 'id-token: write' "$workflow"
+          grep -q 'AWS_BEDROCK_SMOKE_ROLE_TO_ASSUME' "$workflow"
+          grep -q 'MODEL_PROVIDER: bedrock' "$workflow"
+          grep -q 'AWS_MAX_ATTEMPTS: "1"' "$workflow"
+          grep -q 'pnpm run bedrock:smoke' "$workflow"
+          ! grep -Eq 'terraform (init|plan|apply|destroy)' "$workflow"
+          ! grep -q 'aws bedrock-runtime' "$workflow"
+          ! grep -q 'bedrock:InvokeModel' "$workflow"
+          ! grep -q 'iam:PassRole' "$workflow"
