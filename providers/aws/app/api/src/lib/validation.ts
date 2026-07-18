@@ -7,7 +7,9 @@ import type {
   GuardrailAssessmentRequest,
   GuardrailSurface,
   GuardrailSyntheticSignal,
-  RagGovernanceRequest
+  RagGovernanceRequest,
+  WorkflowAcceptanceCheck,
+  WorkflowRunRequest
 } from "../types.js";
 import { HttpError } from "./errors.js";
 import {
@@ -31,6 +33,14 @@ const AGENTOPS_SESSION_KEYS = ["sessionId", "agentId", "owner", "delegatedUser",
 const AGENTOPS_ACTION_KEYS = ["toolId", "actionClass", "leastPrivilegeScope"] as const;
 const AGENTOPS_GOVERNANCE_KEYS = ["policyProfile", "approvalId", "budgetLimit", "budgetConsumed"] as const;
 const GUARDRAIL_REQUEST_KEYS = ["requestId", "policyProfile", "surface", "syntheticSignals"] as const;
+const WORKFLOW_REQUEST_KEYS = [
+  "workflowId", "objective", "owner", "riskTier", "agentAction", "capability", "knowledgeSource", "guardrails", "acceptanceChecks"
+] as const;
+const WORKFLOW_CAPABILITY_KEYS = ["capabilityId", "admissionStatus"] as const;
+const WORKFLOW_SOURCE_KEYS = ["sourceId", "allowedKnowledgeBase"] as const;
+const WORKFLOW_ACCEPTANCE_CHECKS: WorkflowAcceptanceCheck[] = [
+  "capability-admitted", "source-active", "guardrails-allow", "within-budget"
+];
 
 export function normalizeChatRequest(
   input: unknown,
@@ -122,6 +132,35 @@ export function normalizeGuardrailAssessmentRequest(input: unknown): GuardrailAs
     policyProfile: readRequiredString(input, "policyProfile", "invalid_guardrail_assessment_request").trim(),
     surface: readGuardrailSurface(input.surface),
     syntheticSignals: readGuardrailSignals(input.syntheticSignals)
+  };
+}
+
+export function normalizeWorkflowRunRequest(input: unknown): WorkflowRunRequest {
+  if (!isRecord(input)) {
+    throw new HttpError(400, "Request body must be a JSON object.", "invalid_workflow_run_request");
+  }
+
+  assertOnlyKeys(input, WORKFLOW_REQUEST_KEYS, "request", "invalid_workflow_run_request");
+  const objective = readRequiredString(input, "objective", "invalid_workflow_run_request").trim();
+  if (objective.length === 0) {
+    throw new HttpError(400, "objective must not be empty.", "invalid_workflow_run_request");
+  }
+
+  return {
+    workflowId: readRequiredString(input, "workflowId", "invalid_workflow_run_request").trim(),
+    objective,
+    owner: readRequiredString(input, "owner", "invalid_workflow_run_request").trim(),
+    riskTier: readAgentRiskTier(input.riskTier),
+    agentAction: {
+      requestId: readWorkflowAgentActionRequestId(input.agentAction),
+      session: readAgentSession(requireRecord(input.agentAction, "agentAction" ).session),
+      action: readAgentAction(requireRecord(input.agentAction, "agentAction").action),
+      governance: readAgentGovernance(requireRecord(input.agentAction, "agentAction").governance)
+    },
+    capability: readWorkflowCapability(input.capability),
+    knowledgeSource: readWorkflowKnowledgeSource(input.knowledgeSource),
+    guardrails: readWorkflowGuardrails(input.guardrails),
+    acceptanceChecks: readWorkflowAcceptanceChecks(input.acceptanceChecks)
   };
 }
 
@@ -243,6 +282,65 @@ function readAgentSession(value: unknown): AgentActionAuthorisationRequest["sess
     riskTier: readAgentRiskTier(value.riskTier),
     status: readAgentSessionStatus(value.status)
   };
+}
+
+function requireRecord(value: unknown, fieldName: string): Record<string, unknown> {
+  if (!isRecord(value)) {
+    throw new HttpError(400, `${fieldName} is required and must be an object.`, "invalid_workflow_run_request");
+  }
+
+  return value;
+}
+
+function readWorkflowAgentActionRequestId(value: unknown): string {
+  const agentAction = requireRecord(value, "agentAction");
+  assertOnlyKeys(agentAction, AGENTOPS_REQUEST_KEYS, "agentAction", "invalid_workflow_run_request");
+  return readRequiredString(agentAction, "requestId", "invalid_workflow_run_request").trim();
+}
+
+function readWorkflowCapability(value: unknown): WorkflowRunRequest["capability"] {
+  const capability = requireRecord(value, "capability");
+  assertOnlyKeys(capability, WORKFLOW_CAPABILITY_KEYS, "capability", "invalid_workflow_run_request");
+  if (capability.admissionStatus !== "admitted" && capability.admissionStatus !== "blocked") {
+    throw new HttpError(400, "capability.admissionStatus is not supported in mock mode.", "invalid_workflow_run_request");
+  }
+
+  return {
+    capabilityId: readRequiredString(capability, "capabilityId", "invalid_workflow_run_request").trim(),
+    admissionStatus: capability.admissionStatus
+  };
+}
+
+function readWorkflowKnowledgeSource(value: unknown): WorkflowRunRequest["knowledgeSource"] {
+  const source = requireRecord(value, "knowledgeSource");
+  assertOnlyKeys(source, WORKFLOW_SOURCE_KEYS, "knowledgeSource", "invalid_workflow_run_request");
+  return {
+    sourceId: readRequiredString(source, "sourceId", "invalid_workflow_run_request").trim(),
+    allowedKnowledgeBase: readRequiredString(source, "allowedKnowledgeBase", "invalid_workflow_run_request").trim()
+  };
+}
+
+function readWorkflowGuardrails(value: unknown): GuardrailAssessmentRequest {
+  const guardrails = requireRecord(value, "guardrails");
+  assertOnlyKeys(guardrails, GUARDRAIL_REQUEST_KEYS, "guardrails", "invalid_workflow_run_request");
+  return {
+    requestId: readRequiredString(guardrails, "requestId", "invalid_workflow_run_request").trim(),
+    policyProfile: readRequiredString(guardrails, "policyProfile", "invalid_workflow_run_request").trim(),
+    surface: readGuardrailSurface(guardrails.surface),
+    syntheticSignals: readGuardrailSignals(guardrails.syntheticSignals)
+  };
+}
+
+function readWorkflowAcceptanceChecks(value: unknown): WorkflowAcceptanceCheck[] {
+  if (!Array.isArray(value) || value.length === 0 || !value.every((item) => WORKFLOW_ACCEPTANCE_CHECKS.includes(item as WorkflowAcceptanceCheck))) {
+    throw new HttpError(400, "acceptanceChecks must contain supported workflow checks.", "invalid_workflow_run_request");
+  }
+
+  if (new Set(value).size !== value.length) {
+    throw new HttpError(400, "acceptanceChecks must not contain duplicates.", "invalid_workflow_run_request");
+  }
+
+  return value as WorkflowAcceptanceCheck[];
 }
 
 function readAgentAction(value: unknown): AgentActionAuthorisationRequest["action"] {

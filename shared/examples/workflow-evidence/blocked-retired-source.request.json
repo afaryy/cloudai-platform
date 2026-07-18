@@ -1,0 +1,16 @@
+{
+  "workflowId": "workflow_demo_blocked_0001",
+  "objective": "Summarize retired synthetic platform guidance.",
+  "owner": "platform-demo-owner",
+  "riskTier": "standard",
+  "agentAction": {
+    "requestId": "agent_req_0003",
+    "session": { "sessionId": "agent_session_0003", "agentId": "demo-knowledge-agent", "owner": "platform-demo-owner", "delegatedUser": "synthetic-user", "riskTier": "standard", "status": "active" },
+    "action": { "toolId": "knowledge-search", "actionClass": "read", "leastPrivilegeScope": "synthetic-public-knowledge" },
+    "governance": { "policyProfile": "agentops-demo-governed", "approvalId": null, "budgetLimit": 10, "budgetConsumed": 2 }
+  },
+  "capability": { "capabilityId": "knowledge-search", "admissionStatus": "admitted" },
+  "knowledgeSource": { "sourceId": "legacy-platform-handbook-001", "allowedKnowledgeBase": "legacy-platform-handbook" },
+  "guardrails": { "requestId": "guardrail_req_0003", "policyProfile": "guardrails-demo", "surface": "agent-action", "syntheticSignals": ["none"] },
+  "acceptanceChecks": ["capability-admitted", "source-active", "guardrails-allow", "within-budget"]
+}

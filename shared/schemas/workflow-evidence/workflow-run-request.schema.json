@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Mock CloudAI workflow evidence request",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["workflowId", "objective", "owner", "riskTier", "agentAction", "capability", "knowledgeSource", "guardrails", "acceptanceChecks"],
+  "properties": {
+    "workflowId": { "type": "string", "minLength": 1 },
+    "objective": { "type": "string", "minLength": 1 },
+    "owner": { "type": "string", "minLength": 1 },
+    "riskTier": { "enum": ["standard", "high"] },
+    "agentAction": { "type": "object" },
+    "capability": { "type": "object", "additionalProperties": false, "required": ["capabilityId", "admissionStatus"], "properties": { "capabilityId": { "type": "string", "minLength": 1 }, "admissionStatus": { "enum": ["admitted", "blocked"] } } },
+    "knowledgeSource": { "type": "object", "additionalProperties": false, "required": ["sourceId", "allowedKnowledgeBase"], "properties": { "sourceId": { "type": "string", "minLength": 1 }, "allowedKnowledgeBase": { "type": "string", "minLength": 1 } } },
+    "guardrails": { "type": "object" },
+    "acceptanceChecks": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "enum": ["capability-admitted", "source-active", "guardrails-allow", "within-budget"] } }
+  }
+}
