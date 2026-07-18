@@ -77,8 +77,11 @@ Expected environment values:
 | `TF_BACKEND_LOCK_TABLE` | Variable | Terraform lock table if P8b uses the shared backend. | Do not commit real table name. |
 | `TF_STATE_KEY_PREFIX` | Variable | State key prefix, expected to stay generic. | Safe generic values only. |
 | `BEDROCK_MODEL_ID` | Variable | Approved model identifier for the smoke test. | Document only a generic placeholder unless public-safe. |
+| `AWS_BEDROCK_SMOKE_ROLE_TO_ASSUME` | Secret or variable | Dedicated P8b-created OIDC role for one smoke test. | Do not commit role ARN. |
 
 Do not store raw prompt text, provider responses, or model access screenshots as environment values.
+
+P8c uses `AWS_BEDROCK_SMOKE_ROLE_TO_ASSUME` directly, not the Terraform `AWS_ROLE_TO_ASSUME` identity. It requires `confirm_smoke_test=I_UNDERSTAND_ONE_SYNTHETIC_BEDROCK_CALL`, makes one non-streaming call with one attempt, and stops rather than falling back if direct model invocation requires an inference profile.
 
 ## IAM Intent
 
