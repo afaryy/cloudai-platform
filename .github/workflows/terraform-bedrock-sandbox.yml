@@ -1,0 +1,100 @@
+name: terraform-bedrock-sandbox
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "Terraform command mode"
+        required: true
+        default: "validate"
+        type: choice
+        options:
+          - validate
+          - plan
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: cloudai-bedrock-sandbox-control-plane
+  cancel-in-progress: false
+
+jobs:
+  terraform:
+    name: Terraform Bedrock sandbox readiness
+    runs-on: ubuntu-latest
+    environment: aws-sandbox
+    env:
+      AWS_ROLE_TO_ASSUME: ${{ vars.AWS_ROLE_TO_ASSUME || secrets.AWS_ROLE_TO_ASSUME }}
+      AWS_REGION: ${{ vars.AWS_REGION || 'ap-southeast-2' }}
+      TF_BACKEND_BUCKET: ${{ vars.TF_BACKEND_BUCKET }}
+      TF_BACKEND_LOCK_TABLE: ${{ vars.TF_BACKEND_LOCK_TABLE }}
+      TF_STATE_KEY_PREFIX: ${{ vars.TF_STATE_KEY_PREFIX }}
+      TF_STACK_NAME: bedrock-sandbox
+      TF_STATE_KEY: ${{ vars.TF_STATE_KEY_PREFIX }}/bedrock-sandbox/terraform.tfstate
+      TF_VAR_github_oidc_provider_arn: ${{ vars.GITHUB_OIDC_PROVIDER_ARN || secrets.GITHUB_OIDC_PROVIDER_ARN }}
+      TF_VAR_allowed_model_arns: ${{ vars.BEDROCK_ALLOWED_MODEL_ARNS || secrets.BEDROCK_ALLOWED_MODEL_ARNS }}
+    defaults:
+      run:
+        working-directory: providers/aws/infra/terraform/envs/bedrock-sandbox
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Explain Bedrock sandbox boundary
+        run: |
+          echo "P8b is a Terraform validate/plan boundary for Bedrock IAM only."
+          echo "This workflow does not apply Terraform, invoke Bedrock, store prompt text, or capture provider responses."
+          echo "Use P8a readiness and evidence rules before any future apply or smoke test."
+
+      - name: Terraform init without backend for validation
+        if: ${{ inputs.mode == 'validate' }}
+        run: terraform init -backend=false
+
+      - name: Terraform validate
+        if: ${{ inputs.mode == 'validate' }}
+        run: terraform validate
+
+      - name: Check backend and Bedrock environment variables
+        if: ${{ inputs.mode == 'plan' }}
+        run: |
+          missing=0
+          for name in AWS_ROLE_TO_ASSUME AWS_REGION TF_BACKEND_BUCKET TF_BACKEND_LOCK_TABLE TF_STATE_KEY_PREFIX TF_STATE_KEY TF_VAR_github_oidc_provider_arn TF_VAR_allowed_model_arns; do
+            if [ -z "${!name}" ]; then
+              echo "::error::$name is required in the aws-sandbox environment for Bedrock plan mode."
+              missing=1
+            fi
+          done
+          if [ "$missing" -ne 0 ]; then
+            exit 1
+          fi
+
+      - name: Configure AWS credentials for sandbox planning
+        if: ${{ inputs.mode == 'plan' }}
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ env.AWS_REGION }}
+          mask-aws-account-id: true
+
+      - name: Terraform init with remote backend
+        if: ${{ inputs.mode == 'plan' }}
+        run: |
+          terraform init \
+            -backend-config="bucket=${TF_BACKEND_BUCKET}" \
+            -backend-config="key=${TF_STATE_KEY}" \
+            -backend-config="region=${AWS_REGION}" \
+            -backend-config="dynamodb_table=${TF_BACKEND_LOCK_TABLE}" \
+            -backend-config="encrypt=true"
+
+      - name: Terraform validate before plan
+        if: ${{ inputs.mode == 'plan' }}
+        run: terraform validate
+
+      - name: Terraform plan without saved artifact
+        if: ${{ inputs.mode == 'plan' }}
+        run: terraform plan -input=false -no-color
