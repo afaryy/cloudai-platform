@@ -161,7 +161,18 @@ jobs:
             --messages "$messages" \
             --inference-config maxTokens=8,temperature=0 \
             --output json >"$response_file" 2>"$error_file"; then
-            echo "::error::Bedrock smoke test failed. Record only a sanitized failure category."
+            if grep -q 'AccessDeniedException' "$error_file"; then
+              category=access-denied
+            elif grep -Eq 'ValidationException|inference profile' "$error_file"; then
+              category=validation-or-inference-profile-required
+            elif grep -Eq 'ResourceNotFoundException|ModelNotReadyException' "$error_file"; then
+              category=model-unavailable
+            elif grep -q 'ThrottlingException' "$error_file"; then
+              category=throttled
+            else
+              category=unknown
+            fi
+            echo "::error::Bedrock smoke test failed: $category. Record only this sanitized category."
             exit 1
           fi
           jq -e '(.output.message.content | type == "array") and (.stopReason | type == "string")' "$response_file" >/dev/null
