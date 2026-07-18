@@ -180,3 +180,60 @@ git status --short --branch
 ```
 
 Expected: clean `feature/p8b3-oidc-variable-name-fix` branch after the implementation commit.
+
+### Task 4: Correct the P8b IAM tag lifecycle checklist
+
+**Files:**
+- Modify: `docs/p8b1-bedrock-iam-apply-readiness.md:56-80`
+- Modify: `docs/superpowers/specs/2026-07-18-p8b1-bedrock-iam-apply-readiness-design.md:78-82`
+- Modify: `docs/superpowers/plans/2026-07-18-p8b1-bedrock-iam-apply-readiness.md:86-110`
+
+**Interfaces:**
+- Consumes: the existing `tags = var.tags` arguments on `aws_iam_role.github_actions_bedrock` and `aws_iam_policy.bedrock_smoke_test`.
+- Produces: a complete, scoped execution-role tag lifecycle contract for the P8b role and customer-managed policy.
+
+- [ ] **Step 1: Record the complete tag actions in the current runbook**
+
+In the P8b IAM management action list, place the role tag actions adjacent to the role lifecycle actions and the policy tag actions adjacent to the policy lifecycle actions:
+
+```text
+iam:ListRoleTags
+iam:TagRole
+iam:UntagRole
+iam:ListPolicyTags
+iam:TagPolicy
+iam:UntagPolicy
+```
+
+- [ ] **Step 2: Align the P8b.1 design and plan records**
+
+Update the P8b.1 design's role-lifecycle bullet to include `ListRoleTags`, and
+its customer-managed-policy bullet to include `ListPolicyTags`, `TagPolicy`,
+and `UntagPolicy`. Add the same six action names to the historical P8b.1 plan
+checklist.
+
+- [ ] **Step 3: Verify documentation matches the existing Terraform resources**
+
+Run:
+
+```bash
+rg -n 'tags\s*=\s*var\.tags|ListRoleTags|TagRole|UntagRole|ListPolicyTags|TagPolicy|UntagPolicy' \
+  providers/aws/infra/terraform/modules/bedrock-access/main.tf \
+  docs/p8b1-bedrock-iam-apply-readiness.md \
+  docs/superpowers/specs/2026-07-18-p8b1-bedrock-iam-apply-readiness-design.md \
+  docs/superpowers/plans/2026-07-18-p8b1-bedrock-iam-apply-readiness.md
+git diff --check
+```
+
+Expected: both Terraform resources have tags, and each documentation record
+contains all six scoped tag lifecycle actions without whitespace errors.
+
+- [ ] **Step 4: Commit the documentation correction to the existing PR branch**
+
+```bash
+git add docs/p8b1-bedrock-iam-apply-readiness.md \
+  docs/superpowers/specs/2026-07-18-p8b1-bedrock-iam-apply-readiness-design.md \
+  docs/superpowers/plans/2026-07-18-p8b1-bedrock-iam-apply-readiness.md \
+  docs/superpowers/plans/2026-07-18-p8b3-oidc-variable-name-fix.md
+git commit -m "docs: complete Bedrock IAM tag permission checklist"
+```

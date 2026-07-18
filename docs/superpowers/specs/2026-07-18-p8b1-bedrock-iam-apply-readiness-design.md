@@ -77,8 +77,8 @@ Scope state access to the dedicated state bucket and P8b key prefix, and lock ac
 
 Scope IAM management to the exact P8b role and customer-managed policy naming boundary. The current module creates one role, one customer-managed policy, and one role-policy attachment. The execution role therefore needs only the action families Terraform requires to read, create, update, tag, attach, detach, and delete those resources, including:
 
-- role lifecycle and trust-policy management: `CreateRole`, `GetRole`, `UpdateAssumeRolePolicy`, `DeleteRole`, `TagRole`, and `UntagRole`;
-- customer-managed policy lifecycle and version inspection: `CreatePolicy`, `GetPolicy`, `GetPolicyVersion`, `CreatePolicyVersion`, `SetDefaultPolicyVersion`, `DeletePolicyVersion`, and `DeletePolicy`;
+- role lifecycle and trust-policy management: `CreateRole`, `GetRole`, `UpdateAssumeRolePolicy`, `DeleteRole`, `ListRoleTags`, `TagRole`, and `UntagRole`;
+- customer-managed policy lifecycle, version inspection, and tag management: `CreatePolicy`, `GetPolicy`, `GetPolicyVersion`, `CreatePolicyVersion`, `SetDefaultPolicyVersion`, `DeletePolicyVersion`, `DeletePolicy`, `ListPolicyTags`, `TagPolicy`, and `UntagPolicy`;
 - attachment reconciliation: `AttachRolePolicy`, `DetachRolePolicy`, and `ListAttachedRolePolicies`.
 
 The exact resource ARNs and any unavoidable read/list exceptions must be reviewed against the final Terraform provider behaviour before implementation. The runbook must reject `Resource: "*"` for mutating P8b IAM actions unless AWS makes resource scoping impossible and the exception is documented and approved.
