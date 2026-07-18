@@ -1,0 +1,5 @@
+bucket         = "replace-with-private-backend-bucket"
+key            = "cloudai-platform/bedrock-sandbox/terraform.tfstate"
+region         = "ap-southeast-2"
+dynamodb_table = "replace-with-private-lock-table"
+encrypt        = true
