@@ -321,7 +321,7 @@ Extend static workflow checks to require manual dispatch, the confirmation phras
 
 - [ ] **Step 4: Run smoke guard and static workflow tests and verify GREEN**
 
-Run: `pnpm run build && node --test dist/tests/bedrockAdapterSmoke.test.js && ruby -e 'require "yaml"; YAML.safe_load_file(".github/workflows/bedrock-gateway-adapter.yml")' && ruby providers/aws/infra/bootstrap/test_github_oidc_terraform_backend.rb`
+Run: `pnpm run build && node --test dist/tests/bedrockAdapterSmoke.test.js && ruby -e 'require "yaml"; YAML.safe_load(File.read(".github/workflows/bedrock-gateway-adapter.yml"), aliases: true)' && ruby providers/aws/infra/bootstrap/test_github_oidc_terraform_backend.rb`
 
 Expected: local guard tests pass, shell syntax passes, and bootstrap boundary tests remain green. Run the repository's existing Terraform workflow static test command after adding the new guard.
 
@@ -354,9 +354,16 @@ Run:
 
 ```bash
 terraform -chdir=providers/aws/infra/terraform fmt -check -recursive
-terraform -chdir=providers/aws/infra/terraform init -backend=false
-terraform -chdir=providers/aws/infra/terraform validate
-terraform -chdir=providers/aws/infra/terraform test
+for terraform_dir in \
+  providers/aws/infra/terraform/modules/network \
+  providers/aws/infra/terraform/modules/eks \
+  providers/aws/infra/terraform/modules/bedrock-access \
+  providers/aws/infra/terraform/envs/eks-sandbox \
+  providers/aws/infra/terraform/envs/bedrock-sandbox; do
+  terraform -chdir="$terraform_dir" init -backend=false
+  terraform -chdir="$terraform_dir" validate
+  terraform -chdir="$terraform_dir" test
+done
 ruby providers/aws/infra/bootstrap/test_github_oidc_terraform_backend.rb
 ```
 

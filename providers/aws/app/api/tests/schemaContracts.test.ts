@@ -72,6 +72,8 @@ test("error response schema documents mock API error codes", async () => {
   assert.ok(errorCodes.includes("invalid_guardrail_assessment_request"));
   assert.ok(errorCodes.includes("token_budget_exceeded"));
   assert.ok(errorCodes.includes("unsupported_model"));
+  assert.ok(errorCodes.includes("bedrock_response_invalid"));
+  assert.ok(errorCodes.includes("bedrock_unavailable"));
 });
 
 test("error response schema matches an actual validation error payload", async () => {
