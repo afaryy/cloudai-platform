@@ -38,6 +38,8 @@ If a Terraform apply fails with `AccessDenied` for sandbox resources such as `ia
 
 The bootstrap role needs both backend access and bounded sandbox apply/destroy permissions. The policy intentionally grants the EKS sandbox role enough access to create and delete the small VPC, EKS cluster, managed node group, the EKS and EKS node group service-linked roles, sandbox access entries, and associated sandbox IAM roles. It should not be reused for production, shared enterprise, or non-synthetic workloads.
 
+For the P8b Bedrock IAM boundary, an `iam:CreatePolicy` or similar IAM lifecycle denial is remediated by updating this same bootstrap CloudFormation stack before rerunning the Bedrock workflow. The Bedrock statement is limited to roles and customer-managed policies named `cloudai-platform-bedrock-sandbox-*`; it does not grant Bedrock model invocation or `iam:PassRole`.
+
 ## Safety Notes
 
 - Prefer `ap-southeast-2` for Australia-first examples unless there is a reason to choose another region.
