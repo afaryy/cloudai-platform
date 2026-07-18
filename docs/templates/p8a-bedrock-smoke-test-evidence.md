@@ -47,6 +47,9 @@ Use this section only for future P8b/P8b.1 and separately reviewed IAM apply wor
 Use this section only for future P8c work.
 
 - Model family label:
+- Dedicated smoke-test role assumed (not Terraform role):
+- Exact smoke-test confirmation accepted:
+- One non-streaming attempt only:
 - Prompt synthetic:
 - Raw prompt committed: no
 - Raw response committed: no
