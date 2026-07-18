@@ -40,15 +40,19 @@ test("chat response schema documents metadata fields", async () => {
   const schema = await readSchema("chat-response.schema.json");
   const metadata = schema.properties.metadata;
 
-  assert.deepEqual(metadata.required, [
+  assert.equal(Array.isArray(metadata.anyOf), true);
+  assert.equal(metadata.anyOf.length, 2);
+  assert.deepEqual(metadata.anyOf[0].required, [
     "requestId",
     "modelName",
     "estimatedInputTokens",
     "estimatedOutputTokens",
     "estimatedCostUsd",
+    "usage",
     "timestamp"
   ]);
-  assert.equal(metadata.properties.estimatedCostUsd.type, "number");
+  assert.deepEqual(metadata.anyOf[1].required, ["requestId", "modelName", "usage", "timestamp"]);
+  assert.equal(metadata.anyOf[1].properties.usage.properties.source.const, "provider-reported");
 });
 
 test("chat response schema matches an actual mock response payload", async () => {
@@ -120,6 +124,19 @@ function assertMatchesObjectSchema(value: unknown, schema: any): void {
 }
 
 function assertMatchesPropertySchema(value: unknown, schema: any, path: string): void {
+  if (Array.isArray(schema.anyOf)) {
+    const matches = schema.anyOf.some((candidate: any) => {
+      try {
+        assertMatchesPropertySchema(value, candidate, path);
+        return true;
+      } catch {
+        return false;
+      }
+    });
+    assert.ok(matches, `${path} must match one of the documented schema variants`);
+    return;
+  }
+
   if (schema.type === "object") {
     assertMatchesObjectSchema(value, schema);
     return;

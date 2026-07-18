@@ -1,52 +1,71 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://example.com/cloudai-platform/schemas/mock-genai-api/chat-response.schema.json",
-  "title": "Mock GenAI Chat Response",
+  "title": "GenAI Gateway Chat Response",
   "type": "object",
   "additionalProperties": false,
   "required": ["response", "metadata"],
   "properties": {
     "response": {
       "type": "string",
-      "description": "Synthetic local mock response text."
+      "description": "Gateway response text. Mock mode returns synthetic text; opt-in Bedrock mode returns provider text to the caller but never writes it to logs."
     },
     "metadata": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "requestId",
-        "modelName",
-        "estimatedInputTokens",
-        "estimatedOutputTokens",
-        "estimatedCostUsd",
-        "timestamp"
-      ],
-      "properties": {
-        "requestId": {
-          "type": "string",
-          "description": "Synthetic request identifier for local tracing examples."
+      "anyOf": [
+        {
+          "title": "Mock metadata",
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "requestId",
+            "modelName",
+            "estimatedInputTokens",
+            "estimatedOutputTokens",
+            "estimatedCostUsd",
+            "usage",
+            "timestamp"
+          ],
+          "properties": {
+            "requestId": { "type": "string", "description": "Synthetic request identifier for local tracing examples." },
+            "modelName": { "type": "string", "enum": ["mock-bedrock-claude", "mock-bedrock-titan"] },
+            "estimatedInputTokens": { "type": "number", "minimum": 1 },
+            "estimatedOutputTokens": { "type": "number", "minimum": 1 },
+            "estimatedCostUsd": { "type": "number", "minimum": 0, "description": "Synthetic mock-only cost estimate." },
+            "usage": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["source", "inputTokens", "outputTokens"],
+              "properties": {
+                "source": { "const": "synthetic-estimate" },
+                "inputTokens": { "type": "number", "minimum": 1 },
+                "outputTokens": { "type": "number", "minimum": 1 }
+              }
+            },
+            "timestamp": { "type": "string", "format": "date-time" }
+          }
         },
-        "modelName": {
-          "type": "string",
-          "enum": ["mock-bedrock-claude", "mock-bedrock-titan"]
-        },
-        "estimatedInputTokens": {
-          "type": "number",
-          "minimum": 1
-        },
-        "estimatedOutputTokens": {
-          "type": "number",
-          "minimum": 1
-        },
-        "estimatedCostUsd": {
-          "type": "number",
-          "minimum": 0
-        },
-        "timestamp": {
-          "type": "string",
-          "format": "date-time"
+        {
+          "title": "Bedrock metadata",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["requestId", "modelName", "usage", "timestamp"],
+          "properties": {
+            "requestId": { "type": "string", "description": "Gateway-generated trace identifier; not an AWS request identifier." },
+            "modelName": { "type": "string", "minLength": 1, "description": "The explicitly configured Bedrock inference-profile identifier." },
+            "usage": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["source", "inputTokens", "outputTokens"],
+              "properties": {
+                "source": { "const": "provider-reported" },
+                "inputTokens": { "type": "number", "minimum": 0 },
+                "outputTokens": { "type": "number", "minimum": 0 }
+              }
+            },
+            "timestamp": { "type": "string", "format": "date-time" }
+          }
         }
-      }
+      ]
     }
   }
 }

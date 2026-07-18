@@ -6,6 +6,11 @@
     "estimatedInputTokens": 12,
     "estimatedOutputTokens": 17,
     "estimatedCostUsd": 0.000046,
+    "usage": {
+      "source": "synthetic-estimate",
+      "inputTokens": 12,
+      "outputTokens": 17
+    },
     "timestamp": "2026-07-10T00:00:00.000Z"
   }
 }
