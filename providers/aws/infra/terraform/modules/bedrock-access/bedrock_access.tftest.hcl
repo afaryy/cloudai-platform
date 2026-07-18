@@ -1,4 +1,19 @@
-mock_provider "aws" {}
+mock_provider "aws" {
+  mock_data "aws_iam_policy_document" {
+    defaults = {
+      json = jsonencode({
+        Version = "2012-10-17"
+        Statement = [
+          {
+            Effect   = "Allow"
+            Action   = "bedrock:InvokeModel"
+            Resource = "arn:aws:bedrock:ap-southeast-2::foundation-model/anthropic.claude-3-haiku-20240307-v1:0"
+          }
+        ]
+      })
+    }
+  }
+}
 
 run "bedrock_access_boundary" {
   command = plan
