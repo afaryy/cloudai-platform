@@ -121,8 +121,11 @@ async function evaluateResponseMetadataPresent(): Promise<MockGatewayEvalResult>
   const passed = Boolean(
     metadata.requestId
     && metadata.modelName
+    && typeof metadata.estimatedInputTokens === "number"
     && metadata.estimatedInputTokens > 0
+    && typeof metadata.estimatedOutputTokens === "number"
     && metadata.estimatedOutputTokens > 0
+    && typeof metadata.estimatedCostUsd === "number"
     && metadata.estimatedCostUsd >= 0
     && !Number.isNaN(Date.parse(metadata.timestamp))
   );

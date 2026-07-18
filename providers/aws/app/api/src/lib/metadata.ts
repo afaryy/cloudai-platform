@@ -21,6 +21,11 @@ export function buildChatMetadata(input: MetadataInput): ChatMetadata {
       inputTokens: estimatedInputTokens,
       outputTokens: estimatedOutputTokens
     }),
+    usage: {
+      source: "synthetic-estimate",
+      inputTokens: estimatedInputTokens,
+      outputTokens: estimatedOutputTokens
+    },
     timestamp: new Date().toISOString()
   };
 }
