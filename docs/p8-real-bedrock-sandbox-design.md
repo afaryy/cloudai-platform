@@ -57,6 +57,7 @@ The first implementation should not include:
 | P8a: Bedrock access readiness | Confirm the region, model access, budget, IAM boundary, and manual approval model. | Design checklist and no-live-call readiness notes. |
 | P8b: Terraform-managed IAM boundary | Add a small Bedrock sandbox Terraform stack for least-privilege permissions and optional logging/cost tags. | Terraform validate/plan evidence, no model invocation. |
 | P8b.1: IAM apply readiness | Verify protected environment values, scoped Terraform execution permissions, reviewed plan, owners, evidence, and stop conditions before any apply workflow is introduced. | Public-safe review checklist; no apply and no model invocation. |
+| P8b.2: Confirmed IAM apply | Add an exact confirmation-gated, environment-approved apply mode to the existing Bedrock Terraform workflow. | Sanitized IAM apply evidence; no model invocation or destroy mode. |
 | P8c: Synthetic Bedrock smoke test | Run one tiny prompt from GitHub Actions using OIDC and synthetic content only. | Sanitized success/failure evidence, token/cost metadata where available. |
 | P8d: Gateway adapter boundary | Connect the real Bedrock client shape to the existing GenAI Gateway interface without making live calls the default. | Adapter design, mock default preserved, tests. |
 | P8e: Bedrock Guardrails mapping | Map existing Guardrails as a Service contracts to Bedrock Guardrails concepts. | Design or tiny sandbox only after P8a-P8d are stable. |

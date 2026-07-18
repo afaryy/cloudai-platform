@@ -192,7 +192,7 @@ Do not go to P8b if:
 P8a readiness
   -> P8b Terraform plan for Bedrock IAM boundary
   -> P8b.1 IAM apply-readiness gate
-  -> separately reviewed Terraform apply for the IAM boundary
+  -> P8b.2 confirmed Terraform apply for the IAM boundary
   -> P8c one synthetic Bedrock smoke test
   -> P8d optional gateway adapter
   -> P8e optional Guardrails mapping

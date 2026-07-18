@@ -11,7 +11,7 @@ Do not include account IDs, role ARNs, backend bucket/table names, raw prompts, 
 | Date | YYYY-MM-DD |
 | Workflow | `bedrock-sandbox` or readiness-only workflow |
 | Environment | `aws-sandbox` |
-| Mode | `readiness`, `plan`, or `smoke-test` |
+| Mode | `readiness`, `plan`, `apply`, or `smoke-test` |
 | Region | Approved AWS region label |
 | Data scope | `synthetic-only` |
 | Bedrock invocation | `none` or `one synthetic smoke test` |
@@ -35,6 +35,10 @@ Use this section only for future P8b/P8b.1 and separately reviewed IAM apply wor
 - Terraform validation completed:
 - Terraform plan completed:
 - Terraform apply completed:
+- Apply confirmation accepted:
+- GitHub environment approval completed:
+- OIDC role assumption completed:
+- Fresh Terraform plan completed before apply:
 - Resources summarized:
 - No private backend/account values committed:
 

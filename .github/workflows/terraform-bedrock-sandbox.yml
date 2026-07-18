@@ -11,6 +11,12 @@ on:
         options:
           - validate
           - plan
+          - apply
+      confirm_apply:
+        description: "For apply only, type I_UNDERSTAND_BEDROCK_IAM_APPLY"
+        required: false
+        default: ""
+        type: string
 
 permissions:
   contents: read
@@ -47,9 +53,21 @@ jobs:
 
       - name: Explain Bedrock sandbox boundary
         run: |
-          echo "P8b is a Terraform validate/plan boundary for Bedrock IAM only."
-          echo "This workflow does not apply Terraform, invoke Bedrock, store prompt text, or capture provider responses."
-          echo "P8b.1 apply readiness must be complete before any separately reviewed apply workflow is introduced."
+          echo "P8b.2 provides manually confirmed Terraform apply for the Bedrock IAM boundary only."
+          echo "This workflow does not invoke Bedrock, store prompt text, or capture provider responses."
+          echo "P8b.1 apply readiness and aws-sandbox approval are required before apply."
+
+      - name: Confirm Bedrock IAM apply gate
+        if: ${{ inputs.mode == 'apply' }}
+        env:
+          CONFIRM_APPLY: ${{ inputs.confirm_apply }}
+        run: |
+          if [ "$CONFIRM_APPLY" != "I_UNDERSTAND_BEDROCK_IAM_APPLY" ]; then
+            echo "::error::Apply requires confirm_apply=I_UNDERSTAND_BEDROCK_IAM_APPLY."
+            echo "::error::No AWS credentials are configured until confirmation, aws-sandbox approval, and environment checks succeed."
+            exit 1
+          fi
+          echo "Apply confirmation accepted. Proceeding with P8b IAM boundary checks."
 
       - name: Terraform init without backend for validation
         if: ${{ inputs.mode == 'validate' }}
@@ -60,7 +78,7 @@ jobs:
         run: terraform validate
 
       - name: Check backend and Bedrock environment variables
-        if: ${{ inputs.mode == 'plan' }}
+        if: ${{ inputs.mode != 'validate' }}
         run: |
           missing=0
           for name in AWS_ROLE_TO_ASSUME AWS_REGION TF_BACKEND_BUCKET TF_BACKEND_LOCK_TABLE TF_STATE_KEY_PREFIX TF_STATE_KEY TF_VAR_github_oidc_provider_arn TF_VAR_allowed_model_arns; do
@@ -74,7 +92,7 @@ jobs:
           fi
 
       - name: Configure AWS credentials for sandbox planning
-        if: ${{ inputs.mode == 'plan' }}
+        if: ${{ inputs.mode != 'validate' }}
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ env.AWS_ROLE_TO_ASSUME }}
@@ -82,7 +100,7 @@ jobs:
           mask-aws-account-id: true
 
       - name: Terraform init with remote backend
-        if: ${{ inputs.mode == 'plan' }}
+        if: ${{ inputs.mode != 'validate' }}
         run: |
           terraform init \
             -backend-config="bucket=${TF_BACKEND_BUCKET}" \
@@ -92,9 +110,20 @@ jobs:
             -backend-config="encrypt=true"
 
       - name: Terraform validate before plan
-        if: ${{ inputs.mode == 'plan' }}
+        if: ${{ inputs.mode != 'validate' }}
         run: terraform validate
 
       - name: Terraform plan without saved artifact
         if: ${{ inputs.mode == 'plan' }}
         run: terraform plan -input=false -no-color
+
+      - name: Terraform plan before Bedrock IAM apply
+        if: ${{ inputs.mode == 'apply' }}
+        run: terraform plan -input=false -no-color
+
+      - name: Terraform apply Bedrock IAM boundary
+        if: ${{ inputs.mode == 'apply' }}
+        run: |
+          echo "Applying only the P8b IAM role, policy, and attachment."
+          echo "Do not commit account identifiers, role ARNs, backend values, or raw plan output."
+          terraform apply -input=false -auto-approve -no-color

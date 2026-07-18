@@ -4,12 +4,14 @@ on:
   pull_request:
     paths:
       - ".github/workflows/terraform-tests.yaml"
+      - ".github/workflows/terraform-bedrock-sandbox.yml"
       - "providers/aws/infra/terraform/**"
   push:
     branches:
       - main
     paths:
       - ".github/workflows/terraform-tests.yaml"
+      - ".github/workflows/terraform-bedrock-sandbox.yml"
       - "providers/aws/infra/terraform/**"
   workflow_dispatch:
 
@@ -60,3 +62,24 @@ jobs:
 
       - name: Terraform test
         run: terraform test
+
+  bedrock_workflow_boundary:
+    name: Bedrock apply workflow boundary
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Check manual Bedrock IAM apply boundary
+        run: |
+          workflow=.github/workflows/terraform-bedrock-sandbox.yml
+          grep -q 'workflow_dispatch:' "$workflow"
+          grep -q -- '- apply' "$workflow"
+          grep -q 'I_UNDERSTAND_BEDROCK_IAM_APPLY' "$workflow"
+          grep -q 'environment: aws-sandbox' "$workflow"
+          grep -q 'id-token: write' "$workflow"
+          grep -q "inputs.mode == 'apply'" "$workflow"
+          grep -q 'Terraform plan before Bedrock IAM apply' "$workflow"
+          grep -q 'terraform apply -input=false -auto-approve -no-color' "$workflow"
+          ! grep -q 'terraform destroy' "$workflow"
+          ! grep -q 'bedrock:InvokeModel' "$workflow"
+          ! grep -q 'aws bedrock' "$workflow"
