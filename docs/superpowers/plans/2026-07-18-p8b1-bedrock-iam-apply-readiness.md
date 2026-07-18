@@ -90,6 +90,7 @@ iam:CreateRole
 iam:GetRole
 iam:UpdateAssumeRolePolicy
 iam:DeleteRole
+iam:ListRoleTags
 iam:TagRole
 iam:UntagRole
 iam:CreatePolicy
@@ -99,6 +100,9 @@ iam:CreatePolicyVersion
 iam:SetDefaultPolicyVersion
 iam:DeletePolicyVersion
 iam:DeletePolicy
+iam:ListPolicyTags
+iam:TagPolicy
+iam:UntagPolicy
 iam:AttachRolePolicy
 iam:DetachRolePolicy
 iam:ListAttachedRolePolicies
