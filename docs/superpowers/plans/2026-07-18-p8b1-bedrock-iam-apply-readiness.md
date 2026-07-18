@@ -38,7 +38,7 @@
 - Reference: `providers/aws/infra/terraform/modules/bedrock-access/main.tf:1-65`
 
 **Interfaces:**
-- Consumes: the current P8b workflow variables `AWS_ROLE_TO_ASSUME`, `AWS_REGION`, `TF_BACKEND_BUCKET`, `TF_BACKEND_LOCK_TABLE`, `TF_STATE_KEY_PREFIX`, `GITHUB_OIDC_PROVIDER_ARN`, and `BEDROCK_ALLOWED_MODEL_ARNS`.
+- Consumes: the current P8b workflow variables `AWS_ROLE_TO_ASSUME`, `AWS_REGION`, `TF_BACKEND_BUCKET`, `TF_BACKEND_LOCK_TABLE`, `TF_STATE_KEY_PREFIX`, `AWS_OIDC_PROVIDER_ARN`, and `BEDROCK_ALLOWED_MODEL_ARNS`.
 - Produces: the review criteria a later, separately approved apply-workflow design must meet; it does not produce a runnable workflow or an AWS change.
 
 - [ ] **Step 1: Create the runbook boundary and execution sequence**
@@ -72,7 +72,7 @@ Add a table containing precisely these values and classifications:
 | `TF_BACKEND_BUCKET` | Protected variable | Never commit the real bucket name. |
 | `TF_BACKEND_LOCK_TABLE` | Protected variable | Never commit the real table name. |
 | `TF_STATE_KEY_PREFIX` | Protected variable | Keep the stack prefix generic. |
-| `GITHUB_OIDC_PROVIDER_ARN` | Secret or protected variable | Never commit the provider ARN. |
+| `AWS_OIDC_PROVIDER_ARN` | Protected variable | Existing AWS IAM OIDC provider ARN, mapped by the workflow to Terraform's `TF_VAR_github_oidc_provider_arn`. Never commit the provider ARN. |
 | `BEDROCK_ALLOWED_MODEL_ARNS` | Secret or protected variable | Store a JSON list of approved model resources only. |
 
 Immediately below the table, document that `TF_STATE_KEY` is derived as `${TF_STATE_KEY_PREFIX}/bedrock-sandbox/terraform.tfstate` and is not separately maintained. Document that `BEDROCK_MODEL_ID` is deferred to P8c and is not an input to P8b IAM apply readiness.
@@ -119,7 +119,7 @@ Add these stop conditions verbatim in meaning: missing/unprotected environment v
 Run:
 
 ```bash
-rg -n "AWS_ROLE_TO_ASSUME|AWS_REGION|TF_BACKEND_BUCKET|TF_BACKEND_LOCK_TABLE|TF_STATE_KEY_PREFIX|GITHUB_OIDC_PROVIDER_ARN|BEDROCK_ALLOWED_MODEL_ARNS|iam:PassRole|InvokeModel|P8c" docs/p8b1-bedrock-iam-apply-readiness.md
+rg -n "AWS_ROLE_TO_ASSUME|AWS_REGION|TF_BACKEND_BUCKET|TF_BACKEND_LOCK_TABLE|TF_STATE_KEY_PREFIX|AWS_OIDC_PROVIDER_ARN|BEDROCK_ALLOWED_MODEL_ARNS|iam:PassRole|InvokeModel|P8c" docs/p8b1-bedrock-iam-apply-readiness.md
 ```
 
 Expected: every required environment value appears; the execution role explicitly excludes `iam:PassRole` and Bedrock invoke actions; P8c appears only as the later smoke test.

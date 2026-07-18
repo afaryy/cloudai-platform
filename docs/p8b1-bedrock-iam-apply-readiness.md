@@ -29,7 +29,7 @@ Configure these only in the protected `aws-sandbox` GitHub environment:
 | `TF_BACKEND_BUCKET` | Protected variable | Never commit the real bucket name. |
 | `TF_BACKEND_LOCK_TABLE` | Protected variable | Never commit the real table name. |
 | `TF_STATE_KEY_PREFIX` | Protected variable | Keep the stack prefix generic. |
-| `GITHUB_OIDC_PROVIDER_ARN` | Secret or protected variable | Never commit the provider ARN. |
+| `AWS_OIDC_PROVIDER_ARN` | Protected variable | Existing AWS IAM OIDC provider ARN. GitHub forbids configuration names beginning with `GITHUB_`; the workflow maps this value to Terraform's `TF_VAR_github_oidc_provider_arn`. Never commit the provider ARN. |
 | `BEDROCK_ALLOWED_MODEL_ARNS` | Secret or protected variable | Store a JSON list of approved model resources only. |
 
 `TF_STATE_KEY` is derived by the workflow as `${TF_STATE_KEY_PREFIX}/bedrock-sandbox/terraform.tfstate`; it is not a separately maintained environment value. `BEDROCK_MODEL_ID` is deferred to P8c and is not an input to the P8b IAM apply gate.
