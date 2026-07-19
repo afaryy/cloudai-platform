@@ -110,6 +110,13 @@ data "aws_iam_policy_document" "bedrock_guardrail_smoke_test" {
       values   = [local.guardrail_identifier_with_version]
     }
   }
+
+  statement {
+    sid       = "ApplySandboxGuardrailOnly"
+    effect    = "Allow"
+    actions   = ["bedrock:ApplyGuardrail"]
+    resources = [aws_bedrock_guardrail.sandbox.guardrail_arn]
+  }
 }
 
 resource "aws_iam_role" "github_actions_bedrock_guardrail" {

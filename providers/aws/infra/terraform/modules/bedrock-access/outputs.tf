@@ -21,9 +21,11 @@ output "github_actions_bedrock_guardrail_role_name" {
 output "bedrock_guardrail_id" {
   description = "Identifier for the Terraform-managed synthetic sandbox Guardrail."
   value       = aws_bedrock_guardrail.sandbox.guardrail_id
+  sensitive   = true
 }
 
 output "bedrock_guardrail_version" {
   description = "Pinned version for the guarded Converse smoke test."
   value       = aws_bedrock_guardrail_version.sandbox.version
+  sensitive   = true
 }
