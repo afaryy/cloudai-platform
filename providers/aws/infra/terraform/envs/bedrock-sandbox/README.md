@@ -44,7 +44,7 @@ The separate `guardrail-smoke-test` workflow mode requires:
 - `BEDROCK_MODEL_ID` and the existing model-resource boundary;
 - the exact `I_UNDERSTAND_ONE_SYNTHETIC_GUARDED_BEDROCK_CALL` confirmation.
 
-The guarded role permits only `bedrock:InvokeModel` against the approved model resources when the request carries the Terraform-managed Guardrail identifier. The workflow makes exactly one non-streaming synthetic `Converse` request with tracing disabled, uses one AWS attempt, removes temporary files, and reports only a sanitized pass or failure category. It does not print Guardrail IDs, versions, prompts, outputs, traces, or provider error text.
+The guarded role permits `bedrock:InvokeModel` only against the approved model resources when the request carries the Terraform-managed Guardrail identifier/version, plus `bedrock:ApplyGuardrail` only for that Terraform-managed Guardrail. It does not permit a standalone Guardrail evaluation workflow. The workflow masks the Guardrail ID and version before exposing them to later steps, makes exactly one non-streaming synthetic `Converse` request with tracing disabled, uses one AWS attempt, removes temporary files, and reports only a sanitized pass or failure category. It does not print Guardrail IDs, versions, prompts, outputs, traces, or provider error text.
 
 Do not commit account IDs, role ARNs, model entitlement screenshots, backend bucket names, lock-table names, tfvars, tfstate, tfplan files, credentials, raw prompts, or raw responses.
 

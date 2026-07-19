@@ -173,12 +173,18 @@ jobs:
         run: |
           guardrail_id="$(terraform output -raw bedrock_guardrail_id)"
           guardrail_version="$(terraform output -raw bedrock_guardrail_version)"
+          if [ -z "$guardrail_id" ]; then
+            echo "::error::Terraform output did not provide a Guardrail identifier."
+            exit 1
+          fi
           case "$guardrail_version" in
             ''|*[!0-9]*)
               echo "::error::Terraform output did not provide a numeric Guardrail version."
               exit 1
               ;;
           esac
+          echo "::add-mask::$guardrail_id"
+          echo "::add-mask::$guardrail_version"
           printf 'BEDROCK_GUARDRAIL_ID=%s\n' "$guardrail_id" >> "$GITHUB_ENV"
           printf 'BEDROCK_GUARDRAIL_VERSION=%s\n' "$guardrail_version" >> "$GITHUB_ENV"
 

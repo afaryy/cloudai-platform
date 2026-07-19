@@ -107,9 +107,16 @@ jobs:
           grep -q 'trace:"disabled"' "$workflow"
           grep -q 'guardrail-attached-passed' "$workflow"
           test "$(grep -c -- '--guardrail-config' "$workflow")" -eq 1
+          grep -q '::add-mask::$guardrail_id' "$workflow"
+          grep -q '::add-mask::$guardrail_version' "$workflow"
           module=providers/aws/infra/terraform/modules/bedrock-access/main.tf
           grep -q 'guardrail_identifier_with_version' "$module"
           grep -q 'bedrock:GuardrailIdentifier' "$module"
+          grep -q 'bedrock:ApplyGuardrail' "$module"
+          grep -q 'resources = \[aws_bedrock_guardrail.sandbox.guardrail_arn\]' "$module"
+          outputs=providers/aws/infra/terraform/modules/bedrock-access/outputs.tf
+          grep -A3 'output "bedrock_guardrail_id"' "$outputs" | grep -Eq 'sensitive[[:space:]]*=[[:space:]]*true'
+          grep -A3 'output "bedrock_guardrail_version"' "$outputs" | grep -Eq 'sensitive[[:space:]]*=[[:space:]]*true'
 
   bedrock_gateway_adapter_workflow_boundary:
     name: Bedrock gateway adapter workflow boundary
