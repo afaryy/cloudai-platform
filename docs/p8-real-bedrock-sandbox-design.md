@@ -61,6 +61,7 @@ The first implementation should not include:
 | P8c: Synthetic Bedrock smoke test | Run one tiny prompt from GitHub Actions using OIDC and synthetic content only. | Sanitized success/failure evidence, token/cost metadata where available. |
 | P8d: Gateway adapter boundary | Connect the real Bedrock client shape to the existing GenAI Gateway interface without making live calls the default. | Adapter design, mock default preserved, tests. |
 | P8e: Bedrock Guardrails mapping | Map existing Guardrails as a Service contracts to Bedrock Guardrails concepts. | Static schema, synthetic mapping example, contract test, and documentation; no provider resource or call. |
+| P8f: Guarded Converse smoke boundary | Create one small Guardrail/version and prove one synthetic `Converse` request attaches it through a separate OIDC role. | Terraform/IAM/workflow tests, then separately reviewed manual apply and guarded-smoke evidence. |
 
 ## Target Architecture
 
@@ -206,11 +207,18 @@ Guardrails as a Service contract
   -> metadata-only contract evidence
 ```
 
-P8e does not inspect real sensitive content, configure a provider guardrail, or
-claim production-grade safety classification. A later real Guardrails slice
-requires a separate reviewed design for approved policy content, provider
-support, IAM, evaluation data, data handling, retention, cost controls,
-operational ownership, and sanitized evidence.
+P8e does not inspect real sensitive content or claim production-grade safety
+classification. P8f is the deliberately narrow next step: a Terraform-managed
+Guardrail with Prompt Attack filtering, one standard sensitive-information
+entity, an explicit version, and a separate role that can invoke approved
+models only when it supplies that Guardrail identifier. The one guarded
+synthetic `Converse` call uses trace-disabled configuration and sanitized
+evidence. It proves attachment and the access boundary—not filter quality,
+real PII detection, jailbreak resistance, or production policy suitability.
+
+P8f still requires a reviewed provider-compatibility check, Terraform apply,
+protected-environment role configuration, and explicit manual dispatch before
+any live Guardrail resource or guarded call occurs.
 
 ## AgentCore Boundary
 
@@ -220,12 +228,13 @@ AgentCore introduces runtime concerns such as agent identity, tools, memory, gat
 
 ## Completed Progression and Next Boundary
 
-P8a through P8e now establish a governed model-access path: readiness,
+P8a through P8f now establish a governed model-access path: readiness,
 least-privilege IAM, confirmed apply, a single synthetic smoke test, an opt-in
-adapter, and a static Guardrails concept map. The next provider extension must
-be selected deliberately: a real Guardrails resource remains separate from an
-AgentCore exploration, which adds runtime identity, tools, memory, gateway,
-observability, evaluation, and lifecycle scope.
+adapter, a static Guardrails concept map, and a separately governed Guardrail
+attachment boundary. The next provider extension must be selected deliberately:
+Guardrail quality evaluation remains separate from an AgentCore exploration,
+which adds runtime identity, tools, memory, gateway, observability, evaluation,
+and lifecycle scope.
 
 ## Interview / CTO Story
 

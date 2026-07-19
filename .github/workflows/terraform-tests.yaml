@@ -98,6 +98,18 @@ jobs:
           ! grep -q 'terraform destroy' "$workflow"
           ! grep -q 'bedrock:InvokeModel' "$workflow"
           ! grep -q 'aws bedrock ' "$workflow"
+          grep -q -- '- guardrail-smoke-test' "$workflow"
+          grep -q 'I_UNDERSTAND_ONE_SYNTHETIC_GUARDED_BEDROCK_CALL' "$workflow"
+          grep -q 'AWS_BEDROCK_GUARDRAIL_SMOKE_ROLE_TO_ASSUME' "$workflow"
+          grep -q 'terraform output -raw bedrock_guardrail_id' "$workflow"
+          grep -q 'terraform output -raw bedrock_guardrail_version' "$workflow"
+          grep -q -- '--guardrail-config' "$workflow"
+          grep -q 'trace:"disabled"' "$workflow"
+          grep -q 'guardrail-attached-passed' "$workflow"
+          test "$(grep -c -- '--guardrail-config' "$workflow")" -eq 1
+          module=providers/aws/infra/terraform/modules/bedrock-access/main.tf
+          grep -q 'guardrail_identifier_with_version' "$module"
+          grep -q 'bedrock:GuardrailIdentifier' "$module"
 
   bedrock_gateway_adapter_workflow_boundary:
     name: Bedrock gateway adapter workflow boundary

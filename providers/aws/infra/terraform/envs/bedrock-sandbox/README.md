@@ -11,7 +11,7 @@ Use this stack only after the P8a readiness checklist is complete:
 - `docs/p8a-bedrock-access-readiness.md`
 - `docs/templates/p8a-bedrock-smoke-test-evidence.md`
 
-The first safe actions are Terraform validation and plan. P8b.2 adds a manually confirmed apply mode after the [P8b.1 IAM apply-readiness gate](../../../../../docs/p8b1-bedrock-iam-apply-readiness.md); it still performs no Bedrock invocation or destroy.
+The first safe actions are Terraform validation and plan. P8b.2 adds a manually confirmed apply mode after the [P8b.1 IAM apply-readiness gate](../../../../../docs/p8b1-bedrock-iam-apply-readiness.md). P8c adds the separate model-only smoke mode. P8f adds a separate guarded smoke mode, but it is not a default CI action and requires a reviewed apply before it can read the Guardrail outputs.
 
 ## Required Private Inputs
 
@@ -32,6 +32,19 @@ For GitHub Actions, store the model boundary as a JSON list in `BEDROCK_ALLOWED_
 ```
 
 Use the real approved value only in GitHub environment variables or local ignored files.
+
+## P8f Guarded Smoke Boundary
+
+P8f creates a small Terraform-managed Bedrock Guardrail and an explicit version. Its only configured controls are Prompt Attack filtering and one standard sensitive-information entity. It is a bounded attachment and IAM-enforcement exercise, not a test of policy quality or real sensitive-content detection.
+
+The separate `guardrail-smoke-test` workflow mode requires:
+
+- the normal Terraform execution role through the protected `aws-sandbox` environment, so it can read the Guardrail ID and version from the existing remote state;
+- `AWS_BEDROCK_GUARDRAIL_SMOKE_ROLE_TO_ASSUME` in the same protected environment, set after the reviewed Terraform apply creates the separate role;
+- `BEDROCK_MODEL_ID` and the existing model-resource boundary;
+- the exact `I_UNDERSTAND_ONE_SYNTHETIC_GUARDED_BEDROCK_CALL` confirmation.
+
+The guarded role permits only `bedrock:InvokeModel` against the approved model resources when the request carries the Terraform-managed Guardrail identifier. The workflow makes exactly one non-streaming synthetic `Converse` request with tracing disabled, uses one AWS attempt, removes temporary files, and reports only a sanitized pass or failure category. It does not print Guardrail IDs, versions, prompts, outputs, traces, or provider error text.
 
 Do not commit account IDs, role ARNs, model entitlement screenshots, backend bucket names, lock-table names, tfvars, tfstate, tfplan files, credentials, raw prompts, or raw responses.
 

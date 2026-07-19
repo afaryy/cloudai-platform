@@ -39,4 +39,14 @@ run "bedrock_access_boundary" {
     condition     = output.allowed_model_resource_count == 1
     error_message = "The Bedrock invoke boundary should include exactly one model resource in this test."
   }
+
+  assert {
+    condition     = aws_bedrock_guardrail_version.sandbox.description == "P8f synthetic guarded Converse smoke-test version."
+    error_message = "The Bedrock sandbox must define an explicit Guardrail version for guarded inference."
+  }
+
+  assert {
+    condition     = aws_iam_role.github_actions_bedrock_guardrail.name == "cloudai-platform-bedrock-sandbox-bedrock-guardrail-smoke-test"
+    error_message = "The guarded smoke path must use a separate role from the model-only smoke path."
+  }
 }
