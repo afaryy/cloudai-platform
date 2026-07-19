@@ -28,6 +28,37 @@ test("GaaS fixtures document allow, redact, deny, and approval-required verdicts
   assert.ok(requestSchema.properties.syntheticSignals.oneOf, "schema must keep none separate from risk signals");
 });
 
+test("P8e documents a static Bedrock Guardrails concept map without a live provider control", async () => {
+  const mappingSchema = await readJson("bedrock-guardrails-mapping.schema.json", SCHEMA_DIR);
+  const mapping = await readJson("bedrock-guardrails-mapping.mock.json", EXAMPLE_DIR);
+
+  assertMatchesSchema(mapping, mappingSchema);
+  assert.deepEqual(mapping.mappings.map((entry: any) => entry.verdict), [
+    "deny",
+    "redact",
+    "approval-required",
+    "allow"
+  ]);
+  assert.deepEqual(mapping.scope, {
+    conceptual: true,
+    metadataOnly: true,
+    liveProviderConfiguration: false,
+    modelInvocation: false,
+    rawContentHandling: false,
+    providerEnforcementClaim: false
+  });
+  assert.deepEqual(mapping.deferredConcepts.map((entry: any) => entry.concept), [
+    "denied-topics",
+    "word-filters",
+    "contextual-grounding-checks",
+    "provider-traces"
+  ]);
+  assert.equal(
+    mapping.mappings.find((entry: any) => entry.verdict === "approval-required").bedrockConcept,
+    "external-human-approval-control"
+  );
+});
+
 async function readJson(fileName: string, directory: string): Promise<any> {
   return JSON.parse(await readFile(resolve(directory, fileName), "utf8"));
 }

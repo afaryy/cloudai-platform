@@ -1,0 +1,63 @@
+{
+  "mappingVersion": "p8e-1",
+  "scope": {
+    "conceptual": true,
+    "metadataOnly": true,
+    "liveProviderConfiguration": false,
+    "modelInvocation": false,
+    "rawContentHandling": false,
+    "providerEnforcementClaim": false
+  },
+  "mappings": [
+    {
+      "syntheticSignals": ["prompt-injection", "jailbreak-attempt"],
+      "verdict": "deny",
+      "reasonCode": "synthetic_prompt_injection_signal",
+      "bedrockConcept": "content-filter-prompt-attack",
+      "futurePlacement": "pre-model-input"
+    },
+    {
+      "syntheticSignals": ["pii-detected"],
+      "verdict": "redact",
+      "reasonCode": "synthetic_pii_signal",
+      "bedrockConcept": "sensitive-information-filter",
+      "futurePlacement": "input-or-output"
+    },
+    {
+      "syntheticSignals": ["high-risk-action"],
+      "verdict": "approval-required",
+      "reasonCode": "synthetic_high_risk_action_signal",
+      "bedrockConcept": "external-human-approval-control",
+      "futurePlacement": "pre-tool-action"
+    },
+    {
+      "syntheticSignals": ["none"],
+      "verdict": "allow",
+      "reasonCode": "no_synthetic_risk_signal",
+      "bedrockConcept": "no-intervention-inferred",
+      "futurePlacement": "not-applicable"
+    }
+  ],
+  "deferredConcepts": [
+    {
+      "concept": "denied-topics",
+      "reason": "No application-specific topic policy is defined in the metadata-only mock contract."
+    },
+    {
+      "concept": "word-filters",
+      "reason": "No approved blocked-word list exists in the metadata-only mock contract."
+    },
+    {
+      "concept": "contextual-grounding-checks",
+      "reason": "No source, query, response, or retrieval runtime exists for grounding evaluation."
+    },
+    {
+      "concept": "provider-traces",
+      "reason": "P8e performs no provider call and stores no provider intervention evidence."
+    }
+  ],
+  "evidenceBoundary": {
+    "permitted": ["synthetic request correlation metadata", "local policy profile", "deterministic local reason code", "local trace correlation identifier", "mapping version", "contract-test result"],
+    "prohibited": ["raw prompts", "raw responses", "documents", "tool payloads", "provider traces", "provider identifiers", "account identifiers", "ARNs", "model identifiers", "provider-enforcement claims"]
+  }
+}

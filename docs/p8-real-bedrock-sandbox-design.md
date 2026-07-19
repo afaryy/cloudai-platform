@@ -60,7 +60,7 @@ The first implementation should not include:
 | P8b.2: Confirmed IAM apply | Add an exact confirmation-gated, environment-approved apply mode to the existing Bedrock Terraform workflow. | Sanitized IAM apply evidence; no model invocation or destroy mode. |
 | P8c: Synthetic Bedrock smoke test | Run one tiny prompt from GitHub Actions using OIDC and synthetic content only. | Sanitized success/failure evidence, token/cost metadata where available. |
 | P8d: Gateway adapter boundary | Connect the real Bedrock client shape to the existing GenAI Gateway interface without making live calls the default. | Adapter design, mock default preserved, tests. |
-| P8e: Bedrock Guardrails mapping | Map existing Guardrails as a Service contracts to Bedrock Guardrails concepts. | Design or tiny sandbox only after P8a-P8d are stable. |
+| P8e: Bedrock Guardrails mapping | Map existing Guardrails as a Service contracts to Bedrock Guardrails concepts. | Static schema, synthetic mapping example, contract test, and documentation; no provider resource or call. |
 
 ## Target Architecture
 
@@ -195,18 +195,22 @@ P8 does not replace the mock controls. It extends them:
 
 ## Bedrock Guardrails Boundary
 
-Bedrock Guardrails should come after the basic Bedrock access boundary is proven.
-
-The first guardrails slice should map concepts rather than overclaim real safety:
+P8e completes the first guardrails slice as a concept map after the basic
+Bedrock access boundary was proven. It deliberately maps concepts rather than
+overclaiming real safety:
 
 ```text
 Guardrails as a Service contract
   -> allow / redact / deny / approval-required verdicts
-  -> Bedrock Guardrails configuration concept
-  -> synthetic smoke evidence
+  -> static Bedrock Guardrails concept map
+  -> metadata-only contract evidence
 ```
 
-It should not inspect real sensitive content or claim production-grade safety classification.
+P8e does not inspect real sensitive content, configure a provider guardrail, or
+claim production-grade safety classification. A later real Guardrails slice
+requires a separate reviewed design for approved policy content, provider
+support, IAM, evaluation data, data handling, retention, cost controls,
+operational ownership, and sanitized evidence.
 
 ## AgentCore Boundary
 
@@ -214,23 +218,14 @@ Bedrock AgentCore should remain a later AgentOps / runtime-governance exploratio
 
 AgentCore introduces runtime concerns such as agent identity, tools, memory, gateway, observability, evaluation, and operation lifecycle. Those belong after the Bedrock model-access slice is stable and after the project has a clear reason to run a real agent POC.
 
-## Recommended First Implementation
+## Completed Progression and Next Boundary
 
-The first implementation PR after this design should be P8a only:
-
-```text
-P8a Bedrock access readiness
-  -> add a runbook/checklist
-  -> define required GitHub environment values
-  -> define least-privilege IAM intent
-  -> define smoke-test evidence template
-  -> no Terraform apply
-  -> no Bedrock invocation
-```
-
-Only after that should the project add Terraform and a manual smoke-test workflow.
-
-The P8a readiness runbook is `docs/p8a-bedrock-access-readiness.md`. Its public-safe evidence template is `docs/templates/p8a-bedrock-smoke-test-evidence.md`.
+P8a through P8e now establish a governed model-access path: readiness,
+least-privilege IAM, confirmed apply, a single synthetic smoke test, an opt-in
+adapter, and a static Guardrails concept map. The next provider extension must
+be selected deliberately: a real Guardrails resource remains separate from an
+AgentCore exploration, which adds runtime identity, tools, memory, gateway,
+observability, evaluation, and lifecycle scope.
 
 ## Interview / CTO Story
 
