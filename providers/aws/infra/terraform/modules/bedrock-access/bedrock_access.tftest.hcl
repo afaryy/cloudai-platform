@@ -50,3 +50,22 @@ run "bedrock_access_boundary" {
     error_message = "The guarded smoke path must use a separate role from the model-only smoke path."
   }
 }
+
+run "rejects_prompt_attack_response_strength" {
+  command = plan
+
+  variables {
+    name_prefix                             = "cloudai-platform-bedrock-sandbox"
+    github_oidc_provider_arn                = "arn:aws:iam::111122223333:oidc-provider/token.actions.githubusercontent.com"
+    github_subject                          = "repo:example/cloudai-platform:environment:aws-sandbox"
+    allowed_model_arns                      = ["arn:aws:bedrock:ap-southeast-2::foundation-model/anthropic.claude-3-haiku-20240307-v1:0"]
+    guardrail_prompt_attack_output_strength = "HIGH"
+    tags = {
+      Project     = "cloudai-platform"
+      Environment = "bedrock-sandbox"
+      DataScope   = "synthetic-only"
+    }
+  }
+
+  expect_failures = [var.guardrail_prompt_attack_output_strength]
+}

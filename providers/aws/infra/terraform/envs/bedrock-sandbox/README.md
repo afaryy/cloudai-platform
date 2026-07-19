@@ -35,7 +35,7 @@ Use the real approved value only in GitHub environment variables or local ignore
 
 ## P8f Guarded Smoke Boundary
 
-P8f creates a small Terraform-managed Bedrock Guardrail and an explicit version. Its only configured controls are Prompt Attack filtering and one standard sensitive-information entity. It is a bounded attachment and IAM-enforcement exercise, not a test of policy quality or real sensitive-content detection.
+P8f creates a small Terraform-managed Bedrock Guardrail and an explicit version. Its only configured controls are Prompt Attack filtering (high input strength and the Bedrock-required `NONE` response strength) and one standard sensitive-information entity. It is a bounded attachment and IAM-enforcement exercise, not a test of policy quality or real sensitive-content detection.
 
 The separate `guardrail-smoke-test` workflow mode requires:
 
