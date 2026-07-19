@@ -4,6 +4,7 @@ import type { AddressInfo } from "node:net";
 import { createConfiguredApiServer, createMockApiServer } from "../src/server.js";
 import type { RequestLogEvent, RequestLogger } from "../src/lib/requestLogger.js";
 import type { BedrockClient } from "../src/clients/bedrockClient.js";
+import { createBedrockPolicyProfile } from "../src/lib/policyProfile.js";
 
 test("POST /chat returns a mock response with metadata", async () => {
   const logger = createCapturingLogger();
@@ -146,6 +147,33 @@ test("request log omits prompt and response in Bedrock mode", async () => {
   }
 });
 
+test("Bedrock mode accepts only its configured model before calling the adapter", async () => {
+  const logger = createCapturingLogger();
+  const client = new FakeBedrockClient();
+  const server = createMockApiServer(
+    client,
+    logger,
+    "bedrock",
+    createBedrockPolicyProfile("configured-profile")
+  );
+  await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
+
+  try {
+    const port = getServerPort(server.address());
+    const response = await fetch(`http://127.0.0.1:${port}/chat`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ prompt: "synthetic-marker", modelName: "configured-profile" })
+    });
+
+    assert.equal(response.status, 200);
+    assert.equal(client.calls, 1);
+    assert.equal(client.requests[0].modelName, "configured-profile");
+  } finally {
+    await new Promise<void>((resolve, reject) => server.close((error: Error | undefined) => error ? reject(error) : resolve()));
+  }
+});
+
 function getServerPort(address: string | AddressInfo | null): number {
   assert.ok(address && typeof address === "object");
   return address.port;
@@ -162,7 +190,12 @@ function createCapturingLogger(): RequestLogger & { events: RequestLogEvent[] } 
 }
 
 class FakeBedrockClient implements BedrockClient {
-  async chat() {
+  calls = 0;
+  requests: Array<{ prompt: string; modelName?: string }> = [];
+
+  async chat(request: { prompt: string; modelName?: string }) {
+    this.calls += 1;
+    this.requests.push(request);
     return {
       response: "synthetic-response",
       metadata: {
