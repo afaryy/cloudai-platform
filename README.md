@@ -175,11 +175,14 @@ Current scope:
 - **P4g Argo CD GitOps Workflow:** manual GitHub Actions workflow that exercised pinned Argo CD bootstrap, private-repository access, exact-revision Application sync, health verification, status, ordered cleanup, and post-exercise destroy on the EKS sandbox.
 - **P8a Bedrock Access Readiness:** docs-only go/no-go checklist for model access, manual approval, budget, IAM intent, synthetic prompt boundaries, and sanitized evidence before Terraform or invocation.
 - **P8b Bedrock Terraform Plan Boundary:** plan-only Terraform stack for a narrow Bedrock invoke IAM role and policy, using GitHub Actions OIDC and a separate remote state key.
+- **P8c Synthetic Bedrock Smoke Test:** a manually approved, synthetic-only Bedrock invocation with sanitized workflow evidence.
+- **P8d Opt-In Bedrock Gateway Adapter:** a real Bedrock client boundary and manual adapter smoke workflow while mock mode remains the application default.
+- **P8e Bedrock Guardrails Mapping:** a static, tested map from mock Guardrails as a Service outcomes to Bedrock Guardrails concepts; it does not configure or evaluate a provider guardrail.
 
 Future scope:
 
-- P8c/P8d Real Bedrock Sandbox follow-up for optional Terraform apply and one governed synthetic model-access smoke test.
-- Optional Bedrock Guardrails or AgentCore-aligned extension after the Bedrock access boundary is clear.
+- A separately designed real Bedrock Guardrails extension with approved policy content, evaluation, data handling, operational ownership, and sanitized evidence.
+- An optional AgentCore-aligned extension after a distinct runtime-governance use case is defined.
 
 ## Track C: AI-Assisted DevSecOps Pattern
 

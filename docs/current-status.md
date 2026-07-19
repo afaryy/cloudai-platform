@@ -71,6 +71,9 @@ The current control-plane track is **P6 AI Traffic Governance / AgentOps**. P6 c
 | P8 Real Bedrock Sandbox design | Design complete | `docs/p8-real-bedrock-sandbox-design.md` |
 | P8a Bedrock access readiness | Complete | `docs/p8a-bedrock-access-readiness.md` and `docs/templates/p8a-bedrock-smoke-test-evidence.md` |
 | P8b Bedrock Terraform plan boundary | Plan-only Terraform boundary complete | `providers/aws/infra/terraform/modules/bedrock-access/`, `providers/aws/infra/terraform/envs/bedrock-sandbox/`, and `.github/workflows/terraform-bedrock-sandbox.yml` |
+| P8c synthetic Bedrock smoke test | Live synthetic smoke test validated | `.github/workflows/terraform-bedrock-sandbox.yml` and sanitized workflow evidence |
+| P8d opt-in Bedrock gateway adapter | Live adapter smoke validated; mock remains default | `providers/aws/app/api/src/clients/awsBedrockClient.ts`, `providers/aws/app/api/src/scripts/bedrockAdapterSmoke.ts`, and `.github/workflows/bedrock-gateway-adapter.yml` |
+| P8e Bedrock Guardrails mapping | Complete static documentation-and-contract mapping | `docs/guardrails-as-a-service.md`, `shared/schemas/guardrails-as-a-service/bedrock-guardrails-mapping.schema.json`, `shared/examples/guardrails-as-a-service/bedrock-guardrails-mapping.mock.json`, and `providers/aws/app/api/tests/guardrailsContracts.test.ts` |
 | P5a AI-assisted DevSecOps boundary | Complete | `docs/ai-assisted-devsecops-pattern.md` and `.github/workflows/ai-assisted-devsecops.yml` |
 | P5b AI-assisted review evidence | Complete | `docs/ai-assisted-review-evidence.md`, `shared/schemas/ai-assisted-devsecops/`, and `shared/examples/ai-assisted-devsecops/` |
 | P6d control-plane evidence map | Complete | `docs/control-plane-evidence-map.md`, `shared/schemas/control-plane-evidence/`, and `shared/examples/control-plane-evidence/` |
@@ -121,7 +124,7 @@ Recommended next choices:
 - **P6 AI Traffic Governance evidence expansion:** add more synthetic scenario variants only if they explain a new governance outcome that is not already covered by P6e/P6f.
 - **P4b future evidence refresh:** capture only sanitized apply/destroy observations when needed; do not commit account identifiers, live endpoints, kubeconfig, raw plans, state, tfvars, backend names, or screenshots with private details.
 - **P4b pre-apply readiness check:** use `docs/p4b-eks-sandbox-operator-runbook.md` as the single go/no-go runbook before any real personal EKS sandbox apply.
-- **P8c optional Terraform apply for Bedrock IAM boundary:** use the P8a readiness checklist, P8b plan output, manual approval, budget controls, and evidence template before applying IAM resources. Do not invoke a model until a separate P8d smoke-test slice is reviewed.
+- **P8 future provider boundary:** keep the validated IAM, synthetic smoke-test, and opt-in adapter controls stable. A real Guardrails resource or AgentCore exploration needs a separate reviewed design and must not reuse the P8e static map as proof of provider enforcement.
 - **P7 AI Factory learning note:** use `docs/ai-factory-learning-note.md` to explain why cloud architecture is evolving into AI-ready platform architecture rather than disappearing.
 
 The repository should not perform a real cloud deployment by default. Any personal sandbox work must keep account identifiers, state, kubeconfig, plan files, tfvars, credentials, and live endpoint details out of git.
