@@ -9,6 +9,36 @@ variable "github_actions_role_name" {
   default     = "bedrock-smoke-test"
 }
 
+variable "github_actions_guardrail_role_name" {
+  description = "IAM role name for the GitHub Actions Bedrock Guardrail smoke test."
+  type        = string
+  default     = "bedrock-guardrail-smoke-test"
+}
+
+variable "guardrail_prompt_attack_input_strength" {
+  description = "Prompt Attack input filter strength for the synthetic sandbox Guardrail."
+  type        = string
+  default     = "HIGH"
+}
+
+variable "guardrail_prompt_attack_output_strength" {
+  description = "Prompt Attack output filter strength for the synthetic sandbox Guardrail."
+  type        = string
+  default     = "HIGH"
+}
+
+variable "guardrail_pii_entity_type" {
+  description = "One standard PII entity type for the synthetic sandbox Guardrail."
+  type        = string
+  default     = "EMAIL"
+}
+
+variable "guardrail_pii_action" {
+  description = "Action for the one synthetic sandbox PII entity policy."
+  type        = string
+  default     = "BLOCK"
+}
+
 variable "allowed_model_arns" {
   description = "Bedrock model ARNs allowed for the future synthetic smoke test. Use explicit model ARNs where AWS supports model-level scoping."
   type        = list(string)

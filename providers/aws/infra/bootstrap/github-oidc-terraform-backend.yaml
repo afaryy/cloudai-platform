@@ -186,6 +186,24 @@ Resources:
                 Resource:
                   - !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cloudai-platform-bedrock-sandbox-*"
                   - !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:policy/cloudai-platform-bedrock-sandbox-*"
+              - Sid: BedrockSandboxCreateGuardrail
+                Effect: Allow
+                Action:
+                  - bedrock:CreateGuardrail
+                Resource: "*"
+              - Sid: BedrockSandboxGuardrailLifecycle
+                Effect: Allow
+                Action:
+                  - bedrock:CreateGuardrailVersion
+                  - bedrock:DeleteGuardrail
+                  - bedrock:DeleteGuardrailVersion
+                  - bedrock:GetGuardrail
+                  - bedrock:GetGuardrailVersion
+                  - bedrock:ListTagsForResource
+                  - bedrock:TagResource
+                  - bedrock:UntagResource
+                  - bedrock:UpdateGuardrail
+                Resource: !Sub "arn:${AWS::Partition}:bedrock:${AWS::Region}:${AWS::AccountId}:guardrail/*"
               - Sid: EksSandboxPassRole
                 Effect: Allow
                 Action:

@@ -27,4 +27,9 @@ run "bedrock_sandbox_stack" {
     condition     = output.allowed_model_resource_count == 1
     error_message = "The Bedrock sandbox stack should preserve an explicit model resource boundary."
   }
+
+  assert {
+    condition     = output.github_actions_bedrock_guardrail_role_name == "cloudai-platform-bedrock-sandbox-bedrock-guardrail-smoke-test"
+    error_message = "The Bedrock sandbox stack must expose the separate Guardrail smoke role."
+  }
 }
