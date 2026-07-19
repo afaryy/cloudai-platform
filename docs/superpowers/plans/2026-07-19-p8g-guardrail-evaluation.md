@@ -223,11 +223,12 @@ Run:
 
 ```bash
 git diff --check main...HEAD
-rg -n 'arn:aws:|[0-9]{12}|BEDROCK_GUARDRAIL_ID=|BEDROCK_GUARDRAIL_VERSION=' \
-  providers/aws/infra/terraform/envs/bedrock-sandbox/README.md docs/current-status.md
+! git diff --unified=0 main -- \
+  providers/aws/infra/terraform/envs/bedrock-sandbox/README.md docs/current-status.md | \
+  rg '^\+.*(arn:aws:|[0-9]{12}|BEDROCK_GUARDRAIL_ID=|BEDROCK_GUARDRAIL_VERSION=)'
 ```
 
-Expected: `git diff --check` exits `0`; the `rg` command returns no sensitive live values.
+Expected: `git diff --check` exits `0`; no changed line contains a sensitive live value.
 
 - [ ] **Step 4: Commit documentation**
 

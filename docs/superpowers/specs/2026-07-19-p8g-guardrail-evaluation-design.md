@@ -139,4 +139,3 @@ Static tests must assert:
 The normal repository checks and targeted workflow-contract tests must remain
 green. A live evaluation is manually dispatched only after implementation is
 merged and the user explicitly chooses to run it.
-

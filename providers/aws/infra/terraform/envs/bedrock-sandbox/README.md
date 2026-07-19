@@ -11,7 +11,7 @@ Use this stack only after the P8a readiness checklist is complete:
 - `docs/p8a-bedrock-access-readiness.md`
 - `docs/templates/p8a-bedrock-smoke-test-evidence.md`
 
-The first safe actions are Terraform validation and plan. P8b.2 adds a manually confirmed apply mode after the [P8b.1 IAM apply-readiness gate](../../../../../docs/p8b1-bedrock-iam-apply-readiness.md). P8c adds the separate model-only smoke mode. P8f adds a separate guarded smoke mode, but it is not a default CI action and requires a reviewed apply before it can read the Guardrail outputs.
+The first safe actions are Terraform validation and plan. P8b.2 adds a manually confirmed apply mode after the [P8b.1 IAM apply-readiness gate](../../../../../docs/p8b1-bedrock-iam-apply-readiness.md). P8c adds the separate model-only smoke mode. P8f adds a separate guarded smoke mode, and P8g adds a direct Guardrail-evaluation mode. Neither is a default CI action; both require a reviewed apply before they can read the Guardrail outputs.
 
 ## Required Private Inputs
 
@@ -44,7 +44,26 @@ The separate `guardrail-smoke-test` workflow mode requires:
 - `BEDROCK_MODEL_ID` and the existing model-resource boundary;
 - the exact `I_UNDERSTAND_ONE_SYNTHETIC_GUARDED_BEDROCK_CALL` confirmation.
 
-The guarded role permits `bedrock:InvokeModel` only against the approved model resources when the request carries the Terraform-managed Guardrail identifier/version, plus `bedrock:ApplyGuardrail` only for that Terraform-managed Guardrail. It does not permit a standalone Guardrail evaluation workflow. The workflow masks the Guardrail ID and version before exposing them to later steps, makes exactly one non-streaming synthetic `Converse` request with tracing disabled, uses one AWS attempt, removes temporary files, and reports only a sanitized pass or failure category. It does not print Guardrail IDs, versions, prompts, outputs, traces, or provider error text.
+The guarded role permits `bedrock:InvokeModel` only against the approved model resources when the request carries the Terraform-managed Guardrail identifier/version, plus `bedrock:ApplyGuardrail` only for that Terraform-managed Guardrail. The workflow masks the Guardrail ID and version before exposing them to later steps, makes exactly one non-streaming synthetic `Converse` request with tracing disabled, uses one AWS attempt, removes temporary files, and reports only a sanitized pass or failure category. It does not print Guardrail IDs, versions, prompts, outputs, traces, or provider error text.
+
+## P8g Direct Guardrail Evaluation
+
+P8g is a separate manual `ApplyGuardrail` evaluation. It does not invoke a
+model and does not replace the P8f guarded `Converse` attachment evidence. It
+reuses the protected `aws-sandbox` environment, the normal Terraform role for
+remote-state lookup, the separate Guardrail role, and Terraform-managed
+Guardrail outputs. It requires no new GitHub environment variables.
+
+Dispatch `terraform-bedrock-sandbox` with `mode=guardrail-evaluation` and the
+exact confirmation `I_UNDERSTAND_THREE_SYNTHETIC_GUARDRAIL_EVALUATIONS`. The
+workflow evaluates exactly three synthetic categories: safe, PII-shaped, and
+prompt-attack-shaped. It emits only opaque category labels, expected/actual
+allow-or-block verdicts, an aggregate pass marker, or a sanitized failure
+category.
+
+A passing run proves only that this configured Guardrail made the expected
+decisions for those three synthetic checks at that time. It is not evidence of
+PII-detection accuracy, broad safety coverage, or production certification.
 
 Do not commit account IDs, role ARNs, model entitlement screenshots, backend bucket names, lock-table names, tfvars, tfstate, tfplan files, credentials, raw prompts, or raw responses.
 
