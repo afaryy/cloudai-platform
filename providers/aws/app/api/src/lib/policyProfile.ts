@@ -19,3 +19,14 @@ export const DEFAULT_POLICY_PROFILE: MockPolicyProfile = {
 export function isModelAllowed(modelName: string, profile: MockPolicyProfile = DEFAULT_POLICY_PROFILE): boolean {
   return profile.allowedModelNames.includes(modelName);
 }
+
+export function createBedrockPolicyProfile(modelId: string): MockPolicyProfile {
+  return {
+    id: "bedrock-configured-model",
+    description: "Policy profile that permits only the configured Bedrock inference profile.",
+    defaultModelName: modelId,
+    allowedModelNames: [modelId],
+    maxPromptCharacters: DEFAULT_POLICY_PROFILE.maxPromptCharacters,
+    maxInputTokens: DEFAULT_POLICY_PROFILE.maxInputTokens
+  };
+}

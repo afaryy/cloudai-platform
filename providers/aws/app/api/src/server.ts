@@ -4,6 +4,7 @@ import { MockBedrockClient } from "./clients/mockBedrockClient.js";
 import type { BedrockClient } from "./clients/bedrockClient.js";
 import { AwsBedrockClient, createBedrockRuntimeInvoker } from "./clients/awsBedrockClient.js";
 import { readProviderClientConfig, type ModelProvider } from "./clients/providerClient.js";
+import { createBedrockPolicyProfile, DEFAULT_POLICY_PROFILE, type MockPolicyProfile } from "./lib/policyProfile.js";
 import { HttpError } from "./lib/errors.js";
 import {
   buildRequestLogEvent,
@@ -23,7 +24,8 @@ const MAX_BODY_BYTES = 1_000_000;
 export function createMockApiServer(
   client: BedrockClient = new MockBedrockClient(),
   logger: RequestLogger = consoleRequestLogger,
-  mode: ModelProvider = "mock"
+  mode: ModelProvider = "mock",
+  policyProfile: MockPolicyProfile = DEFAULT_POLICY_PROFILE
 ) {
   return createServer(async (request, response) => {
     const startedAt = Date.now();
@@ -120,7 +122,7 @@ export function createMockApiServer(
 
       if (method === "POST" && route === "/chat") {
         const body = await readJsonBody(request);
-        const chatResponse = await postChat(client, body);
+        const chatResponse = await postChat(client, body, policyProfile);
         writeJson(response, 200, chatResponse);
         writeRequestLog(logger, buildRequestLogEvent({
           requestId: chatResponse.metadata.requestId,
@@ -184,7 +186,8 @@ export function createConfiguredApiServer(
       invoker: createBedrockRuntimeInvoker(config.region)
     }),
     logger,
-    "bedrock"
+    "bedrock",
+    createBedrockPolicyProfile(config.modelId)
   );
 }
 
