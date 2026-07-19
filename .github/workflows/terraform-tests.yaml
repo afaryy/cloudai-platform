@@ -109,6 +109,18 @@ jobs:
           test "$(grep -c -- '--guardrail-config' "$workflow")" -eq 1
           grep -q '::add-mask::$guardrail_id' "$workflow"
           grep -q '::add-mask::$guardrail_version' "$workflow"
+          grep -q -- '- guardrail-evaluation' "$workflow"
+          grep -q 'I_UNDERSTAND_THREE_SYNTHETIC_GUARDRAIL_EVALUATIONS' "$workflow"
+          grep -q "inputs.mode == 'guardrail-evaluation'" "$workflow"
+          grep -q 'aws bedrock-runtime apply-guardrail' "$workflow"
+          grep -q -- '--source INPUT' "$workflow"
+          grep -q 'safe-synthetic' "$workflow"
+          grep -q 'pii-shaped-synthetic' "$workflow"
+          grep -q 'prompt-attack-shaped-synthetic' "$workflow"
+          grep -q 'guardrail-evaluation-passed' "$workflow"
+          grep -q 'category=unexpected-verdict' "$workflow"
+          test "$(grep -c 'aws bedrock-runtime apply-guardrail' "$workflow")" -eq 1
+          ! grep -A120 'Invoke three synthetic direct Guardrail evaluations' "$workflow" | grep -q 'bedrock-runtime converse'
           module=providers/aws/infra/terraform/modules/bedrock-access/main.tf
           grep -q 'guardrail_identifier_with_version' "$module"
           grep -q 'bedrock:GuardrailIdentifier' "$module"
