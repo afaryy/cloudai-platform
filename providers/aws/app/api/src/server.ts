@@ -2,6 +2,8 @@ import { createServer, type IncomingMessage, type ServerResponse } from "node:ht
 import { randomUUID } from "node:crypto";
 import { MockBedrockClient } from "./clients/mockBedrockClient.js";
 import type { BedrockClient } from "./clients/bedrockClient.js";
+import { AwsBedrockClient, createBedrockRuntimeInvoker } from "./clients/awsBedrockClient.js";
+import { readProviderClientConfig, type ModelProvider } from "./clients/providerClient.js";
 import { HttpError } from "./lib/errors.js";
 import {
   buildRequestLogEvent,
@@ -20,7 +22,8 @@ const MAX_BODY_BYTES = 1_000_000;
 
 export function createMockApiServer(
   client: BedrockClient = new MockBedrockClient(),
-  logger: RequestLogger = consoleRequestLogger
+  logger: RequestLogger = consoleRequestLogger,
+  mode: ModelProvider = "mock"
 ) {
   return createServer(async (request, response) => {
     const startedAt = Date.now();
@@ -38,7 +41,7 @@ export function createMockApiServer(
           statusCode: 200,
           durationMs: Date.now() - startedAt,
           timestamp: healthResponse.timestamp
-        }));
+        }, mode));
         return;
       }
 
@@ -52,7 +55,7 @@ export function createMockApiServer(
           statusCode: 200,
           durationMs: Date.now() - startedAt,
           timestamp: new Date().toISOString()
-        }));
+        }, mode));
         return;
       }
 
@@ -66,7 +69,7 @@ export function createMockApiServer(
           statusCode: 200,
           durationMs: Date.now() - startedAt,
           timestamp: new Date().toISOString()
-        }));
+        }, mode));
         return;
       }
 
@@ -81,7 +84,7 @@ export function createMockApiServer(
           statusCode: 200,
           durationMs: Date.now() - startedAt,
           timestamp: ragQueryResponse.audit.evaluatedAt
-        }));
+        }, mode));
         return;
       }
 
@@ -96,7 +99,7 @@ export function createMockApiServer(
           statusCode: 200,
           durationMs: Date.now() - startedAt,
           timestamp: decision.audit.recordedAt
-        }));
+        }, mode));
         return;
       }
 
@@ -111,7 +114,7 @@ export function createMockApiServer(
           statusCode: 200,
           durationMs: Date.now() - startedAt,
           timestamp: verdict.audit.recordedAt
-        }));
+        }, mode));
         return;
       }
 
@@ -129,8 +132,10 @@ export function createMockApiServer(
           modelName: chatResponse.metadata.modelName,
           estimatedInputTokens: chatResponse.metadata.estimatedInputTokens,
           estimatedOutputTokens: chatResponse.metadata.estimatedOutputTokens,
-          estimatedCostUsd: chatResponse.metadata.estimatedCostUsd
-        }));
+          estimatedCostUsd: chatResponse.metadata.estimatedCostUsd,
+          inputTokens: chatResponse.metadata.usage?.inputTokens,
+          outputTokens: chatResponse.metadata.usage?.outputTokens
+        }, mode));
         return;
       }
 
@@ -148,7 +153,7 @@ export function createMockApiServer(
         durationMs: Date.now() - startedAt,
         timestamp: new Date().toISOString(),
         errorCode: "not_found"
-      }));
+      }, mode));
     } catch (error) {
       writeError(response, error);
       writeRequestLog(logger, buildRequestLogEvent({
@@ -159,9 +164,28 @@ export function createMockApiServer(
         durationMs: Date.now() - startedAt,
         timestamp: new Date().toISOString(),
         errorCode: getErrorCode(error)
-      }));
+      }, mode));
     }
   });
+}
+
+export function createConfiguredApiServer(
+  env: NodeJS.ProcessEnv = process.env,
+  logger: RequestLogger = consoleRequestLogger
+) {
+  const config = readProviderClientConfig(env);
+  if (config.provider === "mock") {
+    return createMockApiServer(new MockBedrockClient(), logger, "mock");
+  }
+
+  return createMockApiServer(
+    new AwsBedrockClient({
+      modelId: config.modelId,
+      invoker: createBedrockRuntimeInvoker(config.region)
+    }),
+    logger,
+    "bedrock"
+  );
 }
 
 async function readJsonBody(request: IncomingMessage): Promise<unknown> {
@@ -237,7 +261,7 @@ function writeRequestLog(logger: RequestLogger, event: ReturnType<typeof buildRe
 
 if (import.meta.url === `file://${process.argv[1]}`) {
   const port = Number(process.env.PORT ?? DEFAULT_PORT);
-  createMockApiServer().listen(port, () => {
-    console.log(`Mock GenAI API listening on http://localhost:${port}`);
+  createConfiguredApiServer().listen(port, () => {
+    console.log(`GenAI API listening on http://localhost:${port}`);
   });
 }

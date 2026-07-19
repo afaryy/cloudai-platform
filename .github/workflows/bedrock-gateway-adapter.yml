@@ -1,0 +1,78 @@
+name: bedrock-gateway-adapter
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm_adapter_smoke:
+        description: "Type I_UNDERSTAND_ONE_SYNTHETIC_BEDROCK_CALL to run one synthetic adapter request"
+        required: true
+        default: ""
+        type: string
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: cloudai-bedrock-gateway-adapter-smoke
+  cancel-in-progress: false
+
+jobs:
+  adapter-smoke:
+    name: One synthetic Bedrock gateway adapter smoke test
+    runs-on: ubuntu-latest
+    environment: aws-sandbox
+    env:
+      AWS_BEDROCK_SMOKE_ROLE_TO_ASSUME: ${{ vars.AWS_BEDROCK_SMOKE_ROLE_TO_ASSUME || secrets.AWS_BEDROCK_SMOKE_ROLE_TO_ASSUME }}
+      AWS_REGION: ${{ vars.AWS_REGION || 'ap-southeast-2' }}
+      BEDROCK_MODEL_ID: ${{ vars.BEDROCK_MODEL_ID }}
+      MODEL_PROVIDER: bedrock
+      AWS_MAX_ATTEMPTS: "1"
+      CONFIRM_BEDROCK_ADAPTER_SMOKE: ${{ inputs.confirm_adapter_smoke }}
+    defaults:
+      run:
+        working-directory: providers/aws/app/api
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Confirm one synthetic Bedrock adapter request
+        run: |
+          if [ "$CONFIRM_BEDROCK_ADAPTER_SMOKE" != "I_UNDERSTAND_ONE_SYNTHETIC_BEDROCK_CALL" ]; then
+            echo "::error::Adapter smoke test requires I_UNDERSTAND_ONE_SYNTHETIC_BEDROCK_CALL."
+            exit 1
+          fi
+
+      - name: Check adapter environment variables
+        run: |
+          missing=0
+          for name in AWS_BEDROCK_SMOKE_ROLE_TO_ASSUME AWS_REGION BEDROCK_MODEL_ID; do
+            if [ -z "${!name}" ]; then
+              echo "::error::$name is required in the aws-sandbox environment."
+              missing=1
+            fi
+          done
+          exit "$missing"
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11.7.0
+
+      - name: Install locked API dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Configure direct Bedrock smoke role
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.AWS_BEDROCK_SMOKE_ROLE_TO_ASSUME }}
+          aws-region: ${{ env.AWS_REGION }}
+          mask-aws-account-id: true
+
+      - name: Run one synthetic gateway adapter request
+        run: pnpm run bedrock:smoke

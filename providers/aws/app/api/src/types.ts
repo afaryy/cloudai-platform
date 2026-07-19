@@ -6,9 +6,14 @@ export type ChatRequest = {
 export type ChatMetadata = {
   requestId: string;
   modelName: string;
-  estimatedInputTokens: number;
-  estimatedOutputTokens: number;
-  estimatedCostUsd: number;
+  estimatedInputTokens?: number;
+  estimatedOutputTokens?: number;
+  estimatedCostUsd?: number;
+  usage?: {
+    source: "synthetic-estimate" | "provider-reported";
+    inputTokens: number;
+    outputTokens: number;
+  };
   timestamp: string;
 };
 

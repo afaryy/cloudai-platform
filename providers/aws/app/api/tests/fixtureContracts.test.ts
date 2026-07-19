@@ -31,6 +31,25 @@ test("demo chat response fixture matches the documented response contract", asyn
     inputTokens: expectedInputTokens,
     outputTokens: expectedOutputTokens
   }));
+  assert.deepEqual(fixture.metadata.usage, {
+    source: "synthetic-estimate",
+    inputTokens: expectedInputTokens,
+    outputTokens: expectedOutputTokens
+  });
+});
+
+test("chat response contract accepts provider-reported usage without synthetic cost", async () => {
+  const schema = await readJson("chat-response.schema.json", SCHEMA_DIR);
+
+  assertMatchesSchema({
+    response: "synthetic response",
+    metadata: {
+      requestId: "synthetic-id",
+      modelName: "configured-profile",
+      usage: { source: "provider-reported", inputTokens: 2, outputTokens: 3 },
+      timestamp: "2026-07-19T00:00:00.000Z"
+    }
+  }, schema);
 });
 
 test("demo token budget error fixture matches the documented error contract", async () => {

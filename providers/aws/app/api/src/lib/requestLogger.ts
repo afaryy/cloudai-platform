@@ -1,6 +1,8 @@
+import type { ModelProvider } from "../clients/providerClient.js";
+
 export type RequestLogEvent = {
   event: "mock_api_request";
-  mode: "mock";
+  mode: ModelProvider;
   requestId: string;
   method: string;
   route: string;
@@ -11,6 +13,8 @@ export type RequestLogEvent = {
   estimatedInputTokens?: number;
   estimatedOutputTokens?: number;
   estimatedCostUsd?: number;
+  inputTokens?: number;
+  outputTokens?: number;
   errorCode?: string;
 };
 
@@ -25,11 +29,12 @@ export const consoleRequestLogger: RequestLogger = {
 };
 
 export function buildRequestLogEvent(
-  event: Omit<RequestLogEvent, "event" | "mode" | "durationMs"> & { durationMs: number }
+  event: Omit<RequestLogEvent, "event" | "mode" | "durationMs"> & { durationMs: number },
+  mode: ModelProvider = "mock"
 ): RequestLogEvent {
   return {
     event: "mock_api_request",
-    mode: "mock",
+    mode,
     ...event,
     durationMs: Math.max(0, Math.round(event.durationMs))
   };

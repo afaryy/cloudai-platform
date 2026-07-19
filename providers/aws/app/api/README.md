@@ -1,8 +1,8 @@
 # Mock GenAI API
 
-This package is the P1 mock GenAI / LLM Gateway API for the CloudAI platform reference implementation.
+This package is the GenAI / LLM Gateway API for the CloudAI platform reference implementation.
 
-It runs in mock mode only. It returns synthetic responses and does not call Amazon Bedrock or deploy cloud resources.
+It starts in mock mode by default. Mock mode returns synthetic responses and does not call Amazon Bedrock or deploy cloud resources. P8d adds a separately confirmed Bedrock adapter for one synthetic smoke request; it is never enabled by ordinary CI.
 
 ## Endpoints
 
@@ -223,6 +223,22 @@ Metadata fields:
 | `estimatedCostUsd` | Synthetic token cost estimate for demo FinOps workflows. |
 | `timestamp` | ISO timestamp generated when the mock response is created. |
 
+Mock responses also include `metadata.usage` with `source: "synthetic-estimate"`. The estimates and `estimatedCostUsd` are mock-only values.
+
+When the explicit Bedrock adapter is used, the normalized response retains `response`, `requestId`, `modelName`, and `timestamp`, but replaces synthetic estimates with:
+
+```json
+{
+  "usage": {
+    "source": "provider-reported",
+    "inputTokens": 2,
+    "outputTokens": 3
+  }
+}
+```
+
+Provider-reported token counts are not a cost calculation. The gateway never fabricates a Bedrock cost and never logs response text.
+
 ## Health Response
 
 ```bash
@@ -308,9 +324,27 @@ The default port is `3000`. Set `PORT` to use another local port.
 PORT=3001 pnpm run dev
 ```
 
+## Opt-In Bedrock Adapter Smoke Check
+
+The default server remains mock-only. Bedrock mode is an explicit operator action and is intended only for a single synthetic verification request through the same `/chat` gateway boundary.
+
+Before a local live check, select your own standard AWS credential/profile through the AWS CLI or SDK credential chain. Do not place credentials in this repository or its configuration files. Then run:
+
+```bash
+CONFIRM_BEDROCK_ADAPTER_SMOKE=I_UNDERSTAND_ONE_SYNTHETIC_BEDROCK_CALL \
+MODEL_PROVIDER=bedrock \
+BEDROCK_MODEL_ID='<approved-inference-profile-id>' \
+AWS_REGION=ap-southeast-2 \
+pnpm run bedrock:smoke
+```
+
+The command performs one non-streaming Bedrock Converse request with `temperature: 0`, `maxTokens: 8`, no tools, retrieval, agents, streaming, fallback, or automatic retry. It sends one synthetic marker and prints only `adapter-smoke-passed` or a sanitized failure category. It does not print prompt text, response text, provider errors, credentials, ARNs, account identifiers, or AWS request IDs.
+
+The protected GitHub equivalent is the manually dispatched `bedrock-gateway-adapter` workflow. It requires the same confirmation phrase, `aws-sandbox` approval, and the dedicated direct Bedrock smoke role through OIDC. It does not use Terraform credentials or run Terraform.
+
 ## Boundaries
 
-- Mock mode is the default and only mode in this package.
-- The Bedrock client is represented by an interface so a real provider adapter can be added later.
-- No AWS SDK dependency is included in this phase.
+- Mock mode is the default; `MODEL_PROVIDER=bedrock` is the only real-provider opt-in.
+- Bedrock mode requires `BEDROCK_MODEL_ID` and `AWS_REGION`, and accepts only its configured inference-profile identifier.
+- The real adapter uses the AWS Bedrock Runtime SDK but does not add RAG, agents, AgentCore, tools, streaming, fallback models, persistence, deployment, or real-user traffic.
 - No cloud account setup or deployment configuration is required.
