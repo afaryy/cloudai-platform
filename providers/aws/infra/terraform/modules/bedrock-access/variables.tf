@@ -24,7 +24,12 @@ variable "guardrail_prompt_attack_input_strength" {
 variable "guardrail_prompt_attack_output_strength" {
   description = "Prompt Attack output filter strength for the synthetic sandbox Guardrail."
   type        = string
-  default     = "HIGH"
+  default     = "NONE"
+
+  validation {
+    condition     = var.guardrail_prompt_attack_output_strength == "NONE"
+    error_message = "Bedrock requires Prompt Attack output strength to be NONE."
+  }
 }
 
 variable "guardrail_pii_entity_type" {
