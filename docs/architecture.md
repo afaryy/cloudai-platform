@@ -1,196 +1,158 @@
-# Architecture
+# CloudAI Architecture
 
-`cloudai-platform` presents a Cloud AI Control Plane for governing model access, AI traffic, provider integration, platform foundations, observability, and cost controls across cloud environments.
+`cloudai-platform` is a public-safe Cloud & AI Platform Engineering reference
+architecture. It describes the reusable controls that help an enterprise move
+AI workloads from a defined business outcome to supported operation. It is not
+a deployed enterprise topology or a claim that every capability below is
+implemented in this repository.
 
-The platform is AWS-first, with Amazon Bedrock as the initial model provider pattern. Its control-plane design remains provider-neutral so Azure and GCP mappings can be added without changing the core governance model.
+The architecture is AWS-first and multi-cloud-ready: AWS is the first provider
+implementation path, while Azure and GCP remain reference mappings behind the
+same governance and adapter boundaries.
 
-## Logical Layer Overview
+## 1. Enterprise Ecosystem Context
 
-Start here. This view explains the platform in plain language before the later diagrams add system and implementation detail.
-
-- CloudAI Control Plane: use case intake, policy, approval, responsible AI review, provider registry, audit, and evaluation.
-- Model access sub-layer: GenAI / LLM Gateway for governed model routing, request controls, and response handling.
-- AI Traffic Governance layer: broader future gateway controls for agent, tool, retrieval, workflow, and data-access traffic.
-- Provider Adapter layer: AWS first, with Azure and GCP reference architecture mappings.
-- Platform Foundations: identity, encryption, key management, network, CI/CD, observability, and infrastructure automation.
+The first view is intentionally broader than a gateway or a cloud service. It
+shows the relationship between enterprise accountability, shared platform
+capability, workload domains, and provider implementation.
 
 ```mermaid
 flowchart TB
-  purpose["Why this exists<br/>Enable AI use with governance, visibility, and cost awareness"]
+  outcome["Enterprise outcomes and accountable ownership"]
+  policy["Governance, Responsible AI, and data policy"]
 
-  decide["1. Decide what is allowed<br/>Use case intake | Policies | Responsible AI review | Approvals | Evidence"]
+  subgraph platform["Shared CloudAI Platform"]
+    foundations["Secure cloud foundations"]
+    access["Governed model, agent, and data access"]
+    delivery["Delivery and operations controls"]
+    capacity["Optional AI Factory and capacity extension"]
+  end
 
-  access["2. Control how AI is accessed<br/>GenAI / LLM Gateway | Model routing | Request checks"]
+  workloads["Business-domain AI workloads and integrations"]
+  providers["AWS-first implementation with Azure and GCP future mappings"]
 
-  govern["3. Govern broader AI traffic<br/>Agents | Tools | Retrieval | Data movement"]
-
-  connect["4. Connect to cloud providers<br/>AWS-first adapter | Azure mapping | GCP mapping"]
-
-  operate["5. Run, measure, and improve<br/>Infrastructure | CI/CD | Observability | FinOps | Responsible AI"]
-
-  purpose --> decide
-  decide --> access
-  access --> govern
-  govern --> connect
-  connect --> operate
+  outcome --> platform
+  policy -. "applies across" .-> platform
+  policy -. "applies across" .-> workloads
+  platform --> workloads
+  workloads --> providers
 ```
 
-This logical view introduces the role of each layer before the system and technical diagrams describe provider adapters, gateways, and runtime flows.
+This is a reference architecture, not a linear delivery pipeline. Governance
+and data policy apply across both the shared platform and the workloads that
+use it. The optional AI Factory and capacity extension is relevant where a use
+case needs accelerated compute, training, fine-tuning, or high-scale serving;
+it is not a prerequisite for managed-model workloads.
 
-The GenAI / LLM Gateway is the first concrete runtime access pattern. The CloudAI Control Plane is not just a runtime hop; it is the governance and evidence layer that defines which use cases, providers, controls, and audit expectations apply. The broader AI Traffic Governance layer is intentionally described before implementation so future agent and tool flows can inherit the same policy, audit, observability, FinOps, and responsible AI model.
+## 2. Enterprise AI Capability Map
 
-## Cloud & AI Platform System View
+The six-layer enterprise AI model explains **what capabilities** a mature
+enterprise needs. It is an executive and solution-architecture map, not a
+deployment diagram.
+
+| Enterprise capability layer | Core question |
+| --- | --- |
+| Strategy and operating model | Why is AI used, and who is accountable for value and outcomes? |
+| Governance | What is allowed, what risk applies, and what evidence is required? |
+| Data and knowledge | Which information may be used, retained, retrieved, or shared? |
+| AI platform | How do workloads access shared models, agents, tools, and knowledge safely? |
+| Cloud foundations | Under what identity, network, encryption, policy, and runtime boundary does it operate? |
+| Delivery and operations | How is it released, evaluated, observed, cost-managed, supported, and retired? |
+
+## 3. CloudAI Platform Reference Architecture
+
+The CloudAI architecture turns the six capability layers into ten practical
+platform domains. The domains are a reference model for organising controls;
+they do not imply that all domains are centralised in one product or owned by
+one team.
+
+```mermaid
+flowchart TB
+  intake["1. Business outcome, use case, and accountable ownership"]
+  risk["2. Governance, risk, Responsible AI, and approval"]
+  data["3. Data, knowledge, classification, and lifecycle"]
+  foundation["4. Identity, network, encryption, secrets, and policy"]
+  model["5. Governed model and provider access"]
+  traffic["6. Agent, tool, retrieval, workflow, and egress governance"]
+  integration["7. Application and enterprise-system integration"]
+  delivery["8. Infrastructure as code, CI/CD, testing, release, and rollback"]
+  operations["9. Evaluation, observability, audit evidence, and AI FinOps"]
+  lifecycle["10. Resilience, capacity, support, retirement, and improvement"]
+
+  intake --> risk --> data --> foundation --> model --> traffic --> integration
+  integration --> delivery --> operations --> lifecycle
+  risk -. "sets policy" .-> model
+  data -. "sets authorised knowledge boundary" .-> traffic
+  foundation -. "protects" .-> model
+  foundation -. "protects" .-> integration
+  operations -. "feeds evidence to" .-> risk
+```
+
+| Six-layer capability map | CloudAI reference domains |
+| --- | --- |
+| Strategy and operating model | 1. Business outcome, use case, and accountable ownership |
+| Governance | 2. Governance, risk, Responsible AI, and approval |
+| Data and knowledge | 3. Data, knowledge, classification, and lifecycle |
+| AI platform | 5. Governed model and provider access; 6. Agent, tool, retrieval, workflow, and egress governance; 7. Application and enterprise-system integration |
+| Cloud foundations | 4. Identity, network, encryption, secrets, and policy |
+| Delivery and operations | 8. Delivery engineering; 9. Evaluation, observability, audit evidence, and AI FinOps; 10. Resilience, capacity, support, retirement, and improvement |
+
+The six layers and the ten domains are complementary. The former describes the
+enterprise capability model; the latter describes the CloudAI platform
+reference architecture.
+
+## 4. Use Case to Production Lifecycle
+
+The lifecycle explains **how one workload moves through the architecture**. It
+is not another layer stack, and individual controls may iterate as the use case
+changes.
 
 ```mermaid
 flowchart LR
-  subgraph experience["1. Experience and Consumers"]
-    teams["Platform teams"]
-    apps["Applications"]
-    developers["Developers"]
-    agents["AI agents"]
-  end
+  usecase["Business use case and owner"]
+  assessment["Data classification and risk assessment"]
+  pattern["Approved platform pattern"]
+  secure["Secure foundation and workload identity"]
+  access["Model, knowledge, tool, and integration access"]
+  release["Infrastructure as code, CI/CD, evaluation, and release gates"]
+  operate["Observability, FinOps, audit evidence, and support"]
+  improve["Resilience, retirement, and continuous improvement"]
 
-  subgraph control["2. Cloud AI Control Plane"]
-    intake["Use case intake"]
-    governance["Responsible AI governance"]
-    registry["Provider and model registry"]
-    evidence["Audit evidence"]
-  end
-
-  subgraph access["3. AI Access and Traffic Governance"]
-    llm["GenAI / LLM Gateway<br/>model access"]
-    traffic["AI Traffic Governance<br/>agents, tools, data flows"]
-    policy["Policy, token, and rate controls"]
-    egress["Data egress controls"]
-  end
-
-  subgraph provider["4. Provider Implementation"]
-    aws["AWS-first path<br/>Amazon Bedrock | API Gateway | Lambda / ECS / EKS"]
-    azure["Azure mapping<br/>future provider adapter"]
-    gcp["GCP mapping<br/>future provider adapter"]
-  end
-
-  subgraph ops["5. Infrastructure and Operations"]
-    iac["Terraform and GitHub Actions"]
-    identity["Identity, encryption, and key management"]
-    observability["Observability and evaluation"]
-    finops["FinOps and cost controls"]
-  end
-
-  teams --> intake
-  apps --> llm
-  developers --> intake
-  agents --> traffic
-
-  intake --> governance
-  governance --> registry
-  registry --> llm
-  evidence --> observability
-
-  llm --> policy
-  traffic --> policy
-  policy --> egress
-  egress --> aws
-
-  aws -. "provider adapter boundary" .-> azure
-  aws -. "provider adapter boundary" .-> gcp
-
-  iac -. "supports" .-> aws
-  iac -. "supports future mappings" .-> azure
-  iac -. "supports future mappings" .-> gcp
-  identity -. "protects" .-> control
-  identity -. "protects" .-> access
-  observability -. "measures" .-> access
-  finops -. "governs usage" .-> access
+  usecase --> assessment --> pattern --> secure --> access --> release --> operate --> improve
 ```
 
-This system view shows the overall Cloud & AI platform story: consumer entry points, control-plane governance, runtime access and traffic controls, provider implementation paths, and operating capabilities. It is intentionally higher level than the technical architecture view below.
+## 5. Implementation and Provider Views
 
-## High-Level CloudAI Platform Architecture
+The following views connect the reference architecture to the portfolio. Each
+is intentionally bounded and should be read with its stated evidence boundary.
 
-```mermaid
-flowchart TB
-  consumers["Consumers<br/>Developers | Applications | AI Agents | Platform Teams"]
+| Architecture area | Portfolio evidence and boundary |
+| --- | --- |
+| Governed model access | [GenAI / LLM Gateway](genai-llm-gateway.md) and the [Governed AI Gateway case study](featured-solutions.md#governed-ai-gateway): implemented with mock mode as the default; provider mode is an explicit, bounded action. |
+| Data and knowledge controls | [RAG knowledge lifecycle](rag-knowledge-lifecycle.md) and the [Governed RAG Lifecycle case study](featured-solutions.md#governed-rag-lifecycle): implemented as a local synthetic workflow, not provider-backed retrieval. |
+| Delivery engineering | [AI release engineering on EKS](ai-release-engineering-on-eks.md) and the [EKS case study](featured-solutions.md#ai-release-engineering-on-eks): sandbox-validated delivery controls for a synthetic workload. |
+| Bounded provider access | [P8 Bedrock sandbox design](p8-real-bedrock-sandbox-design.md) and the [Bounded Bedrock Sandbox case study](featured-solutions.md#bounded-bedrock-sandbox): bounded synthetic sandbox validation, not a persistent Bedrock application. |
+| Agent runtime extension | [P8h AgentCore knowledge-lookup readiness](p8h-agentcore-knowledge-lookup-readiness.md): gateway-first reference design only; no AgentCore resource or call. |
+| AI Factory and accelerated capacity | [AI Factory infrastructure lens](ai-factory-infrastructure-lens.md): future/design context for LLMOps, capacity, and accelerator patterns; no GPU, training, fine-tuning, or high-scale serving implementation. |
+| Multi-cloud mappings | [AWS](aws-reference-architecture.md), [Azure](azure-reference-architecture.md), and [GCP](gcp-reference-architecture.md) mappings: AWS-first implementation context with Azure/GCP reference mappings, not provider parity claims. |
 
-  control["CloudAI Control Plane<br/>Use case intake | Policy and approval | Provider registry | Audit and evaluation"]
+## 6. Current Evidence Boundary
 
-  governance["AI Traffic Gateway / Governance Layer<br/>GenAI / LLM Gateway | Agent and tool governance | Token and rate controls | Data egress policy"]
+The architecture above includes the full ecosystem. The following table states
+what this repository currently demonstrates publicly.
 
-  adapters["Provider Adapter Layer<br/>AWS adapter | Azure adapter | GCP adapter"]
+| Area | Public-safe status |
+| --- | --- |
+| Governed AI Gateway | Implemented — mock-first |
+| AI Release Engineering on EKS | Implemented — sandbox-validated for a synthetic workload |
+| Governed RAG Lifecycle | Implemented — local synthetic workflow |
+| Bounded Bedrock Sandbox | Implemented — bounded synthetic sandbox validation |
+| AgentCore | Reference architecture only; no AgentCore resource or call |
+| Azure and GCP | Reference mappings only |
+| AI Factory and accelerated capacity | Future/design context only; no GPU, training, fine-tuning, or high-scale serving implementation |
 
-  subgraph providers["Provider Implementation View"]
-    aws["AWS-first implementation<br/>Amazon Bedrock | API Gateway | Lambda / ECS / EKS | DynamoDB / S3 | CloudWatch"]
-    azure["Azure future mapping<br/>Model access | API management | Runtime | Monitoring"]
-    gcp["GCP future mapping<br/>Model access | API gateway | Runtime | Monitoring"]
-  end
-
-  cross["Cross-cutting capabilities<br/>Identity | Key management | Encryption | Terraform | GitHub Actions | Observability | FinOps | Responsible AI | Audit"]
-
-  consumers --> control
-  control --> governance
-  governance --> adapters
-  adapters --> aws
-  adapters -. "future mapping" .-> azure
-  adapters -. "future mapping" .-> gcp
-
-  cross -. "applies across" .-> control
-  cross -. "applies across" .-> governance
-  cross -. "applies across" .-> adapters
-  cross -. "applies across" .-> providers
-```
-
-This diagram shows the control and integration layers rather than a deployed topology. The CloudAI Control Plane defines controls and evidence. The AI Traffic Gateway / Governance Layer applies those controls to model access now and broader AI traffic later. AWS is the first implementation path; Azure and GCP are shown as future provider mappings behind the same adapter boundary.
-
-## Runtime Request Flow
-
-```mermaid
-sequenceDiagram
-  autonumber
-  participant Client as User / App / Agent
-  participant Gateway as GenAI / LLM Gateway
-  participant Checks as Policy / Token / Audit Checks
-  participant Data as Retrieval / Tool / API Access
-  participant Adapter as Provider Adapter
-  participant Bedrock as Amazon Bedrock
-  participant Ops as Logs / Traces
-  participant Cost as Cost / Token Metrics
-  participant Approval as Human Approval
-  participant Egress as Data Egress Controls
-
-  Client->>Gateway: Submit AI request with metadata
-  Gateway->>Checks: Validate policy, tokens, rate, and audit context
-  Checks-->>Approval: Request approval when policy requires review
-  Approval-->>Checks: Approve, reject, or defer
-  Checks->>Egress: Evaluate data boundary and egress rules
-  Checks->>Data: Optional retrieval, tool, or API access
-  Data-->>Checks: Return governed context or tool result
-  Checks->>Adapter: Forward approved provider request
-  Adapter->>Bedrock: Invoke model through AWS-first provider path
-  Bedrock-->>Adapter: Return model response
-  Adapter-->>Gateway: Return provider response and metadata
-  Gateway-->>Client: Return governed response
-  Gateway-->>Ops: Emit logs, traces, request IDs, and audit events
-  Gateway-->>Cost: Emit token and cost metrics
-  Egress-->>Ops: Emit data policy decision events
-```
-
-Runtime requests do not bypass governance. Even in future agent or tool flows, the expected pattern is to capture request metadata, evaluate policy, control tokens and data egress, emit observability and FinOps signals, and route through provider adapters.
-
-## Relationship to the Six-Layer Enterprise AI Model
-
-The six-layer enterprise AI model describes the broader capability map. This repository architecture describes how those capabilities are organised into a buildable reference implementation.
-
-These two views are complementary, not conflicting. The six-layer model explains what platform capabilities are needed. The implementation model explains how this project structures those capabilities technically.
-
-| Six-layer model | Repository implementation view | Explanation |
-|---|---|---|
-| Strategy | Project charter, roadmap, use case framing | Defines why the platform exists and what outcomes it supports. |
-| Governance | CloudAI Control Plane, policy, approval, audit | Defines rules, controls, approval and evidence. |
-| Data | RAG, retrieval, data access, data egress governance | Defines how knowledge and data are safely used. |
-| Platform | GenAI / LLM Gateway, AI Traffic Governance, provider adapters | Provides standard access to models, tools, agents and provider services. |
-| Infrastructure | AWS/Azure/GCP foundations, Terraform, IAM, network, KMS, key management | Provides secure runtime and deployment foundations. |
-| Operations | Observability, FinOps, runbooks, assessment, gap tracking | Makes the platform measurable, supportable and continuously improvable. |
-
-## First Iteration Boundary
-
-This iteration creates documentation and placeholders only. It does not deploy infrastructure, set up provider access, or call real model APIs.
+For the detailed evidence record and intentionally deferred scope, read
+[Current status](current-status.md). The repository contains no employer,
+customer, confidential, credential, or proprietary material. It uses synthetic
+data, generic identifiers, public cloud service patterns, and mock mode as the
+ordinary runtime path.

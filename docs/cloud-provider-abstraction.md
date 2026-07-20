@@ -17,6 +17,6 @@ The provider abstraction describes a stable contract between the CloudAI Control
 
 ## AWS First
 
-The AWS adapter will eventually map these capabilities to services such as Amazon Bedrock, Amazon Bedrock Guardrails, Amazon Bedrock AgentCore, Amazon SageMaker AI, IAM, KMS, Secrets Manager, CloudWatch, S3, DynamoDB, Lambda, API Gateway, ECS, and EKS.
+The repository has a narrow Amazon Bedrock client boundary and bounded synthetic Guardrail validation. A fuller AWS adapter would map the broader capability set to services such as Amazon Bedrock, Amazon Bedrock Guardrails, Amazon Bedrock AgentCore, Amazon SageMaker AI, IAM, KMS, Secrets Manager, CloudWatch, S3, DynamoDB, Lambda, API Gateway, ECS, and EKS.
 
 Azure and GCP adapters remain documentation-only placeholders in early phases. Azure mappings should track Microsoft Foundry, Foundry Models sold by Azure, Azure AI Search, Azure AI Content Safety, Microsoft Entra ID, Key Vault, Azure Monitor, API Management, and Private Link. GCP mappings should track Gemini Enterprise Agent Platform, Vertex AI/Model Garden, Model Armor, Agent Gateway, Agent Runtime, Vector Search, IAM, Cloud KMS, Secret Manager, Cloud Logging, Cloud Monitoring, Private Service Connect, Cloud Run, and GKE.

@@ -132,7 +132,7 @@ Recommended next choices:
 - **P4b pre-apply readiness check:** use `docs/p4b-eks-sandbox-operator-runbook.md` as the single go/no-go runbook before any real personal EKS sandbox apply.
 - **P8g evidence reuse:** the initial three-case direct evaluation is live validated. Repeat it only when there is a new evaluation goal or a Guardrail configuration change. Treat its result as narrow synthetic configuration evidence, not Guardrail-quality evidence.
 - **P8h reference boundary:** the completed AgentCore knowledge-lookup reference is design-only. Any AgentCore resource, Gateway, runtime, identity, knowledge source, Terraform/IAM, or provider call needs a separate reviewed design and must not reuse P8f/P8g evidence as proof of production safety effectiveness.
-- **P7 AI Factory learning note:** use `docs/ai-factory-learning-note.md` to explain why cloud architecture is evolving into AI-ready platform architecture rather than disappearing.
+- **P7 AI Factory / LLMOps / GPU stretch:** retain the [AI Factory infrastructure lens](ai-factory-infrastructure-lens.md) as future research context; it is not a current GPU or AI Factory implementation.
 
 The repository should not perform a real cloud deployment by default. Any personal sandbox work must keep account identifiers, state, kubeconfig, plan files, tfvars, credentials, and live endpoint details out of git.
 

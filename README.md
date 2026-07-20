@@ -10,6 +10,28 @@ I design and build secure, governed, observable, and cost-aware cloud and platfo
 
 > **Public-safe note:** This is a personal technical portfolio and learning implementation. It uses synthetic data, generic identifiers, and public cloud service patterns; mock mode remains the default. It contains no employer, customer, confidential, credential, or proprietary material.
 
+## Architecture at a Glance
+
+```mermaid
+flowchart LR
+  context["Enterprise outcomes and accountable ownership"]
+  policy["Governance and data policy"]
+  platform["Shared CloudAI Platform: secure foundations, governed access, delivery, and operations"]
+  workloads["Business-domain AI workloads and integrations"]
+  providers["AWS-first implementation with Azure and GCP future mappings"]
+  capacity["Optional AI Factory and capacity extension"]
+
+  context --> platform --> workloads --> providers
+  policy -. "applies across" .-> platform
+  policy -. "applies across" .-> workloads
+  capacity -. "future extension" .-> platform
+```
+
+This is a reference architecture, not a deployed topology. Read the
+[full architecture hierarchy](docs/architecture.md) for the enterprise
+capability map, CloudAI platform domains, lifecycle, evidence boundaries, and
+provider views.
+
 ## Featured Solutions
 
 | Solution | Status | Focus |
@@ -145,11 +167,14 @@ Current scope:
 - **P8c Synthetic Bedrock Smoke Test:** a manually approved, synthetic-only Bedrock invocation with sanitized workflow evidence.
 - **P8d Opt-In Bedrock Gateway Adapter:** a real Bedrock client boundary and manual adapter smoke workflow while mock mode remains the application default.
 - **P8e Bedrock Guardrails Mapping:** a static, tested map from mock Guardrails as a Service outcomes to Bedrock Guardrails concepts; it does not configure or evaluate a provider guardrail.
+- **P8f Bedrock Guardrail Boundary:** a bounded Guardrail configuration and guarded `Converse` attachment path, exercised only through confirmation-gated synthetic validation with sanitized evidence.
+- **P8g Direct Guardrail Evaluation:** a bounded metadata-only direct evaluation path for safe, PII-shaped, and prompt-attack-shaped synthetic categories; no model invocation or automatic CI execution.
+- **P8h AgentCore Knowledge-Lookup Readiness:** gateway-first reference architecture only; no AgentCore resource or call.
 
 Future scope:
 
-- A separately designed real Bedrock Guardrails extension with approved policy content, evaluation, data handling, operational ownership, and sanitized evidence.
-- An optional AgentCore-aligned extension after a distinct runtime-governance use case is defined.
+- Broader Guardrail policy, evaluation, data-handling, and operational-ownership work beyond the narrow synthetic boundary.
+- An optional AgentCore runtime extension after a distinct runtime-governance use case is defined.
 
 ## Track C: AI-Assisted DevSecOps Pattern
 

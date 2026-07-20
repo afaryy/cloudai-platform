@@ -68,6 +68,7 @@ This is why the portfolio includes AI FinOps, observability, AgentOps, release g
 | P4 EKS Release Engineering | Kubernetes packaging, promotion, rollback, and optional bounded sandbox readiness for AI services. |
 | P5 AI-Assisted DevSecOps | Human-owned AI-assisted delivery with CI, review, threat-model, and release evidence. |
 | P6 AI Traffic Governance | Runtime AgentOps, capability governance, RAG lifecycle, and evidence scenarios. |
+| P8 Bounded Bedrock Sandbox | Narrow synthetic provider-access and Guardrail validation through short-lived identity, least privilege, manual approval, and sanitized evidence. |
 | P7 AI Factory / LLMOps / GPU Stretch | Future design-first exploration of evaluation, LLMOps, accelerated compute, and AI Factory operating patterns. |
 
 ## Boundary
@@ -79,9 +80,11 @@ Current boundaries:
 - no real model training;
 - no GPU cluster deployment;
 - no HyperPod deployment;
-- no live Bedrock, Bedrock AgentCore, or provider-backed inference call;
+- no persistent provider-backed AI application, provider-backed RAG runtime, or Bedrock AgentCore resource;
 - no real enterprise data;
 - no committed cloud account values, credentials, state, tfvars, plan files, kubeconfig, or live endpoints.
+
+P8 has validated a bounded synthetic Bedrock model-access and Guardrail path. It is not evidence of a production AI service, broad Guardrail quality, or an AI Factory deployment.
 
 Any later personal sandbox proof of concept must use synthetic data, explicit budget controls, manual approval, short-lived resources, teardown evidence, and no committed private values.
 

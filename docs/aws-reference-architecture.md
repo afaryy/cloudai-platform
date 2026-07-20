@@ -42,7 +42,7 @@ The completed EKS sandbox design is documented in `docs/p4b-real-eks-sandbox-des
 
 The next Bedrock-specific design step is documented in `docs/p8-real-bedrock-sandbox-design.md`. It defines a tiny governed Bedrock access path with synthetic prompts, IAM least privilege, manual approval, budget controls, and sanitized evidence.
 
-Bedrock Guardrails and AgentCore-aligned resources remain later optional extensions. Guardrails should come after the basic Bedrock access boundary is clear. AgentCore should come later still because it introduces agent runtime, tool, memory, gateway, observability, and evaluation concerns.
+The bounded P8f Guardrail attachment and P8g direct-evaluation paths now extend the basic Bedrock access boundary with synthetic-only validation. Broader Guardrail policy, evaluation, data-handling, and operational-ownership work remains future scope. AgentCore should come later still because it introduces agent runtime, tool, memory, gateway, observability, and evaluation concerns.
 
 ## Landing Zone Scale Boundary
 

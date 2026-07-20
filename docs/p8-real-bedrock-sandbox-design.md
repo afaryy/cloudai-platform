@@ -97,7 +97,7 @@ Good Terraform-managed resources for P8:
 - Optional CloudWatch log group for future provider-adapter evidence.
 - Optional S3 or DynamoDB metadata resource only if needed for synthetic evidence.
 - Cost allocation tags.
-- Future Bedrock Guardrails resources if the provider supports the required configuration in the chosen version.
+- Future Guardrail policy and evaluation extensions beyond the current narrow synthetic boundary.
 
 Terraform should not:
 
