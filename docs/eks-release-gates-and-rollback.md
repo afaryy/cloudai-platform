@@ -45,7 +45,7 @@ Before a sandbox sync or deployment, the release should pass these gates.
 | GitOps gate | Confirm the Argo CD Application points to the approved chart path and release name. | `argocd/applications/cloudai-api-sandbox.yaml`. |
 | Secret gate | Confirm the release does not introduce Kubernetes `Secret` resources or provider credentials. | Review rendered YAML and chart templates. |
 | Identity gate | Confirm service account token automount is disabled by default. | `automountServiceAccountToken: false`. |
-| Policy gate | Confirm labels capture owner, environment, data scope, and cost allocation. | `cloudai.platform/*` and `cloudai.openai.com/*` labels. |
+| Policy gate | Confirm labels capture owner, environment, data scope, and cost allocation. | `cloudai-platform.example/*` labels. |
 | Resource gate | Confirm requests, limits, probes, and PodDisruptionBudget are defined. | Helm chart templates and rendered YAML. |
 | Cost gate | Confirm a later live sandbox has an explicit budget and teardown plan. | P4b sandbox documentation before any apply. |
 | Approval gate | Confirm live sync/apply actions are manual. | Argo CD example has no automated sync; GitHub Actions uses manual dispatch/approval. |

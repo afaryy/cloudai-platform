@@ -1,82 +1,49 @@
-# CloudAI Platform
+# Cloud & AI Platform Engineering Portfolio
 
-Cloud & AI platform engineering portfolio project.
+## Yvonne Yao — Senior Platform Engineer — Cloud & AI
 
-`cloudai-platform` is positioned as an AWS-first, multi-cloud-ready learning and reference implementation using synthetic examples and public cloud service patterns. It demonstrates a Cloud AI control plane for organizing secure AI enablement, governed model access, AI traffic governance, platform foundations, FinOps, observability, and release engineering patterns.
+I design and build secure, governed, observable, and cost-aware cloud and platform foundations for AI workloads and AI-assisted engineering. This personal portfolio explores reusable, mock-first patterns for enterprise environments through AWS platform infrastructure, delivery automation, and controlled AI access.
 
-This is a learning and reference project. It stays intentionally incremental, with mock mode as the default.
+[LinkedIn](https://www.linkedin.com/in/yvonneyao/) · [GitHub](https://github.com/afaryy)
 
-## Project Overview
+**Core technologies:** AWS · Terraform · Kubernetes · EKS · Helm · Argo CD · GitHub Actions · TypeScript · Python · JSON Schema · AI governance patterns
 
-The project models a CloudAI platform that separates control-plane concerns from provider-specific implementation details.
+> **Public-safe note:** This is a personal technical portfolio and learning implementation. It uses synthetic data, generic identifiers, and public cloud service patterns; mock mode remains the default. It contains no employer, customer, confidential, credential, or proprietary material.
 
-At a high level, it explores:
+## Featured Solutions
 
-- CloudAI Control Plane concepts for policy, approval, audit, and provider registry.
-- Unified AI Asset Registry patterns for approved models, agents, skills, MCP tools, RAG sources, evaluations, versions, owners, and lifecycle evidence.
-- GenAI / LLM Gateway patterns for governed model access.
-- Broader AI Traffic Governance for future agent, tool, retrieval, workflow, and data-access flows.
-- AWS-first provider foundations with future Azure and GCP mappings.
-- AI FinOps, observability, evaluation, operations, and responsible AI practices.
-- AI capacity planning across model quotas, inference throughput, GPU workloads, retrieval scale, agent runtime limits, and operational support.
+| Solution | Status | Focus |
+| --- | --- | --- |
+| [Governed AI Gateway](docs/featured-solutions.md#governed-ai-gateway) | **Implemented — mock-first** | Controlled model access, request policy, metadata-only evidence, and an opt-in provider adapter boundary. |
+| [AI Release Engineering on EKS](docs/featured-solutions.md#ai-release-engineering-on-eks) | **Implemented — sandbox-validated** | Terraform, Helm, GitOps, rollout, rollback, and teardown discipline for a synthetic workload. |
+| [Governed RAG Lifecycle](docs/featured-solutions.md#governed-rag-lifecycle) | **Implemented — local synthetic workflow** | Provenance, source lifecycle, evaluation artifacts, and deterministic local quality checks. |
+| [Bounded Bedrock Sandbox](docs/featured-solutions.md#bounded-bedrock-sandbox) | **Implemented — bounded synthetic sandbox validation** | Short-lived identity, least-privilege access, manual approval, and narrow synthetic Guardrail checks. |
 
-For an end-to-end reader guide, including the TypeScript/Python language boundary, see `docs/cloudai-platform-solution-walkthrough.md`. For runnable local examples, see `examples/README.md`. For a short walkthrough flow, see `docs/demo-script.md`.
+[Read the featured-solution evidence and boundaries →](docs/featured-solutions.md)
 
-## Documentation Guide
+## What This Portfolio Demonstrates
 
-Start here:
+- Cloud platform foundations, infrastructure-as-code, and controlled delivery paths.
+- Governed AI access, RAG lifecycle controls, safety boundaries, and evaluation evidence.
+- Kubernetes packaging, GitOps, rollout and rollback patterns, and cost-aware sandbox discipline.
+- Explicit separation between implemented, mock-first, sandbox-validated, and future work.
 
-- [Solution walkthrough](docs/cloudai-platform-solution-walkthrough.md) - end-to-end reader guide for the repository.
-- [Current status](docs/current-status.md) - current mock scope, completed evidence, and recommended next slice.
-- [Demo script](docs/demo-script.md) - short portfolio walkthrough flow.
+## Architecture Library
 
-Core architecture:
+- [Solution walkthrough](docs/cloudai-platform-solution-walkthrough.md) — end-to-end repository reading path.
+- [Platform architecture](docs/architecture.md) and [CloudAI control plane](docs/control-plane.md) — architectural foundations.
+- [GenAI / LLM gateway](docs/genai-llm-gateway.md), [RAG knowledge lifecycle](docs/rag-knowledge-lifecycle.md), and [AI traffic governance](docs/ai-traffic-governance.md) — governed AI patterns.
+- [AI release engineering on EKS](docs/ai-release-engineering-on-eks.md), [EKS release gates and rollback](docs/eks-release-gates-and-rollback.md), and [AI-assisted DevSecOps](docs/ai-assisted-devsecops-pattern.md) — delivery patterns.
+- [Secure AI enablement](docs/secure-ai-enablement.md), [AI platform security and operations controls](docs/ai-platform-security-operations-controls.md), and [AI FinOps](docs/ai-finops.md) — platform controls.
+- [AWS](docs/aws-reference-architecture.md), [Azure](docs/azure-reference-architecture.md), and [GCP](docs/gcp-reference-architecture.md) reference mappings — provider context, not provider parity claims.
 
-- [Architecture](docs/architecture.md) - CloudAI platform architecture and enterprise AI layers.
-- [CloudAI control plane](docs/control-plane.md) - policy, approval, audit, registry, cost, and observability responsibilities.
-- [GenAI / LLM gateway](docs/genai-llm-gateway.md) - governed model-access sub-layer.
-- [Governed model access](docs/governed-model-access.md) - approved model access patterns and controls.
-- [Cloud provider abstraction](docs/cloud-provider-abstraction.md) - provider boundary for AWS-first, multi-cloud-ready design.
+## Repository Boundaries
 
-Security, governance, and operations:
+The detailed project reference below preserves the implementation record. Read [Current status](docs/current-status.md) for the current evidence and deferred scope. This repository does not claim production operation, customer-data use, autonomous agent execution, or a general-purpose AI application.
 
-- [Secure AI enablement](docs/secure-ai-enablement.md) - cloud foundations for secure AI adoption.
-- [Guardrails as a Service](docs/guardrails-as-a-service.md) - synthetic safety verdict contracts.
-- [Responsible AI checklist](docs/responsible-ai-checklist.md) - governance and review checklist.
-- [AI platform security and operations controls](docs/ai-platform-security-operations-controls.md) - P6f identity, data protection, AI AppSec, delivery, operations, and FinOps matrix.
-- [Observability](docs/observability.md) - telemetry and evidence concepts.
-- [Operations runbook](docs/operations-runbook.md) - operational response and support guidance.
-- [AI FinOps](docs/ai-finops.md) - token, model, usage, and cost-control concepts.
+---
 
-RAG, AgentOps, and evidence:
-
-- [AI traffic governance](docs/ai-traffic-governance.md) - P6a runtime AgentOps decision boundary.
-- [Agent capability governance](docs/agent-capability-governance.md) - P6b capability registry, admission, scan, evaluation, and lifecycle pattern.
-- [RAG knowledge lifecycle](docs/rag-knowledge-lifecycle.md) - P6c source provenance, status, retention, and review controls.
-- [Control-plane evidence map](docs/control-plane-evidence-map.md) - P6d unified evidence story.
-- [Control-plane evidence scenarios](docs/control-plane-evidence-scenarios.md) - P6e allowed, denied, approval-required, blocked-before-runtime, and retired-source-blocked outcomes.
-- [Agent runtime exploration](docs/agent-runtime-exploration.md) - future agent-runtime design boundary.
-
-Release engineering and delivery:
-
-- [AI release engineering on EKS](docs/ai-release-engineering-on-eks.md) - P4 EKS release-engineering track.
-- [P4b EKS sandbox runbook](docs/p4b-eks-sandbox-operator-runbook.md) - optional personal AWS sandbox readiness, budget, OIDC, backend, apply/destroy, and evidence guidance.
-- [Real EKS sandbox design](docs/p4b-real-eks-sandbox-design.md) - P4b design and validate-only Terraform skeleton for a future personal AWS EKS apply/destroy path.
-- [P8 real Bedrock sandbox design](docs/p8-real-bedrock-sandbox-design.md) - bounded real Bedrock access design with synthetic prompts, IAM boundaries, and sanitized evidence.
-- [P8a Bedrock access readiness](docs/p8a-bedrock-access-readiness.md) - go/no-go checklist before Terraform-managed Bedrock IAM or model invocation.
-- [P8b Bedrock Terraform sandbox](providers/aws/infra/terraform/envs/bedrock-sandbox/README.md) - plan-only Bedrock IAM boundary for a future synthetic smoke test.
-- [EKS release gates and rollback](docs/eks-release-gates-and-rollback.md) - P4d gates, rollout observation, rollback, and evidence expectations.
-- [AI-assisted DevSecOps pattern](docs/ai-assisted-devsecops-pattern.md) - P5a advisory AI delivery boundary.
-- [AI-assisted review evidence](docs/ai-assisted-review-evidence.md) - P5b synthetic review, CI, threat-model, and release-note evidence.
-
-Provider reference architecture:
-
-- [AWS reference architecture](docs/aws-reference-architecture.md)
-- [AI Factory infrastructure lens](docs/ai-factory-infrastructure-lens.md)
-- [AI Factory learning note](docs/ai-factory-learning-note.md)
-- [Azure reference architecture](docs/azure-reference-architecture.md)
-- [GCP reference architecture](docs/gcp-reference-architecture.md)
-- [Multi-cloud strategy](docs/multi-cloud-strategy.md)
+## Detailed Project Reference
 
 ## Why This Project Exists
 

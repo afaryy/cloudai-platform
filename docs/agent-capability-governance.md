@@ -15,7 +15,7 @@ The pack uses four provider-neutral contracts under `shared/schemas/agent-capabi
 
 The three synthetic scenarios under `shared/examples/agent-capability-governance/` demonstrate `approved`, `blocked`, and `approval-required` outcomes. They do not install, scan, sign, or execute a capability.
 
-This registry/admission layer is the capability-governance portion of the [Governed AI Factory](governed-ai-factory.md) reference architecture.
+This registry/admission layer is the capability-governance portion of the [AI Factory infrastructure lens](ai-factory-infrastructure-lens.md) reference architecture.
 
 ## Runtime Governance
 

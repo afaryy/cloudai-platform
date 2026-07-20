@@ -8,14 +8,14 @@ metadata:
   labels:
     app.kubernetes.io/name: cloudai-api
     app.kubernetes.io/part-of: cloudai-platform
-    cloudai.openai.com/owner: platform-engineering
-    cloudai.openai.com/environment: sandbox
-    cloudai.openai.com/data-scope: synthetic-only
-    cloudai.openai.com/cost-center: portfolio
+    cloudai-platform.example/owner: platform-engineering
+    cloudai-platform.example/environment: sandbox
+    cloudai-platform.example/data-scope: synthetic-only
+    cloudai-platform.example/cost-center: portfolio
   annotations:
-    cloudai.openai.com/release-boundary: synthetic-only
-    cloudai.openai.com/sync-mode: manual
-    cloudai.openai.com/rollback-runbook: docs/ai-release-engineering-on-eks.md
+    cloudai-platform.example/release-boundary: synthetic-only
+    cloudai-platform.example/sync-mode: manual
+    cloudai-platform.example/rollback-runbook: docs/ai-release-engineering-on-eks.md
 spec:
   project: default
   source:
