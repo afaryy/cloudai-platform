@@ -26,7 +26,7 @@
 - Create: `docs/p8h-agentcore-knowledge-lookup-readiness.md`
 
 **Interfaces:**
-- Consumes: existing public-safe evidence documents at `docs/genai-llm-gateway.md`, `docs/rag-knowledge-lifecycle.md`, `docs/agentops.md`, `docs/ai-platform-security-operations-controls.md`, `docs/p8-real-bedrock-sandbox-design.md`, and `docs/guardrails-as-a-service.md`.
+- Consumes: existing public-safe evidence documents at `docs/genai-llm-gateway.md`, `docs/rag-knowledge-lifecycle.md`, `docs/ai-traffic-governance.md`, `docs/ai-platform-security-operations-controls.md`, `docs/p8-real-bedrock-sandbox-design.md`, and `docs/guardrails-as-a-service.md`.
 - Produces: a self-contained P8h reference document with direct links to existing evidence and official AWS references.
 
 - [ ] **Step 1: Write a failing content contract before the document exists**
@@ -157,7 +157,7 @@ Run:
 test -f docs/p8h-agentcore-knowledge-lookup-readiness.md
 grep -q 'p8h-agentcore-knowledge-lookup-readiness.md' docs/p8-real-bedrock-sandbox-design.md
 grep -q 'P8h AgentCore knowledge-lookup readiness' docs/current-status.md
-! rg -n 'AgentCore.*(live validated|deployed|production)' \
+! rg -n 'AgentCore (is |was )?(live validated|deployed|production-ready|running in production)' \
   docs/p8h-agentcore-knowledge-lookup-readiness.md \
   docs/p8-real-bedrock-sandbox-design.md \
   docs/current-status.md

@@ -216,25 +216,31 @@ synthetic `Converse` call uses trace-disabled configuration and sanitized
 evidence. It proves attachment and the access boundary—not filter quality,
 real PII detection, jailbreak resistance, or production policy suitability.
 
-P8f still requires a reviewed provider-compatibility check, Terraform apply,
-protected-environment role configuration, and explicit manual dispatch before
-any live Guardrail resource or guarded call occurs.
+P8f and P8g are live validated through separately reviewed Terraform, protected
+environment configuration, and explicit manual dispatch. Their evidence remains
+limited to the configured Guardrail attachment and three synthetic direct
+evaluation outcomes; it is not a production safety claim.
 
 ## AgentCore Boundary
 
-Bedrock AgentCore should remain a later AgentOps / runtime-governance exploration.
+P8h now provides a documentation-only, gateway-first readiness reference for a
+future read-only knowledge lookup: [P8h AgentCore Knowledge-Lookup
+Readiness](p8h-agentcore-knowledge-lookup-readiness.md).
 
-AgentCore introduces runtime concerns such as agent identity, tools, memory, gateway, observability, evaluation, and operation lifecycle. Those belong after the Bedrock model-access slice is stable and after the project has a clear reason to run a real agent POC.
+AgentCore introduces runtime concerns such as agent identity, tools, memory,
+gateway, observability, evaluation, and operation lifecycle. P8h defines the
+required controls and stop gates without creating an AgentCore resource, call,
+Terraform, IAM policy, container, knowledge source, or runtime.
 
 ## Completed Progression and Next Boundary
 
-P8a through P8f now establish a governed model-access path: readiness,
+P8a through P8g establish a governed model-access path: readiness,
 least-privilege IAM, confirmed apply, a single synthetic smoke test, an opt-in
-adapter, a static Guardrails concept map, and a separately governed Guardrail
-attachment boundary. The next provider extension must be selected deliberately:
-Guardrail quality evaluation remains separate from an AgentCore exploration,
-which adds runtime identity, tools, memory, gateway, observability, evaluation,
-and lifecycle scope.
+adapter, a static Guardrails concept map, a separately governed Guardrail
+attachment boundary, and a narrow direct Guardrail evaluation. P8h is the next
+separate extension: a gateway-first AgentCore readiness reference that maps
+runtime identity, knowledge scope, Guardrails, observability, FinOps, and
+lifecycle stop gates without adding a provider runtime.
 
 ## Interview / CTO Story
 
