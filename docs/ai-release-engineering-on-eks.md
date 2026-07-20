@@ -15,7 +15,7 @@ The default path is synthetic-only and mock-first. It shows how an enterprise pl
 | P4e | Helm-on-EKS sandbox validation | Optional after the base EKS sandbox is active; verifies GitHub Actions access, node readiness, Helm lint/render, and namespace dry-run without installing workloads. |
 | P4f | Helm install, rollback, and uninstall workflow | Optional after P4e; installs the mock API only, observes rollout, captures sanitized health evidence, and supports rollback, uninstall, or namespace cleanup. |
 | P4g | Live Argo CD sandbox GitOps workflow | Optional after P4f; pinned non-HA Argo CD bootstrap, Application registration, manual sync, health evidence, and ordered cleanup. |
-| P7 later | Bedrock Guardrails, AgentCore, or AI Factory extension | Optional after EKS, Terraform, OIDC, FinOps, cleanup, and release controls are established. |
+| P7 later | AgentCore, AI Factory, or broader Guardrail policy/evaluation extension | Optional after EKS, Terraform, OIDC, FinOps, cleanup, and release controls are established. |
 
 ## Candidate Topics
 

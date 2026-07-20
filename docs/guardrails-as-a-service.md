@@ -64,6 +64,11 @@ Amazon Bedrock Guardrails terminology. The map is documentation and contract
 evidence only: it does not configure a Bedrock Guardrail, call an AWS API, or
 inspect raw content.
 
+Separate P8f and P8g work adds a narrow, confirmation-gated provider boundary
+for synthetic Guardrail attachment and direct metadata-only evaluation. That
+does not change this local GaaS API: it remains mock-only, metadata-only, and
+not a production safety classifier.
+
 | GaaS outcome | Bedrock concept | Boundary |
 | --- | --- | --- |
 | `deny` for `prompt-injection` or `jailbreak-attempt` | Content filter: Prompt Attack | Conceptual pre-model input placement only. |
