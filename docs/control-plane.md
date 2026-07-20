@@ -2,7 +2,10 @@
 
 The CloudAI Control Plane is the cloud-agnostic governance and coordination layer for AI enablement. It sits above provider-specific adapters for AWS, Azure, and GCP, and defines how AI use cases, model access, traffic controls, evidence, and operating signals should be handled.
 
-This project is AWS-first, not AWS-only. AWS is the first implementation provider, while Azure and GCP are represented as future provider mappings. The control plane keeps common governance concepts separate from cloud-specific service integrations.
+This project is AWS-first, not AWS-only. AWS has bounded
+implementation/validation evidence, while Azure and GCP are future provider
+mappings. The control plane keeps common governance concepts separate from
+cloud-specific service integrations.
 
 ## Core Responsibilities
 
@@ -29,23 +32,39 @@ The control plane defines what should happen. Provider adapters define how that 
 - Azure and GCP adapters are future mappings.
 - Provider services should not bypass the control-plane model for policy, approval, audit, observability, or cost signals.
 
-## Architecture Flow
+## Runtime Request Path
 
 ```text
-CloudAI Control Plane
-  -> AI Traffic Gateway / Governance Layer
-  -> Provider Adapter
-  -> AWS / Azure / GCP AI Services
-  -> Cloud Landing Zone / Runtime
+Cloud Landing Zone / Runtime Foundation
+  └─ identity, network, secrets, logging, policy, and operational controls
+      └─ Use Case / Application / Enterprise Integration
+          -> GenAI / LLM Gateway and AI Traffic Governance
+          -> Provider Adapter
+          -> AWS / Azure / GCP AI Services
+
+CloudAI Control Plane applies policy, approval, evidence, and operating intent
+across the workflow.
 ```
 
-In this flow, the control plane defines governance intent and evidence expectations. The AI Traffic Gateway / Governance Layer applies those controls to model requests first, then later to broader AI traffic. Provider adapters translate approved requests into cloud-specific service calls. Cloud landing zones and runtimes provide the secure environment where workloads and supporting services run.
+This is a scoped request-path view, not the overall CloudAI architecture. The
+landing zone and runtime are the secure foundation that hosts the workload and
+supporting controls; they are not a final provider hop. The control plane
+defines governance intent and evidence expectations. The gateway and AI Traffic
+Governance layer apply those controls to model requests first, then later to
+broader AI traffic. Provider adapters translate approved requests into
+cloud-specific service calls.
 
 ## Current Repository Scope
 
-In the current foundation phase, the control plane is documented as a reference model. It does not deploy live cloud resources, call live model APIs, or implement policy enforcement.
+The control plane remains a reference coordination model rather than a complete
+runtime policy-enforcement product. Partial local mock evidence exists through
+the gateway and P6 contracts, and bounded provider evidence exists through
+manually approved synthetic Bedrock validation. Mock mode remains the default.
 
-The immediate implementation direction is to keep mock mode as the default, then add a small AWS-first mock GenAI / LLM Gateway in a future phase. That gateway can later emit request metadata, token estimates, policy decisions, evaluation signals, and audit evidence that align with this control-plane model.
+End-to-end policy enforcement, a runtime traffic proxy, and autonomous agent
+execution remain future scope. The existing gateway can emit request metadata,
+token estimates, policy decisions, evaluation signals, and audit evidence that
+align with the control-plane model.
 
 ## Non-Responsibilities
 

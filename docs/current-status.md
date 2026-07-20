@@ -4,7 +4,11 @@ This page summarizes the current public project state. Local planning notes and 
 
 ## Current Milestone
 
-The local mock GenAI gateway, governed RAG evidence path, mock AgentOps decision path, capability-governance contracts, RAG knowledge lifecycle, Guardrails as a Service path, P4 release engineering patterns, P5 AI-assisted DevSecOps evidence path, and P6 security/operations control matrix are complete for the current demo scope.
+The local mock GenAI gateway, governed RAG evidence path, mock AgentOps
+decision path, capability-governance contracts, RAG knowledge lifecycle,
+Guardrails as a Service path, P4 release-engineering evidence, P5 AI-assisted
+DevSecOps evidence, P6 security/operations control matrix, and bounded P8
+Bedrock validation are complete for the current portfolio scope.
 
 The repository can now demonstrate:
 
@@ -29,9 +33,13 @@ The repository can now demonstrate:
 - **P4e Helm-on-EKS Validation Workflow:** GitHub Actions OIDC, temporary kubeconfig, node readiness check, Helm lint/render, and namespace dry-run against the active sandbox without installing workloads
 - **P4f Helm Release Workflow:** optional sandbox Helm install, rollout observation, rollback, uninstall, and namespace cleanup with ClusterIP-only exposure and synthetic workload boundaries
 - **P4g Argo CD GitOps Workflow:** pinned Argo CD bootstrap, private-repository access, explicit manual sync, exact revision verification, health verification, status, ordered cleanup, and post-exercise destroy for the synthetic Helm workload
-- **P8 Real Bedrock Sandbox Design:** bounded design for future real Bedrock access using synthetic prompts, IAM least privilege, manual approval, budget controls, and sanitized evidence
+- **P8 Real Bedrock Sandbox Design:** bounded design and validation foundation
+  for synthetic Bedrock access using least privilege, manual approval, budget
+  controls, and sanitized evidence
 - **P8a Bedrock Access Readiness:** go/no-go checklist, GitHub environment contract, IAM intent, synthetic prompt rules, failure modes, and sanitized evidence template before Terraform or model invocation
-- **P8b Bedrock Terraform Plan Boundary:** Terraform module, stack, tests, and manual workflow for a plan-only Bedrock invoke IAM boundary; no apply or model invocation
+- **P8b Bedrock Terraform Boundary:** Terraform module, stack, tests, and
+  manual workflow for a narrow Bedrock IAM boundary; provider use remains
+  confirmation-gated and synthetic-only
 - **P8f Bedrock Guardrail Boundary:** Terraform-managed synthetic Guardrail/version, separate guarded-inference role, lifecycle-only bootstrap permission, and live-validated confirmation-gated guarded `Converse` workflow path
 - **P8g Direct Guardrail Evaluation:** live-validated manual metadata-only evaluation of safe, PII-shaped, and prompt-attack-shaped synthetic categories through `ApplyGuardrail`; no model invocation or automatic CI call
 - **P8h AgentCore Knowledge-Lookup Readiness:** static gateway-first reference architecture mapping future AgentCore controls to existing evidence; no AgentCore resource or call
@@ -39,7 +47,8 @@ The repository can now demonstrate:
 - **P5b AI-Assisted Review Evidence:** review summaries, threat-model checklists, CI failure summaries, and release-note drafts
 - **P6f AI Platform Security and Operations Controls:** identity, data protection, AI AppSec, delivery, operations, and FinOps
 
-The current control-plane track is **P6 AI Traffic Governance / AgentOps**. P6 currently has six mock-first lanes:
+**P6 AI Traffic Governance / AgentOps** is the control-plane evidence track.
+It currently has six mock-first lanes:
 
 - **P6a Runtime AgentOps:** agent identity, tool permission, policy verdict, human approval, budget state, traceability, and pause/terminate decisions.
 - **P6b Capability Governance:** registry metadata, skill cards, scan/evaluation evidence, admission decision, lifecycle state, and approved/blocked/approval-required capability outcomes.
@@ -48,7 +57,7 @@ The current control-plane track is **P6 AI Traffic Governance / AgentOps**. P6 c
 - **P6e Control-Plane Evidence Scenarios:** a synthetic scenario pack for allowed, denied, approval-required, blocked-before-runtime, and retired-source-blocked governance outcomes.
 - **P6f AI Platform Security and Operations Controls:** a control matrix connecting identity, data protection, AI AppSec, delivery controls, operations, and FinOps to existing portfolio evidence.
 
-## Completed For Mock Scope
+## Current Implementation and Validation Evidence
 
 | Area | Status | Evidence |
 |---|---|---|
@@ -88,10 +97,10 @@ The current control-plane track is **P6 AI Traffic Governance / AgentOps**. P6 c
 
 ## Intentionally Deferred
 
-The following are not part of the current mock scope:
+The following are not part of the current portfolio scope:
 
-- real provider calls
-- provider-backed AI cloud deployment
+- unbounded or production provider calls
+- persistent provider-backed AI application deployment
 - real retrieval runtime
 - embeddings
 - vector indexes
@@ -100,7 +109,7 @@ The following are not part of the current mock scope:
 - real PII detection, jailbreak detection, or safety classification
 - runtime agent execution
 - runtime traffic proxy
-- production-like EKS runtime delivery
+- production EKS runtime delivery
 - real AI model inference on EKS
 - autonomous AI-assisted delivery
 
