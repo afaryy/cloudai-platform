@@ -1,6 +1,9 @@
 # Cloud Provider Abstraction
 
-The provider abstraction describes a stable contract between the CloudAI Control Plane and cloud-specific services.
+The provider abstraction describes a target contract between the CloudAI
+Control Plane and cloud-specific services. Only the narrow model-access
+boundary has implementation evidence in this repository; agent runtime, tool,
+and retrieval capabilities below are future mappings.
 
 ## Adapter Capabilities
 

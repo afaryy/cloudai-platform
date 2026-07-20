@@ -136,12 +136,12 @@ is intentionally bounded and should be read with its stated evidence boundary.
 | AI Factory and accelerated capacity | [AI Factory infrastructure lens](ai-factory-infrastructure-lens.md): future/design context for LLMOps, capacity, and accelerator patterns; no GPU, training, fine-tuning, or high-scale serving implementation. |
 | Multi-cloud mappings | [AWS](aws-reference-architecture.md), [Azure](azure-reference-architecture.md), and [GCP](gcp-reference-architecture.md) mappings: AWS-first implementation context with Azure/GCP reference mappings, not provider parity claims. |
 
-## 6. Current Evidence Boundary
+## 6. Current Implementation and Evidence Status
 
 The architecture above includes the full ecosystem. The following table states
 what this repository currently demonstrates publicly.
 
-| Area | Public-safe status |
+| Area | Implementation and evidence status |
 | --- | --- |
 | Governed AI Gateway | Implemented — mock-first |
 | AI Release Engineering on EKS | Implemented — sandbox-validated for a synthetic workload |

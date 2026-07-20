@@ -1,6 +1,7 @@
 # AWS Reference Architecture
 
-AWS is the first implementation provider for this platform.
+AWS is the first provider with bounded implementation and validation evidence
+for this platform; it is not a persistent provider-backed deployment.
 
 ## Candidate Service Mapping
 
@@ -14,7 +15,7 @@ AWS is the first implementation provider for this platform.
 - State and metadata: Amazon DynamoDB and Amazon S3.
 - Observability: Amazon CloudWatch.
 - Runtime options: AWS Lambda, Amazon ECS, and Amazon EKS.
-- Future container platform: Amazon EKS.
+- Container platform reference and bounded sandbox-validation path: Amazon EKS.
 
 ## AI Platform Considerations
 
@@ -38,11 +39,11 @@ P4 keeps EKS release engineering separate from general AWS runtime choices:
 - **OIDC boundary:** the repository should reuse an existing `token.actions.githubusercontent.com` OIDC provider where one already exists in the account, rather than creating duplicates.
 - **Cost boundary:** avoid NAT-heavy defaults and long-lived clusters until the sandbox workload, budget, and teardown process are explicit.
 
-The completed EKS sandbox design is documented in `docs/p4b-real-eks-sandbox-design.md`. It keeps the first real deployment focused on EKS, Terraform, GitHub Actions OIDC, Helm, rollout evidence, and teardown before adding Bedrock or Bedrock AgentCore.
+The completed EKS sandbox design is documented in `docs/p4b-real-eks-sandbox-design.md`. Its bounded personal validation used a synthetic workload and was destroyed after evidence capture; it does not represent a persistent EKS deployment.
 
-The next Bedrock-specific design step is documented in `docs/p8-real-bedrock-sandbox-design.md`. It defines a tiny governed Bedrock access path with synthetic prompts, IAM least privilege, manual approval, budget controls, and sanitized evidence.
+The bounded Bedrock sandbox design is documented in `docs/p8-real-bedrock-sandbox-design.md`. It established a tiny governed access path using synthetic inputs, IAM least privilege, manual approval, budget controls, and sanitized evidence. The P8f Guardrail attachment and P8g direct-evaluation paths extend that boundary with synthetic-only validation.
 
-The bounded P8f Guardrail attachment and P8g direct-evaluation paths now extend the basic Bedrock access boundary with synthetic-only validation. Broader Guardrail policy, evaluation, data-handling, and operational-ownership work remains future scope. AgentCore should come later still because it introduces agent runtime, tool, memory, gateway, observability, and evaluation concerns.
+Broader Guardrail policy, evaluation, data-handling, and operational ownership remain future scope. AgentCore remains future scope because it introduces agent runtime, tool, memory, gateway, observability, and evaluation concerns.
 
 ## Landing Zone Scale Boundary
 
@@ -149,4 +150,7 @@ For a provider-aware overview, see `docs/ai-factory-infrastructure-lens.md`.
 
 ## Current State
 
-The repository contains synthetic-only scaffold examples. No Terraform apply is performed, no live AWS resources are required, and no account-specific values should be committed.
+Committed repository artifacts are public-safe and synthetic-only. Optional
+personal EKS and bounded Bedrock validations have been performed and destroyed;
+they do not represent a persistent deployment. No account-specific values,
+credentials, kubeconfig, state, plans, tfvars, or live outputs are committed.

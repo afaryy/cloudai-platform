@@ -8,7 +8,7 @@ I design and build secure, governed, observable, and cost-aware cloud and platfo
 
 **Core technologies:** AWS · Terraform · Kubernetes · EKS · Helm · Argo CD · GitHub Actions · TypeScript · Python · JSON Schema · AI governance patterns
 
-> **Public-safe note:** This is a personal technical portfolio and learning implementation. It uses synthetic data, generic identifiers, and public cloud service patterns; mock mode remains the default. It contains no employer, customer, confidential, credential, or proprietary material.
+> **Public-safe note:** This personal technical portfolio uses synthetic data, generic identifiers, and public cloud service patterns; mock mode remains the default. It intentionally excludes employer, customer, confidential, credential, and proprietary information.
 
 ## Architecture at a Glance
 
@@ -43,6 +43,20 @@ provider views.
 
 [Read the featured-solution evidence and boundaries →](docs/featured-solutions.md)
 
+### Evidence-Status Legend
+
+- **Implemented — mock-first:** local code, contracts, and tests are present;
+  no provider call is required by default.
+- **Implemented — local synthetic workflow:** local, synthetic artifacts and
+  deterministic checks demonstrate the workflow without a hosted runtime.
+- **Implemented — sandbox-validated:** a manually approved personal sandbox
+  validation exercised a synthetic workload; it is not a production platform.
+- **Implemented — bounded synthetic sandbox validation:** a manually approved,
+  least-privilege provider validation used synthetic inputs and sanitized
+  evidence; it is not unconstrained provider access or production operation.
+- **Design / future reference:** an architecture mapping or documented boundary
+  without runtime implementation evidence.
+
 ## What This Portfolio Demonstrates
 
 - Cloud platform foundations, infrastructure-as-code, and controlled delivery paths.
@@ -52,230 +66,37 @@ provider views.
 
 ## Architecture Library
 
-- [Solution walkthrough](docs/cloudai-platform-solution-walkthrough.md) — end-to-end repository reading path.
-- [Platform architecture](docs/architecture.md) and [CloudAI control plane](docs/control-plane.md) — architectural foundations.
-- [GenAI / LLM gateway](docs/genai-llm-gateway.md), [RAG knowledge lifecycle](docs/rag-knowledge-lifecycle.md), and [AI traffic governance](docs/ai-traffic-governance.md) — governed AI patterns.
-- [AI release engineering on EKS](docs/ai-release-engineering-on-eks.md), [EKS release gates and rollback](docs/eks-release-gates-and-rollback.md), and [AI-assisted DevSecOps](docs/ai-assisted-devsecops-pattern.md) — delivery patterns.
-- [Secure AI enablement](docs/secure-ai-enablement.md), [AI platform security and operations controls](docs/ai-platform-security-operations-controls.md), and [AI FinOps](docs/ai-finops.md) — platform controls.
-- [AWS](docs/aws-reference-architecture.md), [Azure](docs/azure-reference-architecture.md), and [GCP](docs/gcp-reference-architecture.md) reference mappings — provider context, not provider parity claims.
+[Browse the complete Architecture Library →](docs/architecture-library.md)
 
 ## Repository Boundaries
 
-The detailed project reference below preserves the implementation record. Read [Current status](docs/current-status.md) for the current evidence and deferred scope. This repository does not claim production operation, customer-data use, autonomous agent execution, or a general-purpose AI application.
+The Technical Reference below links to the implementation record and evidence
+boundaries. This repository does not claim production operation, customer-data
+use, autonomous agent execution, or a general-purpose AI application.
 
 ---
 
-## Detailed Project Reference
+## Technical Reference
 
-## Why This Project Exists
+The portfolio landing page above is deliberately concise. Use these paths for
+the supporting technical detail:
 
-AI platform work often spans cloud engineering, security, governance, developer experience, data access, cost controls, and operations. This repository gives those concerns a concrete shape in a practical portfolio project.
+- [Architecture library](docs/architecture-library.md) — complete curated
+  document index, including AWS-first and future Azure/GCP mappings.
+- [Architecture hierarchy](docs/architecture.md) — enterprise ecosystem,
+  capability layers, CloudAI domains, lifecycle, and evidence boundaries.
+- [Solution walkthrough](docs/cloudai-platform-solution-walkthrough.md) —
+  guided technical reading sequence and evidence progression.
+- [Current status](docs/current-status.md) — implementation record, bounded
+  sandbox validation, deferred scope, and recommended next slice.
+- [Featured solutions](docs/featured-solutions.md) — four case studies with
+  technical evidence, trade-offs, and explicit non-claims.
 
-The goal is to show practical architecture thinking and incremental platform delivery using synthetic examples and public cloud service patterns.
+AWS is the first provider with bounded implementation and validation evidence.
+Azure and GCP remain reference mappings, not provider-parity implementations.
+AgentCore, AI Factory, and GPU capacity patterns remain future design scope.
 
-## What This Project Demonstrates
-
-- **P0 Foundation:** responsible AI checklist, project scope guidance, and future multi-cloud provider mapping.
-- **P1 Mock GenAI Gateway:** a model-access sub-layer through a GenAI / LLM Gateway.
-- **P1 AWS GenAI Pattern:** AWS Bedrock integration pattern at the architecture level.
-- **P1/P2 Governed Model Access:** governed access to foundation models and future AI services.
-- **P2 Secure AI Enablement:** secure AI enablement for Cloud & AI platform workflows.
-- **P2 Guardrails as a Service:** synthetic PII, jailbreak, prompt-injection, safety, and review verdicts.
-- **P2 AI FinOps and Observability:** token cost tracking, evaluation, runbook, and operations practices.
-- **P4 EKS Release Engineering:** Helm, Argo CD, release gates, rollback guidance, optional personal sandbox readiness, and Terraform-oriented AWS platform foundations.
-- **P5 AI-Assisted DevSecOps:** GitHub Actions CI/CD skeletons, advisory AI boundaries, review evidence, and human-owned delivery controls.
-- **P6 AI Traffic Governance:** mock Runtime AgentOps, capability governance, RAG knowledge lifecycle, control-plane evidence, scenario outcomes, and security/operations controls.
-- **P6b Capability Governance:** declared permissions, synthetic scan/evaluation evidence, admission decisions, and lifecycle status for reusable agent assets.
-- **P6c RAG Knowledge Lifecycle:** source provenance, owner, classification, authorised knowledge bases, retention, review, and active/paused/retired status.
-- **P6d Control-Plane Evidence Map:** connected evidence across runtime AgentOps, capability admission, RAG lifecycle, guardrails, and AI-assisted review.
-- **P6e Control-Plane Evidence Scenarios:** allowed, denied, approval-required, blocked-before-runtime, and retired-source-blocked AI governance outcomes.
-- **P6f AI Platform Security and Operations Controls:** identity, data protection, AI AppSec, delivery gates, operations, and FinOps.
-
-## AWS-First, Multi-Cloud-Ready
-
-AWS is the first implementation provider. The reference architecture maps early provider concepts to public AWS services such as Amazon Bedrock, Amazon Bedrock AgentCore, Amazon SageMaker AI, IAM, KMS, Secrets Manager, API Gateway, Lambda, DynamoDB, S3, CloudWatch, ECS, and EKS.
-
-The control model is intentionally cloud-agnostic. Azure and GCP are represented as early reference architecture mappings, not active implementations. Azure mappings track Microsoft Foundry, Azure AI Search, Entra ID, Key Vault, Azure Monitor, API Management, and Private Link. GCP mappings track Gemini Enterprise Agent Platform, Vertex AI / Model Garden, Agent Gateway, Agent Runtime, Vector Search, IAM, Cloud KMS, Secret Manager, Cloud Logging, and Cloud Monitoring. The project keeps provider-specific details behind adapter boundaries so the core governance model can remain portable.
-
-## CloudAI Control Plane Concept
-
-The CloudAI Control Plane is the governance and coordination layer for AI enablement.
-
-It is responsible for:
-
-- Policy and approval workflows.
-- Use case and environment registration.
-- Model and provider access decisions.
-- Audit and evidence capture.
-- Cost and usage visibility.
-- Observability and operational review.
-
-It is not a model training platform, data warehouse, or deployed runtime in this phase.
-
-## Architecture Flow
-
-```text
-User / workload
-  -> CloudAI Control Plane
-  -> GenAI / LLM Gateway
-  -> AI Traffic Governance Layer
-  -> Provider Adapter
-  -> AWS-first provider services
-```
-
-The GenAI / LLM Gateway is the first model-access sub-layer. The AI Traffic Governance Layer is the broader future control point for agents, tools, retrieval, workflows, and governed data access.
-
-See `docs/architecture.md` for the relationship between this implementation view and the six-layer enterprise AI model: Strategy, Governance, Data, Platform, Infrastructure, and Operations.
-
-## Track A: AWS GenAI Platform Starter
-
-Track A focuses on the AWS-first GenAI platform foundation.
-
-Current scope:
-
-- AWS provider placeholder structure.
-- Bedrock-oriented architecture notes.
-- Terraform module and environment folders.
-- Mock-mode scripts for future cost and ingest examples.
-- Local mock GenAI / LLM Gateway API.
-- Request metadata, structured logs, token guardrail, API schemas, and default policy profile examples.
-- Guardrails as a Service assessment contracts for synthetic safety and review signals.
-- Synthetic demo fixtures for request, response, error, and request log examples.
-- Local governed RAG workflow examples for ingest, chunk metadata, evaluation dataset preparation, and response-quality scoring.
-
-Future scope:
-
-- Reviewed AWS foundation modules.
-- Terraform validation examples.
-- Optional small AWS runtime deployment after cost and cleanup guidance is documented.
-
-## Track B: AI Release Engineering on EKS
-
-Track B explores release engineering for AI services on Amazon EKS. It is split into a synthetic-only default path and an optional personal sandbox path so the portfolio can show real platform-engineering judgment without accidentally turning the public repository into a live cloud deployment.
-
-Current scope:
-
-- **P4a Helm Packaging:** portfolio-ready Helm chart for the mock AI API service, including Kubernetes packaging, probes, resource boundaries, synthetic labels, and optional PodDisruptionBudget.
-- **P4b Optional Personal EKS Sandbox:** Terraform-managed sandbox readiness, explicit budget, manual approval, synthetic workload only, and teardown guidance.
-- **P4c GitOps Pattern:** synthetic Argo CD Application manifest, manual sync posture, release metadata, and promotion boundaries.
-- **P4d Release Gates and Rollback:** pre-deploy gates, rollout observation, rollback choices, failure modes, and evidence expectations.
-- **P4e Helm-on-EKS Validation:** manual GitHub Actions workflow that reached the active sandbox, checked node readiness, linted/rendered the Helm chart, and dry-ran the namespace without installing workloads.
-- **P4f Helm Release Workflow:** manual GitHub Actions workflow that exercised sandbox Helm install, rollout observation, rollback, uninstall, and namespace cleanup using a public test image override.
-- **P4g Argo CD GitOps Workflow:** manual GitHub Actions workflow that exercised pinned Argo CD bootstrap, private-repository access, exact-revision Application sync, health verification, status, ordered cleanup, and post-exercise destroy on the EKS sandbox.
-- **P8a Bedrock Access Readiness:** docs-only go/no-go checklist for model access, manual approval, budget, IAM intent, synthetic prompt boundaries, and sanitized evidence before Terraform or invocation.
-- **P8b Bedrock Terraform Plan Boundary:** plan-only Terraform stack for a narrow Bedrock invoke IAM role and policy, using GitHub Actions OIDC and a separate remote state key.
-- **P8c Synthetic Bedrock Smoke Test:** a manually approved, synthetic-only Bedrock invocation with sanitized workflow evidence.
-- **P8d Opt-In Bedrock Gateway Adapter:** a real Bedrock client boundary and manual adapter smoke workflow while mock mode remains the application default.
-- **P8e Bedrock Guardrails Mapping:** a static, tested map from mock Guardrails as a Service outcomes to Bedrock Guardrails concepts; it does not configure or evaluate a provider guardrail.
-- **P8f Bedrock Guardrail Boundary:** a bounded Guardrail configuration and guarded `Converse` attachment path, exercised only through confirmation-gated synthetic validation with sanitized evidence.
-- **P8g Direct Guardrail Evaluation:** a bounded metadata-only direct evaluation path for safe, PII-shaped, and prompt-attack-shaped synthetic categories; no model invocation or automatic CI execution.
-- **P8h AgentCore Knowledge-Lookup Readiness:** gateway-first reference architecture only; no AgentCore resource or call.
-
-Future scope:
-
-- Broader Guardrail policy, evaluation, data-handling, and operational-ownership work beyond the narrow synthetic boundary.
-- An optional AgentCore runtime extension after a distinct runtime-governance use case is defined.
-
-## Track C: AI-Assisted DevSecOps Pattern
-
-Track C documents how AI assistance can support delivery without bypassing engineering controls.
-
-Current scope:
-
-- **P5a AI-Assisted DevSecOps Boundary:** advisory AI use only, human ownership, CI/security gates, prohibited-input rules, and auditable release evidence.
-- **P5b AI-Assisted Review Evidence:** synthetic evidence records for review summaries, threat-model checklists, CI failure summaries, and release-note drafts.
-
-The pattern emphasizes:
-
-- Human review of AI-assisted changes.
-- Required CI and security checks.
-- Reviewable prompts that use synthetic examples.
-- Synthetic examples only.
-- Clear separation between local working notes and public documentation.
-- No autonomous agent execution or deployment by default.
-- Human-owned sign-off for any AI-assisted recommendation.
-
-## Track D: AI Traffic Gateway and Kubernetes-Native Agent Runtime Exploration
-
-Track D explores governed agent, tool, retrieval, workflow, and data-access traffic. It is the P6 track for AgentOps / AI Traffic Governance.
-
-Current mock scope:
-
-- **P6a Runtime AgentOps:** metadata-only agent-action authorisation decisions for allow, deny, approval-required, paused, and budget-exhausted outcomes.
-- **P6b Capability Governance:** registry, skill card, synthetic scan/evaluation evidence, admission decision, and lifecycle records for reusable agent capabilities.
-- **P6c RAG Knowledge Lifecycle:** source provenance, owner, classification, authorised knowledge-base boundary, retention, review, and active/paused/retired source states.
-- **P6d Control-Plane Evidence Map:** one synthetic map that links runtime AgentOps, capability admission, RAG lifecycle, guardrail verdicts, and AI-assisted review evidence.
-- **P6e Control-Plane Evidence Scenarios:** a scenario pack that explains allowed, denied, approval-required, blocked-before-runtime, and retired-source-blocked outcomes through existing synthetic evidence.
-- **P6f AI Platform Security and Operations Controls:** a docs-first control matrix for identity, data protection, AI AppSec, delivery controls, operations, and FinOps.
-
-It asks:
-
-- How should tool calls be authorized?
-- How should retrieval and data egress be governed?
-- Which events should be audited?
-- What runtime isolation model is appropriate?
-- How could Kubernetes-native agents inherit platform controls?
-- Which platform security and operations controls must exist before a future agent or EKS sandbox becomes production-like?
-
-No real agent runtime, MCP execution, traffic proxy, cloud deployment, or provider integration is implemented in the current scope.
-
-## Track E: AI Factory / LLMOps / GPU Platform Stretch
-
-Track E is a future design-first exploration of an Enterprise AI Factory: the operating model, controls, and accelerated compute patterns required to take approved models from evaluation through training, deployment, inference, and retirement.
-
-Potential areas:
-
-- AI Factory operating model: CDAO or equivalent governance ownership, central platform ownership, and product-team delivery responsibilities.
-- AI Factory infrastructure lifecycle: foundation models, enterprise data, AI tools, evaluation, customization, deployment, inference, evidence, and feedback loops.
-- Inference scaling pressure from larger models, longer reasoning, larger context windows, agentic workflows, and production telemetry.
-- Model evaluation workflows.
-- Prompt and response quality checks.
-- Synthetic benchmark datasets.
-- GPU capacity and scheduling architecture notes for training, fine-tuning, batch inference, and high-throughput serving.
-- Amazon SageMaker HyperPod as an optional AWS reference for resilient accelerated clusters with EKS or Slurm orchestration.
-- Cost, quota, capacity, resilience, and teardown guardrails.
-
-This track is intentionally deferred until the control-plane, AgentOps, and delivery patterns are clearer. A HyperPod cluster is not a default portfolio deployment: any later personal POC needs a useful synthetic workload, capacity approval, explicit budget, and teardown plan.
-
-## Project Scope and Governance
-
-This project uses synthetic examples and public cloud service patterns for demonstration purposes.
-
-Scope assumptions:
-
-- It is a learning and reference implementation.
-- Examples use synthetic data, generic service names, and public cloud concepts.
-- Local notes, generated state, screenshots, and full working transcripts are kept out of the repository.
-- Mock mode remains the default unless a future task explicitly adds reviewed deployment guidance.
-
-## FinOps and Token Cost Tracking
-
-The project includes early AI FinOps concepts for understanding usage and cost signals.
-
-Planned signals include:
-
-- Estimated input and output tokens.
-- Provider and model labels.
-- Environment and use case labels.
-- Request volume and latency.
-- Cost allocation metadata.
-
-The current `scripts/estimate-token-cost.ts` file is mock-only and uses synthetic values. It does not call a provider or calculate a real cloud bill.
-
-## Observability and Operations
-
-The operations model covers:
-
-- Request counts, latency, and errors.
-- Policy allow, deny, and review decisions.
-- Provider and model routing decisions.
-- Token estimates and cost metadata.
-- Evaluation results for quality and safety review.
-- Runbooks, assessments, gap tracking, and sprint reviews.
-
-Provider-specific dashboards, alarms, traces, and evaluation harnesses are future work.
-
-## How to Run Locally in Mock Mode
+## Run Locally in Mock Mode
 
 The current P1 implementation runs locally in mock mode.
 
@@ -306,35 +127,7 @@ tsx scripts/estimate-token-cost.ts
 tsx scripts/ingest-sample-docs.ts
 ```
 
-If you do not have a TypeScript runner installed, read the scripts as mock examples. No cloud account setup is needed for this phase.
-
-## Roadmap
-
-Current milestone: mock GenAI gateway, governed RAG evidence, AgentOps decisions, capability governance, RAG knowledge lifecycle, Guardrails as a Service, P4 release engineering patterns, and P5 AI-assisted DevSecOps boundary/evidence are complete for the local demo scope.
-
-Near-term:
-
-- Keep API contracts, request metadata, token guardrails, policy profile examples, and RAG governance examples aligned.
-- Deepen optional P4b personal EKS sandbox evidence before any real `apply`, especially readiness, approval, plan, rollback, teardown, and cost evidence.
-- Add future P6 AgentOps / AI Traffic Governance scenarios only when they explain a new governance outcome not already covered by the current evidence set.
-- Keep future slices synthetic and contract-first before adding any runtime agent behavior or cloud deployment.
-- Continue refreshing status and planning docs as future slices land.
-
-Later:
-
-- Add reviewed AWS Terraform module stubs.
-- Add AWS bootstrap guidance for Terraform state, locking, and GitHub Actions OIDC role assumptions.
-- Expand AI FinOps and observability examples.
-- Optionally execute a personal AWS EKS sandbox POC only after budget, teardown, backend, OIDC, and secret-handling controls are explicit.
-- Expand Azure and GCP provider mapping.
-- Explore agent runtime and LLMOps / GPU sandbox tracks.
-
-See `docs/current-status.md` for the current milestone, deferred runtime work, and recommended next slice.
-
-Detailed planning notes are kept locally. The public repository focuses on the reference architecture, examples, and mock-mode implementation path.
-
-## Project Scope Statement
-
-This project is a personal learning and reference implementation. It uses synthetic examples and public cloud service patterns.
-
-Mock mode is the default. Avoid real AWS cost unless a future task explicitly requests and documents a safe deployment path.
+If you do not have a TypeScript runner installed, read the scripts as mock
+examples. No cloud account setup is needed for this path. For deferred scope,
+future work, and bounded validation evidence, read [Current
+status](docs/current-status.md).
