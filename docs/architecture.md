@@ -108,7 +108,7 @@ is not another layer stack, and individual controls may iterate as the use case
 changes.
 
 ```mermaid
-flowchart LR
+flowchart TB
   usecase["Business use case and owner"]
   assessment["Data classification and risk assessment"]
   pattern["Approved platform pattern"]
@@ -118,8 +118,33 @@ flowchart LR
   operate["Observability, FinOps, audit evidence, and support"]
   improve["Resilience, retirement, and continuous improvement"]
 
-  usecase --> assessment --> pattern --> secure --> access --> release --> operate --> improve
+  subgraph discover["1. Discover and design"]
+    direction LR
+    usecase --> assessment --> pattern
+  end
+
+  subgraph deliver["2. Build and release"]
+    direction LR
+    secure --> access --> release
+  end
+
+  subgraph operate_loop["3. Operate and improve"]
+    direction LR
+    operate --> improve
+  end
+
+  pattern --> secure
+  release --> operate
+  improve -. "feedback, change, or retirement decision" .-> assessment
 ```
+
+The lifecycle starts by establishing a business outcome, accountable owner,
+data classification, and risk posture. An approved pattern then moves through
+secure foundations, governed access, and release controls before it enters
+operation. Operational evidence, cost, support, resilience, and retirement
+decisions feed back into assessment whenever the workload, its data, or its
+risk profile changes. This is a delivery and operating cycle—not a seventh
+enterprise capability layer or a claim that every step is automated.
 
 ## 5. Implementation and Provider Views
 

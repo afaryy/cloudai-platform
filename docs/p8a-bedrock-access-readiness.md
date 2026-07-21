@@ -1,5 +1,10 @@
 # P8a Bedrock Access Readiness
 
+> Historical readiness record. The P8 progression later completed bounded
+> synthetic Bedrock and Guardrail validation. Read [Current status](current-status.md)
+> for the current evidence boundary; this document preserves the pre-validation
+> gate and its public-safety rules.
+
 P8a is the go/no-go checklist before the project adds Terraform-managed Bedrock IAM resources or performs any real Bedrock model invocation.
 
 This slice is intentionally documentation-only. It prepares the sandbox boundary for P8b and P8c without changing AWS resources, invoking a model, storing provider responses, or adding runtime integration code.
