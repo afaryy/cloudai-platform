@@ -1,5 +1,10 @@
 # P8b.1 Bedrock IAM Apply Readiness
 
+> Historical readiness record. The confirmation-gated IAM apply and later
+> bounded synthetic Bedrock and Guardrail validation were completed after this
+> gate. Read [Current status](current-status.md) for the current evidence
+> boundary; this document preserves the pre-apply control requirements.
+
 P8b.1 is the documentation-only gate before a separately reviewed workflow may apply the P8b Bedrock IAM boundary. It does not apply Terraform, invoke Bedrock, create credentials, or enable a new GitHub Actions mode.
 
 ```text

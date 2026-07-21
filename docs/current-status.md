@@ -33,13 +33,17 @@ The repository can now demonstrate:
 - **P4e Helm-on-EKS Validation Workflow:** GitHub Actions OIDC, temporary kubeconfig, node readiness check, Helm lint/render, and namespace dry-run against the active sandbox without installing workloads
 - **P4f Helm Release Workflow:** optional sandbox Helm install, rollout observation, rollback, uninstall, and namespace cleanup with ClusterIP-only exposure and synthetic workload boundaries
 - **P4g Argo CD GitOps Workflow:** pinned Argo CD bootstrap, private-repository access, explicit manual sync, exact revision verification, health verification, status, ordered cleanup, and post-exercise destroy for the synthetic Helm workload
-- **P8 Real Bedrock Sandbox Design:** bounded design and validation foundation
-  for synthetic Bedrock access using least privilege, manual approval, budget
-  controls, and sanitized evidence
-- **P8a Bedrock Access Readiness:** go/no-go checklist, GitHub environment contract, IAM intent, synthetic prompt rules, failure modes, and sanitized evidence template before Terraform or model invocation
-- **P8b Bedrock Terraform Boundary:** Terraform module, stack, tests, and
-  manual workflow for a narrow Bedrock IAM boundary; provider use remains
-  confirmation-gated and synthetic-only
+- **P8 Real Bedrock Sandbox:** bounded synthetic validation for model access
+  and Guardrails using least privilege, manual approval, budget controls, and
+  sanitized evidence
+- **P8a/P8b Bedrock Access and IAM Boundary:** historical readiness gates,
+  Terraform module, stack, tests, and confirmation-gated IAM apply path
+- **P8c Synthetic Bedrock Smoke Test:** one bounded synthetic model-access
+  validation through the dedicated OIDC role
+- **P8d Opt-in Bedrock Gateway Adapter:** validated adapter smoke path while
+  mock mode remains the ordinary runtime path
+- **P8e Bedrock Guardrails Mapping:** static contract and schema mapping from
+  the mock guardrail model to Bedrock concepts
 - **P8f Bedrock Guardrail Boundary:** Terraform-managed synthetic Guardrail/version, separate guarded-inference role, lifecycle-only bootstrap permission, and live-validated confirmation-gated guarded `Converse` workflow path
 - **P8g Direct Guardrail Evaluation:** live-validated manual metadata-only evaluation of safe, PII-shaped, and prompt-attack-shaped synthetic categories through `ApplyGuardrail`; no model invocation or automatic CI call
 - **P8h AgentCore Knowledge-Lookup Readiness:** static gateway-first reference architecture mapping future AgentCore controls to existing evidence; no AgentCore resource or call
@@ -80,9 +84,9 @@ It currently has six mock-first lanes:
 | P4e Helm-on-EKS validation workflow | Live sandbox validated | `.github/workflows/helm-eks-validation.yml` and `docs/ai-release-engineering-on-eks.md` |
 | P4f Helm release workflow | Live install, rollback, and uninstall validated | `.github/workflows/helm-eks-release.yml` and `docs/ai-release-engineering-on-eks.md` |
 | P4g Argo CD GitOps workflow | Live GitOps sync, health, status, cleanup, and destroy validated | `.github/workflows/argocd-eks-gitops.yml`, `argocd/applications/cloudai-api-sandbox.yaml`, and `docs/ai-release-engineering-on-eks.md` |
-| P8 Real Bedrock Sandbox design | Design complete | `docs/p8-real-bedrock-sandbox-design.md` |
+| P8 Real Bedrock Sandbox | Bounded synthetic sandbox validation complete | `docs/p8-real-bedrock-sandbox-design.md` and `providers/aws/infra/terraform/envs/bedrock-sandbox/README.md` |
 | P8a Bedrock access readiness | Complete | `docs/p8a-bedrock-access-readiness.md` and `docs/templates/p8a-bedrock-smoke-test-evidence.md` |
-| P8b Bedrock Terraform plan boundary | Plan-only Terraform boundary complete | `providers/aws/infra/terraform/modules/bedrock-access/`, `providers/aws/infra/terraform/envs/bedrock-sandbox/`, and `.github/workflows/terraform-bedrock-sandbox.yml` |
+| P8b Bedrock Terraform IAM boundary | Confirmation-gated IAM apply boundary complete | `providers/aws/infra/terraform/modules/bedrock-access/`, `providers/aws/infra/terraform/envs/bedrock-sandbox/`, and `.github/workflows/terraform-bedrock-sandbox.yml` |
 | P8c synthetic Bedrock smoke test | Live synthetic smoke test validated | `.github/workflows/terraform-bedrock-sandbox.yml` and sanitized workflow evidence |
 | P8d opt-in Bedrock gateway adapter | Live adapter smoke validated; mock remains default | `providers/aws/app/api/src/clients/awsBedrockClient.ts`, `providers/aws/app/api/src/scripts/bedrockAdapterSmoke.ts`, and `.github/workflows/bedrock-gateway-adapter.yml` |
 | P8e Bedrock Guardrails mapping | Complete static documentation-and-contract mapping | `docs/guardrails-as-a-service.md`, `shared/schemas/guardrails-as-a-service/bedrock-guardrails-mapping.schema.json`, `shared/examples/guardrails-as-a-service/bedrock-guardrails-mapping.mock.json`, and `providers/aws/app/api/tests/guardrailsContracts.test.ts` |
@@ -115,13 +119,17 @@ The following are not part of the current portfolio scope:
 
 These should remain opt-in future work with explicit cost, cleanup, and governance guidance.
 
-## Recommended Next Slice
+## Future Work Selection Rule
 
-The current slice has completed the core synthetic **P4 EKS Release Engineering readiness** documentation, the hardened **P4b optional personal EKS sandbox readiness** boundary, and the **P5 AI-assisted DevSecOps** boundary/evidence path.
+The current portfolio baseline is complete. Future work must add a distinct
+engineering outcome, preserve explicit cost, cleanup, and public-safety
+boundaries, and avoid duplicating the current evidence.
 
-The optional P4b personal EKS sandbox path has also been exercised through the manual GitHub Actions validate, plan, apply, Helm, Argo CD sync, status, cleanup, and destroy sequence with synthetic workload boundaries. The sandbox was destroyed after evidence capture to keep the POC cost-bounded.
+The bounded EKS and Bedrock validation paths are reusable evidence, not default
+deployment instructions. Repeat them only when a changed implementation or a
+new learning goal requires fresh, sanitized evidence.
 
-Completed P4 split:
+Completed P4 evidence:
 
 - **P4a portfolio-ready release engineering:** Helm/Kubernetes chart for the mock AI API service, probes, rollback notes, resource requests, policy gates, and synthetic deployment metadata.
 - **P4b optional personal EKS sandbox readiness:** Terraform backend bootstrap, GitHub OIDC delivery plane, small no-NAT network defaults, restricted EKS API endpoint CIDRs, budget and teardown gates, synthetic workload boundary, manual apply/destroy path, and no-account-specific-value rules.
@@ -131,7 +139,7 @@ Completed P4 split:
 - **P4f Helm release workflow:** optional install/rollback/uninstall workflow for the mock API Helm chart, using temporary runner `/32` access, a public test image override, ClusterIP-only exposure, rollout status, synthetic health check, and cleanup.
 - **P4g Argo CD GitOps workflow:** optional pinned Argo CD bootstrap and explicit GitOps sync for the same synthetic Helm workload, with private repository access, exact revision verification, sync/health evidence, ordered cleanup, and post-exercise destroy.
 
-Recommended next choices:
+Future work controls:
 
 - **P4b repeat-run discipline:** keep AWS Budget, operator `/32` endpoint CIDR, teardown owner, and environment protection as required gates before any repeat apply. The workflow can run backend-backed validate, plan, apply, and destroy through the `aws-sandbox` environment.
 - **P4f/P4g evidence reuse:** treat the completed Helm and Argo CD live validations as release-engineering evidence. Repeat them only when there is a new learning goal or changed implementation.

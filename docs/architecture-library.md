@@ -56,7 +56,7 @@ implementation record and deferred scope.
 - [AgentCore knowledge-lookup readiness](p8h-agentcore-knowledge-lookup-readiness.md)
   — gateway-first future reference only; no AgentCore resource or call.
 
-### Supporting Implementation Records
+## Supporting Implementation Records
 
 - [EKS sandbox design](p4b-real-eks-sandbox-design.md) and [operator
   runbook](p4b-eks-sandbox-operator-runbook.md) — bounded synthetic sandbox

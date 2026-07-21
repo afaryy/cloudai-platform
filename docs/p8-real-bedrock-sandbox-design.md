@@ -1,8 +1,12 @@
 # P8 Real Bedrock Sandbox Design
 
-P8 defines the first deliberately bounded real Amazon Bedrock slice for CloudAI Platform.
+P8 records CloudAI's first deliberately bounded Amazon Bedrock validation
+slice. The documented progression is complete for the current portfolio scope.
 
-The goal is to move one step beyond mock provider contracts without turning the repository into a live AI platform. The design proves how real model access could be governed, invoked, tested, and evidenced through the existing CloudAI control boundaries.
+The goal was to move one step beyond mock provider contracts without turning the
+repository into a live AI platform. The completed slice demonstrates how
+provider access can be governed, invoked, tested, and evidenced through the
+existing CloudAI control boundaries.
 
 ## Why P8 Comes After P4
 
@@ -20,15 +24,17 @@ GitHub Actions OIDC
   -> cleanup and destroy
 ```
 
-P8 should now prove the next layer: real model-provider access behind a governed interface.
+P8 then validated the next layer: bounded synthetic model-provider access behind
+a governed interface.
 
 This sequence matters because real provider calls should not be added before identity, budget, evidence, and cleanup boundaries are clear.
 
-## Scope
+## Completed Scope
 
-P8 is a design-first real-cloud slice.
+P8 began as a design-first real-cloud slice and is now complete as bounded
+synthetic sandbox validation.
 
-The first implementation should include:
+The completed implementation includes:
 
 - Terraform-managed IAM boundary for Bedrock access.
 - Manual GitHub Actions workflow through the protected `aws-sandbox` environment.
@@ -37,9 +43,9 @@ The first implementation should include:
 - No customer, internal, production, personal, or confidential data.
 - Sanitized evidence only.
 - Clear budget and stop conditions.
-- A future adapter path into the existing GenAI / LLM Gateway contract.
+- An opt-in adapter path into the existing GenAI / LLM Gateway contract.
 
-The first implementation should not include:
+The completed implementation does not include:
 
 - Bedrock AgentCore.
 - SageMaker, GPU, HyperPod, or custom model hosting.
@@ -50,18 +56,17 @@ The first implementation should not include:
 - Autonomous agent execution.
 - Committed account IDs, role ARNs, backend names, model access screenshots, raw responses, credentials, or live endpoint details.
 
-## Proposed Sub-Slices
+## Completed P8 Progression
 
 | Slice | Focus | Evidence |
 | --- | --- | --- |
-| P8a: Bedrock access readiness | Confirm the region, model access, budget, IAM boundary, and manual approval model. | Design checklist and no-live-call readiness notes. |
-| P8b: Terraform-managed IAM boundary | Add a small Bedrock sandbox Terraform stack for least-privilege permissions and optional logging/cost tags. | Terraform validate/plan evidence, no model invocation. |
-| P8b.1: IAM apply readiness | Verify protected environment values, scoped Terraform execution permissions, reviewed plan, owners, evidence, and stop conditions before any apply workflow is introduced. | Public-safe review checklist; no apply and no model invocation. |
-| P8b.2: Confirmed IAM apply | Add an exact confirmation-gated, environment-approved apply mode to the existing Bedrock Terraform workflow. | Sanitized IAM apply evidence; no model invocation or destroy mode. |
-| P8c: Synthetic Bedrock smoke test | Run one tiny prompt from GitHub Actions using OIDC and synthetic content only. | Sanitized success/failure evidence, token/cost metadata where available. |
-| P8d: Gateway adapter boundary | Connect the real Bedrock client shape to the existing GenAI Gateway interface without making live calls the default. | Adapter design, mock default preserved, tests. |
-| P8e: Bedrock Guardrails mapping | Map existing Guardrails as a Service contracts to Bedrock Guardrails concepts. | Static schema, synthetic mapping example, contract test, and documentation; no provider resource or call. |
-| P8f: Guarded Converse smoke boundary | Create one small Guardrail/version and prove one synthetic `Converse` request attaches it through a separate OIDC role. | Terraform/IAM/workflow tests, then separately reviewed manual apply and guarded-smoke evidence. |
+| P8a: Bedrock access readiness | Confirmed the region, model access, budget, IAM boundary, and manual approval model. | Public-safe readiness record. |
+| P8b/P8b.1/P8b.2: Terraform-managed IAM boundary | Added and applied a least-privilege, confirmation-gated Bedrock sandbox IAM boundary. | Sanitized apply evidence; no destroy mode. |
+| P8c: Synthetic Bedrock smoke test | Validated one small synthetic model-access call through OIDC. | Sanitized success/failure category and bounded cost path. |
+| P8d: Gateway adapter boundary | Validated an opt-in Bedrock client shape behind the GenAI Gateway interface. | Mock remains the default; adapter smoke is confirmation-gated. |
+| P8e: Bedrock Guardrails mapping | Mapped Guardrails as a Service contracts to Bedrock concepts. | Static schema, synthetic mapping example, contract test, and documentation; no safety-quality claim. |
+| P8f: Guarded Converse smoke boundary | Created a narrow Guardrail and validated a synthetic guarded `Converse` attachment path through a separate OIDC role. | Sanitized Terraform/IAM/workflow evidence. |
+| P8g: Direct Guardrail evaluation | Validated expected metadata-only verdicts for safe, PII-shaped, and prompt-attack-shaped synthetic categories. | No model invocation; not a Guardrail-quality evaluation. |
 
 ## Target Architecture
 
