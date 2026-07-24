@@ -8,7 +8,7 @@ I design and build secure, governed, observable, and cost-aware cloud and platfo
 
 **Core technologies:** AWS · Terraform · Kubernetes · EKS · Helm · Argo CD · GitHub Actions · TypeScript · Python · JSON Schema · AI governance patterns
 
-> **Public-safe note:** This personal technical portfolio uses synthetic data, generic identifiers, and public cloud service patterns; mock mode remains the default. It intentionally excludes employer, customer, confidential, credential, and proprietary information.
+> Independent technical portfolio built using synthetic data and public-cloud patterns.
 
 ## Architecture at a Glance
 
