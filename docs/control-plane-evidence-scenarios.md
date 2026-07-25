@@ -30,6 +30,8 @@ What evidence would explain why this AI action was allowed, denied, paused, bloc
 
 P6e answers that question with metadata-only examples.
 
+For deterministic repeated policy checks, see the [Agent Behavioural Reliability Gate](agent-behavioural-reliability-gate.md). It extends the runtime-AgentOps evidence lane without executing an agent action.
+
 ## Relationship To P6d
 
 P6d is one end-to-end evidence map. P6e is a scenario pack built from the same control lanes.
@@ -60,4 +62,3 @@ It uses synthetic references to existing mock evidence files only.
 Use this page to explain the difference between architecture diagrams and operational evidence:
 
 > I can show how the control plane would explain five different AI governance outcomes: allowed, denied, approval-required, blocked-before-runtime, and retired-source-blocked. The examples are synthetic, but the evidence shape is realistic for regulated enterprise AI.
-

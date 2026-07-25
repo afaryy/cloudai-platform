@@ -1,7 +1,10 @@
 import type {
   AgentActionAuthorisationRequest,
   AgentActionClass,
+  AgentAuthorisationReasonCode,
+  AgentAuthorisationVerdict,
   AgentRiskTier,
+  AgentReliabilityEvaluationRequest,
   AgentSessionStatus,
   ChatRequest,
   GuardrailAssessmentRequest,
@@ -30,6 +33,8 @@ const AGENTOPS_REQUEST_KEYS = ["requestId", "session", "action", "governance"] a
 const AGENTOPS_SESSION_KEYS = ["sessionId", "agentId", "owner", "delegatedUser", "riskTier", "status"] as const;
 const AGENTOPS_ACTION_KEYS = ["toolId", "actionClass", "leastPrivilegeScope"] as const;
 const AGENTOPS_GOVERNANCE_KEYS = ["policyProfile", "approvalId", "budgetLimit", "budgetConsumed"] as const;
+const AGENT_RELIABILITY_REQUEST_KEYS = ["evaluationId", "authorisationRequest", "expected", "repeatCount"] as const;
+const AGENT_RELIABILITY_EXPECTED_KEYS = ["verdict", "reasonCode", "runtimeState", "approvalRequired"] as const;
 const GUARDRAIL_REQUEST_KEYS = ["requestId", "policyProfile", "surface", "syntheticSignals"] as const;
 
 export function normalizeChatRequest(
@@ -110,6 +115,42 @@ export function normalizeAgentActionAuthorisationRequest(input: unknown): AgentA
   };
 }
 
+export function normalizeAgentReliabilityEvaluationRequest(input: unknown): AgentReliabilityEvaluationRequest {
+  const errorCode = "invalid_agent_reliability_evaluation_request";
+  if (!isRecord(input)) {
+    throw new HttpError(400, "Request body must be a JSON object.", errorCode);
+  }
+
+  assertOnlyKeys(input, AGENT_RELIABILITY_REQUEST_KEYS, "request", errorCode);
+  if (!isRecord(input.expected)) {
+    throw new HttpError(400, "expected is required and must be an object.", errorCode);
+  }
+  assertOnlyKeys(input.expected, AGENT_RELIABILITY_EXPECTED_KEYS, "expected", errorCode);
+  const repeatCount = input.repeatCount;
+  if (typeof repeatCount !== "number" || !Number.isInteger(repeatCount) || repeatCount < 3 || repeatCount > 5) {
+    throw new HttpError(400, "repeatCount must be an integer from 3 through 5.", errorCode);
+  }
+
+  try {
+    return {
+      evaluationId: readRequiredString(input, "evaluationId", errorCode).trim(),
+      authorisationRequest: normalizeAgentActionAuthorisationRequest(input.authorisationRequest),
+      expected: {
+        verdict: readAgentAuthorisationVerdict(input.expected.verdict, errorCode),
+        reasonCode: readAgentAuthorisationReasonCode(input.expected.reasonCode, errorCode),
+        runtimeState: readAgentSessionStatus(input.expected.runtimeState),
+        approvalRequired: readRequiredBoolean(input.expected, "approvalRequired", errorCode)
+      },
+      repeatCount
+    };
+  } catch (error) {
+    if (error instanceof HttpError) {
+      throw new HttpError(400, error.message, errorCode);
+    }
+    throw error;
+  }
+}
+
 export function normalizeGuardrailAssessmentRequest(input: unknown): GuardrailAssessmentRequest {
   if (!isRecord(input)) {
     throw new HttpError(400, "Request body must be a JSON object.", "invalid_body");
@@ -138,6 +179,13 @@ function readRequiredString(
     throw new HttpError(400, `${key} is required and must be a string.`, errorCode);
   }
 
+  return input[key];
+}
+
+function readRequiredBoolean(input: Record<string, unknown>, key: string, errorCode: string): boolean {
+  if (typeof input[key] !== "boolean") {
+    throw new HttpError(400, `${key} is required and must be a boolean.`, errorCode);
+  }
   return input[key];
 }
 
@@ -304,6 +352,27 @@ function readAgentActionClass(value: unknown): AgentActionClass {
   }
 
   throw new HttpError(400, "action.actionClass is not supported in mock mode.", "invalid_agent_action_request");
+}
+
+function readAgentAuthorisationVerdict(value: unknown, errorCode: string): AgentAuthorisationVerdict {
+  if (value === "allow" || value === "deny" || value === "approval-required" || value === "paused") {
+    return value;
+  }
+  throw new HttpError(400, "expected.verdict is not supported in mock mode.", errorCode);
+}
+
+function readAgentAuthorisationReasonCode(value: unknown, errorCode: string): AgentAuthorisationReasonCode {
+  if (
+    value === "read_only_action_allowed"
+    || value === "approved_high_impact_action"
+    || value === "human_approval_required"
+    || value === "tool_not_allowed"
+    || value === "budget_limit_exceeded"
+    || value === "session_not_active"
+  ) {
+    return value;
+  }
+  throw new HttpError(400, "expected.reasonCode is not supported in mock mode.", errorCode);
 }
 
 function readGuardrailSurface(value: unknown): GuardrailSurface {

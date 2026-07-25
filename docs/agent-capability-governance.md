@@ -21,6 +21,8 @@ This registry/admission layer is the capability-governance portion of the [AI Fa
 
 Runtime governance is the separate AgentOps concern of controlling how an admitted capability may be used during a specific session. It evaluates agent and delegated-user identity, least-privilege tool access, policy verdicts, human approval, budgets, pause or terminate state, tracing, and audit evidence.
 
+The [Agent Behavioural Reliability Gate](agent-behavioural-reliability-gate.md) adds a deterministic, metadata-only check that selected runtime policy outcomes remain expected and repeatable. It is not a live agent runtime or tool executor.
+
 An approved capability is eligible for a runtime action, but it is not automatically allowed to act. A blocked or approval-required capability must not be treated as approved by a future runtime integration.
 
 ## Evidence Boundary

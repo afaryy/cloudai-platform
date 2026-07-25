@@ -16,6 +16,7 @@ import { postChat } from "./routes/chat.js";
 import { getRagArtifacts, getRagStatus } from "./routes/ragMetadata.js";
 import { postRagQuery } from "./routes/ragQuery.js";
 import { postAgentActionAuthorisation } from "./routes/agentActionAuthorisation.js";
+import { postAgentActionReliabilityEvaluation } from "./routes/agentReliabilityEvaluation.js";
 import { postGuardrailAssessment } from "./routes/guardrailAssessment.js";
 
 const DEFAULT_PORT = 3000;
@@ -101,6 +102,21 @@ export function createMockApiServer(
           statusCode: 200,
           durationMs: Date.now() - startedAt,
           timestamp: decision.audit.recordedAt
+        }, mode));
+        return;
+      }
+
+      if (method === "POST" && route === "/agent-actions/reliability-evaluate") {
+        const body = await readJsonBody(request);
+        const evaluation = postAgentActionReliabilityEvaluation(body);
+        writeJson(response, 200, evaluation);
+        writeRequestLog(logger, buildRequestLogEvent({
+          requestId: evaluation.evaluationId,
+          method,
+          route,
+          statusCode: 200,
+          durationMs: Date.now() - startedAt,
+          timestamp: evaluation.audit.recordedAt
         }, mode));
         return;
       }
