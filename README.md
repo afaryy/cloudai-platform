@@ -95,6 +95,9 @@ the supporting technical detail:
 AWS is the first provider with bounded implementation and validation evidence.
 Azure and GCP remain reference mappings, not provider-parity implementations.
 AgentCore, AI Factory, and GPU capacity patterns remain future design scope.
+The [AI Workload Operating Contract](docs/ai-workload-operating-contract.md)
+defines this as a future/design practice track within the portfolio: it does
+not add a scheduler, GPU cluster, or cloud runtime.
 
 ## Run Locally in Mock Mode
 

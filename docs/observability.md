@@ -2,7 +2,7 @@
 
 Observability helps platform teams understand AI traffic behavior, reliability, cost, and governance outcomes. Evaluation adds structured review of model and workflow quality before patterns are promoted beyond mock mode.
 
-## Target Signals
+## Model and Request Signals
 
 - Request count, latency, and error rate.
 - Policy allow, deny, and review decisions.
@@ -14,6 +14,27 @@ Observability helps platform teams understand AI traffic behavior, reliability, 
 - Safety and responsible AI review markers.
 - Synthetic evaluation results for prompt quality, response quality, retrieval relevance, and policy behavior.
 - Human review outcomes for higher-risk examples.
+
+## Workload Signals
+
+- Workload class, owner, environment, and lifecycle state.
+- Request/job queued, running, completed, failed, paused, or retired state.
+- Retry count, queue time, completion criterion, and release/rollback outcome.
+- Trace correlation across gateway, policy, guardrail, retrieval, and workflow evidence.
+
+## Infrastructure Signals
+
+- Capacity, quota, rate-limit, and headroom signals for the selected runtime.
+- Future CPU/GPU utilisation, memory pressure, storage throughput, and network health signals.
+- Future workload-placement, node health, and accelerator availability evidence where a bounded runtime exists.
+
+The current repository does not collect GPU, storage, or network telemetry. These are future signal definitions, not a deployed monitoring stack.
+
+## Governance Signals
+
+- Policy allow, deny, and approval-required decisions.
+- Data/egress boundary, guardrail, capability-lifecycle, and approval evidence.
+- Budget stop condition, escalation outcome, pause/terminate action, and retirement evidence.
 
 ## Capacity and Operations Signals
 

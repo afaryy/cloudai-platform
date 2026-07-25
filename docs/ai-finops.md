@@ -26,6 +26,18 @@ Capacity signals to track:
 - Agent session, memory, sandbox, and tool-call volume.
 - Fallback route frequency and cost impact.
 
+## Outcome and Efficiency Signals
+
+AI FinOps should connect spend to a useful, governed result rather than a raw infrastructure number alone. Future-ready measures include:
+
+- estimated cost per successful outcome, with the success criterion defined by the workload profile;
+- idle-capacity exposure for reserved or provisioned resources;
+- queue time and capacity headroom for batch or future accelerated workloads;
+- allocation dimensions for owner, environment, use case, workload class, provider, and model;
+- budget stop conditions and the evidence used to pause, defer, or retire a workload.
+
+These are design signals only. The repository does not calculate invoices, measure energy consumption, reserve GPU capacity, or report real provider utilisation.
+
 ## First Iteration
 
 The repository includes a mock token-cost estimation script placeholder. It does not call real providers or calculate real invoices.

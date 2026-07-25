@@ -89,6 +89,9 @@ implementation record and deferred scope.
 - [AI Factory infrastructure lens](ai-factory-infrastructure-lens.md) — future
   design context for LLMOps, capacity, and accelerator patterns; no GPU,
   training, fine-tuning, or high-scale serving implementation.
+- [AI Workload Operating Contract](ai-workload-operating-contract.md) —
+  documentation-first, vendor-neutral workload readiness model for service,
+  batch, fine-tuning, and future distributed-training profiles.
 
 ## Demonstration and Portfolio Navigation
 
