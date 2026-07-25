@@ -68,7 +68,7 @@ Workload proposal
 
 ## Relationship to Agent Action Contract
 
-The future Agent Action / Operating Contract owns runtime action accountability: agent owner and identity, permitted tools, approval boundary, action evidence, pause, and shutdown behaviour.
+Current AgentOps authorisation controls own the narrow runtime decision boundary for agent identity, permitted tools, approval, policy verdicts, and pause or terminate state. A future Agent Action / Operating Contract would consolidate the broader action-accountability model: agent owner and identity, permitted tools, approval boundary, action evidence, pause, and shutdown behaviour.
 
 This workload-level contract owns the surrounding execution context: workload class, data/network/storage boundary, capacity and quota, cost and energy expectation, release condition, telemetry, and retirement. The two models should cross-reference rather than duplicate fields or schemas.
 

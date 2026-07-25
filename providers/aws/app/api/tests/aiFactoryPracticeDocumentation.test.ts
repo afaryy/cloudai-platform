@@ -25,6 +25,13 @@ test("AI Workload Operating Contract preserves the mock-first boundary", async (
   assert.match(document, /does not add a scheduler, GPU cluster, or cloud runtime/);
 });
 
+test("AI Workload Operating Contract distinguishes current AgentOps controls from a future operating contract", async () => {
+  const document = await readFile(DOC_PATH, "utf8");
+
+  assert.match(document, /Current AgentOps authorisation controls/);
+  assert.match(document, /future Agent Action \/ Operating Contract/);
+});
+
 test("AI Factory documentation distinguishes orchestration from future scheduling", async () => {
   const document = await readFile(AI_FACTORY_PATH, "utf8");
 
