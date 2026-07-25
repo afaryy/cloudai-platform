@@ -58,6 +58,14 @@ Key drivers include:
 
 This is why the portfolio includes AI FinOps, observability, AgentOps, release gates, and capacity language. They are not side topics; they are the operating controls that make AI workloads manageable at scale.
 
+## Workload Operating Model
+
+The [AI Workload Operating Contract](ai-workload-operating-contract.md) adds a shared readiness and lifecycle model for service inference, batch processing, fine-tuning, and future distributed training. It makes the owner, identity, approved data boundary, capacity, cost, evidence, and shutdown path explicit before a workload is eligible to run.
+
+Kubernetes is the reference orchestration pattern for service inference and platform services: it packages, deploys, scales, and operates containerised APIs. Batch and training scheduling is a separate future concern: it allocates scarce accelerated capacity, queue priority, reservation, preemption, and completion accounting for non-interactive workloads. A workload may eventually use both patterns, but they solve different operating problems.
+
+This repository does not deploy Slurm, GPU infrastructure, or a training workload. Slurm, managed training services, GPU operators, DCGM, and high-speed network fabrics remain future design references until a bounded synthetic workload, cost gate, operator, telemetry, and teardown plan are separately reviewed.
+
 ## Relationship To Current Phases
 
 | Phase | AI Factory interpretation |
