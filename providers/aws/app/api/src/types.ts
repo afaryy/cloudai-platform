@@ -182,6 +182,41 @@ export type AgentActionAuthorisationDecision = {
   };
 };
 
+export type AgentReliabilityCheckStatus = "pass" | "fail";
+
+export type AgentReliabilityExpectedOutcome = {
+  verdict: AgentAuthorisationVerdict;
+  reasonCode: AgentAuthorisationReasonCode;
+  runtimeState: AgentSessionStatus;
+  approvalRequired: boolean;
+};
+
+export type AgentReliabilityEvaluationRequest = {
+  evaluationId: string;
+  authorisationRequest: AgentActionAuthorisationRequest;
+  expected: AgentReliabilityExpectedOutcome;
+  repeatCount: number;
+};
+
+export type AgentReliabilityEvaluationResult = {
+  evaluationId: string;
+  status: "pass" | "fail";
+  expected: AgentReliabilityExpectedOutcome;
+  observed: AgentReliabilityExpectedOutcome & {
+    runs: number;
+  };
+  checks: {
+    policyOutcome: AgentReliabilityCheckStatus;
+    approvalBoundary: AgentReliabilityCheckStatus;
+    runtimeState: AgentReliabilityCheckStatus;
+    repeatability: AgentReliabilityCheckStatus;
+  };
+  audit: {
+    traceId: string;
+    recordedAt: string;
+  };
+};
+
 export type GuardrailSurface = "model-gateway" | "rag" | "agent-action" | "delivery";
 export type GuardrailSyntheticSignal =
   | "none"
