@@ -7,6 +7,9 @@ const DOC_PATH = resolve(process.cwd(), "../../../../docs/ai-workload-operating-
 const AI_FACTORY_PATH = resolve(process.cwd(), "../../../../docs/ai-factory-infrastructure-lens.md");
 const OBSERVABILITY_PATH = resolve(process.cwd(), "../../../../docs/observability.md");
 const FINOPS_PATH = resolve(process.cwd(), "../../../../docs/ai-finops.md");
+const README_PATH = resolve(process.cwd(), "../../../../README.md");
+const FEATURED_SOLUTIONS_PATH = resolve(process.cwd(), "../../../../docs/featured-solutions.md");
+const CURRENT_STATUS_PATH = resolve(process.cwd(), "../../../../docs/current-status.md");
 
 test("AI Workload Operating Contract documents every agreed workload profile", async () => {
   const document = await readFile(DOC_PATH, "utf8");
@@ -37,4 +40,16 @@ test("observability and FinOps documents define model, workload, infrastructure,
   assert.match(observability, /## Infrastructure Signals/);
   assert.match(observability, /## Governance Signals/);
   assert.match(finops, /cost per successful outcome/);
+});
+
+test("AI Factory practice navigation is present without a false runtime claim", async () => {
+  for (const path of [README_PATH, FEATURED_SOLUTIONS_PATH, CURRENT_STATUS_PATH]) {
+    const document = await readFile(path, "utf8");
+    assert.match(document, /ai-workload-operating-contract\.md/);
+  }
+
+  const readme = await readFile(README_PATH, "utf8");
+  assert.match(readme, /future\/design practice track/);
+  assert.doesNotMatch(readme, /Implemented — GPU cluster/);
+  assert.doesNotMatch(readme, /Implemented — Slurm/);
 });

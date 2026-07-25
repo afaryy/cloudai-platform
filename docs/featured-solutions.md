@@ -43,6 +43,23 @@ How a platform engineer can put contracts, policy checks, usage metadata, and a 
 
 It is not a production gateway, persistent audit service, enterprise model catalogue, or unrestricted agent runtime.
 
+## AI Workload Operating Contract
+
+- **Status:** Design / future reference
+- **Engineering focus:** AI Factory and AI data-centre workload readiness
+
+### Scope
+
+The [AI Workload Operating Contract](ai-workload-operating-contract.md) defines a shared operating model for service inference, batch processing, fine-tuning, and future distributed training. It makes ownership, identity, access, capacity, cost, approval, evidence, and shutdown expectations explicit.
+
+### What this demonstrates
+
+How the existing CloudAI control-plane patterns can extend into a vendor-neutral AI Factory practice track without changing the portfolio's mock-first operating boundary.
+
+### What it does not claim
+
+It does not implement a GPU cluster, Slurm deployment, distributed training job, Prometheus/Grafana stack, or production AI data centre.
+
 ## AI Release Engineering on EKS
 
 - **Status:** Implemented — sandbox-validated
