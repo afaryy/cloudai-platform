@@ -74,16 +74,23 @@ This workload-level contract owns the surrounding execution context: workload cl
 
 ## Tool Adoption Gate
 
-A tool is introduced only when it supports a named operating-contract control and has an owner, boundary, evidence signal, and cleanup path.
+A tool is introduced only when it supports a named control and has an owner, boundary, evidence signal, and cleanup path.
 
-| Tool or pattern | First justified role | Evidence | Adoption boundary |
-| --- | --- | --- |
-| Prometheus-style metrics and Grafana dashboard JSON | Local mock API observability demonstration | Metric names, redaction tests, dashboard definition | First practical tool slice; local only. |
-| OpenTelemetry-style trace correlation | Link gateway, policy, guardrail, and workflow evidence | Shared synthetic trace ID | Add after the metrics contract is defined. |
-| Helm/EKS metrics exposure | Package the local metrics endpoint | Chart render, probe, service metadata | Only after local metrics are tested. |
-| CloudWatch, Azure Monitor, Google Cloud Monitoring | Map the same signal taxonomy to provider services | Documentation and field mapping | No live telemetry integration by default. |
-| NVIDIA GPU Operator and DCGM | Future GPU health and utilisation evidence | GPU workload metrics | Only after a bounded GPU runtime exists. |
-| Slurm or equivalent scheduler | Future training/batch reservation, queueing, and preemption | Job/accounting evidence | Only after a real scheduling use case exists. |
+### 1. Local observability foundation
+
+Start with Prometheus-style metrics and Grafana dashboard JSON for the local mock API. Prove the metric names, redaction tests, and dashboard definition before connecting anything external.
+
+### 2. Correlate existing evidence
+
+Add OpenTelemetry-style trace correlation only after the metrics contract exists. Its purpose is to connect existing gateway, policy, guardrail, and workflow evidence through a shared synthetic trace ID.
+
+### 3. Expose only after local proof
+
+After local metrics are tested, Helm/EKS can package the metrics endpoint with a rendered chart, probe, and service metadata. This remains a packaging exercise, not a live monitoring deployment.
+
+### 4. Defer provider and GPU tooling
+
+CloudWatch, Azure Monitor, and Google Cloud Monitoring remain documentation mappings, not live integrations. GPU Operator, DCGM, and Slurm remain future choices only when a bounded runtime or real scheduling use case exists and has a cost gate, operator, telemetry, and teardown plan.
 
 ## Future Local Observability Demonstration
 

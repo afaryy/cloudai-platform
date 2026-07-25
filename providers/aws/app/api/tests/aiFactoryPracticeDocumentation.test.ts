@@ -32,6 +32,15 @@ test("AI Workload Operating Contract distinguishes current AgentOps controls fro
   assert.match(document, /future Agent Action \/ Operating Contract/);
 });
 
+test("AI Workload Operating Contract presents tool adoption as a staged path", async () => {
+  const document = await readFile(DOC_PATH, "utf8");
+
+  assert.match(document, /### 1\. Local observability foundation/);
+  assert.match(document, /### 2\. Correlate existing evidence/);
+  assert.match(document, /### 3\. Expose only after local proof/);
+  assert.match(document, /### 4\. Defer provider and GPU tooling/);
+});
+
 test("AI Factory documentation distinguishes orchestration from future scheduling", async () => {
   const document = await readFile(AI_FACTORY_PATH, "utf8");
 
