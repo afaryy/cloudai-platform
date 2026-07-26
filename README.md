@@ -26,12 +26,6 @@ flowchart LR
   policy -. "applies across" .-> workloads
   capacity -. "future extension" .-> platform
 
-  style context width:260px
-  style policy width:220px
-  style platform width:320px
-  style workloads width:270px
-  style providers width:280px
-  style capacity width:250px
 ```
 
 This is a reference architecture, not a deployed topology. Read the
