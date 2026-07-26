@@ -150,6 +150,7 @@ Future work controls:
 - **P8g evidence reuse:** the initial three-case direct evaluation is live validated. Repeat it only when there is a new evaluation goal or a Guardrail configuration change. Treat its result as narrow synthetic configuration evidence, not Guardrail-quality evidence.
 - **P8h reference boundary:** the completed AgentCore knowledge-lookup reference is design-only. Any AgentCore resource, Gateway, runtime, identity, knowledge source, Terraform/IAM, or provider call needs a separate reviewed design and must not reuse P8f/P8g evidence as proof of production safety effectiveness.
 - **P7 AI Factory / LLMOps / GPU stretch:** retain the [AI Factory infrastructure lens](ai-factory-infrastructure-lens.md) and [AI Workload Operating Contract](ai-workload-operating-contract.md) as future design context; they define workload readiness and AI data-centre practice boundaries, not a current GPU, scheduler, or AI Factory implementation.
+- **P7 observability sandbox:** the [EKS Prometheus and Grafana observability demonstration](eks-prometheus-grafana-observability-demo.md) is planned, not validated. Any run requires manual approval, synthetic-only metrics, private access, a budget alert, same-day teardown, and sanitized evidence.
 
 The repository should not perform a real cloud deployment by default. Any personal sandbox work must keep account identifiers, state, kubeconfig, plan files, tfvars, credentials, and live endpoint details out of git.
 

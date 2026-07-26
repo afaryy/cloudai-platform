@@ -17,6 +17,7 @@
     "typescript": "^5.8.0"
   },
   "dependencies": {
-    "@aws-sdk/client-bedrock-runtime": "^3.1090.0"
+    "@aws-sdk/client-bedrock-runtime": "^3.1090.0",
+    "prom-client": "15.1.3"
   }
 }

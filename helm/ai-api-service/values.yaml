@@ -38,6 +38,18 @@ service:
   port: 80
   targetPort: 3000
 
+metrics:
+  enabled: false
+  path: /metrics
+  port: 3000
+  serviceMonitor:
+    enabled: false
+    interval: 15s
+    scrapeTimeout: 5s
+  grafanaDashboard:
+    enabled: false
+    label: grafana_dashboard
+
 probes:
   readiness:
     path: /health
