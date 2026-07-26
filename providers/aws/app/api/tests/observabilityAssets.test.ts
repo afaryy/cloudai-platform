@@ -6,6 +6,7 @@ import { resolve } from "node:path";
 
 const DASHBOARD_PATH = resolve(process.cwd(), "../../../../helm/ai-api-service/dashboards/cloudai-mock-api-dashboard.json");
 const CHART_PATH = resolve(process.cwd(), "../../../../helm/ai-api-service");
+const GUIDE_PATH = resolve(process.cwd(), "../../../../docs/eks-prometheus-grafana-observability-demo.md");
 
 test("Grafana dashboard contains only the five synthetic observability panels", async () => {
   const dashboard = JSON.parse(await readFile(DASHBOARD_PATH, "utf8"));
@@ -41,4 +42,14 @@ test("observability Helm render is internal and opt-in", () => {
   assert.match(rendered, /path: \/metrics/);
   assert.match(rendered, /kind: ConfigMap/);
   assert.doesNotMatch(rendered, /kind: Ingress|type: LoadBalancer/);
+});
+
+test("observability sandbox guide preserves the time-boxed private-access boundary", async () => {
+  const guide = await readFile(GUIDE_PATH, "utf8");
+
+  assert.match(guide, /port-forward only/i);
+  assert.match(guide, /same-day teardown/i);
+  assert.match(guide, /I_UNDERSTAND_COST_AND_TEARDOWN/);
+  assert.match(guide, /I_UNDERSTAND_DESTROY/);
+  assert.doesNotMatch(guide, /Ingress|LoadBalancer/);
 });

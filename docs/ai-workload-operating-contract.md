@@ -97,3 +97,5 @@ CloudWatch, Azure Monitor, and Google Cloud Monitoring remain documentation mapp
 The first tool implementation should remain local and mock-first. It can expose redacted metrics for request latency, request outcome, token/cost estimate, policy/guardrail decision, and workflow/job state. Synthetic trace correlation should link the signals without exposing prompts, tool input/output, credentials, source documents, or raw provider payloads.
 
 Before that work begins, it needs a separate reviewed design, implementation plan, tests, and explicit boundary statement.
+
+The optional [EKS Prometheus and Grafana observability demonstration](eks-prometheus-grafana-observability-demo.md) is the first real-tool practice path. It uses the same mock-first metric contract in a short-lived sandbox and requires separate manual approval, budget controls, and teardown evidence.
