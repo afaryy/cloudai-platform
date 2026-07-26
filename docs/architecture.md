@@ -18,24 +18,33 @@ capability, workload domains, and provider implementation.
 
 ```mermaid
 flowchart TB
-  outcome["Enterprise outcomes<br/>and accountable ownership"]
+  outcome["Enterprise outcomes<br/>and accountable<br/>ownership"]
   policy["Governance, Responsible AI,<br/>and data policy"]
 
   subgraph platform["Shared CloudAI Platform"]
-    foundations["Secure cloud foundations"]
+    foundations["Secure cloud<br/>foundations"]
     access["Governed model, agent,<br/>and data access"]
     delivery["Delivery and<br/>operations controls"]
     capacity["Optional AI Factory<br/>and capacity extension"]
   end
 
   workloads["Business-domain AI<br/>workloads and integrations"]
-  providers["AWS-first implementation<br/>with Azure and GCP mappings"]
+  providers["AWS-first implementation<br/>with Azure and GCP<br/>future mappings"]
 
   outcome --> platform
   policy -. "applies across" .-> platform
   policy -. "applies across" .-> workloads
   platform --> workloads
   workloads --> providers
+
+  style outcome width:260px
+  style policy width:280px
+  style foundations width:220px
+  style access width:250px
+  style delivery width:220px
+  style capacity width:240px
+  style workloads width:270px
+  style providers width:280px
 ```
 
 This is a reference architecture, not a linear delivery pipeline. Governance
@@ -68,12 +77,12 @@ one team.
 
 ```mermaid
 flowchart TB
-  intake["1. Business outcome, use case,<br/>and accountable ownership"]
+  intake["1. Business outcome,<br/>use case, and accountable<br/>ownership"]
   risk["2. Governance, risk,<br/>Responsible AI, and approval"]
   data["3. Data, knowledge,<br/>classification, and lifecycle"]
   foundation["4. Identity, network, encryption,<br/>secrets, and policy"]
   model["5. Governed model<br/>and provider access"]
-  traffic["6. Agent, tool, retrieval, workflow,<br/>and egress governance"]
+  traffic["6. Agent, tool, retrieval,<br/>workflow, and egress governance"]
   integration["7. Application and<br/>enterprise-system integration"]
   delivery["8. Infrastructure as code, CI/CD,<br/>testing, release, and rollback"]
   operations["9. Evaluation, observability,<br/>audit evidence, and AI FinOps"]
@@ -86,6 +95,17 @@ flowchart TB
   foundation -. "protects" .-> model
   foundation -. "protects" .-> integration
   operations -. "feeds evidence to" .-> risk
+
+  style intake width:280px
+  style risk width:270px
+  style data width:270px
+  style foundation width:290px
+  style model width:250px
+  style traffic width:310px
+  style integration width:280px
+  style delivery width:310px
+  style operations width:290px
+  style lifecycle width:300px
 ```
 
 | Six-layer capability map | CloudAI reference domains |
@@ -109,9 +129,9 @@ changes.
 
 ```mermaid
 flowchart TB
-  usecase["Business use case and owner"]
+  usecase["Business use case<br/>and owner"]
   assessment["Data classification<br/>and risk assessment"]
-  pattern["Approved platform pattern"]
+  pattern["Approved platform<br/>pattern"]
   secure["Secure foundation<br/>and workload identity"]
   access["Model, knowledge, tool,<br/>and integration access"]
   release["Infrastructure as code, CI/CD,<br/>evaluation, and release gates"]
@@ -136,6 +156,15 @@ flowchart TB
   pattern --> secure
   release --> operate
   improve -. "feedback, change, or retirement decision" .-> assessment
+
+  style usecase width:230px
+  style assessment width:240px
+  style pattern width:230px
+  style secure width:250px
+  style access width:270px
+  style release width:300px
+  style operate width:260px
+  style improve width:270px
 ```
 
 The lifecycle starts by establishing a business outcome, accountable owner,

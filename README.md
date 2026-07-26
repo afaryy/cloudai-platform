@@ -14,17 +14,24 @@ I design and build secure, governed, observable, and cost-aware cloud and platfo
 
 ```mermaid
 flowchart LR
-  context["Enterprise outcomes<br/>and accountable ownership"]
+  context["Enterprise outcomes<br/>and accountable<br/>ownership"]
   policy["Governance and<br/>data policy"]
-  platform["Shared CloudAI Platform<br/>secure foundations, governed access<br/>delivery, and operations"]
+  platform["Shared CloudAI Platform:<br/>secure foundations,<br/>governed access, delivery,<br/>and operations"]
   workloads["Business-domain AI<br/>workloads and integrations"]
-  providers["AWS-first implementation<br/>with Azure and GCP mappings"]
+  providers["AWS-first implementation<br/>with Azure and GCP<br/>future mappings"]
   capacity["Optional AI Factory<br/>and capacity extension"]
 
   context --> platform --> workloads --> providers
   policy -. "applies across" .-> platform
   policy -. "applies across" .-> workloads
   capacity -. "future extension" .-> platform
+
+  style context width:260px
+  style policy width:220px
+  style platform width:320px
+  style workloads width:270px
+  style providers width:280px
+  style capacity width:250px
 ```
 
 This is a reference architecture, not a deployed topology. Read the
