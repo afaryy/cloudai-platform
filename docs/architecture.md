@@ -18,18 +18,18 @@ capability, workload domains, and provider implementation.
 
 ```mermaid
 flowchart TB
-  outcome["Enterprise outcomes and accountable ownership"]
-  policy["Governance, Responsible AI, and data policy"]
+  outcome["Enterprise outcomes<br/>and accountable ownership"]
+  policy["Governance, Responsible AI,<br/>and data policy"]
 
   subgraph platform["Shared CloudAI Platform"]
     foundations["Secure cloud foundations"]
-    access["Governed model, agent, and data access"]
-    delivery["Delivery and operations controls"]
-    capacity["Optional AI Factory and capacity extension"]
+    access["Governed model, agent,<br/>and data access"]
+    delivery["Delivery and<br/>operations controls"]
+    capacity["Optional AI Factory<br/>and capacity extension"]
   end
 
-  workloads["Business-domain AI workloads and integrations"]
-  providers["AWS-first implementation with Azure and GCP future mappings"]
+  workloads["Business-domain AI<br/>workloads and integrations"]
+  providers["AWS-first implementation<br/>with Azure and GCP mappings"]
 
   outcome --> platform
   policy -. "applies across" .-> platform
@@ -68,16 +68,16 @@ one team.
 
 ```mermaid
 flowchart TB
-  intake["1. Business outcome, use case, and accountable ownership"]
-  risk["2. Governance, risk, Responsible AI, and approval"]
-  data["3. Data, knowledge, classification, and lifecycle"]
-  foundation["4. Identity, network, encryption, secrets, and policy"]
-  model["5. Governed model and provider access"]
-  traffic["6. Agent, tool, retrieval, workflow, and egress governance"]
-  integration["7. Application and enterprise-system integration"]
-  delivery["8. Infrastructure as code, CI/CD, testing, release, and rollback"]
-  operations["9. Evaluation, observability, audit evidence, and AI FinOps"]
-  lifecycle["10. Resilience, capacity, support, retirement, and improvement"]
+  intake["1. Business outcome, use case,<br/>and accountable ownership"]
+  risk["2. Governance, risk,<br/>Responsible AI, and approval"]
+  data["3. Data, knowledge,<br/>classification, and lifecycle"]
+  foundation["4. Identity, network, encryption,<br/>secrets, and policy"]
+  model["5. Governed model<br/>and provider access"]
+  traffic["6. Agent, tool, retrieval, workflow,<br/>and egress governance"]
+  integration["7. Application and<br/>enterprise-system integration"]
+  delivery["8. Infrastructure as code, CI/CD,<br/>testing, release, and rollback"]
+  operations["9. Evaluation, observability,<br/>audit evidence, and AI FinOps"]
+  lifecycle["10. Resilience, capacity, support,<br/>retirement, and improvement"]
 
   intake --> risk --> data --> foundation --> model --> traffic --> integration
   integration --> delivery --> operations --> lifecycle
@@ -110,13 +110,13 @@ changes.
 ```mermaid
 flowchart TB
   usecase["Business use case and owner"]
-  assessment["Data classification and risk assessment"]
+  assessment["Data classification<br/>and risk assessment"]
   pattern["Approved platform pattern"]
-  secure["Secure foundation and workload identity"]
-  access["Model, knowledge, tool, and integration access"]
-  release["Infrastructure as code, CI/CD, evaluation, and release gates"]
-  operate["Observability, FinOps, audit evidence, and support"]
-  improve["Resilience, retirement, and continuous improvement"]
+  secure["Secure foundation<br/>and workload identity"]
+  access["Model, knowledge, tool,<br/>and integration access"]
+  release["Infrastructure as code, CI/CD,<br/>evaluation, and release gates"]
+  operate["Observability, FinOps,<br/>audit evidence, and support"]
+  improve["Resilience, retirement,<br/>and continuous improvement"]
 
   subgraph discover["1. Discover and design"]
     direction LR
