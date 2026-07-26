@@ -1,0 +1,12 @@
+{{- if .Values.metrics.grafanaDashboard.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "ai-api-service.fullname" . }}-dashboard
+  labels:
+    {{- include "ai-api-service.labels" . | nindent 4 }}
+    {{ .Values.metrics.grafanaDashboard.label }}: "1"
+data:
+  cloudai-mock-api-dashboard.json: |
+{{ .Files.Get "dashboards/cloudai-mock-api-dashboard.json" | indent 4 }}
+{{- end }}
