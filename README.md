@@ -14,12 +14,12 @@ I design and build secure, governed, observable, and cost-aware cloud and platfo
 
 ```mermaid
 flowchart LR
-  context["Enterprise outcomes and accountable ownership"]
-  policy["Governance and data policy"]
-  platform["Shared CloudAI Platform: secure foundations, governed access, delivery, and operations"]
-  workloads["Business-domain AI workloads and integrations"]
-  providers["AWS-first implementation with Azure and GCP future mappings"]
-  capacity["Optional AI Factory and capacity extension"]
+  context["Enterprise outcomes<br/>and accountable ownership"]
+  policy["Governance and<br/>data policy"]
+  platform["Shared CloudAI Platform<br/>secure foundations, governed access<br/>delivery, and operations"]
+  workloads["Business-domain AI<br/>workloads and integrations"]
+  providers["AWS-first implementation<br/>with Azure and GCP mappings"]
+  capacity["Optional AI Factory<br/>and capacity extension"]
 
   context --> platform --> workloads --> providers
   policy -. "applies across" .-> platform

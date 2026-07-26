@@ -5,6 +5,15 @@ Engineering Portfolio. It groups the repository's reference architecture,
 mock-first implementation evidence, sandbox guidance, and future design
 material without implying that every document represents a deployed capability.
 
+## Start Here
+
+- **Hiring manager:** [Featured solutions](featured-solutions.md), then
+  [Current status](current-status.md).
+- **Platform engineer:** [CloudAI architecture](architecture.md), a featured
+  solution, and its implementation evidence.
+- **Deep reviewer:** use this complete library to follow architecture,
+  controls, provider references, and implementation records.
+
 Start with [Featured solutions](featured-solutions.md) for the four concise
 case studies, or follow the [solution walkthrough](cloudai-platform-solution-walkthrough.md)
 for a guided repository tour. Read [Current status](current-status.md) for the
