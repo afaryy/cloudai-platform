@@ -36,6 +36,15 @@ flowchart TB
   policy -. "applies across" .-> workloads
   platform --> workloads
   workloads --> providers
+
+  style outcome width:260px
+  style policy width:280px
+  style foundations width:220px
+  style access width:250px
+  style delivery width:220px
+  style capacity width:240px
+  style workloads width:270px
+  style providers width:280px
 ```
 
 This is a reference architecture, not a linear delivery pipeline. Governance
@@ -86,6 +95,17 @@ flowchart TB
   foundation -. "protects" .-> model
   foundation -. "protects" .-> integration
   operations -. "feeds evidence to" .-> risk
+
+  style intake width:280px
+  style risk width:270px
+  style data width:270px
+  style foundation width:290px
+  style model width:250px
+  style traffic width:310px
+  style integration width:280px
+  style delivery width:310px
+  style operations width:290px
+  style lifecycle width:300px
 ```
 
 | Six-layer capability map | CloudAI reference domains |
@@ -136,6 +156,15 @@ flowchart TB
   pattern --> secure
   release --> operate
   improve -. "feedback, change, or retirement decision" .-> assessment
+
+  style usecase width:230px
+  style assessment width:240px
+  style pattern width:230px
+  style secure width:250px
+  style access width:270px
+  style release width:300px
+  style operate width:260px
+  style improve width:270px
 ```
 
 The lifecycle starts by establishing a business outcome, accountable owner,
