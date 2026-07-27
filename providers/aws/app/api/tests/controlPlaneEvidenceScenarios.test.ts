@@ -5,7 +5,7 @@ import { resolve } from "node:path";
 
 const EXAMPLE_DIR = resolve(process.cwd(), "../../../../shared/examples/control-plane-evidence");
 const SCHEMA_DIR = resolve(process.cwd(), "../../../../shared/schemas/control-plane-evidence");
-const DOC_PATH = resolve(process.cwd(), "../../../../docs/control-plane-evidence-scenarios.md");
+const DOC_PATH = resolve(process.cwd(), "../../../../docs/evidence/control-plane-evidence-scenarios.md");
 
 test("control-plane evidence scenarios cover key governance outcomes", async () => {
   const schema = await readJson("evidence-scenarios.schema.json", SCHEMA_DIR);

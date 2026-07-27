@@ -218,13 +218,13 @@ P5 shows how AI assistance can support delivery without owning the change. AI ou
 
 ### 13. Show The Control-Plane Evidence Map And Scenarios
 
-Open `docs/control-plane-evidence-map.md` and `shared/examples/control-plane-evidence/evidence-map.mock.json`.
+Open `docs/evidence/control-plane-evidence-map.md` and `shared/examples/control-plane-evidence/evidence-map.mock.json`.
 
 Talk track:
 
 This is the unifying P6d artifact. It links runtime AgentOps, capability admission, RAG lifecycle state, guardrail verdicts, and AI-assisted review evidence into one control-plane evidence map.
 
-Then open `docs/control-plane-evidence-scenarios.md` and `shared/examples/control-plane-evidence/evidence-scenarios.mock.json`.
+Then open `docs/evidence/control-plane-evidence-scenarios.md` and `shared/examples/control-plane-evidence/evidence-scenarios.mock.json`.
 
 Talk track:
 

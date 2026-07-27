@@ -9,7 +9,7 @@ It models a narrow GitHub Actions OIDC role and IAM policy for one later synthet
 Use this stack only after the P8a readiness checklist is complete:
 
 - `docs/p8a-bedrock-access-readiness.md`
-- `docs/templates/p8a-bedrock-smoke-test-evidence.md`
+- `docs/evidence/templates/p8a-bedrock-smoke-test-evidence.md`
 
 The first safe actions are Terraform validation and plan. P8b.2 adds a manually confirmed apply mode after the [P8b.1 IAM apply-readiness gate](../../../../../../docs/p8b1-bedrock-iam-apply-readiness.md). P8c adds the separate model-only smoke mode. P8f adds a separate guarded smoke mode, and P8g adds a direct Guardrail-evaluation mode. Neither is a default CI action; both require a reviewed apply before they can read the Guardrail outputs.
 

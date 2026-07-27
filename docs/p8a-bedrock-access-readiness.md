@@ -133,7 +133,7 @@ The smoke test should prove provider access only. It should not be used to evalu
 
 ## Evidence To Capture
 
-Use `docs/templates/p8a-bedrock-smoke-test-evidence.md` when P8c eventually runs a smoke test.
+Use `docs/evidence/templates/p8a-bedrock-smoke-test-evidence.md` when P8c eventually runs a smoke test.
 
 Public-safe evidence may include:
 

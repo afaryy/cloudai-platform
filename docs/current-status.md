@@ -85,7 +85,7 @@ It currently has six mock-first lanes:
 | P4f Helm release workflow | Live install, rollback, and uninstall validated | `.github/workflows/helm-eks-release.yml` and `docs/ai-release-engineering-on-eks.md` |
 | P4g Argo CD GitOps workflow | Live GitOps sync, health, status, cleanup, and destroy validated | `.github/workflows/argocd-eks-gitops.yml`, `argocd/applications/cloudai-api-sandbox.yaml`, and `docs/ai-release-engineering-on-eks.md` |
 | P8 Real Bedrock Sandbox | Bounded synthetic sandbox validation complete | `docs/p8-real-bedrock-sandbox-design.md` and `providers/aws/infra/terraform/envs/bedrock-sandbox/README.md` |
-| P8a Bedrock access readiness | Complete | `docs/p8a-bedrock-access-readiness.md` and `docs/templates/p8a-bedrock-smoke-test-evidence.md` |
+| P8a Bedrock access readiness | Complete | `docs/p8a-bedrock-access-readiness.md` and `docs/evidence/templates/p8a-bedrock-smoke-test-evidence.md` |
 | P8b Bedrock Terraform IAM boundary | Confirmation-gated IAM apply boundary complete | `providers/aws/infra/terraform/modules/bedrock-access/`, `providers/aws/infra/terraform/envs/bedrock-sandbox/`, and `.github/workflows/terraform-bedrock-sandbox.yml` |
 | P8c synthetic Bedrock smoke test | Live synthetic smoke test validated | `.github/workflows/terraform-bedrock-sandbox.yml` and sanitized workflow evidence |
 | P8d opt-in Bedrock gateway adapter | Live adapter smoke validated; mock remains default | `providers/aws/app/api/src/clients/awsBedrockClient.ts`, `providers/aws/app/api/src/scripts/bedrockAdapterSmoke.ts`, and `.github/workflows/bedrock-gateway-adapter.yml` |
@@ -95,8 +95,8 @@ It currently has six mock-first lanes:
 | P8h AgentCore knowledge-lookup readiness | Complete static gateway-first reference architecture; no AgentCore resource or call | `docs/p8h-agentcore-knowledge-lookup-readiness.md` |
 | P5a AI-assisted DevSecOps boundary | Complete | `docs/ai-assisted-devsecops-pattern.md` and `.github/workflows/ai-assisted-devsecops.yml` |
 | P5b AI-assisted review evidence | Complete | `docs/ai-assisted-review-evidence.md`, `shared/schemas/ai-assisted-devsecops/`, and `shared/examples/ai-assisted-devsecops/` |
-| P6d control-plane evidence map | Complete | `docs/control-plane-evidence-map.md`, `shared/schemas/control-plane-evidence/`, and `shared/examples/control-plane-evidence/` |
-| P6e control-plane evidence scenarios | Complete | `docs/control-plane-evidence-scenarios.md`, `shared/schemas/control-plane-evidence/evidence-scenarios.schema.json`, and `shared/examples/control-plane-evidence/evidence-scenarios.mock.json` |
+| P6d control-plane evidence map | Complete | `docs/evidence/control-plane-evidence-map.md`, `shared/schemas/control-plane-evidence/`, and `shared/examples/control-plane-evidence/` |
+| P6e control-plane evidence scenarios | Complete | `docs/evidence/control-plane-evidence-scenarios.md`, `shared/schemas/control-plane-evidence/evidence-scenarios.schema.json`, and `shared/examples/control-plane-evidence/evidence-scenarios.mock.json` |
 | P6f security and operations controls | Complete | `docs/ai-platform-security-operations-controls.md` |
 
 ## Intentionally Deferred

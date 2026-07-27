@@ -43,7 +43,7 @@ The normal delivery plane is GitHub Actions with OIDC and environment approval. 
 | Terraform stack | `providers/aws/infra/terraform/envs/eks-sandbox/` | Holds the optional EKS sandbox Terraform entry point. |
 | EKS workflow | `.github/workflows/terraform-eks-sandbox.yml` | Supports manual validate, plan, apply, and destroy. |
 | Design note | `docs/p4b-real-eks-sandbox-design.md` | Describes the validate-first personal EKS sandbox design. |
-| Evidence template | `docs/templates/p4b-eks-sandbox-apply-destroy-evidence.md` | Provides a sanitized apply/destroy evidence format. |
+| Evidence template | `docs/evidence/templates/p4b-eks-sandbox-apply-destroy-evidence.md` | Provides a sanitized apply/destroy evidence format. |
 
 ## Readiness Gates
 
