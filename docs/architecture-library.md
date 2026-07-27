@@ -19,6 +19,16 @@ case studies, or follow the [solution walkthrough](cloudai-platform-solution-wal
 for a guided repository tour. Read [Current status](current-status.md) for the
 implementation record and deferred scope.
 
+## Browse by Category
+
+- [Architecture](architecture/) — reference architecture, control plane,
+  provider mappings, and AI Factory context.
+- [Solutions](solutions/) — end-to-end portfolio case studies.
+- [Practices](practices/) — reusable cross-layer engineering disciplines.
+- [Evidence](evidence/) — evidence maps, scenarios, and templates.
+- [Archive](archive/) — reserved for intact historical records in a later,
+  link-safe move stage.
+
 ## Architecture and Platform Context
 
 - [CloudAI architecture](architecture.md) — ecosystem context, six enterprise
