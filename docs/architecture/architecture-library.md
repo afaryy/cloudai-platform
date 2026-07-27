@@ -21,13 +21,12 @@ implementation record and deferred scope.
 
 ## Browse by Category
 
-- [Architecture](architecture/) — reference architecture, control plane,
+- [Architecture](README.md) — reference architecture, control plane,
   provider mappings, and AI Factory context.
-- [Solutions](solutions/) — end-to-end portfolio case studies.
-- [Practices](practices/) — reusable cross-layer engineering disciplines.
-- [Evidence](evidence/) — evidence maps, scenarios, and templates.
-- [Archive](archive/) — reserved for intact historical records in a later,
-  link-safe move stage.
+- [Solutions](../solutions/README.md) — end-to-end portfolio case studies.
+- [Practices](../practices/README.md) — reusable cross-layer engineering disciplines.
+- [Evidence](../evidence/README.md) — evidence maps, scenarios, and templates.
+- [Archive](../archive/README.md) — reserved for intact historical records.
 
 ## Architecture and Platform Context
 
