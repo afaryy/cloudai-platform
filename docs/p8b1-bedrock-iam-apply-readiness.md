@@ -127,6 +127,6 @@ Correct one narrow configuration or permission boundary at a time. Do not solve 
 
 ## Evidence And Handoff
 
-Use [the P8 evidence template](templates/p8a-bedrock-smoke-test-evidence.md) for public-safe readiness, apply, and later smoke-test notes. Apply-readiness and IAM apply evidence must remain separate from P8c smoke-test evidence.
+Use [the P8 evidence template](evidence/templates/p8a-bedrock-smoke-test-evidence.md) for public-safe readiness, apply, and later smoke-test notes. Apply-readiness and IAM apply evidence must remain separate from P8c smoke-test evidence.
 
 P8b.1 is implemented by P8b.2, which extends the existing manual workflow with `mode=apply` and requires `confirm_apply=I_UNDERSTAND_BEDROCK_IAM_APPLY`. It runs a fresh plan before applying the IAM boundary, does not offer destroy, and does not invoke Bedrock. P8c remains the later, one-prompt synthetic Bedrock smoke test.

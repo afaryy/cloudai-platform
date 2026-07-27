@@ -89,8 +89,8 @@ implementation record and deferred scope.
 
 ## Evidence, Security, Operations, and FinOps
 
-- [Control-plane evidence map](control-plane-evidence-map.md) and
-  [evidence scenarios](control-plane-evidence-scenarios.md) — linked synthetic
+- [Control-plane evidence map](evidence/control-plane-evidence-map.md) and
+  [evidence scenarios](evidence/control-plane-evidence-scenarios.md) — linked synthetic
   evidence across access, safety, RAG, and review controls.
 - [AI platform security and operations controls](ai-platform-security-operations-controls.md)
   — identity, data protection, AppSec, delivery, operations, and FinOps.
