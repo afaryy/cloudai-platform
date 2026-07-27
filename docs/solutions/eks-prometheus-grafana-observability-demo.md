@@ -28,7 +28,7 @@ AWS Budget alerts are advisory. Short duration and verified cleanup are the prim
 4. Install `kube-prometheus-stack` with `observability/kube-prometheus-stack-values.yaml` into the `observability` namespace.
 5. Install `helm/ai-api-service` into `cloudai-observability` with `metrics.enabled=true`, `metrics.serviceMonitor.enabled=true`, and `metrics.grafanaDashboard.enabled=true`.
 6. Use temporary port-forward sessions for Grafana and the mock API. Send only synthetic requests, verify the Prometheus scrape target, and review the five dashboard panels.
-7. Record metadata-only evidence using [the evidence template](templates/eks-observability-sandbox-evidence.md).
+7. Record metadata-only evidence using [the evidence template](../evidence/templates/eks-observability-sandbox-evidence.md).
 8. Uninstall both Helm releases, delete the two namespaces, then trigger Terraform `destroy` with `confirm_destroy=I_UNDERSTAND_DESTROY`.
 9. Record successful cleanup and destroy. Do not retain endpoints, screenshots, kubeconfig, plans, or state in git.
 

@@ -16,7 +16,7 @@ jobs:
       - name: Confirm mock-first repository
         run: |
           test -f README.md
-          test -f docs/architecture.md
+          test -f docs/architecture/architecture.md
           grep -R "mock" README.md docs
 
       - name: Validate P4g Argo CD GitOps contract

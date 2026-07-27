@@ -6,14 +6,14 @@ The project is AWS-first and multi-cloud-ready. It uses synthetic examples, publ
 
 ## Reader Guide
 
-- **Portfolio overview:** start with the repository [README](../README.md) and
-  [featured solutions](featured-solutions.md).
-- **Architecture:** read [CloudAI architecture](architecture.md) and the
-  [control plane](control-plane.md).
-- **Implementation and evidence:** read [Current status](current-status.md),
+- **Portfolio overview:** start with the repository [README](../../README.md) and
+  [featured solutions](./featured-solutions.md).
+- **Architecture:** read [CloudAI architecture](../architecture/architecture.md) and the
+  [control plane](../architecture/control-plane.md).
+- **Implementation and evidence:** read [Current status](../practices/current-status.md),
   then the relevant delivery, RAG, gateway, or Bedrock document in the
-  [Architecture Library](architecture-library.md).
-- **Local demonstration:** use the [demo script](demo-script.md), the mock API
+  [Architecture Library](../architecture/architecture-library.md).
+- **Local demonstration:** use the [demo script](../practices/demo-script.md), the mock API
   README, and the local RAG walkthrough.
 
 ## Solution Overview
@@ -125,7 +125,7 @@ release engineering, and bounded provider validation:
    synthetic Bedrock and Guardrail validation while the application remains
    mock-first.
 
-Read [Current status](current-status.md) for the detailed implementation
+Read [Current status](../practices/current-status.md) for the detailed implementation
 record, validation boundaries, and deferred scope.
 
 ## Foundation Scope

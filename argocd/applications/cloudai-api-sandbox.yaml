@@ -15,7 +15,7 @@ metadata:
   annotations:
     cloudai-platform.example/release-boundary: synthetic-only
     cloudai-platform.example/sync-mode: manual
-    cloudai-platform.example/rollback-runbook: docs/ai-release-engineering-on-eks.md
+    cloudai-platform.example/rollback-runbook: docs/solutions/ai-release-engineering-on-eks.md
 spec:
   project: default
   source:

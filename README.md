@@ -29,7 +29,7 @@ flowchart LR
 ```
 
 This is a reference architecture, not a deployed topology. Read the
-[full architecture hierarchy](docs/architecture.md) for the enterprise
+[full architecture hierarchy](docs/architecture/architecture.md) for the enterprise
 capability map, CloudAI platform domains, lifecycle, evidence boundaries, and
 provider views.
 
@@ -37,12 +37,12 @@ provider views.
 
 | Solution | Status | Focus |
 | --- | --- | --- |
-| [Governed AI Gateway](docs/featured-solutions.md#governed-ai-gateway) | **Implemented — mock-first** | Controlled model access, request policy, metadata-only evidence, and an opt-in provider adapter boundary. |
-| [AI Release Engineering on EKS](docs/featured-solutions.md#ai-release-engineering-on-eks) | **Implemented — sandbox-validated** | Terraform, Helm, GitOps, rollout, rollback, and teardown discipline for a synthetic workload. |
-| [Governed RAG Lifecycle](docs/featured-solutions.md#governed-rag-lifecycle) | **Implemented — local synthetic workflow** | Provenance, source lifecycle, evaluation artifacts, and deterministic local quality checks. |
-| [Bounded Bedrock Sandbox](docs/featured-solutions.md#bounded-bedrock-sandbox) | **Implemented — bounded synthetic sandbox validation** | Short-lived identity, least-privilege access, manual approval, and narrow synthetic Guardrail checks. |
+| [Governed AI Gateway](docs/solutions/featured-solutions.md#governed-ai-gateway) | **Implemented — mock-first** | Controlled model access, request policy, metadata-only evidence, and an opt-in provider adapter boundary. |
+| [AI Release Engineering on EKS](docs/solutions/featured-solutions.md#ai-release-engineering-on-eks) | **Implemented — sandbox-validated** | Terraform, Helm, GitOps, rollout, rollback, and teardown discipline for a synthetic workload. |
+| [Governed RAG Lifecycle](docs/solutions/featured-solutions.md#governed-rag-lifecycle) | **Implemented — local synthetic workflow** | Provenance, source lifecycle, evaluation artifacts, and deterministic local quality checks. |
+| [Bounded Bedrock Sandbox](docs/solutions/featured-solutions.md#bounded-bedrock-sandbox) | **Implemented — bounded synthetic sandbox validation** | Short-lived identity, least-privilege access, manual approval, and narrow synthetic Guardrail checks. |
 
-[Read the featured-solution evidence and boundaries →](docs/featured-solutions.md)
+[Read the featured-solution evidence and boundaries →](docs/solutions/featured-solutions.md)
 
 ### Evidence-Status Legend
 
@@ -67,7 +67,7 @@ provider views.
 
 ## Architecture Library
 
-[Browse the complete Architecture Library →](docs/architecture-library.md)
+[Browse the complete Architecture Library →](docs/architecture/architecture-library.md)
 
 ## Repository Boundaries
 
@@ -82,21 +82,21 @@ use, autonomous agent execution, or a general-purpose AI application.
 The portfolio landing page above is deliberately concise. Use these paths for
 the supporting technical detail:
 
-- [Architecture library](docs/architecture-library.md) — complete curated
+- [Architecture library](docs/architecture/architecture-library.md) — complete curated
   document index, including AWS-first and future Azure/GCP mappings.
-- [Architecture hierarchy](docs/architecture.md) — enterprise ecosystem,
+- [Architecture hierarchy](docs/architecture/architecture.md) — enterprise ecosystem,
   capability layers, CloudAI domains, lifecycle, and evidence boundaries.
-- [Solution walkthrough](docs/cloudai-platform-solution-walkthrough.md) —
+- [Solution walkthrough](docs/solutions/cloudai-platform-solution-walkthrough.md) —
   guided technical reading sequence and evidence progression.
-- [Current status](docs/current-status.md) — implementation record, bounded
+- [Current status](docs/practices/current-status.md) — implementation record, bounded
   sandbox validation, deferred scope, and recommended next slice.
-- [Featured solutions](docs/featured-solutions.md) — four case studies with
+- [Featured solutions](docs/solutions/featured-solutions.md) — four case studies with
   technical evidence, trade-offs, and explicit non-claims.
 
 AWS is the first provider with bounded implementation and validation evidence.
 Azure and GCP remain reference mappings, not provider-parity implementations.
 AgentCore, AI Factory, and GPU capacity patterns remain future design scope.
-The [AI Workload Operating Contract](docs/ai-workload-operating-contract.md)
+The [AI Workload Operating Contract](docs/practices/ai-workload-operating-contract.md)
 defines this as a future/design practice track within the portfolio: it does
 not add a scheduler, GPU cluster, or cloud runtime.
 
@@ -134,4 +134,4 @@ tsx scripts/ingest-sample-docs.ts
 If you do not have a TypeScript runner installed, read the scripts as mock
 examples. No cloud account setup is needed for this path. For deferred scope,
 future work, and bounded validation evidence, read [Current
-status](docs/current-status.md).
+status](docs/practices/current-status.md).

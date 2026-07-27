@@ -54,12 +54,12 @@ quality, cost, and operational response.
 
 | Future control | P8h reference responsibility | Existing portfolio evidence | Deferred external control |
 | --- | --- | --- | --- |
-| Request boundary | The Gateway is the sole approved entry point. | [P1 GenAI / LLM Gateway](genai-llm-gateway.md) | AgentCore Gateway resource and runtime-bypass-prevention policy. |
-| Owner and authorisation | A named owner approves a request outcome before runtime execution. | [P6 AI Traffic Governance](ai-traffic-governance.md) | Runtime identity configuration and production access review. |
-| Knowledge scope | Read only approved, classified, lifecycle-managed knowledge. | [RAG knowledge lifecycle](rag-knowledge-lifecycle.md) | Retrieval store, source onboarding, and data-access policy. |
-| Guardrails | Apply provider Guardrails at the Gateway/model path and retain metadata-safe evidence only. | [Guardrails as a Service](guardrails-as-a-service.md), P8f attachment and P8g evaluation in the [Bedrock sandbox design](p8-real-bedrock-sandbox-design.md) | AgentCore Gateway policy configuration and broader safety evaluation. |
-| Observability | Retain only metadata needed for ownership, latency, failure, and evidence. | [AI Platform Security and Operations Controls](ai-platform-security-operations-controls.md) | CloudWatch/ADOT setup, log destination, retention, and redaction policy. |
-| Cost and operations | Define request/session limits, owner, incident path, and disable mechanism. | [AI Platform Security and Operations Controls](ai-platform-security-operations-controls.md) | AgentCore pricing model, budgets, alarms, and operational runbook. |
+| Request boundary | The Gateway is the sole approved entry point. | [P1 GenAI / LLM Gateway](./genai-llm-gateway.md) | AgentCore Gateway resource and runtime-bypass-prevention policy. |
+| Owner and authorisation | A named owner approves a request outcome before runtime execution. | [P6 AI Traffic Governance](../practices/ai-traffic-governance.md) | Runtime identity configuration and production access review. |
+| Knowledge scope | Read only approved, classified, lifecycle-managed knowledge. | [RAG knowledge lifecycle](./rag-knowledge-lifecycle.md) | Retrieval store, source onboarding, and data-access policy. |
+| Guardrails | Apply provider Guardrails at the Gateway/model path and retain metadata-safe evidence only. | [Guardrails as a Service](./guardrails-as-a-service.md), P8f attachment and P8g evaluation in the [Bedrock sandbox design](./p8-real-bedrock-sandbox-design.md) | AgentCore Gateway policy configuration and broader safety evaluation. |
+| Observability | Retain only metadata needed for ownership, latency, failure, and evidence. | [AI Platform Security and Operations Controls](../practices/ai-platform-security-operations-controls.md) | CloudWatch/ADOT setup, log destination, retention, and redaction policy. |
+| Cost and operations | Define request/session limits, owner, incident path, and disable mechanism. | [AI Platform Security and Operations Controls](../practices/ai-platform-security-operations-controls.md) | AgentCore pricing model, budgets, alarms, and operational runbook. |
 
 These are separate evidence sources. P8h does not claim they are already
 integrated with AgentCore.

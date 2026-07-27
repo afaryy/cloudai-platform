@@ -156,13 +156,13 @@ is intentionally bounded and should be read with its stated evidence boundary.
 
 | Architecture area | Portfolio evidence and boundary |
 | --- | --- |
-| Governed model access | [GenAI / LLM Gateway](genai-llm-gateway.md) and the [Governed AI Gateway case study](featured-solutions.md#governed-ai-gateway): implemented with mock mode as the default; provider mode is an explicit, bounded action. |
-| Data and knowledge controls | [RAG knowledge lifecycle](rag-knowledge-lifecycle.md) and the [Governed RAG Lifecycle case study](featured-solutions.md#governed-rag-lifecycle): implemented as a local synthetic workflow, not provider-backed retrieval. |
-| Delivery engineering | [AI release engineering on EKS](ai-release-engineering-on-eks.md) and the [EKS case study](featured-solutions.md#ai-release-engineering-on-eks): sandbox-validated delivery controls for a synthetic workload. |
-| Bounded provider access | [P8 Bedrock sandbox design](p8-real-bedrock-sandbox-design.md) and the [Bounded Bedrock Sandbox case study](featured-solutions.md#bounded-bedrock-sandbox): bounded synthetic sandbox validation, not a persistent Bedrock application. |
-| Agent runtime extension | [P8h AgentCore knowledge-lookup readiness](p8h-agentcore-knowledge-lookup-readiness.md): gateway-first reference design only; no AgentCore resource or call. |
-| AI Factory and accelerated capacity | [AI Factory infrastructure lens](ai-factory-infrastructure-lens.md) and [AI Workload Operating Contract](ai-workload-operating-contract.md): future/design context for LLMOps, workload readiness, capacity, and accelerator patterns; no GPU, training, fine-tuning, or high-scale serving implementation. |
-| Multi-cloud mappings | [AWS](aws-reference-architecture.md), [Azure](azure-reference-architecture.md), and [GCP](gcp-reference-architecture.md) mappings: AWS-first implementation context with Azure/GCP reference mappings, not provider parity claims. |
+| Governed model access | [GenAI / LLM Gateway](../solutions/genai-llm-gateway.md) and the [Governed AI Gateway case study](../solutions/featured-solutions.md#governed-ai-gateway): implemented with mock mode as the default; provider mode is an explicit, bounded action. |
+| Data and knowledge controls | [RAG knowledge lifecycle](../solutions/rag-knowledge-lifecycle.md) and the [Governed RAG Lifecycle case study](../solutions/featured-solutions.md#governed-rag-lifecycle): implemented as a local synthetic workflow, not provider-backed retrieval. |
+| Delivery engineering | [AI release engineering on EKS](../solutions/ai-release-engineering-on-eks.md) and the [EKS case study](../solutions/featured-solutions.md#ai-release-engineering-on-eks): sandbox-validated delivery controls for a synthetic workload. |
+| Bounded provider access | [P8 Bedrock sandbox design](../solutions/p8-real-bedrock-sandbox-design.md) and the [Bounded Bedrock Sandbox case study](../solutions/featured-solutions.md#bounded-bedrock-sandbox): bounded synthetic sandbox validation, not a persistent Bedrock application. |
+| Agent runtime extension | [P8h AgentCore knowledge-lookup readiness](../solutions/p8h-agentcore-knowledge-lookup-readiness.md): gateway-first reference design only; no AgentCore resource or call. |
+| AI Factory and accelerated capacity | [AI Factory infrastructure lens](./ai-factory-infrastructure-lens.md) and [AI Workload Operating Contract](../practices/ai-workload-operating-contract.md): future/design context for LLMOps, workload readiness, capacity, and accelerator patterns; no GPU, training, fine-tuning, or high-scale serving implementation. |
+| Multi-cloud mappings | [AWS](./aws-reference-architecture.md), [Azure](./azure-reference-architecture.md), and [GCP](./gcp-reference-architecture.md) mappings: AWS-first implementation context with Azure/GCP reference mappings, not provider parity claims. |
 
 ## 6. Current Implementation and Evidence Status
 
@@ -180,7 +180,7 @@ what this repository currently demonstrates publicly.
 | AI Factory and accelerated capacity | Future/design context only; no GPU, training, fine-tuning, or high-scale serving implementation |
 
 For the detailed evidence record and intentionally deferred scope, read
-[Current status](current-status.md). The repository contains no employer,
+[Current status](../practices/current-status.md). The repository contains no employer,
 customer, confidential, credential, or proprietary material. It uses synthetic
 data, generic identifiers, public cloud service patterns, and mock mode as the
 ordinary runtime path.

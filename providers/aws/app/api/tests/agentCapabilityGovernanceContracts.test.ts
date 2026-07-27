@@ -5,7 +5,7 @@ import { resolve } from "node:path";
 
 const EXAMPLE_DIR = resolve(process.cwd(), "../../../../shared/examples/agent-capability-governance");
 const SCHEMA_DIR = resolve(process.cwd(), "../../../../shared/schemas/agent-capability-governance");
-const DOC_PATH = resolve(process.cwd(), "../../../../docs/agent-capability-governance.md");
+const DOC_PATH = resolve(process.cwd(), "../../../../docs/practices/agent-capability-governance.md");
 
 const SCENARIOS = ["knowledge-search", "external-export", "change-summary"] as const;
 const CONTRACTS = [

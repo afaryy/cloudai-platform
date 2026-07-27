@@ -86,7 +86,7 @@ P5 sits between release engineering and AgentOps:
 
 - **P4 EKS Release Engineering** shows how a synthetic AI API can be packaged and promoted through Helm, Argo CD, gates, and rollback.
 - **P5 AI-assisted DevSecOps** shows how AI-assisted changes should move through controlled delivery.
-- **P5b AI-assisted review evidence** adds synthetic records for review summaries, threat-model checklists, CI failure summaries, release-note drafts, and human-owned sign-off. See `docs/ai-assisted-review-evidence.md`.
+- **P5b AI-assisted review evidence** adds synthetic records for review summaries, threat-model checklists, CI failure summaries, release-note drafts, and human-owned sign-off. See `docs/evidence/ai-assisted-review-evidence.md`.
 - **P6 AI Traffic Governance / AgentOps** will focus on runtime agent identity, tool permissions, approval gates, policy verdicts, budgets, and audit evidence.
 
 The boundary is important: P5 controls the software-delivery workflow. P6 controls what agents and AI traffic can do at runtime.

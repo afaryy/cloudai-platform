@@ -2,7 +2,7 @@
 
 > Historical readiness record. The confirmation-gated IAM apply and later
 > bounded synthetic Bedrock and Guardrail validation were completed after this
-> gate. Read [Current status](current-status.md) for the current evidence
+> gate. Read [Current status](../practices/current-status.md) for the current evidence
 > boundary; this document preserves the pre-apply control requirements.
 
 P8b.1 is the documentation-only gate before a separately reviewed workflow may apply the P8b Bedrock IAM boundary. It does not apply Terraform, invoke Bedrock, create credentials, or enable a new GitHub Actions mode.
@@ -127,6 +127,6 @@ Correct one narrow configuration or permission boundary at a time. Do not solve 
 
 ## Evidence And Handoff
 
-Use [the P8 evidence template](templates/p8a-bedrock-smoke-test-evidence.md) for public-safe readiness, apply, and later smoke-test notes. Apply-readiness and IAM apply evidence must remain separate from P8c smoke-test evidence.
+Use [the P8 evidence template](../evidence/templates/p8a-bedrock-smoke-test-evidence.md) for public-safe readiness, apply, and later smoke-test notes. Apply-readiness and IAM apply evidence must remain separate from P8c smoke-test evidence.
 
 P8b.1 is implemented by P8b.2, which extends the existing manual workflow with `mode=apply` and requires `confirm_apply=I_UNDERSTAND_BEDROCK_IAM_APPLY`. It runs a fresh plan before applying the IAM boundary, does not offer destroy, and does not invoke Bedrock. P8c remains the later, one-prompt synthetic Bedrock smoke test.

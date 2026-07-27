@@ -63,4 +63,4 @@ Provider-specific dashboards, alarms, distributed traces, provider-hosted evals,
 
 ## Optional EKS Sandbox Demonstration
 
-The [EKS Prometheus and Grafana observability demonstration](eks-prometheus-grafana-observability-demo.md) is a planned, manually approved exercise for real Prometheus scraping and Grafana dashboard practice with synthetic metrics. It remains private-cluster, port-forward-only, time-boxed, and teardown-bound; it is not current production-monitoring evidence.
+The [EKS Prometheus and Grafana observability demonstration](../solutions/eks-prometheus-grafana-observability-demo.md) is a planned, manually approved exercise for real Prometheus scraping and Grafana dashboard practice with synthetic metrics. It remains private-cluster, port-forward-only, time-boxed, and teardown-bound; it is not current production-monitoring evidence.

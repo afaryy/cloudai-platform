@@ -38,9 +38,9 @@ jobs:
 
       - name: Confirm required boundary documentation
         run: |
-          test -f docs/ai-assisted-devsecops-pattern.md
-          grep -q "AI must not" docs/ai-assisted-devsecops-pattern.md
-          grep -q "P6 controls what agents and AI traffic can do at runtime" docs/ai-assisted-devsecops-pattern.md
+          test -f docs/practices/ai-assisted-devsecops-pattern.md
+          grep -q "AI must not" docs/practices/ai-assisted-devsecops-pattern.md
+          grep -q "P6 controls what agents and AI traffic can do at runtime" docs/practices/ai-assisted-devsecops-pattern.md
 
   mock-api-test:
     name: Mock API contract tests

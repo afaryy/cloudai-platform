@@ -22,7 +22,7 @@ Mock mode is the default. It should run without cloud credentials, provider API 
 
 The P4 EKS release-engineering track defines the public-safe release pattern for Kubernetes-based AI platform services.
 
-Use `docs/eks-release-gates-and-rollback.md` for:
+Use `docs/solutions/eks-release-gates-and-rollback.md` for:
 
 - pre-deploy gates before a future sandbox sync;
 - Helm and Argo CD validation boundaries;

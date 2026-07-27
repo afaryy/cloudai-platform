@@ -6,7 +6,7 @@ import { resolve } from "node:path";
 
 const DASHBOARD_PATH = resolve(process.cwd(), "../../../../helm/ai-api-service/dashboards/cloudai-mock-api-dashboard.json");
 const CHART_PATH = resolve(process.cwd(), "../../../../helm/ai-api-service");
-const GUIDE_PATH = resolve(process.cwd(), "../../../../docs/eks-prometheus-grafana-observability-demo.md");
+const GUIDE_PATH = resolve(process.cwd(), "../../../../docs/solutions/eks-prometheus-grafana-observability-demo.md");
 
 test("Grafana dashboard contains only the five synthetic observability panels", async () => {
   const dashboard = JSON.parse(await readFile(DASHBOARD_PATH, "utf8"));

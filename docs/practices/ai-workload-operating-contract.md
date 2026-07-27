@@ -98,4 +98,4 @@ The first tool implementation should remain local and mock-first. It can expose 
 
 Before that work begins, it needs a separate reviewed design, implementation plan, tests, and explicit boundary statement.
 
-The optional [EKS Prometheus and Grafana observability demonstration](eks-prometheus-grafana-observability-demo.md) is the first real-tool practice path. It uses the same mock-first metric contract in a short-lived sandbox and requires separate manual approval, budget controls, and teardown evidence.
+The optional [EKS Prometheus and Grafana observability demonstration](../solutions/eks-prometheus-grafana-observability-demo.md) is the first real-tool practice path. It uses the same mock-first metric contract in a short-lived sandbox and requires separate manual approval, budget controls, and teardown evidence.
