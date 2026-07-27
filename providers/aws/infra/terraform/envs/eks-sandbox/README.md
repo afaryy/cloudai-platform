@@ -11,7 +11,7 @@ The first implementation should prove release-engineering skills with the smalle
 - Minimal EKS cluster and managed node group skeleton only after explicit approval.
 - Synthetic workload only.
 - Budget alarm and teardown runbook before apply.
-- P4b operator runbook in `docs/p4b-eks-sandbox-operator-runbook.md`.
+- P4b operator runbook in `docs/solutions/p4b-eks-sandbox-operator-runbook.md`.
 
 ## Files
 

@@ -118,7 +118,7 @@ cloudai-platform/eks-sandbox/terraform.tfstate
 
 Future Bedrock, AgentCore, GenAI gateway, and platform foundation stacks should use separate keys under the same prefix. This keeps state isolated by stack while reusing the same backend bucket and lock table.
 
-This sandbox pattern is intentionally small-scale. It is suitable for a personal account, a portfolio POC, or a small number of platform stacks. It should not be presented as the operating model for hundreds or thousands of landing zones. At enterprise scale, use a landing-zone factory model with account inventory, blueprint catalogs, account vending, baseline rollout, policy-as-code, CI/CD orchestration, drift detection, and generated state keys. See `docs/aws-reference-architecture.md` for the scale boundary.
+This sandbox pattern is intentionally small-scale. It is suitable for a personal account, a portfolio POC, or a small number of platform stacks. It should not be presented as the operating model for hundreds or thousands of landing zones. At enterprise scale, use a landing-zone factory model with account inventory, blueprint catalogs, account vending, baseline rollout, policy-as-code, CI/CD orchestration, drift detection, and generated state keys. See `docs/architecture/aws-reference-architecture.md` for the scale boundary.
 
 Recommended defaults:
 

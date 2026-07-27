@@ -43,7 +43,7 @@ Emphasize that the project is incremental. It starts with a local mock GenAI / L
 
 ### 2. Show The Architecture View
 
-Open `docs/architecture.md`.
+Open `docs/architecture/architecture.md`.
 
 Point out:
 
@@ -138,7 +138,7 @@ The mock RAG query endpoint demonstrates the governed response contract. It retu
 
 ### 7. Show Guardrails As A Service
 
-Open `docs/guardrails-as-a-service.md` and `shared/examples/guardrails-as-a-service/`.
+Open `docs/solutions/guardrails-as-a-service.md` and `shared/examples/guardrails-as-a-service/`.
 
 Talk track:
 
@@ -158,7 +158,7 @@ Point out the additional fixtures for approval-required, denied-tool, and exhaus
 
 ### 9. Show Capability Governance And RAG Lifecycle
 
-Open `docs/agent-capability-governance.md` and `docs/rag-knowledge-lifecycle.md`.
+Open `docs/practices/agent-capability-governance.md` and `docs/solutions/rag-knowledge-lifecycle.md`.
 
 Talk track:
 
@@ -173,7 +173,7 @@ Explain that a retired source cannot produce a new governed RAG response.
 
 ### 10. Show The Runtime Request Flow
 
-Open `docs/cloudai-platform-solution-walkthrough.md`.
+Open `docs/solutions/cloudai-platform-solution-walkthrough.md`.
 
 Use the request flow:
 
@@ -196,9 +196,9 @@ Explain that this is the first practical slice of the GenAI / LLM Gateway. It is
 Open:
 
 - `helm/ai-api-service/`
-- `docs/p4b-eks-sandbox-operator-runbook.md`
+- `docs/solutions/p4b-eks-sandbox-operator-runbook.md`
 - `argocd/applications/cloudai-api-sandbox.yaml`
-- `docs/eks-release-gates-and-rollback.md`
+- `docs/solutions/eks-release-gates-and-rollback.md`
 
 Talk track:
 
@@ -208,8 +208,8 @@ The P4 release engineering track shows how the mock AI API could be packaged and
 
 Open:
 
-- `docs/ai-assisted-devsecops-pattern.md`
-- `docs/ai-assisted-review-evidence.md`
+- `docs/practices/ai-assisted-devsecops-pattern.md`
+- `docs/evidence/ai-assisted-review-evidence.md`
 - `shared/examples/ai-assisted-devsecops/`
 
 Talk track:
@@ -236,7 +236,7 @@ The point is not that this repository runs an enterprise AI platform. The point 
 
 ### 14. Show Security And Operations Controls
 
-Open `docs/ai-platform-security-operations-controls.md`.
+Open `docs/practices/ai-platform-security-operations-controls.md`.
 
 Talk track:
 
@@ -248,7 +248,7 @@ Production enterprise AI is not just a model problem. It is a platform control p
 
 ### 15. Show What Is Deferred
 
-Open `docs/cloudai-platform-solution-walkthrough.md`, then the “What Is Intentionally Mock-Only” and “Future Deployment Path” sections.
+Open `docs/solutions/cloudai-platform-solution-walkthrough.md`, then the “What Is Intentionally Mock-Only” and “Future Deployment Path” sections.
 
 Call out that these are future work:
 

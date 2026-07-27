@@ -30,7 +30,7 @@ What evidence would explain why this AI action was allowed, denied, paused, bloc
 
 P6e answers that question with metadata-only examples.
 
-For deterministic repeated policy checks, see the [Agent Behavioural Reliability Gate](../agent-behavioural-reliability-gate.md). It extends the runtime-AgentOps evidence lane without executing an agent action.
+For deterministic repeated policy checks, see the [Agent Behavioural Reliability Gate](../practices/agent-behavioural-reliability-gate.md). It extends the runtime-AgentOps evidence lane without executing an agent action.
 
 ## Relationship To P6d
 

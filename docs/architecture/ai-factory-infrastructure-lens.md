@@ -60,7 +60,7 @@ This is why the portfolio includes AI FinOps, observability, AgentOps, release g
 
 ## Workload Operating Model
 
-The [AI Workload Operating Contract](ai-workload-operating-contract.md) adds a shared readiness and lifecycle model for service inference, batch processing, fine-tuning, and future distributed training. It makes the owner, identity, approved data boundary, capacity, cost, evidence, and shutdown path explicit before a workload is eligible to run.
+The [AI Workload Operating Contract](../practices/ai-workload-operating-contract.md) adds a shared readiness and lifecycle model for service inference, batch processing, fine-tuning, and future distributed training. It makes the owner, identity, approved data boundary, capacity, cost, evidence, and shutdown path explicit before a workload is eligible to run.
 
 Kubernetes is the reference orchestration pattern for service inference and platform services: it packages, deploys, scales, and operates containerised APIs. Batch and training scheduling is a separate future concern: it allocates scarce accelerated capacity, queue priority, reservation, preemption, and completion accounting for non-interactive workloads. A workload may eventually use both patterns, but they solve different operating problems.
 

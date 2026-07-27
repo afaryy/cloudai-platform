@@ -18,13 +18,13 @@ The local gateway provides mock-default chat, governed RAG metadata, Guardrails-
 
 ### Architecture summary
 
-The [GenAI / LLM gateway](genai-llm-gateway.md) sits between a client-facing contract and provider-specific clients. The implementation under [providers/aws/app/api](../providers/aws/app/api) keeps validation, token boundaries, structured metadata, and provider selection explicit.
+The [GenAI / LLM gateway](./genai-llm-gateway.md) sits between a client-facing contract and provider-specific clients. The implementation under [providers/aws/app/api](../../providers/aws/app/api) keeps validation, token boundaries, structured metadata, and provider selection explicit.
 
 ### Technical evidence
 
 - TypeScript routes, provider-client interfaces, JSON schemas, fixtures, and contract tests.
 - Mock mode is the ordinary runtime path; provider mode is an explicit, bounded operator action.
-- [Gateway README](../providers/aws/app/api/README.md) records the API boundary and safe provider-adapter behavior.
+- [Gateway README](../../providers/aws/app/api/README.md) records the API boundary and safe provider-adapter behavior.
 
 ### Test or validation evidence
 
@@ -50,7 +50,7 @@ It is not a production gateway, persistent audit service, enterprise model catal
 
 ### Scope
 
-The [AI Workload Operating Contract](ai-workload-operating-contract.md) defines a shared operating model for service inference, batch processing, fine-tuning, and future distributed training. It makes ownership, identity, access, capacity, cost, approval, evidence, and shutdown expectations explicit.
+The [AI Workload Operating Contract](../practices/ai-workload-operating-contract.md) defines a shared operating model for service inference, batch processing, fine-tuning, and future distributed training. It makes ownership, identity, access, capacity, cost, approval, evidence, and shutdown expectations explicit.
 
 ### What this demonstrates
 
@@ -76,7 +76,7 @@ This implementation packages the mock API with Helm, defines a GitOps applicatio
 
 ### Architecture summary
 
-Terraform provides the sandbox foundation; GitHub Actions uses short-lived OIDC access; Helm packages the service; and Argo CD reconciles a pinned revision. The [EKS release engineering guide](ai-release-engineering-on-eks.md) explains the delivery and cleanup boundaries.
+Terraform provides the sandbox foundation; GitHub Actions uses short-lived OIDC access; Helm packages the service; and Argo CD reconciles a pinned revision. The [EKS release engineering guide](./ai-release-engineering-on-eks.md) explains the delivery and cleanup boundaries.
 
 ### Technical evidence
 
@@ -85,7 +85,7 @@ Terraform provides the sandbox foundation; GitHub Actions uses short-lived OIDC 
 
 ### Test or validation evidence
 
-The P4e, P4f, and P4g workflow paths are recorded as sandbox-validated in [Current status](current-status.md), with scoped validation, release, GitOps, health, cleanup, and destroy evidence described in the EKS guide.
+The P4e, P4f, and P4g workflow paths are recorded as sandbox-validated in [Current status](../practices/current-status.md), with scoped validation, release, GitOps, health, cleanup, and destroy evidence described in the EKS guide.
 
 ### Key trade-offs
 
@@ -116,7 +116,7 @@ The local workflow ingests synthetic Markdown, creates chunk metadata and evalua
 
 ### Architecture summary
 
-The [RAG knowledge lifecycle](rag-knowledge-lifecycle.md) links provenance, owner, classification, retention, review, and active/retired state. The implementation in [examples/rag-pattern/python](../examples/rag-pattern/python) provides the local artifact and quality path.
+The [RAG knowledge lifecycle](./rag-knowledge-lifecycle.md) links provenance, owner, classification, retention, review, and active/retired state. The implementation in [examples/rag-pattern/python](../../examples/rag-pattern/python) provides the local artifact and quality path.
 
 ### Technical evidence
 
@@ -156,12 +156,12 @@ The sandbox uses a Terraform-managed access boundary and manually confirmed, syn
 
 ### Architecture summary
 
-GitHub Actions assumes dedicated short-lived roles through OIDC. Terraform controls the narrowly scoped IAM and Guardrail configuration; workflows require explicit confirmation and emit only sanitized result categories. [The Bedrock sandbox design](p8-real-bedrock-sandbox-design.md) records the control model and limits.
+GitHub Actions assumes dedicated short-lived roles through OIDC. Terraform controls the narrowly scoped IAM and Guardrail configuration; workflows require explicit confirmation and emit only sanitized result categories. [The Bedrock sandbox design](./p8-real-bedrock-sandbox-design.md) records the control model and limits.
 
 ### Technical evidence
 
 - [Bedrock Terraform environment](../providers/aws/infra/terraform/envs/bedrock-sandbox), separate IAM boundaries, and protected manual workflow modes.
-- [Current status](current-status.md) records bounded synthetic smoke, guarded attachment, and direct-evaluation validation.
+- [Current status](../practices/current-status.md) records bounded synthetic smoke, guarded attachment, and direct-evaluation validation.
 
 ### Test or validation evidence
 

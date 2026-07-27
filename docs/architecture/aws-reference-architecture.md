@@ -39,9 +39,9 @@ P4 keeps EKS release engineering separate from general AWS runtime choices:
 - **OIDC boundary:** the repository should reuse an existing `token.actions.githubusercontent.com` OIDC provider where one already exists in the account, rather than creating duplicates.
 - **Cost boundary:** avoid NAT-heavy defaults and long-lived clusters until the sandbox workload, budget, and teardown process are explicit.
 
-The completed EKS sandbox design is documented in `docs/p4b-real-eks-sandbox-design.md`. Its bounded personal validation used a synthetic workload and was destroyed after evidence capture; it does not represent a persistent EKS deployment.
+The completed EKS sandbox design is documented in `docs/solutions/p4b-real-eks-sandbox-design.md`. Its bounded personal validation used a synthetic workload and was destroyed after evidence capture; it does not represent a persistent EKS deployment.
 
-The bounded Bedrock sandbox design is documented in `docs/p8-real-bedrock-sandbox-design.md`. It established a tiny governed access path using synthetic inputs, IAM least privilege, manual approval, budget controls, and sanitized evidence. The P8f Guardrail attachment and P8g direct-evaluation paths extend that boundary with synthetic-only validation.
+The bounded Bedrock sandbox design is documented in `docs/solutions/p8-real-bedrock-sandbox-design.md`. It established a tiny governed access path using synthetic inputs, IAM least privilege, manual approval, budget controls, and sanitized evidence. The P8f Guardrail attachment and P8g direct-evaluation paths extend that boundary with synthetic-only validation.
 
 Broader Guardrail policy, evaluation, data-handling, and operational ownership remain future scope. AgentCore remains future scope because it introduces agent runtime, tool, memory, gateway, observability, and evaluation concerns.
 
@@ -146,7 +146,7 @@ This lifecycle explains why the repository already emphasizes platform controls 
 
 The CDAO is an operating-model and governance role, not a service deployed by this repository. HyperPod is similarly a future compute-capacity option. Larger models, longer reasoning, larger context windows, and agentic tool use increase inference cost, telemetry, capacity, and governance pressure; they do not change the current project boundary. Any personal sandbox POC must use synthetic data, no committed credentials or state, a defined budget, and explicit cleanup.
 
-For a provider-aware overview, see `docs/ai-factory-infrastructure-lens.md`.
+For a provider-aware overview, see `docs/architecture/ai-factory-infrastructure-lens.md`.
 
 ## Current State
 

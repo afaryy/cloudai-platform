@@ -1,7 +1,8 @@
 # Archive
 
 This category is reserved for detailed historical implementation-stage records
-when a later move preserves the full document, updates internal links, and
-retains a compatibility page at the established public URL.
+that are no longer part of the current architecture, solution, practice, or
+evidence navigation.
 
-No document is moved or archived in this first categorisation stage.
+No document is currently archived. Historical records will remain complete if
+they are ever moved here.

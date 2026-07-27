@@ -46,7 +46,7 @@ If the optional P4b sandbox is used, the design should include:
 
 Normal sandbox operation should not rely on laptop-local deploy commands. Local commands can be useful for learning and emergency inspection, but the portfolio pattern should show controlled delivery through GitHub Actions with OIDC identity and GitHub environment approval.
 
-See `docs/p4b-eks-sandbox-operator-runbook.md` for the P4b readiness checklist, budget and cleanup rules, GitHub Actions boundary, apply/destroy steps, and evidence gate.
+See `docs/solutions/p4b-eks-sandbox-operator-runbook.md` for the P4b readiness checklist, budget and cleanup rules, GitHub Actions boundary, apply/destroy steps, and evidence gate.
 
 ## P4e Helm-On-EKS Validation
 
@@ -180,8 +180,8 @@ Current P4 evidence includes:
 - Synthetic-only Argo CD Application manifest for the mock AI API Helm chart.
 - Manual sync posture with no automated sync enabled by default.
 - Argo CD labels and annotations for owner, environment, data scope, cost allocation, release boundary, and rollback/runbook metadata.
-- Release gates and rollback pattern in `docs/eks-release-gates-and-rollback.md`.
-- P4b readiness and operator guidance in `docs/p4b-eks-sandbox-operator-runbook.md`.
+- Release gates and rollback pattern in `docs/solutions/eks-release-gates-and-rollback.md`.
+- P4b readiness and operator guidance in `docs/solutions/p4b-eks-sandbox-operator-runbook.md`.
 - CloudFormation bootstrap example for Terraform backend and GitHub Actions role/policy.
 - Terraform backend example and empty committed S3 backend block for `eks-sandbox`.
 - Manual GitHub Actions workflow for validation and backend-backed plan.
@@ -203,7 +203,7 @@ Do not add a real cluster URL, Argo CD token, kubeconfig, account ID, role ARN, 
 
 ## P4d Release Gates And Rollback
 
-`docs/eks-release-gates-and-rollback.md` defines the release governance pattern that sits between GitOps intent and a future sandbox deployment. It covers:
+`docs/solutions/eks-release-gates-and-rollback.md` defines the release governance pattern that sits between GitOps intent and a future sandbox deployment. It covers:
 
 - pre-deploy gates for scope, manifest rendering, chart quality, secrets, identity, policy, resources, cost, and approval;
 - rollout observation through Argo CD health, Kubernetes Deployment readiness, probes, events, logs, and synthetic health checks;

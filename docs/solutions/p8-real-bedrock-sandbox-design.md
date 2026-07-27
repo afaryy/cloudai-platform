@@ -230,7 +230,7 @@ evaluation outcomes; it is not a production safety claim.
 
 P8h now provides a documentation-only, gateway-first readiness reference for a
 future read-only knowledge lookup: [P8h AgentCore Knowledge-Lookup
-Readiness](p8h-agentcore-knowledge-lookup-readiness.md).
+Readiness](./p8h-agentcore-knowledge-lookup-readiness.md).
 
 AgentCore introduces runtime concerns such as agent identity, tools, memory,
 gateway, observability, evaluation, and operation lifecycle. P8h defines the

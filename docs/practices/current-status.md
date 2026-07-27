@@ -78,26 +78,26 @@ It currently has six mock-first lanes:
 | P6c RAG knowledge lifecycle | Complete | `shared/schemas/rag-knowledge-lifecycle/`, synthetic lifecycle fixtures, and retired-source route test |
 | P2 Guardrails as a Service | Complete | `shared/schemas/guardrails-as-a-service/`, synthetic fixtures, `POST /guardrails/assess`, and mock eval evidence |
 | P4a Helm packaging | Complete | `helm/ai-api-service/` |
-| P4b personal EKS sandbox runbook, Terraform skeleton, backend-backed validate/plan/apply/destroy path, and static tests | Complete | `docs/p4b-eks-sandbox-operator-runbook.md`, `docs/p4b-real-eks-sandbox-design.md`, `providers/aws/infra/bootstrap/`, `providers/aws/infra/terraform/envs/eks-sandbox/`, `providers/aws/infra/terraform/modules/network/`, `providers/aws/infra/terraform/modules/eks/`, `.github/workflows/terraform-eks-sandbox.yml`, and `.github/workflows/terraform-tests.yaml` |
+| P4b personal EKS sandbox runbook, Terraform skeleton, backend-backed validate/plan/apply/destroy path, and static tests | Complete | `docs/solutions/p4b-eks-sandbox-operator-runbook.md`, `docs/solutions/p4b-real-eks-sandbox-design.md`, `providers/aws/infra/bootstrap/`, `providers/aws/infra/terraform/envs/eks-sandbox/`, `providers/aws/infra/terraform/modules/network/`, `providers/aws/infra/terraform/modules/eks/`, `.github/workflows/terraform-eks-sandbox.yml`, and `.github/workflows/terraform-tests.yaml` |
 | P4c Argo CD pattern | Complete | `argocd/applications/cloudai-api-sandbox.yaml` |
-| P4d release gates and rollback | Complete | `docs/eks-release-gates-and-rollback.md` |
-| P4e Helm-on-EKS validation workflow | Live sandbox validated | `.github/workflows/helm-eks-validation.yml` and `docs/ai-release-engineering-on-eks.md` |
-| P4f Helm release workflow | Live install, rollback, and uninstall validated | `.github/workflows/helm-eks-release.yml` and `docs/ai-release-engineering-on-eks.md` |
-| P4g Argo CD GitOps workflow | Live GitOps sync, health, status, cleanup, and destroy validated | `.github/workflows/argocd-eks-gitops.yml`, `argocd/applications/cloudai-api-sandbox.yaml`, and `docs/ai-release-engineering-on-eks.md` |
-| P8 Real Bedrock Sandbox | Bounded synthetic sandbox validation complete | `docs/p8-real-bedrock-sandbox-design.md` and `providers/aws/infra/terraform/envs/bedrock-sandbox/README.md` |
-| P8a Bedrock access readiness | Complete | `docs/p8a-bedrock-access-readiness.md` and `docs/evidence/templates/p8a-bedrock-smoke-test-evidence.md` |
+| P4d release gates and rollback | Complete | `docs/solutions/eks-release-gates-and-rollback.md` |
+| P4e Helm-on-EKS validation workflow | Live sandbox validated | `.github/workflows/helm-eks-validation.yml` and `docs/solutions/ai-release-engineering-on-eks.md` |
+| P4f Helm release workflow | Live install, rollback, and uninstall validated | `.github/workflows/helm-eks-release.yml` and `docs/solutions/ai-release-engineering-on-eks.md` |
+| P4g Argo CD GitOps workflow | Live GitOps sync, health, status, cleanup, and destroy validated | `.github/workflows/argocd-eks-gitops.yml`, `argocd/applications/cloudai-api-sandbox.yaml`, and `docs/solutions/ai-release-engineering-on-eks.md` |
+| P8 Real Bedrock Sandbox | Bounded synthetic sandbox validation complete | `docs/solutions/p8-real-bedrock-sandbox-design.md` and `providers/aws/infra/terraform/envs/bedrock-sandbox/README.md` |
+| P8a Bedrock access readiness | Complete | `docs/solutions/p8a-bedrock-access-readiness.md` and `docs/evidence/templates/p8a-bedrock-smoke-test-evidence.md` |
 | P8b Bedrock Terraform IAM boundary | Confirmation-gated IAM apply boundary complete | `providers/aws/infra/terraform/modules/bedrock-access/`, `providers/aws/infra/terraform/envs/bedrock-sandbox/`, and `.github/workflows/terraform-bedrock-sandbox.yml` |
 | P8c synthetic Bedrock smoke test | Live synthetic smoke test validated | `.github/workflows/terraform-bedrock-sandbox.yml` and sanitized workflow evidence |
 | P8d opt-in Bedrock gateway adapter | Live adapter smoke validated; mock remains default | `providers/aws/app/api/src/clients/awsBedrockClient.ts`, `providers/aws/app/api/src/scripts/bedrockAdapterSmoke.ts`, and `.github/workflows/bedrock-gateway-adapter.yml` |
-| P8e Bedrock Guardrails mapping | Complete static documentation-and-contract mapping | `docs/guardrails-as-a-service.md`, `shared/schemas/guardrails-as-a-service/bedrock-guardrails-mapping.schema.json`, `shared/examples/guardrails-as-a-service/bedrock-guardrails-mapping.mock.json`, and `providers/aws/app/api/tests/guardrailsContracts.test.ts` |
+| P8e Bedrock Guardrails mapping | Complete static documentation-and-contract mapping | `docs/solutions/guardrails-as-a-service.md`, `shared/schemas/guardrails-as-a-service/bedrock-guardrails-mapping.schema.json`, `shared/examples/guardrails-as-a-service/bedrock-guardrails-mapping.mock.json`, and `providers/aws/app/api/tests/guardrailsContracts.test.ts` |
 | P8f Bedrock Guardrail boundary | Live Guardrail apply and guarded `Converse` attachment smoke validated | `providers/aws/infra/terraform/modules/bedrock-access/`, `providers/aws/infra/terraform/envs/bedrock-sandbox/`, `.github/workflows/terraform-bedrock-sandbox.yml`, and `providers/aws/infra/bootstrap/github-oidc-terraform-backend.yaml` |
 | P8g Direct Guardrail evaluation | Live direct evaluation validated the expected safe-allowed, PII-shaped-blocked, and prompt-attack-shaped-blocked metadata verdicts; no model invocation | `.github/workflows/terraform-bedrock-sandbox.yml`, `.github/workflows/terraform-tests.yaml`, and `providers/aws/infra/terraform/envs/bedrock-sandbox/README.md` |
-| P8h AgentCore knowledge-lookup readiness | Complete static gateway-first reference architecture; no AgentCore resource or call | `docs/p8h-agentcore-knowledge-lookup-readiness.md` |
-| P5a AI-assisted DevSecOps boundary | Complete | `docs/ai-assisted-devsecops-pattern.md` and `.github/workflows/ai-assisted-devsecops.yml` |
-| P5b AI-assisted review evidence | Complete | `docs/ai-assisted-review-evidence.md`, `shared/schemas/ai-assisted-devsecops/`, and `shared/examples/ai-assisted-devsecops/` |
+| P8h AgentCore knowledge-lookup readiness | Complete static gateway-first reference architecture; no AgentCore resource or call | `docs/solutions/p8h-agentcore-knowledge-lookup-readiness.md` |
+| P5a AI-assisted DevSecOps boundary | Complete | `docs/practices/ai-assisted-devsecops-pattern.md` and `.github/workflows/ai-assisted-devsecops.yml` |
+| P5b AI-assisted review evidence | Complete | `docs/evidence/ai-assisted-review-evidence.md`, `shared/schemas/ai-assisted-devsecops/`, and `shared/examples/ai-assisted-devsecops/` |
 | P6d control-plane evidence map | Complete | `docs/evidence/control-plane-evidence-map.md`, `shared/schemas/control-plane-evidence/`, and `shared/examples/control-plane-evidence/` |
 | P6e control-plane evidence scenarios | Complete | `docs/evidence/control-plane-evidence-scenarios.md`, `shared/schemas/control-plane-evidence/evidence-scenarios.schema.json`, and `shared/examples/control-plane-evidence/evidence-scenarios.mock.json` |
-| P6f security and operations controls | Complete | `docs/ai-platform-security-operations-controls.md` |
+| P6f security and operations controls | Complete | `docs/practices/ai-platform-security-operations-controls.md` |
 
 ## Intentionally Deferred
 
@@ -146,11 +146,11 @@ Future work controls:
 - **Synthetic-vs-real AI boundary:** keep public wording clear that the live EKS workload was synthetic. Real AI inference would require model artifacts, model server images, GPU or accelerator capacity, readiness checks, secure model/data access, evaluation evidence, observability, and FinOps.
 - **P6 AI Traffic Governance evidence expansion:** add more synthetic scenario variants only if they explain a new governance outcome that is not already covered by P6e/P6f.
 - **P4b future evidence refresh:** capture only sanitized apply/destroy observations when needed; do not commit account identifiers, live endpoints, kubeconfig, raw plans, state, tfvars, backend names, or screenshots with private details.
-- **P4b pre-apply readiness check:** use `docs/p4b-eks-sandbox-operator-runbook.md` as the single go/no-go runbook before any real personal EKS sandbox apply.
+- **P4b pre-apply readiness check:** use `docs/solutions/p4b-eks-sandbox-operator-runbook.md` as the single go/no-go runbook before any real personal EKS sandbox apply.
 - **P8g evidence reuse:** the initial three-case direct evaluation is live validated. Repeat it only when there is a new evaluation goal or a Guardrail configuration change. Treat its result as narrow synthetic configuration evidence, not Guardrail-quality evidence.
 - **P8h reference boundary:** the completed AgentCore knowledge-lookup reference is design-only. Any AgentCore resource, Gateway, runtime, identity, knowledge source, Terraform/IAM, or provider call needs a separate reviewed design and must not reuse P8f/P8g evidence as proof of production safety effectiveness.
-- **P7 AI Factory / LLMOps / GPU stretch:** retain the [AI Factory infrastructure lens](ai-factory-infrastructure-lens.md) and [AI Workload Operating Contract](ai-workload-operating-contract.md) as future design context; they define workload readiness and AI data-centre practice boundaries, not a current GPU, scheduler, or AI Factory implementation.
-- **P7 observability sandbox:** the [EKS Prometheus and Grafana observability demonstration](eks-prometheus-grafana-observability-demo.md) is planned, not validated. Any run requires manual approval, synthetic-only metrics, private access, a budget alert, same-day teardown, and sanitized evidence.
+- **P7 AI Factory / LLMOps / GPU stretch:** retain the [AI Factory infrastructure lens](../architecture/ai-factory-infrastructure-lens.md) and [AI Workload Operating Contract](./ai-workload-operating-contract.md) as future design context; they define workload readiness and AI data-centre practice boundaries, not a current GPU, scheduler, or AI Factory implementation.
+- **P7 observability sandbox:** the [EKS Prometheus and Grafana observability demonstration](../solutions/eks-prometheus-grafana-observability-demo.md) is planned, not validated. Any run requires manual approval, synthetic-only metrics, private access, a budget alert, same-day teardown, and sanitized evidence.
 
 The repository should not perform a real cloud deployment by default. Any personal sandbox work must keep account identifiers, state, kubeconfig, plan files, tfvars, credentials, and live endpoint details out of git.
 

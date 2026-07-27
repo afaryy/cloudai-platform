@@ -3,13 +3,13 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 
-const DOC_PATH = resolve(process.cwd(), "../../../../docs/ai-workload-operating-contract.md");
-const AI_FACTORY_PATH = resolve(process.cwd(), "../../../../docs/ai-factory-infrastructure-lens.md");
-const OBSERVABILITY_PATH = resolve(process.cwd(), "../../../../docs/observability.md");
-const FINOPS_PATH = resolve(process.cwd(), "../../../../docs/ai-finops.md");
+const DOC_PATH = resolve(process.cwd(), "../../../../docs/practices/ai-workload-operating-contract.md");
+const AI_FACTORY_PATH = resolve(process.cwd(), "../../../../docs/architecture/ai-factory-infrastructure-lens.md");
+const OBSERVABILITY_PATH = resolve(process.cwd(), "../../../../docs/practices/observability.md");
+const FINOPS_PATH = resolve(process.cwd(), "../../../../docs/practices/ai-finops.md");
 const README_PATH = resolve(process.cwd(), "../../../../README.md");
-const FEATURED_SOLUTIONS_PATH = resolve(process.cwd(), "../../../../docs/featured-solutions.md");
-const CURRENT_STATUS_PATH = resolve(process.cwd(), "../../../../docs/current-status.md");
+const FEATURED_SOLUTIONS_PATH = resolve(process.cwd(), "../../../../docs/solutions/featured-solutions.md");
+const CURRENT_STATUS_PATH = resolve(process.cwd(), "../../../../docs/practices/current-status.md");
 
 test("AI Workload Operating Contract documents every agreed workload profile", async () => {
   const document = await readFile(DOC_PATH, "utf8");

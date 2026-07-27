@@ -91,10 +91,10 @@ Guardrails as a Service adds a shared safety-verdict contract for model gateway,
 
 P6a does not install or scan agent skills, invoke MCP tools, execute tool calls, contact models or cloud providers, persist audit records, proxy traffic, or enforce policy outside the local mock process.
 
-P6b adds the separate mock capability-governance contract pack. It records registry metadata, skill cards, declared permissions, synthetic scan and evaluation evidence, integrity status, lifecycle, and admission decisions before a capability is eligible for future runtime use. See `docs/agent-capability-governance.md`. A blocked or approval-required capability is not treated as approved by the capability-admission evaluation.
+P6b adds the separate mock capability-governance contract pack. It records registry metadata, skill cards, declared permissions, synthetic scan and evaluation evidence, integrity status, lifecycle, and admission decisions before a capability is eligible for future runtime use. See `docs/practices/agent-capability-governance.md`. A blocked or approval-required capability is not treated as approved by the capability-admission evaluation.
 
 The RAG governance contract under `shared/schemas/rag-governance/` is a mock contract for retrieval evidence. It defines how future RAG flows can expose data classification, allowed knowledge base boundaries, citation checks, egress decisions, and audit metadata before any retrieval runtime is added.
 
-P6c adds synthetic knowledge-source lifecycle evidence for provenance, owner, classification, authorised knowledge bases, retention, review, and `active | paused | retired` state. The mock route rejects a retired source before it can return a governed response. See `docs/rag-knowledge-lifecycle.md`.
+P6c adds synthetic knowledge-source lifecycle evidence for provenance, owner, classification, authorised knowledge bases, retention, review, and `active | paused | retired` state. The mock route rejects a retired source before it can return a governed response. See `docs/solutions/rag-knowledge-lifecycle.md`.
 
-P2 Guardrails as a Service adds `POST /guardrails/assess` and a synthetic metadata-only contract for shared safety and review verdicts. It accepts no raw `content`, prompt text, tool payloads, credentials, or sensitive data. See `docs/guardrails-as-a-service.md`.
+P2 Guardrails as a Service adds `POST /guardrails/assess` and a synthetic metadata-only contract for shared safety and review verdicts. It accepts no raw `content`, prompt text, tool payloads, credentials, or sensitive data. See `docs/solutions/guardrails-as-a-service.md`.

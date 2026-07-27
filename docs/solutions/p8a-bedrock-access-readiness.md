@@ -1,7 +1,7 @@
 # P8a Bedrock Access Readiness
 
 > Historical readiness record. The P8 progression later completed bounded
-> synthetic Bedrock and Guardrail validation. Read [Current status](current-status.md)
+> synthetic Bedrock and Guardrail validation. Read [Current status](../practices/current-status.md)
 > for the current evidence boundary; this document preserves the pre-validation
 > gate and its public-safety rules.
 
@@ -208,7 +208,7 @@ P8a readiness
 
 Do not combine these into one PR.
 
-Before any separate apply-workflow change, use the [P8b.1 Bedrock IAM Apply Readiness](p8b1-bedrock-iam-apply-readiness.md) gate.
+Before any separate apply-workflow change, use the [P8b.1 Bedrock IAM Apply Readiness](./p8b1-bedrock-iam-apply-readiness.md) gate.
 
 ## Interview / CTO Wording
 
