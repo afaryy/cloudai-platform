@@ -21,7 +21,7 @@
     "requestId": { "type": "string", "minLength": 1 },
     "owner": { "type": "string", "minLength": 1 },
     "workloadIdentity": { "type": "string", "minLength": 1 },
-    "route": { "type": "string", "enum": ["gateway-only"] },
+    "route": { "type": "string", "enum": ["gateway-only", "direct-runtime"] },
     "capability": { "type": "string", "enum": ["knowledge-search"] },
     "accessMode": { "type": "string", "enum": ["read-only"] },
     "knowledgeBoundaryId": { "type": "string", "minLength": 1 },
