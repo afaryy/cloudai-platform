@@ -16,5 +16,6 @@ evidence, validation, trade-offs, and explicit limits.
 - [Bedrock Access Readiness](p8a-bedrock-access-readiness.md) and
   [IAM Apply Readiness](p8b1-bedrock-iam-apply-readiness.md)
 - [AgentCore Knowledge-Lookup Readiness](p8h-agentcore-knowledge-lookup-readiness.md)
+- [AgentCore Synthetic Knowledge-Lookup Contract Pack](p8i-agentcore-synthetic-contract-pack.md)
 - [Solution Walkthrough](cloudai-platform-solution-walkthrough.md) and
   [Featured Solutions](featured-solutions.md)
