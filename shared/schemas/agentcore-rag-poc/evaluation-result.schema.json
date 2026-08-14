@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AgentCore Governed RAG POC Evaluation Result",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["scenario", "expectedOutcome", "citationRequired", "evidenceLevel"],
+  "properties": {
+    "scenario": { "type": "string", "pattern": "^synthetic-" },
+    "expectedOutcome": { "enum": ["answer", "abstain", "denied", "disabled"] },
+    "citationRequired": { "type": "boolean" },
+    "evidenceLevel": { "enum": ["local-contract", "architecture-mapping", "live-validation"] }
+  }
+}

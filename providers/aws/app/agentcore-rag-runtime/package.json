@@ -1,0 +1,16 @@
+{
+  "name": "@cloudai-platform/agentcore-rag-runtime",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@11.7.0",
+  "type": "module",
+  "description": "Fail-closed local runtime boundary for the governed AgentCore RAG POC.",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "tsc -p tsconfig.json && node --test \"dist/tests/**/*.test.js\""
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "typescript": "^5.8.0"
+  }
+}
