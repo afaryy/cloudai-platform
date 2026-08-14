@@ -92,6 +92,14 @@ test("AgentCore readiness decision requires trusted policy and Guardrail metadat
 
   assert.throws(() => assertMatchesSchema(withoutPolicy, decisionSchema), /missing required field: policy/);
   assert.throws(() => assertMatchesSchema(withoutGuardrail, decisionSchema), /missing required field: guardrail/);
+  assert.throws(
+    () => assertMatchesSchema({ ...allowed.decision, policy: { ...allowed.decision.policy, policyId: "non-synthetic-policy" } }, decisionSchema),
+    /synthetic pattern/
+  );
+  assert.throws(
+    () => assertMatchesSchema({ ...allowed.decision, guardrail: { ...allowed.decision.guardrail, guardrailId: "non-synthetic-guardrail" } }, decisionSchema),
+    /synthetic pattern/
+  );
 });
 
 test("AgentCore readiness schema validation rejects empty capability lists and invalid timestamps", async () => {
@@ -105,6 +113,10 @@ test("AgentCore readiness schema validation rejects empty capability lists and i
   );
   assert.throws(
     () => assertMatchesSchema({ ...allowed.request, requestedAt: "not-a-timestamp" }, requestSchema),
+    /ISO date-time/
+  );
+  assert.throws(
+    () => assertMatchesSchema({ ...allowed.request, requestedAt: "2026-08-14" }, requestSchema),
     /ISO date-time/
   );
 });
@@ -292,8 +304,11 @@ function assertMatchesSchema(value: unknown, schema: any, path = "$"): void {
     if (typeof schema.minLength === "number") {
       assert.ok(value.length >= schema.minLength, `${path} must not be empty`);
     }
+    if (typeof schema.pattern === "string") {
+      assert.ok(new RegExp(schema.pattern).test(value), `${path} must match the documented synthetic pattern`);
+    }
     if (schema.format === "date-time") {
-      assert.ok(!Number.isNaN(Date.parse(value)), `${path} must be an ISO date-time`);
+      assert.ok(isRfc3339DateTime(value), `${path} must be an ISO date-time`);
     }
   }
 
@@ -307,4 +322,9 @@ function assertMatchesSchema(value: unknown, schema: any, path = "$"): void {
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function isRfc3339DateTime(value: string): boolean {
+  const rfc3339DateTime = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/;
+  return rfc3339DateTime.test(value) && !Number.isNaN(Date.parse(value));
 }

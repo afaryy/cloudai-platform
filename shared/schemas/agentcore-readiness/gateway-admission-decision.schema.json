@@ -27,7 +27,7 @@
       "additionalProperties": false,
       "required": ["policyId", "policyVersion", "trustStatus"],
       "properties": {
-        "policyId": { "type": "string", "minLength": 1 },
+        "policyId": { "type": "string", "pattern": "^synthetic-[a-z0-9-]+$" },
         "policyVersion": { "type": "string", "enum": ["synthetic-v1"] },
         "trustStatus": { "type": "string", "enum": ["trusted"] }
       }
@@ -37,7 +37,7 @@
       "additionalProperties": false,
       "required": ["guardrailId", "guardrailVersion", "trustStatus"],
       "properties": {
-        "guardrailId": { "type": "string", "minLength": 1 },
+        "guardrailId": { "type": "string", "pattern": "^synthetic-[a-z0-9-]+$" },
         "guardrailVersion": { "type": "string", "enum": ["synthetic-v1"] },
         "trustStatus": { "type": "string", "enum": ["trusted"] }
       }
