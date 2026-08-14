@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cloudai-platform.example/schemas/agentcore-readiness/emergency-disable-closure.schema.json",
+  "title": "Synthetic Emergency Disable Closure",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "workloadIdentity",
+    "closureStatus",
+    "initiatedBy",
+    "reasonCode",
+    "effectiveAt",
+    "evidenceId",
+    "newRequests"
+  ],
+  "properties": {
+    "workloadIdentity": { "type": "string", "minLength": 1 },
+    "closureStatus": { "type": "string", "enum": ["disabled"] },
+    "initiatedBy": { "type": "string", "minLength": 1 },
+    "reasonCode": { "type": "string", "enum": ["synthetic-emergency-disable"] },
+    "effectiveAt": { "type": "string", "format": "date-time" },
+    "evidenceId": { "type": "string", "minLength": 1 },
+    "newRequests": { "type": "string", "enum": ["rejected"] }
+  }
+}
