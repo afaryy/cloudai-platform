@@ -1,0 +1,9 @@
+{
+  "workloadIdentity": "synthetic-workload-knowledge-lookup",
+  "closureStatus": "disabled",
+  "initiatedBy": "synthetic-owner-platform",
+  "reasonCode": "synthetic-emergency-disable",
+  "effectiveAt": "2026-08-14T00:05:00Z",
+  "evidenceId": "synthetic-evidence-006",
+  "newRequests": "rejected"
+}

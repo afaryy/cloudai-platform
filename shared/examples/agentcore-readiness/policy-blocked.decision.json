@@ -1,0 +1,10 @@
+{
+  "requestId": "synthetic-request-blocked-004",
+  "decision": "blocked",
+  "reasonCode": "synthetic-guardrail-policy-block",
+  "policySignal": "deny",
+  "guardrailSignal": "blocked",
+  "session": { "sessionId": "synthetic-session-004", "state": "closed", "limit": 3 },
+  "budget": { "consumed": 0, "limit": 10, "state": "not-applicable" },
+  "evidence": { "evidenceId": "synthetic-evidence-004", "redactionStatus": "metadata-only", "recordedAt": "2026-08-14T00:03:01Z" }
+}

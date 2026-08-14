@@ -1,0 +1,10 @@
+{
+  "knowledgeBoundaryId": "synthetic-retired-handbook",
+  "owner": "synthetic-owner-knowledge",
+  "classification": "synthetic-internal",
+  "lifecycleStatus": "retired",
+  "approvedForCapabilities": ["knowledge-search"],
+  "accessMode": "read-only",
+  "sourceReference": "synthetic-retired-handbook-v0",
+  "reviewedAt": "2026-08-14T00:01:00Z"
+}
