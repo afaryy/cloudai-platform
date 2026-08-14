@@ -119,6 +119,14 @@ test("AgentCore readiness schema validation rejects empty capability lists and i
     () => assertMatchesSchema({ ...allowed.request, requestedAt: "2026-08-14" }, requestSchema),
     /ISO date-time/
   );
+  assert.throws(
+    () => assertMatchesSchema({ ...allowed.request, requestedAt: "2026-02-30T00:00:00Z" }, requestSchema),
+    /ISO date-time/
+  );
+  assert.throws(
+    () => assertMatchesSchema({ ...allowed.request, requestedAt: "2026-04-31T00:00:00+00:00" }, requestSchema),
+    /ISO date-time/
+  );
 });
 
 test("AgentCore readiness rejects invalid request, boundary, and decision combinations", async () => {
@@ -325,6 +333,17 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 function isRfc3339DateTime(value: string): boolean {
-  const rfc3339DateTime = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/;
-  return rfc3339DateTime.test(value) && !Number.isNaN(Date.parse(value));
+  const match = /^(\d{4})-(\d{2})-(\d{2})T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/.exec(value);
+  if (!match) return false;
+
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  const monthDays = [31, isLeapYear(year) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+
+  return month >= 1 && month <= 12 && day >= 1 && day <= monthDays[month - 1] && !Number.isNaN(Date.parse(value));
+}
+
+function isLeapYear(year: number): boolean {
+  return year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
 }
