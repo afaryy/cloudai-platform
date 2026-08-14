@@ -14,5 +14,7 @@ provider boundaries, and future capacity design.
   and [GCP](gcp-reference-architecture.md) reference architectures.
 - [AI Factory Infrastructure Lens](ai-factory-infrastructure-lens.md) —
   future capacity and accelerator context.
+- [AgentCore Governed RAG POC](agentcore-governed-rag-poc.md) — planned
+  Gateway, Runtime, Guardrails, and synthetic knowledge-retrieval sandbox.
 - [Architecture Library](architecture-library.md) — the curated entry point
   across the repository.
