@@ -5,6 +5,7 @@ import { resolve } from "node:path";
 
 const SCHEMA_DIR = resolve(process.cwd(), "../../../../shared/schemas/agentcore-readiness");
 const EXAMPLE_DIR = resolve(process.cwd(), "../../../../shared/examples/agentcore-readiness");
+const P8I_DOC_PATH = resolve(process.cwd(), "../../../../docs/solutions/p8i-agentcore-synthetic-contract-pack.md");
 
 test("AgentCore readiness request captures a metadata-only knowledge lookup boundary", async () => {
   const schema = await readJson("knowledge-lookup-admission-request.schema.json", SCHEMA_DIR);
@@ -76,6 +77,15 @@ test("AgentCore readiness relationships fail closed when governance boundaries c
   assert.throws(() => assertMatchesSchema({ ...allowed.boundary, rawSourceText: "not allowed" }, boundarySchema), /not documented/);
   assert.throws(() => assertMatchesSchema({ ...allowed.decision.evidence, rawPrompt: "not allowed" }, decisionSchema.properties.evidence), /not documented/);
   assert.throws(() => assertMatchesSchema({ ...disabled.closure, newRequests: "allowed" }, closureSchema), /documented enum values/);
+});
+
+test("P8i documentation states the complete non-claim boundary", async () => {
+  const documentation = await readFile(P8I_DOC_PATH, "utf8");
+
+  assert.match(documentation, /Implemented — local synthetic contract pack/);
+  assert.match(documentation, /AgentCore-ready control-plane design/);
+  assert.match(documentation, /no AgentCore integration or live runtime validation/);
+  assert.match(documentation, /no provider call, retrieval, embeddings, vector index, or customer data/);
 });
 
 async function loadScenario(prefix: string, includeClosure = false): Promise<any> {
