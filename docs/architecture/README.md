@@ -16,5 +16,7 @@ provider boundaries, and future capacity design.
   future capacity and accelerator context.
 - [AgentCore Governed RAG POC](agentcore-governed-rag-poc.md) — planned
   Gateway, Runtime, Guardrails, and synthetic knowledge-retrieval sandbox.
+- [Three-Cloud Governed RAG Reference](three-cloud-governed-rag-reference.md)
+  — shared control and evaluation contract with AWS, Azure, and GCP mappings.
 - [Architecture Library](architecture-library.md) — the curated entry point
   across the repository.

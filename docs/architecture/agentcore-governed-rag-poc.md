@@ -57,14 +57,45 @@ sanitized evidence for:
 
 ## Delivery Stages
 
-1. Local contracts and synthetic evaluation cases.
-2. Reviewed AWS preflight: identity, region, model access, quotas, IAM,
+1. Provider-neutral Governed RAG Contract: one synthetic corpus, a shared
+   evaluation set, and fixed control/evidence criteria across AWS, Azure, and
+   GCP.
+2. Local AWS contracts and synthetic evaluation cases.
+3. Reviewed AWS preflight: identity, region, model access, quotas, IAM,
    budget, logs, and teardown plan.
-3. Explicitly approved small sandbox deployment.
-4. Sanitized validation evidence and resource destruction.
+4. Explicitly approved small AWS sandbox deployment.
+5. Sanitized validation evidence and resource destruction.
+6. Azure and GCP equivalent architecture mappings, followed by optional
+   small validations only when their own preflight, budget, and teardown
+   gates have been reviewed.
 
 Any failed preflight condition stops the work before cloud resources are
 created.
+
+## Three-Cloud Comparison Boundary
+
+This POC is the AWS flagship implementation of a wider **Governed RAG
+Reference**. It compares control and operating patterns, not a vendor ranking
+or an uncontrolled model-quality contest.
+
+Every provider mapping must use the same synthetic source material and test:
+
+- authenticated access and named ownership;
+- approved source lifecycle and retrieval boundary;
+- grounded citations or an explicit abstention;
+- deterministic policy decisions outside the model;
+- evaluation and metadata-safe observability;
+- cost ownership, safe failure, and teardown.
+
+| Provider | Initial reference path | Evidence level |
+| --- | --- | --- |
+| AWS | AgentCore Gateway + Runtime + Bedrock Knowledge Bases + Guardrails | Live POC after explicit approval |
+| Azure | Foundry and Azure AI Search RAG mapping | Architecture mapping first; optional validation later |
+| GCP | Vertex AI RAG Engine mapping | Architecture mapping first; optional validation later |
+
+The public comparison will distinguish verified behaviour, architecture-level
+equivalence, and future validation. It will never imply a deployed workload
+where only a documented mapping exists.
 
 ## Relationship to Existing Work
 
