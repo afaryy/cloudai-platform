@@ -48,6 +48,7 @@ test("six AgentCore readiness scenarios remain distinct and match their contract
     assertMatchesSchema(scenario.request, requestSchema);
     assertMatchesSchema(scenario.boundary, boundarySchema);
     assertMatchesSchema(scenario.decision, decisionSchema);
+    assertScenarioRelationships(scenario);
   }
   assertMatchesSchema(disabled.closure, closureSchema);
 
@@ -78,6 +79,46 @@ test("AgentCore readiness relationships fail closed when governance boundaries c
   assert.throws(() => assertMatchesSchema({ ...allowed.boundary, rawSourceText: "not allowed" }, boundarySchema), /not documented/);
   assert.throws(() => assertMatchesSchema({ ...allowed.decision.evidence, rawPrompt: "not allowed" }, decisionSchema.properties.evidence), /not documented/);
   assert.throws(() => assertMatchesSchema({ ...disabled.closure, newRequests: "allowed" }, closureSchema), /documented enum values/);
+});
+
+test("AgentCore readiness decision requires trusted policy and Guardrail metadata", async () => {
+  const decisionSchema = await readJson("gateway-admission-decision.schema.json", SCHEMA_DIR);
+  const allowed = await loadScenario("allowed-gateway-lookup");
+  const withoutPolicy = { ...allowed.decision };
+  const withoutGuardrail = { ...allowed.decision };
+
+  delete withoutPolicy.policy;
+  delete withoutGuardrail.guardrail;
+
+  assert.throws(() => assertMatchesSchema(withoutPolicy, decisionSchema), /missing required field: policy/);
+  assert.throws(() => assertMatchesSchema(withoutGuardrail, decisionSchema), /missing required field: guardrail/);
+});
+
+test("AgentCore readiness schema validation rejects empty capability lists and invalid timestamps", async () => {
+  const requestSchema = await readJson("knowledge-lookup-admission-request.schema.json", SCHEMA_DIR);
+  const boundarySchema = await readJson("approved-knowledge-boundary.schema.json", SCHEMA_DIR);
+  const allowed = await loadScenario("allowed-gateway-lookup");
+
+  assert.throws(
+    () => assertMatchesSchema({ ...allowed.boundary, approvedForCapabilities: [] }, boundarySchema),
+    /at least 1 item/
+  );
+  assert.throws(
+    () => assertMatchesSchema({ ...allowed.request, requestedAt: "not-a-timestamp" }, requestSchema),
+    /ISO date-time/
+  );
+});
+
+test("AgentCore readiness rejects invalid request, boundary, and decision combinations", async () => {
+  const allowed = await loadScenario("allowed-gateway-lookup");
+  const retired = await loadScenario("retired-source-denied");
+  const blocked = await loadScenario("policy-blocked");
+  const bypass = await loadScenario("direct-runtime-bypass");
+
+  assert.throws(() => assertScenarioRelationships({ ...allowed, request: { ...allowed.request, route: "direct-runtime" } }), /direct-runtime bypass/);
+  assert.throws(() => assertScenarioRelationships({ ...retired, decision: { ...retired.decision, decision: "admit" } }), /retired/);
+  assert.throws(() => assertScenarioRelationships({ ...blocked, decision: { ...blocked.decision, guardrailSignal: "allow" } }), /blocked/);
+  assert.throws(() => assertScenarioRelationships({ ...bypass, decision: { ...bypass.decision, decision: "admit" } }), /bypass/);
 });
 
 test("P8i documentation states the complete non-claim boundary", async () => {
@@ -143,6 +184,69 @@ function assertEmergencyDisableClosesAdmission(scenario: any): void {
   assert.equal(scenario.closure.evidenceId, scenario.decision.evidence.evidenceId);
 }
 
+function assertScenarioRelationships(scenario: any): void {
+  const { request, boundary, decision } = scenario;
+
+  assert.equal(boundary.knowledgeBoundaryId, request.knowledgeBoundaryId, "knowledge boundary must match the request");
+  assert.equal(decision.requestId, request.requestId, "decision must match the request");
+  assert.equal(decision.session.limit, request.sessionLimit, "session limit must match the request");
+  assert.equal(decision.budget.limit, request.budgetLimit, "budget limit must match the request");
+  assert.equal(decision.policy.trustStatus, "trusted", "policy metadata must be trusted");
+  assert.equal(decision.guardrail.trustStatus, "trusted", "Guardrail metadata must be trusted");
+
+  if (request.route === "direct-runtime") {
+    assert.equal(decision.decision, "deny", "direct-runtime bypass must be denied");
+    assert.equal(decision.policySignal, "deny", "direct-runtime bypass must be denied by policy");
+    assert.match(decision.reasonCode, /bypass/, "direct-runtime denial must retain a bypass reason");
+    return;
+  }
+
+  if (boundary.lifecycleStatus === "retired") {
+    assert.equal(decision.decision, "deny", "retired source must be denied");
+    assert.equal(decision.policySignal, "deny", "retired source must be denied by policy");
+    assert.match(decision.reasonCode, /retired/, "retired source denial must retain a lifecycle reason");
+    return;
+  }
+
+  if (decision.guardrailSignal === "blocked") {
+    assert.equal(decision.decision, "blocked", "blocked Guardrail signal must block admission");
+    assert.equal(decision.policySignal, "deny", "blocked Guardrail signal must deny by policy");
+    assert.equal(decision.session.state, "closed", "blocked Guardrail signal must close the session");
+    return;
+  }
+
+  if (decision.decision === "blocked") {
+    assert.equal(decision.guardrailSignal, "blocked", "blocked decision must carry a blocked Guardrail signal");
+    assert.equal(decision.policySignal, "deny", "blocked decision must have deny policy state");
+    assert.equal(decision.session.state, "closed", "blocked decision must close the session");
+    return;
+  }
+
+  if (decision.decision === "disabled") {
+    assert.equal(decision.policySignal, "disabled", "disabled workload must have disabled policy state");
+    assert.ok(scenario.closure, "disabled workload must include closure evidence");
+    assertEmergencyDisableClosesAdmission(scenario);
+    return;
+  }
+
+  if (request.riskTier === "elevated") {
+    assert.equal(decision.decision, "approval-required", "elevated-risk lookup must require approval");
+    assert.equal(decision.policySignal, "review", "elevated-risk lookup must be in review state");
+    assert.equal(decision.guardrailSignal, "allow", "approval-required lookup must retain allow Guardrail state");
+    assert.equal(decision.session.state, "approval-pending", "elevated-risk lookup must await approval");
+    return;
+  }
+
+  assert.equal(request.route, "gateway-only", "admitted lookup must use gateway-only route");
+  assert.equal(boundary.lifecycleStatus, "active", "admitted lookup must use an active source");
+  assert.equal(decision.decision, "admit", "standard active lookup must be admitted");
+  assert.equal(decision.policySignal, "allow", "admitted lookup must have allow policy state");
+  assert.equal(decision.guardrailSignal, "allow", "admitted lookup must have allow Guardrail state");
+  assert.equal(decision.session.state, "within-limit", "admitted lookup must remain within its session limit");
+  assert.equal(decision.budget.state, "within-limit", "admitted lookup must remain within its budget limit");
+  assert.ok(decision.budget.consumed < decision.budget.limit, "admitted lookup must retain budget headroom");
+}
+
 async function readJson(fileName: string, directory: string): Promise<any> {
   return JSON.parse(await readFile(resolve(directory, fileName), "utf8"));
 }
@@ -174,6 +278,9 @@ function assertMatchesSchema(value: unknown, schema: any, path = "$"): void {
 
   if (schema.type === "array" || schema.items) {
     assert.ok(Array.isArray(value), `${path} must be an array`);
+    if (typeof schema.minItems === "number") {
+      assert.ok(value.length >= schema.minItems, `${path} must include at least ${schema.minItems} item(s)`);
+    }
     for (const [index, item] of value.entries()) {
       assertMatchesSchema(item, schema.items, `${path}[${index}]`);
     }
@@ -184,6 +291,9 @@ function assertMatchesSchema(value: unknown, schema: any, path = "$"): void {
     if (typeof value !== "string") assert.fail(`${path} must be a string`);
     if (typeof schema.minLength === "number") {
       assert.ok(value.length >= schema.minLength, `${path} must not be empty`);
+    }
+    if (schema.format === "date-time") {
+      assert.ok(!Number.isNaN(Date.parse(value)), `${path} must be an ISO date-time`);
     }
   }
 

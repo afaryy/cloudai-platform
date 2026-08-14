@@ -4,6 +4,8 @@
   "reasonCode": "synthetic-emergency-disable",
   "policySignal": "disabled",
   "guardrailSignal": "not-evaluated",
+  "policy": { "policyId": "synthetic-policy-knowledge-lookup", "policyVersion": "synthetic-v1", "trustStatus": "trusted" },
+  "guardrail": { "guardrailId": "synthetic-guardrail-knowledge-lookup", "guardrailVersion": "synthetic-v1", "trustStatus": "trusted" },
   "session": { "sessionId": "synthetic-session-006", "state": "closed", "limit": 3 },
   "budget": { "consumed": 0, "limit": 10, "state": "not-applicable" },
   "evidence": { "evidenceId": "synthetic-evidence-006", "redactionStatus": "metadata-only", "recordedAt": "2026-08-14T00:05:01Z" }

@@ -10,6 +10,8 @@
     "reasonCode",
     "policySignal",
     "guardrailSignal",
+    "policy",
+    "guardrail",
     "session",
     "budget",
     "evidence"
@@ -20,6 +22,26 @@
     "reasonCode": { "type": "string", "minLength": 1 },
     "policySignal": { "type": "string", "enum": ["allow", "review", "deny", "disabled"] },
     "guardrailSignal": { "type": "string", "enum": ["allow", "blocked", "not-evaluated"] },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["policyId", "policyVersion", "trustStatus"],
+      "properties": {
+        "policyId": { "type": "string", "minLength": 1 },
+        "policyVersion": { "type": "string", "enum": ["synthetic-v1"] },
+        "trustStatus": { "type": "string", "enum": ["trusted"] }
+      }
+    },
+    "guardrail": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["guardrailId", "guardrailVersion", "trustStatus"],
+      "properties": {
+        "guardrailId": { "type": "string", "minLength": 1 },
+        "guardrailVersion": { "type": "string", "enum": ["synthetic-v1"] },
+        "trustStatus": { "type": "string", "enum": ["trusted"] }
+      }
+    },
     "session": {
       "type": "object",
       "additionalProperties": false,

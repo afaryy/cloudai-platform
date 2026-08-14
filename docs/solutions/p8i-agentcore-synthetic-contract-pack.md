@@ -27,7 +27,7 @@ The contracts live under [`shared/schemas/agentcore-readiness/`](../../shared/sc
 | --- | --- |
 | Knowledge-lookup admission request | Requires a named owner, workload identity, read-only `knowledge-search` capability, route declaration, risk tier, and bounded session/budget metadata. |
 | Approved knowledge boundary | Records ownership, synthetic classification, lifecycle state, read-only access, and allowed capability. |
-| Gateway admission decision | Records the admitted, denied, approval-required, blocked, or disabled outcome with policy/Guardrail metadata and redacted evidence. |
+| Gateway admission decision | Records the admitted, denied, approval-required, blocked, or disabled outcome with trusted synthetic policy/Guardrail IDs and versions, bounded session/budget metadata, and redacted evidence. |
 | Emergency disable closure | Records a separate emergency-disable closure and rejects new requests for the workload identity. |
 
 The request contract can record a `direct-runtime` attempt so that the contract
@@ -49,7 +49,8 @@ The fixtures under [`shared/examples/agentcore-readiness/`](../../shared/example
 | `emergency-disabled` | `disabled` | Emergency closure rejects new requests and keeps metadata-only closure evidence. |
 
 The local contract test proves that required owner/identity fields, active
-source lifecycle, route, policy/Guardrail decision, bounded budget/session,
+source lifecycle, request-to-decision IDs and limits, route, trusted
+policy/Guardrail metadata and decision mapping, bounded budget/session,
 metadata-only evidence, bypass denial, and closure records fail closed when
 changed or omitted.
 
