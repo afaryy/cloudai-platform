@@ -1,0 +1,12 @@
+{
+  "requestId": "synthetic-request-allowed-001",
+  "decision": "admit",
+  "reasonCode": "synthetic-approved-gateway-lookup",
+  "policySignal": "allow",
+  "guardrailSignal": "allow",
+  "policy": { "policyId": "synthetic-policy-knowledge-lookup", "policyVersion": "synthetic-v1", "trustStatus": "trusted" },
+  "guardrail": { "guardrailId": "synthetic-guardrail-knowledge-lookup", "guardrailVersion": "synthetic-v1", "trustStatus": "trusted" },
+  "session": { "sessionId": "synthetic-session-001", "state": "within-limit", "limit": 3 },
+  "budget": { "consumed": 1, "limit": 10, "state": "within-limit" },
+  "evidence": { "evidenceId": "synthetic-evidence-001", "redactionStatus": "metadata-only", "recordedAt": "2026-08-14T00:00:01Z" }
+}

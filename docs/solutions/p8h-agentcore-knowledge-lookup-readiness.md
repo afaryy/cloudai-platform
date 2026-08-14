@@ -64,6 +64,11 @@ quality, cost, and operational response.
 These are separate evidence sources. P8h does not claim they are already
 integrated with AgentCore.
 
+The [P8i local synthetic contract pack](p8i-agentcore-synthetic-contract-pack.md)
+adds fail-closed metadata contracts for the same future admission and closure
+expectations. It remains local evidence only: it does not add AgentCore
+integration, a live runtime, or a replacement for the stop gates below.
+
 ## Required Stop Gates Before Runtime Work
 
 Any real AgentCore POC requires a separately reviewed design that identifies:

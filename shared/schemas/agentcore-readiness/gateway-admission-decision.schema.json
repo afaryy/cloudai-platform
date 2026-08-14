@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cloudai-platform.example/schemas/agentcore-readiness/gateway-admission-decision.schema.json",
+  "title": "Synthetic Gateway Admission Decision",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "requestId",
+    "decision",
+    "reasonCode",
+    "policySignal",
+    "guardrailSignal",
+    "policy",
+    "guardrail",
+    "session",
+    "budget",
+    "evidence"
+  ],
+  "properties": {
+    "requestId": { "type": "string", "minLength": 1 },
+    "decision": { "type": "string", "enum": ["admit", "deny", "approval-required", "blocked", "disabled"] },
+    "reasonCode": { "type": "string", "minLength": 1 },
+    "policySignal": { "type": "string", "enum": ["allow", "review", "deny", "disabled"] },
+    "guardrailSignal": { "type": "string", "enum": ["allow", "blocked", "not-evaluated"] },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["policyId", "policyVersion", "trustStatus"],
+      "properties": {
+        "policyId": { "type": "string", "pattern": "^synthetic-[a-z0-9-]+$" },
+        "policyVersion": { "type": "string", "enum": ["synthetic-v1"] },
+        "trustStatus": { "type": "string", "enum": ["trusted"] }
+      }
+    },
+    "guardrail": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["guardrailId", "guardrailVersion", "trustStatus"],
+      "properties": {
+        "guardrailId": { "type": "string", "pattern": "^synthetic-[a-z0-9-]+$" },
+        "guardrailVersion": { "type": "string", "enum": ["synthetic-v1"] },
+        "trustStatus": { "type": "string", "enum": ["trusted"] }
+      }
+    },
+    "session": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sessionId", "state", "limit"],
+      "properties": {
+        "sessionId": { "type": "string", "minLength": 1 },
+        "state": { "type": "string", "enum": ["within-limit", "approval-pending", "closed"] },
+        "limit": { "type": "number", "minimum": 1 }
+      }
+    },
+    "budget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["consumed", "limit", "state"],
+      "properties": {
+        "consumed": { "type": "number", "minimum": 0 },
+        "limit": { "type": "number", "minimum": 1 },
+        "state": { "type": "string", "enum": ["within-limit", "not-applicable"] }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["evidenceId", "redactionStatus", "recordedAt"],
+      "properties": {
+        "evidenceId": { "type": "string", "minLength": 1 },
+        "redactionStatus": { "type": "string", "enum": ["metadata-only"] },
+        "recordedAt": { "type": "string", "format": "date-time" }
+      }
+    }
+  }
+}

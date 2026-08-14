@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cloudai-platform.example/schemas/agentcore-readiness/approved-knowledge-boundary.schema.json",
+  "title": "Synthetic Approved Knowledge Boundary",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "knowledgeBoundaryId",
+    "owner",
+    "classification",
+    "lifecycleStatus",
+    "approvedForCapabilities",
+    "accessMode",
+    "sourceReference",
+    "reviewedAt"
+  ],
+  "properties": {
+    "knowledgeBoundaryId": { "type": "string", "minLength": 1 },
+    "owner": { "type": "string", "minLength": 1 },
+    "classification": { "type": "string", "enum": ["synthetic-internal"] },
+    "lifecycleStatus": { "type": "string", "enum": ["active", "retired"] },
+    "approvedForCapabilities": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "enum": ["knowledge-search"] }
+    },
+    "accessMode": { "type": "string", "enum": ["read-only"] },
+    "sourceReference": { "type": "string", "minLength": 1 },
+    "reviewedAt": { "type": "string", "format": "date-time" }
+  }
+}

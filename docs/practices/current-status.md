@@ -7,8 +7,9 @@ This page summarizes the current public project state. Local planning notes and 
 The local mock GenAI gateway, governed RAG evidence path, mock AgentOps
 decision path, capability-governance contracts, RAG knowledge lifecycle,
 Guardrails as a Service path, P4 release-engineering evidence, P5 AI-assisted
-DevSecOps evidence, P6 security/operations control matrix, and bounded P8
-Bedrock validation are complete for the current portfolio scope.
+DevSecOps evidence, P6 security/operations control matrix, bounded P8 Bedrock
+validation, and the P8i local AgentCore readiness contract pack are complete
+for the current portfolio scope.
 
 The repository can now demonstrate:
 
@@ -47,6 +48,7 @@ The repository can now demonstrate:
 - **P8f Bedrock Guardrail Boundary:** Terraform-managed synthetic Guardrail/version, separate guarded-inference role, lifecycle-only bootstrap permission, and live-validated confirmation-gated guarded `Converse` workflow path
 - **P8g Direct Guardrail Evaluation:** live-validated manual metadata-only evaluation of safe, PII-shaped, and prompt-attack-shaped synthetic categories through `ApplyGuardrail`; no model invocation or automatic CI call
 - **P8h AgentCore Knowledge-Lookup Readiness:** static gateway-first reference architecture mapping future AgentCore controls to existing evidence; no AgentCore resource or call
+- **P8i AgentCore Synthetic Knowledge-Lookup Contract Pack:** local, provider-neutral, fail-closed admission, bypass-denial, and emergency-closure contract evidence; no AgentCore integration or live runtime validation
 - **P5a AI-Assisted DevSecOps Boundary:** advisory AI use, human review, CI/security checks, and release evidence
 - **P5b AI-Assisted Review Evidence:** review summaries, threat-model checklists, CI failure summaries, and release-note drafts
 - **P6f AI Platform Security and Operations Controls:** identity, data protection, AI AppSec, delivery, operations, and FinOps
@@ -93,6 +95,7 @@ It currently has six mock-first lanes:
 | P8f Bedrock Guardrail boundary | Live Guardrail apply and guarded `Converse` attachment smoke validated | `providers/aws/infra/terraform/modules/bedrock-access/`, `providers/aws/infra/terraform/envs/bedrock-sandbox/`, `.github/workflows/terraform-bedrock-sandbox.yml`, and `providers/aws/infra/bootstrap/github-oidc-terraform-backend.yaml` |
 | P8g Direct Guardrail evaluation | Live direct evaluation validated the expected safe-allowed, PII-shaped-blocked, and prompt-attack-shaped-blocked metadata verdicts; no model invocation | `.github/workflows/terraform-bedrock-sandbox.yml`, `.github/workflows/terraform-tests.yaml`, and `providers/aws/infra/terraform/envs/bedrock-sandbox/README.md` |
 | P8h AgentCore knowledge-lookup readiness | Complete static gateway-first reference architecture; no AgentCore resource or call | `docs/solutions/p8h-agentcore-knowledge-lookup-readiness.md` |
+| P8i AgentCore synthetic contract pack | Complete local synthetic contract evidence; no AgentCore integration or live runtime validation | `shared/schemas/agentcore-readiness/`, `shared/examples/agentcore-readiness/`, `providers/aws/app/api/tests/agentcoreReadinessContracts.test.ts`, and `docs/solutions/p8i-agentcore-synthetic-contract-pack.md` |
 | P5a AI-assisted DevSecOps boundary | Complete | `docs/practices/ai-assisted-devsecops-pattern.md` and `.github/workflows/ai-assisted-devsecops.yml` |
 | P5b AI-assisted review evidence | Complete | `docs/evidence/ai-assisted-review-evidence.md`, `shared/schemas/ai-assisted-devsecops/`, and `shared/examples/ai-assisted-devsecops/` |
 | P6d control-plane evidence map | Complete | `docs/evidence/control-plane-evidence-map.md`, `shared/schemas/control-plane-evidence/`, and `shared/examples/control-plane-evidence/` |
@@ -149,6 +152,7 @@ Future work controls:
 - **P4b pre-apply readiness check:** use `docs/solutions/p4b-eks-sandbox-operator-runbook.md` as the single go/no-go runbook before any real personal EKS sandbox apply.
 - **P8g evidence reuse:** the initial three-case direct evaluation is live validated. Repeat it only when there is a new evaluation goal or a Guardrail configuration change. Treat its result as narrow synthetic configuration evidence, not Guardrail-quality evidence.
 - **P8h reference boundary:** the completed AgentCore knowledge-lookup reference is design-only. Any AgentCore resource, Gateway, runtime, identity, knowledge source, Terraform/IAM, or provider call needs a separate reviewed design and must not reuse P8f/P8g evidence as proof of production safety effectiveness.
+- **P8i contract boundary:** the completed P8i pack is local synthetic contract evidence for future gateway-only knowledge lookup. It does not validate an AgentCore resource, Gateway, runtime, identity, retrieval source, provider control, or production approval/disable mechanism.
 - **P7 AI Factory / LLMOps / GPU stretch:** retain the [AI Factory infrastructure lens](../architecture/ai-factory-infrastructure-lens.md) and [AI Workload Operating Contract](./ai-workload-operating-contract.md) as future design context; they define workload readiness and AI data-centre practice boundaries, not a current GPU, scheduler, or AI Factory implementation.
 - **P7 observability sandbox:** the [EKS Prometheus and Grafana observability demonstration](../solutions/eks-prometheus-grafana-observability-demo.md) is planned, not validated. Any run requires manual approval, synthetic-only metrics, private access, a budget alert, same-day teardown, and sanitized evidence.
 

@@ -1,0 +1,13 @@
+{
+  "requestId": "synthetic-request-retired-002",
+  "owner": "synthetic-owner-platform",
+  "workloadIdentity": "synthetic-workload-knowledge-lookup",
+  "route": "gateway-only",
+  "capability": "knowledge-search",
+  "accessMode": "read-only",
+  "knowledgeBoundaryId": "synthetic-retired-handbook",
+  "riskTier": "standard",
+  "sessionLimit": 3,
+  "budgetLimit": 10,
+  "requestedAt": "2026-08-14T00:01:00Z"
+}

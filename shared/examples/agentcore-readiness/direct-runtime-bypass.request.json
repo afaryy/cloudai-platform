@@ -1,0 +1,13 @@
+{
+  "requestId": "synthetic-request-bypass-005",
+  "owner": "synthetic-owner-platform",
+  "workloadIdentity": "synthetic-workload-knowledge-lookup",
+  "route": "direct-runtime",
+  "capability": "knowledge-search",
+  "accessMode": "read-only",
+  "knowledgeBoundaryId": "synthetic-approved-handbook",
+  "riskTier": "standard",
+  "sessionLimit": 3,
+  "budgetLimit": 10,
+  "requestedAt": "2026-08-14T00:04:00Z"
+}
