@@ -1,0 +1,20 @@
+{
+  "name": "synthetic-governed-rag-poc",
+  "region": "ap-southeast-2",
+  "runtime": {
+    "entrypoint": "providers/aws/app/agentcore-rag-runtime/dist/src/app.js",
+    "healthPath": "/ping",
+    "invocationPath": "/invocations",
+    "gatewayOnly": true
+  },
+  "knowledge": {
+    "sourceType": "synthetic-only",
+    "citationsRequired": true
+  },
+  "controls": {
+    "tools": "disabled",
+    "writes": "disabled",
+    "memory": "disabled",
+    "rawBodyLogging": "disabled"
+  }
+}
