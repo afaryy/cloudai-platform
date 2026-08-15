@@ -17,5 +17,6 @@ evidence, validation, trade-offs, and explicit limits.
   [IAM Apply Readiness](p8b1-bedrock-iam-apply-readiness.md)
 - [AgentCore Knowledge-Lookup Readiness](p8h-agentcore-knowledge-lookup-readiness.md)
 - [AgentCore Synthetic Knowledge-Lookup Contract Pack](p8i-agentcore-synthetic-contract-pack.md)
+- [AgentCore Governed RAG POC Runbook](agentcore-governed-rag-poc-runbook.md)
 - [Solution Walkthrough](cloudai-platform-solution-walkthrough.md) and
   [Featured Solutions](featured-solutions.md)
