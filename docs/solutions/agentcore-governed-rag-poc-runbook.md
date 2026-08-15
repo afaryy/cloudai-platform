@@ -74,3 +74,12 @@ scenario evidence and teardown evidence are complete.
 > synthetic data, gateway-only admission, deterministic safety boundaries,
 > citations-or-abstention behaviour, metadata-safe evidence, and
 > confirmation-gated sandbox controls.
+
+## Future Retrieval Evolution
+
+Classic RAG, GraphRAG, and Agentic RAG solve different problems. This POC does
+not claim that agentic retrieval is automatically better. It establishes a
+reliable governed retrieval baseline first; a later GraphRAG or Agentic RAG
+exercise must demonstrate a distinct relationship-reasoning or multi-step
+retrieval requirement and retain the same access, citation, evaluation, and
+human-control boundaries.

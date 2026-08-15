@@ -68,6 +68,27 @@ identical. The portable asset is the control contract and evidence model.
 4. Treat deployment, provider access, and teardown as provider-specific gates.
 5. Prefer reproducible operational evidence over screenshots or product claims.
 
+## Retrieval Maturity and Selection
+
+The right question is not which retrieval pattern is most advanced. It is what
+kind of reasoning the use case actually requires.
+
+| Pattern | Use when | Do not add it merely because |
+| --- | --- | --- |
+| Governed RAG | An approved source contains a direct, citeable answer | An agentic label sounds more advanced |
+| GraphRAG | The answer depends on explicit entity relationships or multi-hop connections | Semantic retrieval has not yet been evaluated |
+| Agentic RAG | A bounded planner must compare, decompose, or repeat retrieval across approved sources | The model should be allowed to take action |
+
+For this portfolio, the current POC remains **Governed RAG**. It proves source
+lifecycle, citations-or-abstention, deterministic policy, evaluation, and
+operational evidence before adding graph construction, iterative planning, or
+tool access.
+
+If a later Agentic RAG exercise is justified, the agent may propose a
+retrieval plan only. It must remain a governed workload identity with approved
+sources, bounded iteration, traceable decisions, explicit evaluation, and no
+autonomous writes or production actions.
+
 ## Current Evidence Status
 
 | Provider | Status | Next evidence |
