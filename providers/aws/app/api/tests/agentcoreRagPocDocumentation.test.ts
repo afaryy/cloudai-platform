@@ -12,3 +12,11 @@ test("AgentCore RAG runbook preserves synthetic-only and manual-deployment bound
   assert.match(runbook, /teardown/i);
   assert.match(runbook, /not production-ready guidance/i);
 });
+
+test("AgentCore RAG preflight evidence is sanitized and records no resource change", async () => {
+  const evidence = await readFile(resolve(repoRoot, "docs/evidence/agentcore-governed-rag-preflight-evidence.md"), "utf8");
+  assert.match(evidence, /Resource changes: none/i);
+  assert.match(evidence, /AWS identity \| Pass/i);
+  assert.doesNotMatch(evidence, /\b\d{12}\b/);
+  assert.doesNotMatch(evidence, /arn:aws/i);
+});

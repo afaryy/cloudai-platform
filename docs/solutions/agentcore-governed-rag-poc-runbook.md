@@ -62,6 +62,8 @@ It does not make an AWS call.
 ## Evidence and Teardown
 
 Use the [evidence template](../evidence/templates/agentcore-governed-rag-poc-evidence.md).
+The completed [read-only preflight evidence](../evidence/agentcore-governed-rag-preflight-evidence.md)
+records only pass/blocked categories and no identity details.
 The teardown order is: Gateway target, Gateway, Runtime, knowledge base/data
 source, then synthetic storage. Do not mark the POC live-validated until both
 scenario evidence and teardown evidence are complete.
