@@ -196,9 +196,7 @@ Resources:
                 Action:
                   - bedrock:CreateGuardrailVersion
                   - bedrock:DeleteGuardrail
-                  - bedrock:DeleteGuardrailVersion
                   - bedrock:GetGuardrail
-                  - bedrock:GetGuardrailVersion
                   - bedrock:ListTagsForResource
                   - bedrock:TagResource
                   - bedrock:UntagResource
