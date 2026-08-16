@@ -1,0 +1,146 @@
+name: terraform-agentcore-rag-sandbox
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "Terraform operation"
+        required: true
+        default: "validate"
+        type: choice
+        options:
+          - validate
+          - bootstrap-plan
+          - bootstrap-apply
+          - deploy-plan
+          - deploy-apply
+          - destroy-plan
+      confirmation:
+        description: "Required only for apply: exact confirmation phrase"
+        required: false
+        default: ""
+        type: string
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: cloudai-agentcore-rag-sandbox
+  cancel-in-progress: false
+
+jobs:
+  terraform:
+    name: AgentCore RAG sandbox
+    runs-on: ubuntu-latest
+    environment: aws-sandbox
+    env:
+      AWS_ROLE_TO_ASSUME: ${{ vars.AWS_ROLE_TO_ASSUME || secrets.AWS_ROLE_TO_ASSUME }}
+      AWS_REGION: ${{ vars.AWS_REGION || 'ap-southeast-2' }}
+      TF_BACKEND_BUCKET: ${{ vars.TF_BACKEND_BUCKET }}
+      TF_BACKEND_LOCK_TABLE: ${{ vars.TF_BACKEND_LOCK_TABLE }}
+      TF_STATE_KEY_PREFIX: ${{ vars.TF_STATE_KEY_PREFIX }}
+      TF_STATE_KEY: ${{ vars.TF_STATE_KEY_PREFIX }}/agentcore-rag-sandbox/terraform.tfstate
+      TF_VAR_github_oidc_provider_arn: ${{ vars.AWS_OIDC_PROVIDER_ARN }}
+      TF_VAR_knowledge_base_id: ${{ vars.AGENTCORE_RAG_KNOWLEDGE_BASE_ID }}
+      TF_VAR_knowledge_base_arn: ${{ vars.AGENTCORE_RAG_KNOWLEDGE_BASE_ARN }}
+      TF_VAR_model_arn: ${{ vars.AGENTCORE_RAG_MODEL_ARN }}
+      TF_VAR_container_image_uri: ${{ vars.AGENTCORE_RAG_CONTAINER_IMAGE_URI }}
+    defaults:
+      run:
+        working-directory: providers/aws/infra/terraform/envs/agentcore-rag-sandbox
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Explain deployment boundary
+        run: |
+          echo "This workflow is the only deployment path for the AgentCore RAG sandbox."
+          echo "GitHub Environment approval, OIDC, an explicit confirmation, and a reviewed plan are required for apply."
+          echo "The sandbox accepts only synthetic data and has no anonymous gateway, write tools, memory, or browser access."
+
+      - name: Check apply confirmation
+        if: ${{ inputs.mode == 'bootstrap-apply' || inputs.mode == 'deploy-apply' }}
+        env:
+          CONFIRMATION: ${{ inputs.confirmation }}
+          MODE: ${{ inputs.mode }}
+        run: |
+          if [ "$MODE" = "bootstrap-apply" ] && [ "$CONFIRMATION" != "I_UNDERSTAND_AGENTCORE_RAG_BOOTSTRAP_APPLY" ]; then
+            echo "::error::bootstrap-apply requires I_UNDERSTAND_AGENTCORE_RAG_BOOTSTRAP_APPLY."
+            exit 1
+          fi
+          if [ "$MODE" = "deploy-apply" ] && [ "$CONFIRMATION" != "I_UNDERSTAND_AGENTCORE_RAG_DEPLOY_APPLY" ]; then
+            echo "::error::deploy-apply requires I_UNDERSTAND_AGENTCORE_RAG_DEPLOY_APPLY."
+            exit 1
+          fi
+
+      - name: Terraform init without backend for validation
+        if: ${{ inputs.mode == 'validate' }}
+        run: terraform init -backend=false
+
+      - name: Terraform format and validate
+        if: ${{ inputs.mode == 'validate' }}
+        run: |
+          terraform fmt -check -recursive
+          terraform validate
+
+      - name: Check protected environment variables
+        if: ${{ inputs.mode != 'validate' }}
+        run: |
+          missing=0
+          for name in AWS_ROLE_TO_ASSUME AWS_REGION TF_BACKEND_BUCKET TF_BACKEND_LOCK_TABLE TF_STATE_KEY_PREFIX TF_VAR_github_oidc_provider_arn; do
+            if [ -z "${!name}" ]; then
+              echo "::error::$name is required in aws-sandbox."
+              missing=1
+            fi
+          done
+          if [ "${{ inputs.mode }}" = "deploy-plan" ] || [ "${{ inputs.mode }}" = "deploy-apply" ]; then
+            for name in TF_VAR_knowledge_base_id TF_VAR_knowledge_base_arn TF_VAR_model_arn TF_VAR_container_image_uri; do
+              if [ -z "${!name}" ]; then
+                echo "::error::$name is required to deploy the Runtime, Gateway, and Gateway Target."
+                missing=1
+              fi
+            done
+          fi
+          exit "$missing"
+
+      - name: Configure AWS credentials through GitHub OIDC
+        if: ${{ inputs.mode != 'validate' }}
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ env.AWS_REGION }}
+          mask-aws-account-id: true
+
+      - name: Terraform init with remote backend
+        if: ${{ inputs.mode != 'validate' }}
+        run: |
+          terraform init \
+            -backend-config="bucket=${TF_BACKEND_BUCKET}" \
+            -backend-config="key=${TF_STATE_KEY}" \
+            -backend-config="region=${AWS_REGION}" \
+            -backend-config="dynamodb_table=${TF_BACKEND_LOCK_TABLE}" \
+            -backend-config="encrypt=true"
+
+      - name: Plan ECR and IAM foundation
+        if: ${{ inputs.mode == 'bootstrap-plan' || inputs.mode == 'bootstrap-apply' }}
+        run: terraform plan -input=false -var='enable_runtime=false' -out=tfplan
+
+      - name: Apply ECR and IAM foundation
+        if: ${{ inputs.mode == 'bootstrap-apply' }}
+        run: terraform apply -input=false tfplan
+
+      - name: Plan runtime deployment
+        if: ${{ inputs.mode == 'deploy-plan' || inputs.mode == 'deploy-apply' }}
+        run: terraform plan -input=false -var='enable_runtime=true' -out=tfplan
+
+      - name: Apply runtime deployment
+        if: ${{ inputs.mode == 'deploy-apply' }}
+        run: terraform apply -input=false tfplan
+
+      - name: Plan teardown only
+        if: ${{ inputs.mode == 'destroy-plan' }}
+        run: terraform plan -destroy -input=false -var='enable_runtime=true'

@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AgentCore Governed RAG POC Runtime Request",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["requestId", "question", "knowledgeSource", "governance"],
+  "properties": {
+    "requestId": { "type": "string", "pattern": "^synthetic-request-[a-z0-9-]+$" },
+    "question": { "type": "string", "minLength": 1, "maxLength": 500 },
+    "knowledgeSource": { "const": "agentcore-poc-handbook" },
+    "governance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sourceLifecycle", "requireCitations", "entryPath"],
+      "properties": {
+        "sourceLifecycle": { "enum": ["active", "retired"] },
+        "requireCitations": { "type": "boolean" },
+        "entryPath": { "enum": ["gateway", "direct-runtime"] },
+        "workloadState": { "enum": ["enabled", "disabled"] }
+      }
+    }
+  }
+}

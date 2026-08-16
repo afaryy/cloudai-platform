@@ -1,0 +1,6 @@
+{
+  "requestId": "synthetic-request-insufficient-002",
+  "question": "What is the undisclosed retention period for a source not present in this handbook?",
+  "knowledgeSource": "agentcore-poc-handbook",
+  "governance": { "sourceLifecycle": "active", "requireCitations": true, "entryPath": "gateway", "workloadState": "enabled" }
+}

@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AgentCore Governed RAG POC Runtime Response",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["requestId", "outcome", "citations", "audit"],
+  "properties": {
+    "requestId": { "type": "string", "pattern": "^synthetic-request-[a-z0-9-]+$" },
+    "outcome": { "enum": ["answer", "abstain", "denied", "disabled"] },
+    "answer": { "type": "string", "maxLength": 1000 },
+    "reasonCode": { "type": "string", "maxLength": 80 },
+    "citations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["title", "uri"],
+        "properties": {
+          "title": { "type": "string", "minLength": 1, "maxLength": 160 },
+          "uri": { "type": "string", "pattern": "^synthetic://" }
+        }
+      }
+    },
+    "audit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sourceLifecycle", "citationPresent"],
+      "properties": {
+        "sourceLifecycle": { "enum": ["active", "retired"] },
+        "citationPresent": { "type": "boolean" }
+      }
+    }
+  }
+}

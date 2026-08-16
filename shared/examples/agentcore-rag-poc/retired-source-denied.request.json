@@ -1,0 +1,6 @@
+{
+  "requestId": "synthetic-request-retired-003",
+  "question": "What controls protect a governed AI platform?",
+  "knowledgeSource": "agentcore-poc-handbook",
+  "governance": { "sourceLifecycle": "retired", "requireCitations": true, "entryPath": "gateway", "workloadState": "enabled" }
+}

@@ -1,0 +1,70 @@
+openapi: 3.0.3
+info:
+  title: Synthetic Governed RAG Runtime Target
+  version: 0.1.0
+paths:
+  /invocations:
+    post:
+      operationId: retrieveSyntheticKnowledge
+      summary: Gateway-only read-only synthetic knowledge retrieval
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RuntimeRequest'
+      responses:
+        '200':
+          description: Cited answer or safe abstention
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RuntimeResponse'
+        '403':
+          description: Deterministic policy denial
+        '423':
+          description: Disabled workload
+components:
+  schemas:
+    RuntimeRequest:
+      type: object
+      additionalProperties: false
+      required: [requestId, question, knowledgeSource, governance]
+      properties:
+        requestId: { type: string, pattern: '^synthetic-request-[a-z0-9-]+$' }
+        question: { type: string, maxLength: 500 }
+        knowledgeSource: { type: string, enum: [agentcore-poc-handbook] }
+        governance:
+          type: object
+          additionalProperties: false
+          required: [sourceLifecycle, requireCitations, entryPath]
+          properties:
+            sourceLifecycle: { type: string, enum: [active, retired] }
+            requireCitations: { type: boolean }
+            entryPath: { type: string, enum: [gateway, direct-runtime] }
+            workloadState: { type: string, enum: [enabled, disabled] }
+    RuntimeResponse:
+      type: object
+      additionalProperties: false
+      required: [requestId, outcome, citations, audit]
+      properties:
+        requestId: { type: string, pattern: '^synthetic-request-[a-z0-9-]+$' }
+        outcome: { type: string, enum: [answer, abstain, denied, disabled] }
+        answer: { type: string, maxLength: 1000 }
+        reasonCode: { type: string, maxLength: 80 }
+        citations:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            required: [title, uri]
+            properties:
+              title: { type: string }
+              uri: { type: string, pattern: '^synthetic://' }
+        audit:
+          type: object
+          additionalProperties: false
+          required: [sourceLifecycle, citationPresent]
+          properties:
+            sourceLifecycle: { type: string, enum: [active, retired] }
+            citationPresent: { type: boolean }
