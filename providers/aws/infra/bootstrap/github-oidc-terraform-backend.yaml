@@ -277,7 +277,7 @@ Resources:
                       - CostBoundary
                       - TeardownRequired
                       - CloudAISlice
-                  Null:
+                  "Null":
                     aws:TagKeys: "false"
               - Sid: ManageOnlyTheAgentCoreEcrRepository
                 Effect: Allow
@@ -309,7 +309,7 @@ Resources:
                       - CostBoundary
                       - TeardownRequired
                       - CloudAISlice
-                  Null:
+                  "Null":
                     aws:TagKeys: "false"
               - Sid: ManageOnlyNamedAgentCoreRoles
                 Effect: Allow
@@ -352,7 +352,7 @@ Resources:
                       - CostBoundary
                       - TeardownRequired
                       - CloudAISlice
-                  Null:
+                  "Null":
                     aws:TagKeys: "false"
               - Sid: AgentCoreRuntimeProvisioningDependencies
                 Effect: Allow
