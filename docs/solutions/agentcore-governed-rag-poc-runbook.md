@@ -71,6 +71,10 @@ It does not make an AWS call.
 Do not create, update, or destroy AgentCore resources from a local terminal.
 The GitHub Actions workflows provide the reviewed and auditable delivery path.
 
+If Bootstrap reports an AWS permission denial, use the scoped
+[IAM remediation policy](agentcore-bootstrap-iam-remediation.md) before
+retrying. Do not replace it with an administrator policy.
+
 ## Evidence and Teardown
 
 Use the [evidence template](../evidence/templates/agentcore-governed-rag-poc-evidence.md).
