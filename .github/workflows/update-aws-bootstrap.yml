@@ -1,0 +1,148 @@
+name: update-aws-bootstrap
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/update-aws-bootstrap.yml"
+      - "providers/aws/infra/bootstrap/**"
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "CloudFormation operation"
+        required: true
+        default: "validate"
+        type: choice
+        options:
+          - validate
+          - plan
+          - apply
+      change_set_name:
+        description: "Required for apply: reviewed cloudai-bootstrap-* change set name"
+        required: false
+        default: ""
+        type: string
+      confirmation:
+        description: "Required for apply: I_UNDERSTAND_AWS_BOOTSTRAP_APPLY"
+        required: false
+        default: ""
+        type: string
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: cloudai-aws-bootstrap
+  cancel-in-progress: false
+
+jobs:
+  bootstrap:
+    name: Update AWS bootstrap stack
+    runs-on: ubuntu-latest
+    environment: aws-sandbox
+    env:
+      AWS_REGION: ${{ vars.AWS_REGION || 'ap-southeast-2' }}
+      AWS_BOOTSTRAP_ROLE_TO_ASSUME: ${{ vars.AWS_BOOTSTRAP_ROLE_TO_ASSUME || secrets.AWS_BOOTSTRAP_ROLE_TO_ASSUME }}
+      AWS_TERRAFORM_ROLE_TO_ASSUME: ${{ vars.AWS_ROLE_TO_ASSUME || secrets.AWS_ROLE_TO_ASSUME }}
+      AWS_BOOTSTRAP_STACK_NAME: ${{ vars.AWS_BOOTSTRAP_STACK_NAME }}
+      AWS_OIDC_PROVIDER_ARN: ${{ vars.AWS_OIDC_PROVIDER_ARN }}
+      TF_BACKEND_BUCKET: ${{ vars.TF_BACKEND_BUCKET }}
+      TF_BACKEND_LOCK_TABLE: ${{ vars.TF_BACKEND_LOCK_TABLE }}
+      CHANGE_SET_NAME: ${{ inputs.change_set_name }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate CloudFormation template without cloud access
+        if: ${{ github.event_name == 'pull_request' || inputs.mode == 'validate' }}
+        run: pipx run cfn-lint providers/aws/infra/bootstrap/github-oidc-terraform-backend.yaml
+
+      - name: Check bootstrap environment configuration
+        if: ${{ github.event_name == 'workflow_dispatch' && (inputs.mode == 'plan' || inputs.mode == 'apply') }}
+        run: |
+          missing=0
+          for name in AWS_BOOTSTRAP_ROLE_TO_ASSUME AWS_TERRAFORM_ROLE_TO_ASSUME AWS_BOOTSTRAP_STACK_NAME AWS_OIDC_PROVIDER_ARN TF_BACKEND_BUCKET TF_BACKEND_LOCK_TABLE; do
+            if [ -z "${!name}" ]; then
+              echo "::error::$name is required in the protected aws-sandbox environment."
+              missing=1
+            fi
+          done
+          if [ "$AWS_BOOTSTRAP_ROLE_TO_ASSUME" = "$AWS_TERRAFORM_ROLE_TO_ASSUME" ]; then
+            echo "::error::AWS_BOOTSTRAP_ROLE_TO_ASSUME must be a separate trust-root role, not AWS_ROLE_TO_ASSUME."
+            missing=1
+          fi
+          exit "$missing"
+
+      - name: Check apply confirmation and reviewed change set
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.mode == 'apply' }}
+        env:
+          CONFIRMATION: ${{ inputs.confirmation }}
+        run: |
+          if [ "$CONFIRMATION" != "I_UNDERSTAND_AWS_BOOTSTRAP_APPLY" ]; then
+            echo "::error::apply requires I_UNDERSTAND_AWS_BOOTSTRAP_APPLY."
+            exit 1
+          fi
+          if ! [[ "$CHANGE_SET_NAME" =~ ^cloudai-bootstrap-[0-9]+$ ]]; then
+            echo "::error::apply requires the exact reviewed change set name emitted by plan."
+            exit 1
+          fi
+
+      - name: Configure AWS credentials through GitHub OIDC
+        if: ${{ github.event_name == 'workflow_dispatch' && (inputs.mode == 'plan' || inputs.mode == 'apply') }}
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.AWS_BOOTSTRAP_ROLE_TO_ASSUME }}
+          aws-region: ${{ env.AWS_REGION }}
+          mask-aws-account-id: true
+
+      - name: Create a non-executing CloudFormation change set
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.mode == 'plan' }}
+        run: |
+          change_set_name="cloudai-bootstrap-${GITHUB_RUN_ID}"
+          echo "CHANGE_SET_NAME=$change_set_name" >> "$GITHUB_ENV"
+          aws cloudformation create-change-set \
+            --stack-name "$AWS_BOOTSTRAP_STACK_NAME" \
+            --change-set-name "$change_set_name" \
+            --change-set-type UPDATE \
+            --template-body file://providers/aws/infra/bootstrap/github-oidc-terraform-backend.yaml \
+            --capabilities CAPABILITY_NAMED_IAM \
+            --parameters \
+              "ParameterKey=BackendBucketName,ParameterValue=$TF_BACKEND_BUCKET,UsePreviousValue=false" \
+              "ParameterKey=LockTableName,ParameterValue=$TF_BACKEND_LOCK_TABLE,UsePreviousValue=false" \
+              "ParameterKey=GitHubOrg,ParameterValue=afaryy,UsePreviousValue=false" \
+              "ParameterKey=GitHubRepo,ParameterValue=cloudai-platform,UsePreviousValue=false" \
+              "ParameterKey=GitHubEnvironment,ParameterValue=aws-sandbox,UsePreviousValue=false" \
+              "ParameterKey=ExistingGitHubOidcProviderArn,ParameterValue=$AWS_OIDC_PROVIDER_ARN,UsePreviousValue=false"
+          set +e
+          aws cloudformation wait change-set-create-complete \
+            --stack-name "$AWS_BOOTSTRAP_STACK_NAME" \
+            --change-set-name "$change_set_name"
+          wait_status=$?
+          set -e
+          aws cloudformation describe-change-set \
+            --stack-name "$AWS_BOOTSTRAP_STACK_NAME" \
+            --change-set-name "$change_set_name" \
+            --query '{Status:Status,StatusReason:StatusReason,Changes:Changes[*].ResourceChange.{Action:Action,LogicalResourceId:LogicalResourceId,ResourceType:ResourceType,Replacement:Replacement}}' \
+            --output json
+          if [ "$wait_status" -ne 0 ]; then
+            echo "::notice::No executable change set was created. Review StatusReason above; no stack update was performed."
+            exit 0
+          fi
+          echo "::notice::Review change set $change_set_name, then run apply with this exact value and the required confirmation."
+
+      - name: Execute the reviewed CloudFormation change set
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.mode == 'apply' }}
+        run: |
+          aws cloudformation describe-change-set \
+            --stack-name "$AWS_BOOTSTRAP_STACK_NAME" \
+            --change-set-name "$CHANGE_SET_NAME" \
+            --query '{Status:Status,ExecutionStatus:ExecutionStatus,Changes:Changes[*].ResourceChange.{Action:Action,LogicalResourceId:LogicalResourceId,ResourceType:ResourceType,Replacement:Replacement}}' \
+            --output json
+          aws cloudformation execute-change-set \
+            --stack-name "$AWS_BOOTSTRAP_STACK_NAME" \
+            --change-set-name "$CHANGE_SET_NAME"
+          aws cloudformation wait stack-update-complete --stack-name "$AWS_BOOTSTRAP_STACK_NAME"
+          aws cloudformation describe-stacks \
+            --stack-name "$AWS_BOOTSTRAP_STACK_NAME" \
+            --query 'Stacks[0].{StackStatus:StackStatus,LastUpdatedTime:LastUpdatedTime}' \
+            --output json

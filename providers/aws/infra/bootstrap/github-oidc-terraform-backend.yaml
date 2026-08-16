@@ -258,6 +258,149 @@ Resources:
                   - eks:UpdateNodegroupConfig
                   - eks:UpdateNodegroupVersion
                 Resource: "*"
+              - Sid: CreateTaggedAgentCoreEcrRepository
+                Effect: Allow
+                Action:
+                  - ecr:CreateRepository
+                  - ecr:TagResource
+                Resource: "*"
+                Condition:
+                  StringEquals:
+                    aws:RequestTag/Project: cloudai-platform
+                    aws:RequestTag/Environment: agentcore-rag-sandbox
+                  ForAllValues:StringEquals:
+                    aws:TagKeys:
+                      - Project
+                      - Environment
+                      - DataScope
+                      - ManagedBy
+                      - CostBoundary
+                      - TeardownRequired
+                      - CloudAISlice
+                  Null:
+                    aws:TagKeys: "false"
+              - Sid: ManageOnlyTheAgentCoreEcrRepository
+                Effect: Allow
+                Action:
+                  - ecr:DeleteLifecyclePolicy
+                  - ecr:DeleteRepository
+                  - ecr:DescribeRepositories
+                  - ecr:GetLifecyclePolicy
+                  - ecr:PutLifecyclePolicy
+                  - ecr:TagResource
+                  - ecr:UntagResource
+                Resource: !Sub "arn:${AWS::Partition}:ecr:${AWS::Region}:${AWS::AccountId}:repository/cloudai-platform-agentcore-rag-sandbox"
+              - Sid: CreateOnlyNamedAgentCoreRoles
+                Effect: Allow
+                Action:
+                  - iam:CreateRole
+                  - iam:TagRole
+                Resource: !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cloudaiplatformagentcoreragsandbox-*"
+                Condition:
+                  StringEquals:
+                    aws:RequestTag/Project: cloudai-platform
+                    aws:RequestTag/Environment: agentcore-rag-sandbox
+                  ForAllValues:StringEquals:
+                    aws:TagKeys:
+                      - Project
+                      - Environment
+                      - DataScope
+                      - ManagedBy
+                      - CostBoundary
+                      - TeardownRequired
+                      - CloudAISlice
+                  Null:
+                    aws:TagKeys: "false"
+              - Sid: ManageOnlyNamedAgentCoreRoles
+                Effect: Allow
+                Action:
+                  - iam:DeleteRole
+                  - iam:DeleteRolePolicy
+                  - iam:GetRole
+                  - iam:GetRolePolicy
+                  - iam:ListRolePolicies
+                  - iam:PutRolePolicy
+                  - iam:TagRole
+                  - iam:UntagRole
+                  - iam:UpdateAssumeRolePolicy
+                Resource: !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cloudaiplatformagentcoreragsandbox-*"
+              - Sid: PassOnlySandboxRolesToAgentCore
+                Effect: Allow
+                Action:
+                  - iam:PassRole
+                Resource: !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cloudaiplatformagentcoreragsandbox-*"
+                Condition:
+                  StringEquals:
+                    iam:PassedToService: bedrock-agentcore.amazonaws.com
+              - Sid: CreateOnlyTaggedAgentCoreResources
+                Effect: Allow
+                Action:
+                  - bedrock-agentcore:CreateAgentRuntime
+                  - bedrock-agentcore:CreateGateway
+                  - bedrock-agentcore:TagResource
+                Resource: "*"
+                Condition:
+                  StringEquals:
+                    aws:RequestTag/Project: cloudai-platform
+                    aws:RequestTag/Environment: agentcore-rag-sandbox
+                  ForAllValues:StringEquals:
+                    aws:TagKeys:
+                      - Project
+                      - Environment
+                      - DataScope
+                      - ManagedBy
+                      - CostBoundary
+                      - TeardownRequired
+                      - CloudAISlice
+                  Null:
+                    aws:TagKeys: "false"
+              - Sid: AgentCoreRuntimeProvisioningDependencies
+                Effect: Allow
+                Action:
+                  - bedrock-agentcore:CreateAgentRuntimeEndpoint
+                  - bedrock-agentcore:DeleteAgentRuntimeEndpoint
+                  - bedrock-agentcore:DeleteWorkloadIdentity
+                  - bedrock-agentcore:PassCapacityProvider
+                Resource: "*"
+              - Sid: ManageOnlyTaggedAgentCoreResources
+                Effect: Allow
+                Action:
+                  - bedrock-agentcore:DeleteAgentRuntime
+                  - bedrock-agentcore:DeleteGateway
+                  - bedrock-agentcore:GetAgentRuntime
+                  - bedrock-agentcore:GetGateway
+                  - bedrock-agentcore:ListTagsForResource
+                  - bedrock-agentcore:TagResource
+                  - bedrock-agentcore:UntagResource
+                  - bedrock-agentcore:UpdateAgentRuntime
+                  - bedrock-agentcore:UpdateGateway
+                Resource:
+                  - !Sub "arn:${AWS::Partition}:bedrock-agentcore:${AWS::Region}:${AWS::AccountId}:runtime/*"
+                  - !Sub "arn:${AWS::Partition}:bedrock-agentcore:${AWS::Region}:${AWS::AccountId}:gateway/*"
+                Condition:
+                  StringEquals:
+                    aws:ResourceTag/Project: cloudai-platform
+                    aws:ResourceTag/Environment: agentcore-rag-sandbox
+              - Sid: ManageTargetsOnlyForTaggedGateway
+                Effect: Allow
+                Action:
+                  - bedrock-agentcore:CreateGatewayTarget
+                  - bedrock-agentcore:DeleteGatewayTarget
+                  - bedrock-agentcore:GetGatewayTarget
+                  - bedrock-agentcore:ListGatewayTargets
+                  - bedrock-agentcore:SynchronizeGatewayTargets
+                  - bedrock-agentcore:UpdateGatewayTarget
+                Resource: !Sub "arn:${AWS::Partition}:bedrock-agentcore:${AWS::Region}:${AWS::AccountId}:gateway/*"
+                Condition:
+                  StringEquals:
+                    aws:ResourceTag/Project: cloudai-platform
+                    aws:ResourceTag/Environment: agentcore-rag-sandbox
+              - Sid: ListAgentCoreForTerraformStateRefresh
+                Effect: Allow
+                Action:
+                  - bedrock-agentcore:ListAgentRuntimes
+                  - bedrock-agentcore:ListGateways
+                Resource: "*"
 
 Outputs:
   BackendBucketName:
