@@ -442,7 +442,7 @@ Resources:
                   - cloudformation:ExecuteChangeSet
                 Resource:
                   - !Sub "arn:${AWS::Partition}:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/${AWS::StackName}/*"
-                  - !Sub "arn:${AWS::Partition}:cloudformation:${AWS::Region}:${AWS::AccountId}:changeSet/${AWS::StackName}/*/*"
+                  - !Sub "arn:${AWS::Partition}:cloudformation:${AWS::Region}:${AWS::AccountId}:changeSet/cloudai-bootstrap-*/*"
               - Sid: ManageOnlyTerraformAndBootstrapRoles
                 Effect: Allow
                 Action:
