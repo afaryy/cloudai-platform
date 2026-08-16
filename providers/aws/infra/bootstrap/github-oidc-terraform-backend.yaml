@@ -22,6 +22,10 @@ Parameters:
   ExistingGitHubOidcProviderArn:
     Type: String
     Description: Existing account-level GitHub OIDC provider ARN. Example arn:aws:iam::<ACCOUNT_ID>:oidc-provider/token.actions.githubusercontent.com
+  BootstrapRoleName:
+    Type: String
+    Default: cloudai-platform-aws-sandbox-bootstrap
+    Description: Dedicated GitHub OIDC role used only to update this CloudFormation bootstrap stack.
 
 Resources:
   TerraformStateBucket:
@@ -400,6 +404,62 @@ Resources:
                   - bedrock-agentcore:ListGateways
                 Resource: "*"
 
+  GitHubActionsBootstrapRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Ref BootstrapRoleName
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Federated: !Ref ExistingGitHubOidcProviderArn
+            Action: sts:AssumeRoleWithWebIdentity
+            Condition:
+              StringEquals:
+                token.actions.githubusercontent.com:aud: sts.amazonaws.com
+              StringLike:
+                token.actions.githubusercontent.com:sub: !Sub "repo:${GitHubOrg}/${GitHubRepo}:environment:${GitHubEnvironment}"
+      Policies:
+        - PolicyName: BootstrapStackChangeSetControl
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Sid: ManageOnlyThisBootstrapStack
+                Effect: Allow
+                Action:
+                  - cloudformation:CreateChangeSet
+                  - cloudformation:DescribeStackEvents
+                  - cloudformation:DescribeStacks
+                  - cloudformation:GetTemplate
+                  - cloudformation:ListStackResources
+                  - cloudformation:UpdateStack
+                Resource: !Sub "arn:${AWS::Partition}:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/${AWS::StackName}/*"
+              - Sid: ManageChangeSetsForThisBootstrapStack
+                Effect: Allow
+                Action:
+                  - cloudformation:DescribeChangeSet
+                  - cloudformation:ExecuteChangeSet
+                Resource:
+                  - !Sub "arn:${AWS::Partition}:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/${AWS::StackName}/*"
+                  - !Sub "arn:${AWS::Partition}:cloudformation:${AWS::Region}:${AWS::AccountId}:changeSet/cloudai-bootstrap-*/*"
+              - Sid: ManageOnlyTerraformAndBootstrapRoles
+                Effect: Allow
+                Action:
+                  - iam:CreateRole
+                  - iam:DeleteRole
+                  - iam:DeleteRolePolicy
+                  - iam:GetRole
+                  - iam:GetRolePolicy
+                  - iam:ListRolePolicies
+                  - iam:PutRolePolicy
+                  - iam:TagRole
+                  - iam:UntagRole
+                  - iam:UpdateAssumeRolePolicy
+                Resource:
+                  - !GetAtt GitHubActionsTerraformRole.Arn
+                  - !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/${BootstrapRoleName}"
+
 Outputs:
   BackendBucketName:
     Description: S3 bucket for Terraform state.
@@ -410,3 +470,6 @@ Outputs:
   GitHubActionsRoleArn:
     Description: Store privately as AWS_ROLE_TO_ASSUME in the aws-sandbox GitHub environment.
     Value: !GetAtt GitHubActionsTerraformRole.Arn
+  BootstrapRoleArn:
+    Description: Store privately as AWS_BOOTSTRAP_ROLE_TO_ASSUME in the aws-sandbox GitHub environment.
+    Value: !GetAtt GitHubActionsBootstrapRole.Arn
