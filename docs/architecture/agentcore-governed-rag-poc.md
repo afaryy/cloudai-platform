@@ -41,7 +41,29 @@ citations or safely abstain.
 
 The POC excludes customer, employer, internal, confidential, and production
 data. It also excludes tools, writes, browser access, code execution, durable
-memory, autonomous actions, and automated deployment or teardown.
+memory, autonomous actions, and automated teardown.
+
+## Delivery Control Plane
+
+Terraform is the sole infrastructure definition. GitHub Actions is the sole
+deployment path and obtains short-lived AWS credentials through GitHub OIDC.
+There is no local AgentCore CLI deployment path.
+
+```text
+GitHub Environment approval
+        ↓
+Terraform bootstrap (ECR + dedicated image-publisher role)
+        ↓
+GitHub Actions builds and pushes an immutable image digest
+        ↓
+Terraform deploy (Runtime + IAM Gateway + single target)
+        ↓
+Gateway-only synthetic validation and sanitized evidence
+```
+
+The workflow separates bootstrap, image publication and runtime deployment.
+Each apply requires a GitHub Environment approval and an exact confirmation
+phrase. The Gateway uses `AWS_IAM`; it is not an anonymous public endpoint.
 
 ## Required Evidence
 
@@ -63,7 +85,7 @@ sanitized evidence for:
 2. Local AWS contracts and synthetic evaluation cases.
 3. Reviewed AWS preflight: identity, region, model access, quotas, IAM,
    budget, logs, and teardown plan.
-4. Explicitly approved small AWS sandbox deployment.
+4. Explicitly approved small AWS sandbox deployment through GitHub Actions.
 5. Sanitized validation evidence and resource destruction.
 6. Azure and GCP equivalent architecture mappings, followed by optional
    small validations only when their own preflight, budget, and teardown
@@ -110,5 +132,6 @@ where only a documented mapping exists.
 
 > Designed and validated a governed Amazon Bedrock AgentCore POC with
 > Gateway-enforced access, least-privilege Runtime orchestration, Bedrock
-> Guardrails, synthetic RAG citations, metadata-only observability, cost
-> controls, and a tested teardown path.
+> Guardrails, synthetic RAG citations, Terraform-defined infrastructure,
+> GitHub Actions OIDC delivery, metadata-only observability, cost controls,
+> and a tested teardown path.

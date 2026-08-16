@@ -26,6 +26,8 @@ The model may only return a cited answer or a safe abstention.
 - Metadata-only evidence; no raw prompts, answers, credentials, identifiers,
   endpoints, or account details in the repository.
 - Separate manual approval for preflight/deployment and teardown.
+- Terraform is the sole infrastructure definition; GitHub Actions with OIDC is
+  the sole resource-creation or update path.
 
 ## Synthetic Validation Cases
 
@@ -54,10 +56,20 @@ It does not make an AWS call.
 
 1. Review this runbook, the architecture design, cost boundary, and teardown owner.
 2. Run the read-only preflight and resolve every blocked category.
-3. Obtain a fresh explicit deployment approval before any resource-creating command.
-4. Validate the six scenarios through the Gateway and retain only sanitized evidence.
-5. Obtain separate teardown approval, destroy in the recorded dependency order,
+3. Run `terraform-agentcore-rag-sandbox` in `validate` mode through GitHub
+   Actions; this requires no AWS credentials.
+4. Review `bootstrap-plan`, then use the approved `bootstrap-apply` mode to
+   create only ECR and the required IAM roles.
+5. Run `build-agentcore-rag-image` to publish one immutable image digest using
+   its dedicated OIDC role. Store the digest only in the protected GitHub
+   Environment.
+6. Review `deploy-plan`, then obtain a fresh approval for `deploy-apply`.
+7. Validate the six scenarios through the Gateway and retain only sanitized evidence.
+8. Obtain separate teardown approval, destroy in the recorded dependency order,
    and record sanitized closure evidence.
+
+Do not create, update, or destroy AgentCore resources from a local terminal.
+The GitHub Actions workflows provide the reviewed and auditable delivery path.
 
 ## Evidence and Teardown
 
