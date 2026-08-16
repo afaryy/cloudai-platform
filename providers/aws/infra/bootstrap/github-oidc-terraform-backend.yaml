@@ -288,6 +288,7 @@ Resources:
                   - ecr:DeleteRepository
                   - ecr:DescribeRepositories
                   - ecr:GetLifecyclePolicy
+                  - ecr:ListTagsForResource
                   - ecr:PutLifecyclePolicy
                   - ecr:TagResource
                   - ecr:UntagResource
