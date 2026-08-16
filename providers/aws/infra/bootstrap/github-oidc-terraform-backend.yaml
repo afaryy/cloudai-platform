@@ -460,6 +460,11 @@ Resources:
                 Resource:
                   - !GetAtt GitHubActionsTerraformRole.Arn
                   - !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/${BootstrapRoleName}"
+              - Sid: ReadOnlyTerraformLockTableMetadata
+                Effect: Allow
+                Action:
+                  - dynamodb:DescribeTable
+                Resource: !GetAtt TerraformLockTable.Arn
 
 Outputs:
   BackendBucketName:
