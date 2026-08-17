@@ -234,7 +234,7 @@ jobs:
             echo "::error::Terraform outputs did not contain valid Knowledge Base and data source IDs."
             exit 1
           fi
-          client_token="agentcore-rag-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          client_token="cloudai-platform-agentcore-rag-ingestion-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
           job_json="$RUNNER_TEMP/agentcore-ingestion-start.json"
           aws bedrock-agent start-ingestion-job \
             --knowledge-base-id "$kb_id" \
