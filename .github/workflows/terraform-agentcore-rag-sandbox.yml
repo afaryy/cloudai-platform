@@ -136,8 +136,20 @@ jobs:
             -backend-config="dynamodb_table=${TF_BACKEND_LOCK_TABLE}" \
             -backend-config="encrypt=true"
 
-      - name: Verify empty ECR repository before state recovery
+      - name: Detect tainted ECR state before recovery
         if: ${{ inputs.mode == 'bootstrap-recover' }}
+        id: ecr_state
+        run: |
+          if terraform state pull | jq -e '.resources[] | select(.mode == "managed" and .type == "aws_ecr_repository" and .name == "runtime") | .instances[] | select(.status == "tainted")' >/dev/null; then
+            echo "tainted=true" >> "$GITHUB_OUTPUT"
+            echo "aws_ecr_repository.runtime is tainted."
+          else
+            echo "tainted=false" >> "$GITHUB_OUTPUT"
+            echo "aws_ecr_repository.runtime is not tainted."
+          fi
+
+      - name: Verify empty ECR repository before ECR state recovery
+        if: ${{ inputs.mode == 'bootstrap-recover' && steps.ecr_state.outputs.tainted == 'true' }}
         run: |
           image_count=$(aws ecr describe-images \
             --repository-name cloudai-platform-agentcore-rag-sandbox \
@@ -147,7 +159,7 @@ jobs:
             echo "::error::State recovery is blocked because the ECR repository contains $image_count image(s)."
             exit 1
           fi
-          echo "The ECR repository is empty; state recovery will not remove image data."
+          echo "The ECR repository is empty; ECR state recovery will not remove image data."
 
       - name: Recover a failed synthetic RAG data stack
         if: ${{ inputs.mode == 'bootstrap-recover' }}
@@ -170,14 +182,14 @@ jobs:
           fi
 
       - name: Recover tainted ECR state
+        if: ${{ inputs.mode == 'bootstrap-recover' && steps.ecr_state.outputs.tainted == 'true' }}
+        run: |
+          terraform untaint aws_ecr_repository.runtime
+          echo "Removed the tainted marker from aws_ecr_repository.runtime."
+
+      - name: Plan state recovery result
         if: ${{ inputs.mode == 'bootstrap-recover' }}
         run: |
-          if terraform state pull | jq -e '.resources[] | select(.mode == "managed" and .type == "aws_ecr_repository" and .name == "runtime") | .instances[] | select(.status == "tainted")' >/dev/null; then
-            terraform untaint aws_ecr_repository.runtime
-            echo "Removed the tainted marker from aws_ecr_repository.runtime."
-          else
-            echo "aws_ecr_repository.runtime is not tainted; no state mutation was required."
-          fi
           terraform plan -input=false -var='enable_runtime=false' -var='enable_data=false' -out=tfplan
 
       - name: Plan ECR and IAM foundation
