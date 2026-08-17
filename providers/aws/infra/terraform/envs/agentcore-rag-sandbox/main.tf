@@ -257,7 +257,7 @@ resource "aws_iam_role_policy" "knowledge_base_stack" {
           "s3:GetEncryptionConfiguration",
           "s3:GetPublicAccessBlock",
           "s3:ListBucket",
-          "s3:PutBucketEncryption",
+          "s3:PutEncryptionConfiguration",
           "s3:PutBucketPolicy",
           "s3:PutBucketPublicAccessBlock",
           "s3:PutBucketTagging",
