@@ -12,7 +12,7 @@ Attach [agentcore-terraform-execution-role-policy.json](agentcore-terraform-exec
 
 The policy is intentionally scoped to the Sydney ECR repository `cloudai-platform-agentcore-rag-sandbox`, IAM roles beginning `cloudaiplatformagentcoreragsandbox-`, tagged AgentCore resources, and `iam:PassRole` only to `bedrock-agentcore.amazonaws.com`.
 
-It does not authorize general IAM administration, general ECR repository management, Bedrock model invocation, Knowledge Base reads, browser access, or autonomous actions.
+It does not authorize general IAM administration, general ECR repository management, Bedrock model invocation, Knowledge Base reads, browser access, or autonomous actions. The policy also permits only the tagged, single-sandbox application inference profile lifecycle required by the AgentCore RAG response-generation path.
 
 ## AWS Console steps
 
