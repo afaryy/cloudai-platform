@@ -49,9 +49,9 @@ The repository can now demonstrate:
 - **P8g Direct Guardrail Evaluation:** live-validated manual metadata-only evaluation of safe, PII-shaped, and prompt-attack-shaped synthetic categories through `ApplyGuardrail`; no model invocation or automatic CI call
 - **P8h AgentCore Knowledge-Lookup Readiness:** static gateway-first reference architecture mapping future AgentCore controls to existing evidence; no AgentCore resource or call
 - **P8i AgentCore Synthetic Knowledge-Lookup Contract Pack:** local, provider-neutral, fail-closed admission, bypass-denial, and emergency-closure contract evidence; no AgentCore integration or live runtime validation
-- **AgentCore Governed RAG POC:** local Runtime, mocked retrieval adapter,
-  synthetic evaluation cases, Gateway contract, and confirmation-gated sandbox
-  controls; no live AgentCore or AWS resource validation
+- **AgentCore Governed RAG POC:** synthetic Knowledge Base, arm64 Runtime,
+  IAM Gateway/Runtime target, and confirmation-gated CI ingestion/invocation
+  controls deployed; end-to-end evidence is the remaining validation gate
 - **P5a AI-Assisted DevSecOps Boundary:** advisory AI use, human review, CI/security checks, and release evidence
 - **P5b AI-Assisted Review Evidence:** review summaries, threat-model checklists, CI failure summaries, and release-note drafts
 - **P6f AI Platform Security and Operations Controls:** identity, data protection, AI AppSec, delivery, operations, and FinOps
@@ -99,7 +99,7 @@ It currently has six mock-first lanes:
 | P8g Direct Guardrail evaluation | Live direct evaluation validated the expected safe-allowed, PII-shaped-blocked, and prompt-attack-shaped-blocked metadata verdicts; no model invocation | `.github/workflows/terraform-bedrock-sandbox.yml`, `.github/workflows/terraform-tests.yaml`, and `providers/aws/infra/terraform/envs/bedrock-sandbox/README.md` |
 | P8h AgentCore knowledge-lookup readiness | Complete static gateway-first reference architecture; no AgentCore resource or call | `docs/solutions/p8h-agentcore-knowledge-lookup-readiness.md` |
 | P8i AgentCore synthetic contract pack | Complete local synthetic contract evidence; no AgentCore integration or live runtime validation | `shared/schemas/agentcore-readiness/`, `shared/examples/agentcore-readiness/`, `providers/aws/app/api/tests/agentcoreReadinessContracts.test.ts`, and `docs/solutions/p8i-agentcore-synthetic-contract-pack.md` |
-| AgentCore governed RAG POC | Local implementation, mock-only validation, and read-only Sydney preflight complete; deployment not approved or performed | `providers/aws/app/agentcore-rag-runtime/`, `providers/aws/agentcore/`, `providers/aws/scripts/agentcore-rag-*.mjs`, `docs/architecture/agentcore-governed-rag-poc.md`, `docs/solutions/agentcore-governed-rag-poc-runbook.md`, and `docs/evidence/agentcore-governed-rag-preflight-evidence.md` |
+| AgentCore governed RAG POC | Synthetic data foundation, arm64 Runtime, IAM Gateway/Runtime target, and protected CI functional-closure workflow deployed; ingestion and Gateway evidence are the active validation gate | `providers/aws/app/agentcore-rag-runtime/`, `providers/aws/agentcore/`, `.github/workflows/terraform-agentcore-rag-sandbox.yml`, `providers/aws/infra/bootstrap/github-oidc-terraform-backend.yaml`, `docs/solutions/p8i-agentcore-rag-data-foundation.md`, `docs/solutions/agentcore-governed-rag-poc-runbook.md`, and `docs/evidence/agentcore-governed-rag-preflight-evidence.md` |
 | P5a AI-assisted DevSecOps boundary | Complete | `docs/practices/ai-assisted-devsecops-pattern.md` and `.github/workflows/ai-assisted-devsecops.yml` |
 | P5b AI-assisted review evidence | Complete | `docs/evidence/ai-assisted-review-evidence.md`, `shared/schemas/ai-assisted-devsecops/`, and `shared/examples/ai-assisted-devsecops/` |
 | P6d control-plane evidence map | Complete | `docs/evidence/control-plane-evidence-map.md`, `shared/schemas/control-plane-evidence/`, and `shared/examples/control-plane-evidence/` |

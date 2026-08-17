@@ -160,7 +160,7 @@ is intentionally bounded and should be read with its stated evidence boundary.
 | Data and knowledge controls | [RAG knowledge lifecycle](../solutions/rag-knowledge-lifecycle.md) and the [Governed RAG Lifecycle case study](../solutions/featured-solutions.md#governed-rag-lifecycle): implemented as a local synthetic workflow, not provider-backed retrieval. |
 | Delivery engineering | [AI release engineering on EKS](../solutions/ai-release-engineering-on-eks.md) and the [EKS case study](../solutions/featured-solutions.md#ai-release-engineering-on-eks): sandbox-validated delivery controls for a synthetic workload. |
 | Bounded provider access | [P8 Bedrock sandbox design](../solutions/p8-real-bedrock-sandbox-design.md) and the [Bounded Bedrock Sandbox case study](../solutions/featured-solutions.md#bounded-bedrock-sandbox): bounded synthetic sandbox validation, not a persistent Bedrock application. |
-| Agent runtime extension | [P8h AgentCore knowledge-lookup readiness](../solutions/p8h-agentcore-knowledge-lookup-readiness.md): gateway-first reference design only; no AgentCore resource or call. |
+| Agent runtime extension | [AgentCore Governed RAG POC](./agentcore-governed-rag-poc.md) and [P8i data foundation](../solutions/p8i-agentcore-rag-data-foundation.md): deployed synthetic AWS sandbox with protected ingestion/Gateway validation; no production claim. |
 | AI Factory and accelerated capacity | [AI Factory infrastructure lens](./ai-factory-infrastructure-lens.md) and [AI Workload Operating Contract](../practices/ai-workload-operating-contract.md): future/design context for LLMOps, workload readiness, capacity, and accelerator patterns; no GPU, training, fine-tuning, or high-scale serving implementation. |
 | Multi-cloud mappings | [AWS](./aws-reference-architecture.md), [Azure](./azure-reference-architecture.md), and [GCP](./gcp-reference-architecture.md) mappings: AWS-first implementation context with Azure/GCP reference mappings, not provider parity claims. |
 
@@ -175,7 +175,7 @@ what this repository currently demonstrates publicly.
 | AI Release Engineering on EKS | Implemented — sandbox-validated for a synthetic workload |
 | Governed RAG Lifecycle | Implemented — local synthetic workflow |
 | Bounded Bedrock Sandbox | Implemented — bounded synthetic sandbox validation |
-| AgentCore | Reference architecture only; no AgentCore resource or call |
+| AgentCore | Synthetic sandbox deployed; ingestion and Gateway end-to-end evidence pending |
 | Azure and GCP | Reference mappings only |
 | AI Factory and accelerated capacity | Future/design context only; no GPU, training, fine-tuning, or high-scale serving implementation |
 

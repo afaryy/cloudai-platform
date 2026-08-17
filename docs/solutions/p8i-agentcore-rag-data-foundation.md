@@ -59,7 +59,9 @@ This keeps the deployment path declarative and CI-only while avoiding a manual c
 2. `bootstrap-apply` applies the reviewed plan after the exact confirmation phrase.
 3. Terraform outputs the real `knowledge_base_id`, `knowledge_base_arn`, source bucket and data source IDs.
 4. The sample document is uploaded by Terraform after the stack is available.
-5. A later CI step can start a Bedrock ingestion job, then `deploy-plan` and `deploy-apply` can create the AgentCore Runtime, Gateway and target.
+5. `ingest` starts and polls a Bedrock Knowledge Base ingestion job through the same protected OIDC role; it uploads a seven-day synthetic evidence artifact.
+6. `deploy-plan` and `deploy-apply` create the AgentCore Runtime, Gateway and target.
+7. `invoke` signs a request through the IAM-authenticated Gateway target and uploads a seven-day synthetic response artifact. A successful deployment is not treated as an end-to-end result until this response contains an answer, a citation, and `citationPresent=true`.
 
 ## Teardown note
 
@@ -82,3 +84,17 @@ Deployed outputs (account number intentionally omitted):
 - Data source ID: `MG4TMXZI3G`
 
 The next functional step is a CI-only Bedrock Knowledge Base ingestion job followed by a synthetic gateway invocation and evidence capture. Deployment success alone does not prove retrieval quality until ingestion and an end-to-end query are completed.
+
+## Functional-closure workflow contract — 2026-08-17
+
+The existing `terraform-agentcore-rag-sandbox` workflow now has two additional protected modes:
+
+- `ingest` requires `I_UNDERSTAND_AGENTCORE_RAG_INGESTION`, reads the Knowledge Base and data-source IDs from remote Terraform state, starts `StartIngestionJob`, polls `GetIngestionJob` until `COMPLETE` or `FAILED`, and uploads only synthetic ingestion statistics.
+- `invoke` requires `I_UNDERSTAND_AGENTCORE_RAG_GATEWAY_INVOKE`, reads the Runtime ARN and Gateway URL from remote Terraform state, invokes only the `governed-rag-runtime` Gateway target with the active synthetic fixture, validates the citations-or-abstention contract, and uploads the sanitized response artifact.
+
+The bootstrap execution policy now grants only:
+
+- `bedrock:StartIngestionJob` and `bedrock:GetIngestionJob` on tagged AgentCore Knowledge Bases; and
+- `bedrock-agentcore:InvokeGateway` on tagged AgentCore Gateways.
+
+It does not grant a direct Runtime invocation permission to the CI role. This preserves the Gateway-only entry boundary while allowing CI to prove the deployed path.
