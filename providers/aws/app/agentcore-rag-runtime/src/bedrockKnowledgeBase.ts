@@ -34,7 +34,7 @@ export async function retrieveGroundedAnswer(
     };
   } catch (error) {
     logRetrievalFailure(error, request.requestId);
-    return abstention(request, "retrieval_unavailable");
+    return abstention(request, retrievalFailureReason(error));
   }
 }
 
@@ -91,6 +91,15 @@ function logRetrievalFailure(error: unknown, requestId: string): void {
     retryable: typeof metadata?.retryable === "boolean" ? metadata.retryable : undefined
   };
   console.error(JSON.stringify(details));
+}
+
+function retrievalFailureReason(error: unknown): string {
+  const errorName = error instanceof Error ? error.name : "";
+  if (errorName === "AccessDeniedException") return "retrieval_access_denied";
+  if (errorName === "ValidationException") return "retrieval_invalid_configuration";
+  if (errorName === "ResourceNotFoundException") return "retrieval_resource_not_found";
+  if (errorName === "ThrottlingException") return "retrieval_throttled";
+  return "retrieval_unavailable";
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
