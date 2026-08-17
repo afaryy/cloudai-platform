@@ -32,7 +32,8 @@ export async function retrieveGroundedAnswer(
       citations,
       audit: { sourceLifecycle: request.governance.sourceLifecycle, citationPresent: true }
     };
-  } catch {
+  } catch (error) {
+    logRetrievalFailure(error, request.requestId);
     return abstention(request, "retrieval_unavailable");
   }
 }
@@ -78,6 +79,22 @@ function sanitizeCitations(citations: RetrievalResult["citations"]): RetrievalRe
     .filter((citation) => citation.title.length > 0 && citation.uri.startsWith("synthetic://"))
     .slice(0, 5)
     .map((citation) => ({ title: citation.title.slice(0, 160), uri: citation.uri }));
+}
+
+function logRetrievalFailure(error: unknown, requestId: string): void {
+  const metadata = isRecord(error) && isRecord(error.$metadata) ? error.$metadata : undefined;
+  const details = {
+    event: "bedrock_retrieve_and_generate_failed",
+    requestId,
+    errorName: error instanceof Error ? error.name : "UnknownError",
+    httpStatusCode: typeof metadata?.httpStatusCode === "number" ? metadata.httpStatusCode : undefined,
+    retryable: typeof metadata?.retryable === "boolean" ? metadata.retryable : undefined
+  };
+  console.error(JSON.stringify(details));
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
 }
 
 function abstention(request: RuntimeRequest, reasonCode: string): RuntimeResponse {

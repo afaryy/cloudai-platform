@@ -28,6 +28,8 @@ The follow-up read showed the target API/provider normalizes the supported Runti
 
 The first post-authorization Gateway invoke then failed because the target sent the Runtime deployment version (`2`) as its qualifier. AgentCore treats a qualifier as a specific endpoint version/name, not as the Runtime resource's deployment version; no endpoint named `2` existed. The target now omits `qualifier`, which uses the Runtime's default endpoint and keeps endpoint selection managed by AgentCore rather than pinning an invalid version value.
 
+After the qualifier fix, Gateway authorization and routing succeeded with HTTP 200, but the Runtime returned a bounded `retrieval_unavailable` abstention with no citations. The runtime intentionally suppressed provider details, so the image now emits only a sanitized error event (`errorName`, HTTP status, retryable flag, and synthetic request ID) to its standard logs. This preserves the fail-closed response contract while making the next CI-only diagnosis actionable.
+
 ## Purpose
 
 The AgentCore runtime needs a real Knowledge Base ID and ARN. The sandbox now creates those dependencies from code instead of accepting hand-written identifiers.
