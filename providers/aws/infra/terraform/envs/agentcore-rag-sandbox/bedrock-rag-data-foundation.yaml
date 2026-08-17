@@ -122,7 +122,7 @@ Resources:
   KnowledgeBase:
     Type: AWS::Bedrock::KnowledgeBase
     Properties:
-      Name: cloudai-platform-agentcore-rag
+      Name: cloudai-platform-agentcore-rag-v2
       Description: Synthetic-only governed RAG knowledge base for the AgentCore sandbox.
       RoleArn: !Ref KnowledgeBaseRoleArn
       KnowledgeBaseConfiguration:
