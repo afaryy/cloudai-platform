@@ -14,6 +14,8 @@ The first AgentCore runtime deployment reached AWS but was denied while AgentCor
 
 AgentCore's create flow validates both the default workload-identity directory ARN and the child workload-identity ARN pattern. The bootstrap policy grants only those two resource shapes for `bedrock-agentcore:CreateWorkloadIdentity`; it does not broaden the action to all AgentCore resources.
 
+The Runtime and Gateway resources then created successfully, but the first Gateway Target apply rejected `credential_provider_configuration.gateway_iam_role`: AgentCore Runtime targets do not support `IamCredentialProvider` (that provider is for MCP, OpenAPI, and Passthrough targets). The target configuration now relies on the Runtime target type without that unsupported block.
+
 ## Purpose
 
 The AgentCore runtime needs a real Knowledge Base ID and ARN. The sandbox now creates those dependencies from code instead of accepting hand-written identifiers.
