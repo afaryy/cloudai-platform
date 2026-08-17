@@ -146,7 +146,7 @@ jobs:
       - name: Recover tainted ECR state
         if: ${{ inputs.mode == 'bootstrap-recover' }}
         run: |
-          if terraform state pull | jq -e '.resources[] | select(.address == "aws_ecr_repository.runtime") | .instances[] | select(.status == "tainted")' >/dev/null; then
+          if terraform state pull | jq -e '.resources[] | select(.mode == "managed" and .type == "aws_ecr_repository" and .name == "runtime") | .instances[] | select(.status == "tainted")' >/dev/null; then
             terraform state untaint aws_ecr_repository.runtime
             echo "Removed the tainted marker from aws_ecr_repository.runtime."
           else
