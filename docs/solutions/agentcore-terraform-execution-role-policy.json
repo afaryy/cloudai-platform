@@ -84,6 +84,12 @@
       }
     },
     {
+      "Sid": "CreateAgentCoreRuntimeWorkloadIdentity",
+      "Effect": "Allow",
+      "Action": ["bedrock-agentcore:CreateWorkloadIdentity"],
+      "Resource": "arn:aws:bedrock-agentcore:ap-southeast-2:${aws:PrincipalAccount}:workload-identity-directory/default/workload-identity/*"
+    },
+    {
       "Sid": "ManageOnlyTaggedAgentCoreResources",
       "Effect": "Allow",
       "Action": ["bedrock-agentcore:DeleteAgentRuntime", "bedrock-agentcore:DeleteGateway", "bedrock-agentcore:GetAgentRuntime", "bedrock-agentcore:GetGateway", "bedrock-agentcore:ListTagsForResource", "bedrock-agentcore:TagResource", "bedrock-agentcore:UntagResource", "bedrock-agentcore:UpdateAgentRuntime", "bedrock-agentcore:UpdateGateway"],
