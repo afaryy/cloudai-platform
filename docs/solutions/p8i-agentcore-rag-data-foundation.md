@@ -30,6 +30,8 @@ The first post-authorization Gateway invoke then failed because the target sent 
 
 After the qualifier fix, Gateway authorization and routing succeeded with HTTP 200, but the Runtime returned a bounded `retrieval_unavailable` abstention with no citations. The runtime intentionally suppressed provider details, so the image now emits only a sanitized error event (`errorName`, HTTP status, retryable flag, and synthetic request ID) to its standard logs. This preserves the fail-closed response contract while making the next CI-only diagnosis actionable.
 
+The Runtime now additionally maps a small allowlist of provider error names to bounded response reason codes (`retrieval_access_denied`, `retrieval_invalid_configuration`, `retrieval_resource_not_found`, and `retrieval_throttled`). It never returns provider messages, ARNs, request payloads, or credentials.
+
 ## Purpose
 
 The AgentCore runtime needs a real Knowledge Base ID and ARN. The sandbox now creates those dependencies from code instead of accepting hand-written identifiers.

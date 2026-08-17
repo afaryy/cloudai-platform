@@ -23,6 +23,21 @@ test("provider failure becomes a sanitized abstention", async () => {
   assert.doesNotMatch(JSON.stringify(response), /provider details/);
 });
 
+test("known provider failures become bounded diagnostic reason codes", async () => {
+  const client: KnowledgeBaseClient = {
+    retrieveAndGenerate: async () => {
+      const error = new Error("provider details must not escape");
+      error.name = "AccessDeniedException";
+      throw error;
+    }
+  };
+
+  const response = await retrieveGroundedAnswer(client, allowedInput);
+  assert.equal(response.outcome, "abstain");
+  assert.equal(response.reasonCode, "retrieval_access_denied");
+  assert.doesNotMatch(JSON.stringify(response), /provider details/);
+});
+
 test("missing citations become a safe abstention", async () => {
   const client: KnowledgeBaseClient = {
     retrieveAndGenerate: async () => ({ answer: "Ungrounded answer", citations: [] })
