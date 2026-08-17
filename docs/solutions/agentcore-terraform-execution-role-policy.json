@@ -58,6 +58,17 @@
       }
     },
     {
+      "Sid": "CreateAgentCoreRuntimeIdentityServiceLinkedRole",
+      "Effect": "Allow",
+      "Action": "iam:CreateServiceLinkedRole",
+      "Resource": "arn:aws:iam::*:role/aws-service-role/runtime-identity.bedrock-agentcore.amazonaws.com/AWSServiceRoleForBedrockAgentCoreRuntimeIdentity",
+      "Condition": {
+        "StringEquals": {
+          "iam:AWSServiceName": "runtime-identity.bedrock-agentcore.amazonaws.com"
+        }
+      }
+    },
+    {
       "Sid": "CreateOnlyTaggedAgentCoreResources",
       "Effect": "Allow",
       "Action": ["bedrock-agentcore:CreateAgentRuntime", "bedrock-agentcore:CreateGateway"],
