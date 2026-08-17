@@ -12,6 +12,8 @@ The first ingestion attempt then reached `StartIngestionJob` successfully but S3
 
 The first metadata-schema update also demonstrated a CloudFormation limitation: an `AWS::S3Vectors::Index` with a custom name cannot be replaced in place when its metadata configuration changes. The sandbox therefore versions the index name (`cloudai-platform-agentcore-rag-v2`) so CloudFormation can create the corrected empty index before removing the old one. This is intentionally safe for the synthetic sandbox because no successful ingestion had populated the old index.
 
+Because the Knowledge Base storage configuration points to the replacement index, CloudFormation also needs a versioned Knowledge Base name (`cloudai-platform-agentcore-rag-v2`) to avoid an `AlreadyExists` collision while creating the replacement. The Runtime receives the new Knowledge Base ID from Terraform outputs after convergence; no identifier is hard-coded into the Runtime image.
+
 The first arm64 image verification also exposed a separate least-privilege gap: the dedicated image-publisher role could push to ECR but could not pull its own digest for CI architecture verification. Terraform now grants only `ecr:GetDownloadUrlForLayer` alongside its existing repository-scoped push and manifest-read actions.
 
 The first AgentCore runtime deployment reached AWS but was denied while AgentCore attempted to create its runtime-identity service-linked role. The Terraform execution role now grants only the narrowly scoped `iam:CreateServiceLinkedRole` permission for `runtime-identity.bedrock-agentcore.amazonaws.com`.
