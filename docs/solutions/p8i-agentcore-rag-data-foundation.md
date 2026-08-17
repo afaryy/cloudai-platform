@@ -26,6 +26,8 @@ The Runtime and Gateway resources then created successfully, but the first Gatew
 
 The follow-up read showed the target API/provider normalizes the supported Runtime authorization as an empty `gateway_iam_role {}` block. The Terraform configuration uses that empty block (without `service` or `region`) so the provider emits the Runtime-compatible `GATEWAY_IAM_ROLE` type instead of the unsupported nested IAM credential provider.
 
+The first post-authorization Gateway invoke then failed because the target sent the Runtime deployment version (`2`) as its qualifier. AgentCore treats a qualifier as a specific endpoint version/name, not as the Runtime resource's deployment version; no endpoint named `2` existed. The target now omits `qualifier`, which uses the Runtime's default endpoint and keeps endpoint selection managed by AgentCore rather than pinning an invalid version value.
+
 ## Purpose
 
 The AgentCore runtime needs a real Knowledge Base ID and ARN. The sandbox now creates those dependencies from code instead of accepting hand-written identifiers.

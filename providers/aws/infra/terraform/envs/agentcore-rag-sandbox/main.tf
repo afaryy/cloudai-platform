@@ -462,8 +462,7 @@ resource "aws_bedrockagentcore_gateway_target" "runtime" {
   target_configuration {
     http {
       agentcore_runtime {
-        arn       = aws_bedrockagentcore_agent_runtime.governed_rag[0].agent_runtime_arn
-        qualifier = aws_bedrockagentcore_agent_runtime.governed_rag[0].agent_runtime_version
+        arn = aws_bedrockagentcore_agent_runtime.governed_rag[0].agent_runtime_arn
       }
     }
   }
