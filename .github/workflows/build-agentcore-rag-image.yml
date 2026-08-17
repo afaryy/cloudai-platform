@@ -95,15 +95,43 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      - name: Enable arm64 build emulation
+        uses: docker/setup-qemu-action@v3
+        with:
+          platforms: arm64
+
       - name: Build and push immutable image
         id: build
         uses: docker/build-push-action@v6
         with:
           context: providers/aws/app/agentcore-rag-runtime
+          platforms: linux/arm64
           push: true
           tags: ${{ env.REPOSITORY_URL }}:${{ github.sha }}
+
+      - name: Verify AgentCore-compatible image architecture
+        env:
+          IMAGE_DIGEST: ${{ steps.build.outputs.digest }}
+        run: |
+          if [ -z "$IMAGE_DIGEST" ]; then
+            echo "::error::The image build did not return an immutable digest."
+            exit 1
+          fi
+          image_uri="${REPOSITORY_URL}@${IMAGE_DIGEST}"
+          docker buildx imagetools inspect "$image_uri" | tee /tmp/agentcore-image-manifest.txt
+          if ! grep -q 'linux/arm64' /tmp/agentcore-image-manifest.txt; then
+            echo "::error::The pushed image manifest does not contain linux/arm64."
+            exit 1
+          fi
+          echo "Immutable AgentCore image URI: $image_uri"
+          {
+            echo "### AgentCore image"
+            echo
+            echo "- Platform: `linux/arm64`"
+            echo "- Immutable URI: `$image_uri`"
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Record deploy input without exposing content
         run: |
           echo "image-push-passed"
-          echo "Set AGENTCORE_RAG_CONTAINER_IMAGE_URI in aws-sandbox to the immutable image digest from this run before approved deploy-plan."
+          echo "Set AGENTCORE_RAG_CONTAINER_IMAGE_URI in aws-sandbox to the verified linux/arm64 immutable image URI from this run before approved deploy-plan."
