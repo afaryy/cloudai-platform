@@ -375,6 +375,12 @@ Resources:
                   - bedrock-agentcore:DeleteWorkloadIdentity
                   - bedrock-agentcore:PassCapacityProvider
                 Resource: "*"
+              - Sid: AgentCoreCreateRuntimeWorkloadIdentity
+                Effect: Allow
+                Action:
+                  - bedrock-agentcore:CreateWorkloadIdentity
+                Resource:
+                  - !Sub "arn:${AWS::Partition}:bedrock-agentcore:${AWS::Region}:${AWS::AccountId}:workload-identity-directory/default/workload-identity/*"
               - Sid: ManageOnlyTaggedAgentCoreResources
                 Effect: Allow
                 Action:
