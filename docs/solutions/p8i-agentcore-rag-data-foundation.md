@@ -32,6 +32,10 @@ After the qualifier fix, Gateway authorization and routing succeeded with HTTP 2
 
 The Runtime now additionally maps a small allowlist of provider error names to bounded response reason codes (`retrieval_access_denied`, `retrieval_invalid_configuration`, `retrieval_resource_not_found`, and `retrieval_throttled`). It never returns provider messages, ARNs, request payloads, or credentials.
 
+The next diagnostic identified `retrieval_invalid_configuration` as a Bedrock `ValidationException` from the Knowledge Base response-generation call. The sandbox therefore creates a single-region application inference profile from the approved foundation model through Terraform. The Runtime receives the Terraform-managed profile ARN, and its execution role can invoke only the approved foundation model and that profile. This keeps generation in `ap-southeast-2` while satisfying the Knowledge Base response-generation contract without relying on a guessed or manually created profile.
+
+A temporary read-only attempt to enumerate system-defined inference profiles through CI was intentionally denied because the bootstrap role does not include `bedrock:ListInferenceProfiles`; no AWS resource was changed. Managing the application profile declaratively avoids broadening the CI role merely for discovery and keeps the model choice auditable in Terraform.
+
 ## Purpose
 
 The AgentCore runtime needs a real Knowledge Base ID and ARN. The sandbox now creates those dependencies from code instead of accepting hand-written identifiers.
