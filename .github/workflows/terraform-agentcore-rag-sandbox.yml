@@ -149,6 +149,26 @@ jobs:
           fi
           echo "The ECR repository is empty; state recovery will not remove image data."
 
+      - name: Recover a failed synthetic RAG data stack
+        if: ${{ inputs.mode == 'bootstrap-recover' }}
+        run: |
+          stack_name="cloudai-platform-agentcore-rag-data"
+          stack_status=$(aws cloudformation describe-stacks \
+            --stack-name "$stack_name" \
+            --query 'Stacks[0].StackStatus' \
+            --output text 2>/dev/null || true)
+          if [ "$stack_status" = "ROLLBACK_FAILED" ]; then
+            echo "The synthetic RAG data stack is ROLLBACK_FAILED; retrying its managed deletion."
+            aws cloudformation delete-stack --stack-name "$stack_name"
+            aws cloudformation wait stack-delete-complete --stack-name "$stack_name"
+            echo "Removed the failed synthetic RAG data stack; no source document was uploaded."
+          elif [ -z "$stack_status" ] || [ "$stack_status" = "None" ]; then
+            echo "No failed synthetic RAG data stack exists."
+          else
+            echo "Synthetic RAG data stack status is $stack_status; recovery will not mutate it."
+            exit 1
+          fi
+
       - name: Recover tainted ECR state
         if: ${{ inputs.mode == 'bootstrap-recover' }}
         run: |
