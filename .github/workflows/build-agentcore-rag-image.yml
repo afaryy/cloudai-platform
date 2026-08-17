@@ -108,6 +108,8 @@ jobs:
           platforms: linux/arm64
           push: true
           tags: ${{ env.REPOSITORY_URL }}:${{ github.sha }}
+          provenance: false
+          sbom: false
 
       - name: Verify AgentCore-compatible image architecture
         env:
@@ -127,8 +129,8 @@ jobs:
           {
             echo "### AgentCore image"
             echo
-            echo "- Platform: `linux/arm64`"
-            echo "- Immutable URI: `$image_uri`"
+            printf '%s\n' '- Platform: `linux/arm64`'
+            printf '%s\n' "- Immutable URI: \`$image_uri\`"
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Record deploy input without exposing content
