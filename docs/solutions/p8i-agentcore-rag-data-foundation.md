@@ -8,6 +8,8 @@ The template now declares `DependsOn: VectorBucket` on `VectorIndex`. This keeps
 
 The next apply created the complete data foundation successfully, then failed only while uploading the synthetic handbook because the GitHub Terraform role lacked `s3:PutObjectTagging`. The bootstrap policy now grants object tag read/write/delete actions on the narrowly named synthetic source-bucket prefix; the existing stack and vector data remain managed and are not recreated.
 
+The first arm64 image verification also exposed a separate least-privilege gap: the dedicated image-publisher role could push to ECR but could not pull its own digest for CI architecture verification. Terraform now grants only `ecr:GetDownloadUrlForLayer` alongside its existing repository-scoped push and manifest-read actions.
+
 ## Purpose
 
 The AgentCore runtime needs a real Knowledge Base ID and ARN. The sandbox now creates those dependencies from code instead of accepting hand-written identifiers.
