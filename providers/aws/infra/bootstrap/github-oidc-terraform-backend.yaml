@@ -92,6 +92,8 @@ Resources:
                 token.actions.githubusercontent.com:aud: sts.amazonaws.com
               StringLike:
                 token.actions.githubusercontent.com:sub: !Sub "repo:${GitHubOrg}/${GitHubRepo}:environment:${GitHubEnvironment}"
+      ManagedPolicyArns:
+        - !Ref AgentCoreRagFunctionalPolicy
       Policies:
         - PolicyName: TerraformBackendAndEksSandboxPolicy
           PolicyDocument:
@@ -401,25 +403,6 @@ Resources:
                   StringEquals:
                     aws:ResourceTag/Project: cloudai-platform
                     aws:ResourceTag/Environment: agentcore-rag-sandbox
-              - Sid: InvokeOnlyTaggedAgentCoreGateway
-                Effect: Allow
-                Action:
-                  - bedrock-agentcore:InvokeGateway
-                Resource: !Sub "arn:${AWS::Partition}:bedrock-agentcore:${AWS::Region}:${AWS::AccountId}:gateway/*"
-                Condition:
-                  StringEquals:
-                    aws:ResourceTag/Project: cloudai-platform
-                    aws:ResourceTag/Environment: agentcore-rag-sandbox
-              - Sid: ManageOnlyTaggedAgentCoreKnowledgeBaseIngestion
-                Effect: Allow
-                Action:
-                  - bedrock:GetIngestionJob
-                  - bedrock:StartIngestionJob
-                Resource: !Sub "arn:${AWS::Partition}:bedrock:${AWS::Region}:${AWS::AccountId}:knowledge-base/*"
-                Condition:
-                  StringEquals:
-                    aws:ResourceTag/Project: cloudai-platform
-                    aws:ResourceTag/Environment: agentcore-rag-sandbox
               - Sid: ManageTargetsOnlyForTaggedGateway
                 Effect: Allow
                 Action:
@@ -482,6 +465,33 @@ Resources:
                   - s3:PutObject
                   - s3:PutObjectTagging
                 Resource: !Sub "arn:${AWS::Partition}:s3:::${GitHubRepo}-agentcore-rag-source-*/*"
+
+  AgentCoreRagFunctionalPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      ManagedPolicyName: !Sub "${GitHubRepo}-agentcore-rag-functional"
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: InvokeOnlyTaggedAgentCoreGateway
+            Effect: Allow
+            Action:
+              - bedrock-agentcore:InvokeGateway
+            Resource: !Sub "arn:${AWS::Partition}:bedrock-agentcore:${AWS::Region}:${AWS::AccountId}:gateway/*"
+            Condition:
+              StringEquals:
+                aws:ResourceTag/Project: cloudai-platform
+                aws:ResourceTag/Environment: agentcore-rag-sandbox
+          - Sid: ManageOnlyTaggedAgentCoreKnowledgeBaseIngestion
+            Effect: Allow
+            Action:
+              - bedrock:GetIngestionJob
+              - bedrock:StartIngestionJob
+            Resource: !Sub "arn:${AWS::Partition}:bedrock:${AWS::Region}:${AWS::AccountId}:knowledge-base/*"
+            Condition:
+              StringEquals:
+                aws:ResourceTag/Project: cloudai-platform
+                aws:ResourceTag/Environment: agentcore-rag-sandbox
 
   GitHubActionsBootstrapRole:
     Type: AWS::IAM::Role
