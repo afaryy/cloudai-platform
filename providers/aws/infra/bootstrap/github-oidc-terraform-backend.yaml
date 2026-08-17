@@ -468,6 +468,7 @@ Resources:
 
   AgentCoreRagFunctionalPolicy:
     Type: AWS::IAM::ManagedPolicy
+    DependsOn: GitHubActionsBootstrapRole
     Properties:
       ManagedPolicyName: !Sub "${GitHubRepo}-agentcore-rag-functional"
       PolicyDocument:
