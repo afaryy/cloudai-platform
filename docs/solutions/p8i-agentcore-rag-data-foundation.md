@@ -1,5 +1,11 @@
 # P8i AgentCore RAG data foundation
 
+## CI deployment incident: S3 Vectors creation ordering
+
+The first synthetic data-foundation apply failed during CloudFormation creation even though S3 Vectors is supported in `ap-southeast-2`. `AWS::S3Vectors::Index` received the vector bucket name through a template parameter, so CloudFormation did not infer a dependency on `AWS::S3Vectors::VectorBucket`. The index creation raced the bucket creation and returned `The specified vector bucket could not be found` (HTTP 404); the source bucket and vector bucket were then cancelled during rollback.
+
+The template now declares `DependsOn: VectorBucket` on `VectorIndex`. This keeps the resource lifecycle declarative while making the cross-resource ordering explicit. The protected CI recovery workflow removed the failed `ROLLBACK_COMPLETE` stack before the next apply, and no synthetic source document was uploaded.
+
 ## Purpose
 
 The AgentCore runtime needs a real Knowledge Base ID and ARN. The sandbox now creates those dependencies from code instead of accepting hand-written identifiers.
