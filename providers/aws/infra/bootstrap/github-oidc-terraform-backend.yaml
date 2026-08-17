@@ -549,7 +549,7 @@ Resources:
                   - iam:UntagRole
                   - iam:UpdateAssumeRolePolicy
                 Resource:
-                  - !GetAtt GitHubActionsTerraformRole.Arn
+                  - !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/${GitHubRepo}-${GitHubEnvironment}-terraform"
                   - !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/${BootstrapRoleName}"
               - Sid: ManageOnlyAgentCoreRagFunctionalPolicy
                 Effect: Allow
