@@ -16,6 +16,7 @@ on:
           - validate
           - plan
           - apply
+          - diagnose
       change_set_name:
         description: "Required for apply: reviewed cloudai-bootstrap-* change set name"
         required: false
@@ -58,7 +59,7 @@ jobs:
         run: pipx run cfn-lint providers/aws/infra/bootstrap/github-oidc-terraform-backend.yaml
 
       - name: Check bootstrap environment configuration
-        if: ${{ github.event_name == 'workflow_dispatch' && (inputs.mode == 'plan' || inputs.mode == 'apply') }}
+        if: ${{ github.event_name == 'workflow_dispatch' && (inputs.mode == 'plan' || inputs.mode == 'apply' || inputs.mode == 'diagnose') }}
         run: |
           missing=0
           for name in AWS_BOOTSTRAP_ROLE_TO_ASSUME AWS_TERRAFORM_ROLE_TO_ASSUME AWS_BOOTSTRAP_STACK_NAME AWS_OIDC_PROVIDER_ARN TF_BACKEND_BUCKET TF_BACKEND_LOCK_TABLE; do
@@ -88,12 +89,24 @@ jobs:
           fi
 
       - name: Configure AWS credentials through GitHub OIDC
-        if: ${{ github.event_name == 'workflow_dispatch' && (inputs.mode == 'plan' || inputs.mode == 'apply') }}
+        if: ${{ github.event_name == 'workflow_dispatch' && (inputs.mode == 'plan' || inputs.mode == 'apply' || inputs.mode == 'diagnose') }}
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ env.AWS_BOOTSTRAP_ROLE_TO_ASSUME }}
           aws-region: ${{ env.AWS_REGION }}
           mask-aws-account-id: true
+
+      - name: Diagnose current bootstrap stack events
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.mode == 'diagnose' }}
+        run: |
+          aws cloudformation describe-stacks \
+            --stack-name "$AWS_BOOTSTRAP_STACK_NAME" \
+            --query 'Stacks[0].{StackStatus:StackStatus,LastUpdatedTime:LastUpdatedTime}' \
+            --output json
+          aws cloudformation describe-stack-events \
+            --stack-name "$AWS_BOOTSTRAP_STACK_NAME" \
+            --query 'StackEvents[?ResourceStatusReason != `null`].[Timestamp,LogicalResourceId,ResourceType,ResourceStatus,ResourceStatusReason]' \
+            --output table
 
       - name: Create a non-executing CloudFormation change set
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.mode == 'plan' }}
