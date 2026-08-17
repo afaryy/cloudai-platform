@@ -64,3 +64,21 @@ This keeps the deployment path declarative and CI-only while avoiding a manual c
 ## Teardown note
 
 The data source and vector resources are tagged `TeardownRequired=true`. If an ingestion job has populated the vector index, the index must be emptied before the CloudFormation stack can delete the vector bucket. Always review `destroy-plan` before teardown.
+
+## AgentCore deployment record — 2026-08-17
+
+The synthetic-only sandbox is now deployed through the protected GitHub Actions/Terraform path:
+
+- arm64 image build and verification: workflow run `32016558170` (immutable image digest recorded in the protected environment variable).
+- bootstrap permission updates: workflow runs `32013786218`, `32021683295`, `32022234140`, `32023071204`.
+- successful Runtime/Gateway/Target deployment: workflow run `32024230745`.
+- final convergence check: workflow run `32024337019`, result `No changes`.
+
+Deployed outputs (account number intentionally omitted):
+
+- Runtime ARN: `arn:aws:bedrock-agentcore:ap-southeast-2:<account>:runtime/cloudaiplatformagentcoreragsandbox-WRwCFJGSvf`
+- Gateway URL: `https://cloudai-platform-agentcore-rag-cdpwqgxwvl.gateway.bedrock-agentcore.ap-southeast-2.amazonaws.com`
+- Knowledge Base ID: `ZKODO1FLUS`
+- Data source ID: `MG4TMXZI3G`
+
+The next functional step is a CI-only Bedrock Knowledge Base ingestion job followed by a synthetic gateway invocation and evidence capture. Deployment success alone does not prove retrieval quality until ingestion and an end-to-end query are completed.
