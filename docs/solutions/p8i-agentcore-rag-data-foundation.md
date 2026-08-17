@@ -16,6 +16,8 @@ AgentCore's create flow validates both the default workload-identity directory A
 
 The Runtime and Gateway resources then created successfully, but the first Gateway Target apply rejected `credential_provider_configuration.gateway_iam_role`: AgentCore Runtime targets do not support `IamCredentialProvider` (that provider is for MCP, OpenAPI, and Passthrough targets). The target configuration now relies on the Runtime target type without that unsupported block.
 
+The follow-up read showed the target API/provider normalizes the supported Runtime authorization as an empty `gateway_iam_role {}` block. The Terraform configuration uses that empty block (without `service` or `region`) so the provider emits the Runtime-compatible `GATEWAY_IAM_ROLE` type instead of the unsupported nested IAM credential provider.
+
 ## Purpose
 
 The AgentCore runtime needs a real Knowledge Base ID and ARN. The sandbox now creates those dependencies from code instead of accepting hand-written identifiers.
