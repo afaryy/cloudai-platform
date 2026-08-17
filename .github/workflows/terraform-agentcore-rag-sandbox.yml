@@ -11,12 +11,13 @@ on:
         options:
           - validate
           - bootstrap-plan
+          - bootstrap-recover
           - bootstrap-apply
           - deploy-plan
           - deploy-apply
           - destroy-plan
       confirmation:
-        description: "Required only for apply: exact confirmation phrase"
+        description: "Required only for state recovery or apply: exact confirmation phrase"
         required: false
         default: ""
         type: string
@@ -62,12 +63,16 @@ jobs:
           echo "GitHub Environment approval, OIDC, an explicit confirmation, and a reviewed plan are required for apply."
           echo "The sandbox accepts only synthetic data and has no anonymous gateway, write tools, memory, or browser access."
 
-      - name: Check apply confirmation
-        if: ${{ inputs.mode == 'bootstrap-apply' || inputs.mode == 'deploy-apply' }}
+      - name: Check recovery or apply confirmation
+        if: ${{ inputs.mode == 'bootstrap-recover' || inputs.mode == 'bootstrap-apply' || inputs.mode == 'deploy-apply' }}
         env:
           CONFIRMATION: ${{ inputs.confirmation }}
           MODE: ${{ inputs.mode }}
         run: |
+          if [ "$MODE" = "bootstrap-recover" ] && [ "$CONFIRMATION" != "I_UNDERSTAND_AGENTCORE_RAG_STATE_RECOVERY" ]; then
+            echo "::error::bootstrap-recover requires I_UNDERSTAND_AGENTCORE_RAG_STATE_RECOVERY."
+            exit 1
+          fi
           if [ "$MODE" = "bootstrap-apply" ] && [ "$CONFIRMATION" != "I_UNDERSTAND_AGENTCORE_RAG_BOOTSTRAP_APPLY" ]; then
             echo "::error::bootstrap-apply requires I_UNDERSTAND_AGENTCORE_RAG_BOOTSTRAP_APPLY."
             exit 1
@@ -124,6 +129,30 @@ jobs:
             -backend-config="region=${AWS_REGION}" \
             -backend-config="dynamodb_table=${TF_BACKEND_LOCK_TABLE}" \
             -backend-config="encrypt=true"
+
+      - name: Verify empty ECR repository before state recovery
+        if: ${{ inputs.mode == 'bootstrap-recover' }}
+        run: |
+          image_count=$(aws ecr describe-images \
+            --repository-name cloudai-platform-agentcore-rag-sandbox \
+            --query 'length(imageDetails)' \
+            --output text)
+          if [ "$image_count" != "0" ]; then
+            echo "::error::State recovery is blocked because the ECR repository contains $image_count image(s)."
+            exit 1
+          fi
+          echo "The ECR repository is empty; state recovery will not remove image data."
+
+      - name: Recover tainted ECR state
+        if: ${{ inputs.mode == 'bootstrap-recover' }}
+        run: |
+          if terraform state pull | jq -e '.resources[] | select(.address == "aws_ecr_repository.runtime") | .instances[] | select(.status == "tainted")' >/dev/null; then
+            terraform state untaint aws_ecr_repository.runtime
+            echo "Removed the tainted marker from aws_ecr_repository.runtime."
+          else
+            echo "aws_ecr_repository.runtime is not tainted; no state mutation was required."
+          fi
+          terraform plan -input=false -var='enable_runtime=false' -out=tfplan
 
       - name: Plan ECR and IAM foundation
         if: ${{ inputs.mode == 'bootstrap-plan' || inputs.mode == 'bootstrap-apply' }}
