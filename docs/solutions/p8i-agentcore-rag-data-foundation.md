@@ -12,7 +12,7 @@ The first arm64 image verification also exposed a separate least-privilege gap: 
 
 The first AgentCore runtime deployment reached AWS but was denied while AgentCore attempted to create its runtime-identity service-linked role. The Terraform execution role now grants only the narrowly scoped `iam:CreateServiceLinkedRole` permission for `runtime-identity.bedrock-agentcore.amazonaws.com`.
 
-After that permission was applied, AgentCore reported the next missing control-plane permission: `bedrock-agentcore:CreateWorkloadIdentity` for the default workload-identity directory. The bootstrap policy now grants only that create action on the regional default workload-identity path.
+After that permission was applied, AgentCore reported the next missing control-plane permission: `bedrock-agentcore:CreateWorkloadIdentity` on the default workload-identity directory ARN. The bootstrap policy now grants only that create action on the regional default directory resource.
 
 ## Purpose
 

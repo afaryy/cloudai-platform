@@ -87,7 +87,7 @@
       "Sid": "CreateAgentCoreRuntimeWorkloadIdentity",
       "Effect": "Allow",
       "Action": ["bedrock-agentcore:CreateWorkloadIdentity"],
-      "Resource": "arn:aws:bedrock-agentcore:ap-southeast-2:${aws:PrincipalAccount}:workload-identity-directory/default/workload-identity/*"
+      "Resource": "arn:aws:bedrock-agentcore:ap-southeast-2:${aws:PrincipalAccount}:workload-identity-directory/default"
     },
     {
       "Sid": "ManageOnlyTaggedAgentCoreResources",

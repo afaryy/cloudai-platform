@@ -380,7 +380,7 @@ Resources:
                 Action:
                   - bedrock-agentcore:CreateWorkloadIdentity
                 Resource:
-                  - !Sub "arn:${AWS::Partition}:bedrock-agentcore:${AWS::Region}:${AWS::AccountId}:workload-identity-directory/default/workload-identity/*"
+                  - !Sub "arn:${AWS::Partition}:bedrock-agentcore:${AWS::Region}:${AWS::AccountId}:workload-identity-directory/default"
               - Sid: ManageOnlyTaggedAgentCoreResources
                 Effect: Allow
                 Action:
