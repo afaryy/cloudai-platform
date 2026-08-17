@@ -121,6 +121,36 @@
       "Effect": "Allow",
       "Action": ["bedrock-agentcore:ListAgentRuntimes", "bedrock-agentcore:ListGateways"],
       "Resource": "*"
+    },
+    {
+      "Sid": "CreateTaggedAgentCoreRagInferenceProfile",
+      "Effect": "Allow",
+      "Action": ["bedrock:CreateInferenceProfile"],
+      "Resource": "*",
+      "Condition": {
+        "StringEquals": {
+          "aws:RequestTag/Project": "cloudai-platform",
+          "aws:RequestTag/Environment": "agentcore-rag-sandbox"
+        },
+        "ForAllValues:StringEquals": {
+          "aws:TagKeys": ["Project", "Environment", "DataScope", "ManagedBy", "CostBoundary", "TeardownRequired", "CloudAISlice"]
+        },
+        "Null": {
+          "aws:TagKeys": "false"
+        }
+      }
+    },
+    {
+      "Sid": "ManageOnlyTaggedAgentCoreRagInferenceProfile",
+      "Effect": "Allow",
+      "Action": ["bedrock:DeleteInferenceProfile", "bedrock:GetInferenceProfile", "bedrock:ListTagsForResource", "bedrock:TagResource", "bedrock:UntagResource"],
+      "Resource": "arn:aws:bedrock:ap-southeast-2:${aws:PrincipalAccount}:application-inference-profile/*",
+      "Condition": {
+        "StringEquals": {
+          "aws:ResourceTag/Project": "cloudai-platform",
+          "aws:ResourceTag/Environment": "agentcore-rag-sandbox"
+        }
+      }
     }
   ]
 }
