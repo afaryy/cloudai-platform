@@ -15,9 +15,11 @@ on:
           - bootstrap-apply
           - deploy-plan
           - deploy-apply
+          - ingest
+          - invoke
           - destroy-plan
       confirmation:
-        description: "Required only for state recovery or apply: exact confirmation phrase"
+        description: "Required for recovery, apply, ingestion, or invocation: exact confirmation phrase"
         required: false
         default: ""
         type: string
@@ -64,8 +66,8 @@ jobs:
           echo "GitHub Environment approval, OIDC, an explicit confirmation, and a reviewed plan are required for apply."
           echo "The sandbox accepts only synthetic data and has no anonymous gateway, write tools, memory, or browser access."
 
-      - name: Check recovery or apply confirmation
-        if: ${{ inputs.mode == 'bootstrap-recover' || inputs.mode == 'bootstrap-apply' || inputs.mode == 'deploy-apply' }}
+      - name: Check recovery, apply, ingestion, or invocation confirmation
+        if: ${{ inputs.mode == 'bootstrap-recover' || inputs.mode == 'bootstrap-apply' || inputs.mode == 'deploy-apply' || inputs.mode == 'ingest' || inputs.mode == 'invoke' }}
         env:
           CONFIRMATION: ${{ inputs.confirmation }}
           MODE: ${{ inputs.mode }}
@@ -80,6 +82,14 @@ jobs:
           fi
           if [ "$MODE" = "deploy-apply" ] && [ "$CONFIRMATION" != "I_UNDERSTAND_AGENTCORE_RAG_DEPLOY_APPLY" ]; then
             echo "::error::deploy-apply requires I_UNDERSTAND_AGENTCORE_RAG_DEPLOY_APPLY."
+            exit 1
+          fi
+          if [ "$MODE" = "ingest" ] && [ "$CONFIRMATION" != "I_UNDERSTAND_AGENTCORE_RAG_INGESTION" ]; then
+            echo "::error::ingest requires I_UNDERSTAND_AGENTCORE_RAG_INGESTION."
+            exit 1
+          fi
+          if [ "$MODE" = "invoke" ] && [ "$CONFIRMATION" != "I_UNDERSTAND_AGENTCORE_RAG_GATEWAY_INVOKE" ]; then
+            echo "::error::invoke requires I_UNDERSTAND_AGENTCORE_RAG_GATEWAY_INVOKE."
             exit 1
           fi
 
@@ -212,6 +222,130 @@ jobs:
       - name: Apply runtime deployment
         if: ${{ inputs.mode == 'deploy-apply' }}
         run: terraform apply -input=false tfplan
+
+      - name: Start and monitor synthetic Knowledge Base ingestion
+        if: ${{ inputs.mode == 'ingest' }}
+        id: ingestion
+        run: |
+          set -euo pipefail
+          kb_id=$(terraform output -raw knowledge_base_id)
+          data_source_id=$(terraform output -raw knowledge_base_data_source_id)
+          if [[ ! "$kb_id" =~ ^[A-Za-z0-9]{10}$ || ! "$data_source_id" =~ ^[A-Za-z0-9]{10}$ ]]; then
+            echo "::error::Terraform outputs did not contain valid Knowledge Base and data source IDs."
+            exit 1
+          fi
+          client_token="agentcore-rag-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          job_json="$RUNNER_TEMP/agentcore-ingestion-start.json"
+          aws bedrock-agent start-ingestion-job \
+            --knowledge-base-id "$kb_id" \
+            --data-source-id "$data_source_id" \
+            --client-token "$client_token" \
+            --description "Synthetic AgentCore RAG handbook ingestion from GitHub Actions" \
+            --output json > "$job_json"
+          job_id=$(jq -r '.ingestionJob.ingestionJobId' "$job_json")
+          if [[ ! "$job_id" =~ ^[A-Za-z0-9]{10}$ ]]; then
+            echo "::error::StartIngestionJob did not return a valid ingestion job ID."
+            cat "$job_json"
+            exit 1
+          fi
+          echo "Started synthetic ingestion job $job_id for Knowledge Base $kb_id."
+          for attempt in $(seq 1 30); do
+            status_json="$RUNNER_TEMP/agentcore-ingestion-status.json"
+            aws bedrock-agent get-ingestion-job \
+              --knowledge-base-id "$kb_id" \
+              --data-source-id "$data_source_id" \
+              --ingestion-job-id "$job_id" \
+              --output json > "$status_json"
+            status=$(jq -r '.ingestionJob.status' "$status_json")
+            echo "Ingestion poll $attempt/30: $status"
+            if [ "$status" = "COMPLETE" ]; then
+              echo "Ingestion is COMPLETE; allowing S3 Vectors propagation before a follow-up query."
+              sleep 30
+              cp "$status_json" "$RUNNER_TEMP/agentcore-ingestion-result.json"
+              echo "kb_id=$kb_id" >> "$GITHUB_OUTPUT"
+              echo "data_source_id=$data_source_id" >> "$GITHUB_OUTPUT"
+              echo "job_id=$job_id" >> "$GITHUB_OUTPUT"
+              echo "status=COMPLETE" >> "$GITHUB_OUTPUT"
+              echo "documents_scanned=$(jq -r '.ingestionJob.statistics.numberOfDocumentsScanned // 0' "$status_json")" >> "$GITHUB_OUTPUT"
+              echo "documents_indexed=$(jq -r '.ingestionJob.statistics.numberOfNewDocumentsIndexed // 0' "$status_json")" >> "$GITHUB_OUTPUT"
+              echo "documents_failed=$(jq -r '.ingestionJob.statistics.numberOfDocumentsFailed // 0' "$status_json")" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            if [ "$status" = "FAILED" ] || [ "$status" = "STOPPED" ]; then
+              cp "$status_json" "$RUNNER_TEMP/agentcore-ingestion-result.json"
+              echo "::error::Synthetic Knowledge Base ingestion ended with status $status."
+              jq -r '.ingestionJob.failureReasons[]? // empty' "$status_json"
+              exit 1
+            fi
+            sleep 20
+          done
+          echo "::error::Synthetic Knowledge Base ingestion did not complete within 10 minutes."
+          exit 1
+
+      - name: Upload synthetic ingestion evidence
+        if: ${{ always() && inputs.mode == 'ingest' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: agentcore-rag-ingestion-evidence-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/agentcore-ingestion-start.json
+            ${{ runner.temp }}/agentcore-ingestion-result.json
+          if-no-files-found: warn
+          retention-days: 7
+
+      - name: Invoke synthetic request through AgentCore Gateway
+        if: ${{ inputs.mode == 'invoke' }}
+        id: invocation
+        working-directory: .
+        run: |
+          set -euo pipefail
+          runtime_arn=$(terraform -chdir=providers/aws/infra/terraform/envs/agentcore-rag-sandbox output -raw agent_runtime_arn)
+          gateway_url=$(terraform -chdir=providers/aws/infra/terraform/envs/agentcore-rag-sandbox output -raw gateway_url)
+          gateway_authorizer=$(terraform -chdir=providers/aws/infra/terraform/envs/agentcore-rag-sandbox output -raw gateway_authorizer_type)
+          endpoint="${gateway_url%/}/governed-rag-runtime"
+          if [ "$gateway_authorizer" != "AWS_IAM" ]; then
+            echo "::error::Gateway authorizer is $gateway_authorizer; this test requires AWS_IAM."
+            exit 1
+          fi
+          case "$endpoint" in
+            */governed-rag-runtime) ;;
+            *) echo "::error::Gateway endpoint is not the expected governed-rag-runtime target."; exit 1 ;;
+          esac
+          request_file="shared/examples/agentcore-rag-poc/active-cited-answer.request.json"
+          response_file="$RUNNER_TEMP/agentcore-gateway-response.json"
+          aws bedrock-agentcore invoke-agent-runtime \
+            --endpoint-url "$endpoint" \
+            --agent-runtime-arn "$runtime_arn" \
+            --content-type application/json \
+            --accept application/json \
+            --payload "fileb://$GITHUB_WORKSPACE/$request_file" \
+            "$response_file"
+          echo "Gateway response:"
+          jq . "$response_file"
+          jq -e '
+            .requestId == "synthetic-request-active-001" and
+            .outcome == "answer" and
+            (.citations | length) > 0 and
+            .audit.citationPresent == true and
+            .audit.sourceLifecycle == "active"
+          ' "$response_file" >/dev/null
+          jq -n \
+            --arg endpoint "$endpoint" \
+            --arg runtime_arn "$runtime_arn" \
+            --slurpfile request "$GITHUB_WORKSPACE/$request_file" \
+            --slurpfile response "$response_file" \
+            '{endpoint: $endpoint, runtimeArn: $runtime_arn, request: $request[0], response: $response[0]}' \
+            > "$RUNNER_TEMP/agentcore-gateway-evidence.json"
+          echo "response_file=$response_file" >> "$GITHUB_OUTPUT"
+
+      - name: Upload synthetic gateway evidence
+        if: ${{ always() && inputs.mode == 'invoke' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: agentcore-rag-gateway-evidence-${{ github.run_id }}
+          path: ${{ runner.temp }}/agentcore-gateway-evidence.json
+          if-no-files-found: warn
+          retention-days: 7
 
       - name: Plan teardown only
         if: ${{ inputs.mode == 'destroy-plan' }}

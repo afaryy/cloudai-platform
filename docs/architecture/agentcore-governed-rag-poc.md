@@ -2,13 +2,20 @@
 
 ## Purpose
 
-This planned personal sandbox demonstrates how a regulated enterprise can
+This personal sandbox demonstrates how a regulated enterprise can
 provide safe, read-only knowledge assistance without allowing an AI model to
 decide access, safety, or execution outcomes.
 
 It is a learning and portfolio proof of concept. It will use only synthetic,
 self-authored documentation in Sydney (`ap-southeast-2`), and it is not a
 production deployment claim.
+
+## Status
+
+The synthetic data foundation, arm64 Runtime, IAM Gateway, and Runtime target
+are deployed through protected GitHub Actions/Terraform. The remaining live
+validation gate is successful Knowledge Base ingestion followed by a synthetic
+Gateway invocation; no production or employer data is involved.
 
 ## Architecture Principle
 

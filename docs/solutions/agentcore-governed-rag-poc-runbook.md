@@ -2,9 +2,10 @@
 
 ## Status
 
-**Local implementation and mock-only validation complete.** No AgentCore,
-Gateway, Runtime, knowledge base, provider retrieval, or AWS resource has been
-created by this POC.
+**Deployment complete; functional closure in progress.** The synthetic
+Knowledge Base, AgentCore Runtime, Gateway, and Runtime target have been
+created through the protected GitHub Actions/Terraform path. Ingestion and
+end-to-end Gateway evidence are the remaining live-validation steps.
 
 This runbook is for a personal Sydney sandbox using only self-authored,
 synthetic material. It is not production-ready guidance.
@@ -64,8 +65,10 @@ It does not make an AWS call.
    its dedicated OIDC role. Store the digest only in the protected GitHub
    Environment.
 6. Review `deploy-plan`, then obtain a fresh approval for `deploy-apply`.
-7. Validate the six scenarios through the Gateway and retain only sanitized evidence.
-8. Obtain separate teardown approval, destroy in the recorded dependency order,
+7. Run the protected `ingest` mode and wait for `COMPLETE` before querying.
+8. Run the protected `invoke` mode and retain only the sanitized synthetic response artifact.
+9. Extend the invocation matrix to the six deterministic scenarios only after the active cited-answer path passes.
+10. Obtain separate teardown approval, destroy in the recorded dependency order,
    and record sanitized closure evidence.
 
 Do not create, update, or destroy AgentCore resources from a local terminal.
@@ -89,7 +92,9 @@ scenario evidence and teardown evidence are complete.
 > Built and locally validated a governed AgentCore RAG control path with
 > synthetic data, gateway-only admission, deterministic safety boundaries,
 > citations-or-abstention behaviour, metadata-safe evidence, and
-> confirmation-gated sandbox controls.
+> confirmation-gated sandbox controls. Deployed the same path through
+> Terraform and GitHub Actions with a protected Knowledge Base ingestion job
+> and IAM-authenticated Gateway verification.
 
 ## Future Retrieval Evolution
 

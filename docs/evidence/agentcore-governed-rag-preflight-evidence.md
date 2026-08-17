@@ -25,6 +25,7 @@
 
 ## Remaining Gate
 
-The next action would be a sandbox deployment preview/validation. It requires a
-fresh, explicit deployment approval and must retain the synthetic-only, cost,
-teardown, and sanitized-evidence boundaries in the runbook.
+The sandbox deployment has since completed through the protected GitHub
+Actions/Terraform path. This preflight record remains intentionally read-only;
+the live functional records are retained as short-lived GitHub Actions artifacts
+from the protected `ingest` and `invoke` modes, not copied into this repository.
