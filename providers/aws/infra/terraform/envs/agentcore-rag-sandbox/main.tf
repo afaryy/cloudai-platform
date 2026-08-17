@@ -464,11 +464,4 @@ resource "aws_bedrockagentcore_gateway_target" "runtime" {
       }
     }
   }
-
-  credential_provider_configuration {
-    gateway_iam_role {
-      service = "bedrock-agentcore"
-      region  = var.aws_region
-    }
-  }
 }
