@@ -120,9 +120,10 @@ jobs:
             exit 1
           fi
           image_uri="${REPOSITORY_URL}@${IMAGE_DIGEST}"
-          docker buildx imagetools inspect "$image_uri" | tee /tmp/agentcore-image-manifest.txt
-          if ! grep -q 'linux/arm64' /tmp/agentcore-image-manifest.txt; then
-            echo "::error::The pushed image manifest does not contain linux/arm64."
+          docker pull --platform linux/arm64 "$image_uri"
+          image_platform=$(docker image inspect "$image_uri" --format '{{.Os}}/{{.Architecture}}')
+          if [ "$image_platform" != "linux/arm64" ]; then
+            echo "::error::The pushed image config reports $image_platform, expected linux/arm64."
             exit 1
           fi
           echo "Immutable AgentCore image URI: $image_uri"
