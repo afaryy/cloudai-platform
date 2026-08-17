@@ -430,9 +430,12 @@ resource "aws_iam_role_policy" "gateway_invoke_runtime" {
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
-      Effect   = "Allow"
-      Action   = ["bedrock-agentcore:InvokeAgentRuntime"]
-      Resource = aws_bedrockagentcore_agent_runtime.governed_rag[0].agent_runtime_arn
+      Effect = "Allow"
+      Action = ["bedrock-agentcore:InvokeAgentRuntime"]
+      Resource = [
+        aws_bedrockagentcore_agent_runtime.governed_rag[0].agent_runtime_arn,
+        "${aws_bedrockagentcore_agent_runtime.governed_rag[0].agent_runtime_arn}/runtime-endpoint/*"
+      ]
     }]
   })
 }

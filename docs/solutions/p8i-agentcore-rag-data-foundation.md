@@ -14,6 +14,8 @@ The first metadata-schema update also demonstrated a CloudFormation limitation: 
 
 Because the Knowledge Base storage configuration points to the replacement index, CloudFormation also needs a versioned Knowledge Base name (`cloudai-platform-agentcore-rag-v2`) to avoid an `AlreadyExists` collision while creating the replacement. The Runtime receives the new Knowledge Base ID from Terraform outputs after convergence; no identifier is hard-coded into the Runtime image.
 
+The first Gateway invoke reached AgentCore but was denied because the Gateway execution role allowed `InvokeAgentRuntime` only on the runtime base ARN while the data-plane request was evaluated against `/runtime-endpoint/2`. The least-privilege policy now allows the base runtime ARN and only its own `/runtime-endpoint/*` children; it does not allow endpoints belonging to other runtimes.
+
 The first arm64 image verification also exposed a separate least-privilege gap: the dedicated image-publisher role could push to ECR but could not pull its own digest for CI architecture verification. Terraform now grants only `ecr:GetDownloadUrlForLayer` alongside its existing repository-scoped push and manifest-read actions.
 
 The first AgentCore runtime deployment reached AWS but was denied while AgentCore attempted to create its runtime-identity service-linked role. The Terraform execution role now grants only the narrowly scoped `iam:CreateServiceLinkedRole` permission for `runtime-identity.bedrock-agentcore.amazonaws.com`.
