@@ -4,7 +4,7 @@ locals {
 
   source_bucket_name = "${var.project_name}-agentcore-rag-source-${data.aws_caller_identity.current.account_id}"
   vector_bucket_name = "${var.project_name}-agentcore-rag-vectors-${data.aws_caller_identity.current.account_id}"
-  vector_index_name  = "${var.project_name}-agentcore-rag"
+  vector_index_name  = "${var.project_name}-agentcore-rag-v2"
 
   github_subject = "repo:${var.github_org}/${var.github_repo}:environment:${var.github_environment}"
 

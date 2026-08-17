@@ -10,6 +10,8 @@ The next apply created the complete data foundation successfully, then failed on
 
 The first ingestion attempt then reached `StartIngestionJob` successfully but S3 Vectors rejected a generated record because the Bedrock text and citation metadata were still filterable and exceeded the filterable-metadata limit. The vector index now declares `AMAZON_BEDROCK_TEXT` and `AMAZON_BEDROCK_METADATA` as non-filterable metadata keys, preserving retrieval context without treating large text fields as query filters.
 
+The first metadata-schema update also demonstrated a CloudFormation limitation: an `AWS::S3Vectors::Index` with a custom name cannot be replaced in place when its metadata configuration changes. The sandbox therefore versions the index name (`cloudai-platform-agentcore-rag-v2`) so CloudFormation can create the corrected empty index before removing the old one. This is intentionally safe for the synthetic sandbox because no successful ingestion had populated the old index.
+
 The first arm64 image verification also exposed a separate least-privilege gap: the dedicated image-publisher role could push to ECR but could not pull its own digest for CI architecture verification. Terraform now grants only `ecr:GetDownloadUrlForLayer` alongside its existing repository-scoped push and manifest-read actions.
 
 The first AgentCore runtime deployment reached AWS but was denied while AgentCore attempted to create its runtime-identity service-linked role. The Terraform execution role now grants only the narrowly scoped `iam:CreateServiceLinkedRole` permission for `runtime-identity.bedrock-agentcore.amazonaws.com`.
