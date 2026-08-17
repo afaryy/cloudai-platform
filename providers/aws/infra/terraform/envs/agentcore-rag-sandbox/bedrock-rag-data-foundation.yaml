@@ -90,6 +90,7 @@ Resources:
 
   VectorIndex:
     Type: AWS::S3Vectors::Index
+    DependsOn: VectorBucket
     DeletionPolicy: Delete
     UpdateReplacePolicy: Delete
     Properties:
