@@ -1,0 +1,175 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Synthetic-only Bedrock Knowledge Base with S3 Vectors for the AgentCore RAG sandbox.
+
+Parameters:
+  SourceBucketName:
+    Type: String
+    MinLength: 3
+  VectorBucketName:
+    Type: String
+    MinLength: 3
+  VectorIndexName:
+    Type: String
+    MinLength: 3
+  EmbeddingModelArn:
+    Type: String
+  KnowledgeBaseRoleArn:
+    Type: String
+
+Resources:
+  SourceBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
+    Properties:
+      BucketName: !Ref SourceBucketName
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      Tags:
+        - Key: Project
+          Value: cloudai-platform
+        - Key: Environment
+          Value: agentcore-rag-sandbox
+        - Key: DataScope
+          Value: synthetic-only
+        - Key: ManagedBy
+          Value: terraform-cloudformation
+        - Key: CostBoundary
+          Value: personal-sandbox
+        - Key: TeardownRequired
+          Value: "true"
+        - Key: CloudAISlice
+          Value: P8i
+
+  SourceBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref SourceBucket
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: DenyInsecureTransport
+            Effect: Deny
+            Principal: "*"
+            Action: "s3:*"
+            Resource:
+              - !GetAtt SourceBucket.Arn
+              - !Sub "${SourceBucket.Arn}/*"
+            Condition:
+              Bool:
+                aws:SecureTransport: false
+
+  VectorBucket:
+    Type: AWS::S3Vectors::VectorBucket
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
+    Properties:
+      VectorBucketName: !Ref VectorBucketName
+      Tags:
+        - Key: Project
+          Value: cloudai-platform
+        - Key: Environment
+          Value: agentcore-rag-sandbox
+        - Key: DataScope
+          Value: synthetic-only
+        - Key: ManagedBy
+          Value: terraform-cloudformation
+        - Key: CostBoundary
+          Value: personal-sandbox
+        - Key: TeardownRequired
+          Value: "true"
+        - Key: CloudAISlice
+          Value: P8i
+
+  VectorIndex:
+    Type: AWS::S3Vectors::Index
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
+    Properties:
+      IndexName: !Ref VectorIndexName
+      VectorBucketName: !Ref VectorBucketName
+      DataType: float32
+      Dimension: 1024
+      DistanceMetric: cosine
+      Tags:
+        - Key: Project
+          Value: cloudai-platform
+        - Key: Environment
+          Value: agentcore-rag-sandbox
+        - Key: DataScope
+          Value: synthetic-only
+        - Key: ManagedBy
+          Value: terraform-cloudformation
+        - Key: CostBoundary
+          Value: personal-sandbox
+        - Key: TeardownRequired
+          Value: "true"
+        - Key: CloudAISlice
+          Value: P8i
+
+  KnowledgeBase:
+    Type: AWS::Bedrock::KnowledgeBase
+    Properties:
+      Name: cloudai-platform-agentcore-rag
+      Description: Synthetic-only governed RAG knowledge base for the AgentCore sandbox.
+      RoleArn: !Ref KnowledgeBaseRoleArn
+      KnowledgeBaseConfiguration:
+        Type: VECTOR
+        VectorKnowledgeBaseConfiguration:
+          EmbeddingModelArn: !Ref EmbeddingModelArn
+      StorageConfiguration:
+        Type: S3_VECTORS
+        S3VectorsConfiguration:
+          IndexArn: !GetAtt VectorIndex.IndexArn
+      Tags:
+        Project: cloudai-platform
+        Environment: agentcore-rag-sandbox
+        DataScope: synthetic-only
+        ManagedBy: terraform-cloudformation
+        CostBoundary: personal-sandbox
+        TeardownRequired: "true"
+        CloudAISlice: P8i
+
+  DataSource:
+    Type: AWS::Bedrock::DataSource
+    Properties:
+      Name: synthetic-docs
+      Description: Synthetic handbook documents only; no customer or production data.
+      KnowledgeBaseId: !Ref KnowledgeBase
+      DataDeletionPolicy: DELETE
+      DataSourceConfiguration:
+        Type: S3
+        S3Configuration:
+          BucketArn: !GetAtt SourceBucket.Arn
+          InclusionPrefixes:
+            - docs/
+
+Outputs:
+  SourceBucketName:
+    Description: S3 bucket containing synthetic-only RAG source documents.
+    Value: !Ref SourceBucket
+  SourceBucketArn:
+    Description: ARN of the synthetic-only RAG source bucket.
+    Value: !GetAtt SourceBucket.Arn
+  VectorBucketArn:
+    Description: ARN of the S3 Vectors bucket.
+    Value: !GetAtt VectorBucket.VectorBucketArn
+  VectorIndexArn:
+    Description: ARN of the S3 Vectors index.
+    Value: !GetAtt VectorIndex.IndexArn
+  KnowledgeBaseId:
+    Description: Bedrock Knowledge Base ID for AgentCore runtime configuration.
+    Value: !Ref KnowledgeBase
+  KnowledgeBaseArn:
+    Description: Bedrock Knowledge Base ARN for least-privilege runtime access.
+    Value: !GetAtt KnowledgeBase.KnowledgeBaseArn
+  DataSourceId:
+    Description: Bedrock data source ID for the synthetic documents.
+    Value: !GetAtt DataSource.DataSourceId

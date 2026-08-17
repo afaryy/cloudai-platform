@@ -40,9 +40,15 @@ variable "github_environment" {
 }
 
 variable "enable_runtime" {
-  description = "Create the runtime, gateway, and target. False creates only the ECR and IAM foundation."
+  description = "Create the runtime, gateway, and target. False skips runtime deployment while data and bootstrap foundations may still be created."
   type        = bool
   default     = true
+}
+
+variable "enable_data" {
+  description = "Create the synthetic-only S3 source bucket, S3 Vectors index, Bedrock Knowledge Base, and data source."
+  type        = bool
+  default     = false
 }
 
 variable "container_image_uri" {
@@ -62,8 +68,8 @@ variable "knowledge_base_id" {
   default     = ""
 
   validation {
-    condition     = !var.enable_runtime || length(trimspace(var.knowledge_base_id)) > 0
-    error_message = "enable_runtime requires a Knowledge Base ID."
+    condition     = !var.enable_runtime || var.enable_data || length(trimspace(var.knowledge_base_id)) > 0
+    error_message = "enable_runtime requires a Knowledge Base ID when enable_data is false."
   }
 }
 
@@ -73,8 +79,8 @@ variable "knowledge_base_arn" {
   default     = ""
 
   validation {
-    condition     = !var.enable_runtime || can(regex("^arn:aws:bedrock:", var.knowledge_base_arn))
-    error_message = "enable_runtime requires a Bedrock Knowledge Base ARN."
+    condition     = !var.enable_runtime || var.enable_data || can(regex("^arn:aws:bedrock:", var.knowledge_base_arn))
+    error_message = "enable_runtime requires a Bedrock Knowledge Base ARN when enable_data is false."
   }
 }
 
@@ -86,6 +92,17 @@ variable "model_arn" {
   validation {
     condition     = !var.enable_runtime || can(regex("^arn:aws:bedrock:", var.model_arn))
     error_message = "enable_runtime requires an approved Bedrock model ARN."
+  }
+}
+
+variable "embedding_model_arn" {
+  description = "Approved Bedrock embedding model ARN used by the synthetic-only Knowledge Base."
+  type        = string
+  default     = "arn:aws:bedrock:ap-southeast-2::foundation-model/amazon.titan-embed-text-v2:0"
+
+  validation {
+    condition     = !var.enable_data || can(regex("^arn:aws:bedrock:", var.embedding_model_arn))
+    error_message = "enable_data requires an approved Bedrock embedding model ARN."
   }
 }
 

@@ -13,6 +13,26 @@ output "image_publisher_role_arn" {
   value       = aws_iam_role.image_publisher.arn
 }
 
+output "knowledge_base_id" {
+  description = "Synthetic-only Bedrock Knowledge Base ID when the data foundation is enabled."
+  value       = var.enable_data ? aws_cloudformation_stack.rag_data[0].outputs["KnowledgeBaseId"] : null
+}
+
+output "knowledge_base_arn" {
+  description = "Synthetic-only Bedrock Knowledge Base ARN for AgentCore runtime access."
+  value       = var.enable_data ? aws_cloudformation_stack.rag_data[0].outputs["KnowledgeBaseArn"] : null
+}
+
+output "knowledge_base_source_bucket_name" {
+  description = "S3 bucket containing the synthetic-only source documents."
+  value       = var.enable_data ? aws_cloudformation_stack.rag_data[0].outputs["SourceBucketName"] : null
+}
+
+output "knowledge_base_data_source_id" {
+  description = "Bedrock data source ID for the synthetic-only documents."
+  value       = var.enable_data ? aws_cloudformation_stack.rag_data[0].outputs["DataSourceId"] : null
+}
+
 output "agent_runtime_name" {
   description = "The named AgentCore Runtime when runtime deployment is enabled."
   value       = var.enable_runtime ? aws_bedrockagentcore_agent_runtime.governed_rag[0].agent_runtime_name : null

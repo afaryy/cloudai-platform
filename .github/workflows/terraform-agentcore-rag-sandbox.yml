@@ -47,6 +47,7 @@ jobs:
       TF_VAR_knowledge_base_arn: ${{ vars.AGENTCORE_RAG_KNOWLEDGE_BASE_ARN }}
       TF_VAR_model_arn: ${{ vars.AGENTCORE_RAG_MODEL_ARN }}
       TF_VAR_container_image_uri: ${{ vars.AGENTCORE_RAG_CONTAINER_IMAGE_URI }}
+      TF_VAR_embedding_model_arn: ${{ vars.AGENTCORE_RAG_EMBEDDING_MODEL_ARN || 'arn:aws:bedrock:ap-southeast-2::foundation-model/amazon.titan-embed-text-v2:0' }}
     defaults:
       run:
         working-directory: providers/aws/infra/terraform/envs/agentcore-rag-sandbox
@@ -92,6 +93,11 @@ jobs:
           terraform fmt -check -recursive
           terraform validate
 
+      - name: Validate the synthetic RAG CloudFormation template
+        if: ${{ inputs.mode == 'validate' }}
+        working-directory: .
+        run: pipx run cfn-lint providers/aws/infra/terraform/envs/agentcore-rag-sandbox/bedrock-rag-data-foundation.yaml
+
       - name: Check protected environment variables
         if: ${{ inputs.mode != 'validate' }}
         run: |
@@ -103,7 +109,7 @@ jobs:
             fi
           done
           if [ "${{ inputs.mode }}" = "deploy-plan" ] || [ "${{ inputs.mode }}" = "deploy-apply" ]; then
-            for name in TF_VAR_knowledge_base_id TF_VAR_knowledge_base_arn TF_VAR_model_arn TF_VAR_container_image_uri; do
+            for name in TF_VAR_model_arn TF_VAR_container_image_uri; do
               if [ -z "${!name}" ]; then
                 echo "::error::$name is required to deploy the Runtime, Gateway, and Gateway Target."
                 missing=1
@@ -152,11 +158,11 @@ jobs:
           else
             echo "aws_ecr_repository.runtime is not tainted; no state mutation was required."
           fi
-          terraform plan -input=false -var='enable_runtime=false' -out=tfplan
+          terraform plan -input=false -var='enable_runtime=false' -var='enable_data=false' -out=tfplan
 
       - name: Plan ECR and IAM foundation
         if: ${{ inputs.mode == 'bootstrap-plan' || inputs.mode == 'bootstrap-apply' }}
-        run: terraform plan -input=false -var='enable_runtime=false' -out=tfplan
+        run: terraform plan -input=false -var='enable_runtime=false' -var='enable_data=true' -out=tfplan
 
       - name: Apply ECR and IAM foundation
         if: ${{ inputs.mode == 'bootstrap-apply' }}
@@ -164,7 +170,7 @@ jobs:
 
       - name: Plan runtime deployment
         if: ${{ inputs.mode == 'deploy-plan' || inputs.mode == 'deploy-apply' }}
-        run: terraform plan -input=false -var='enable_runtime=true' -out=tfplan
+        run: terraform plan -input=false -var='enable_runtime=true' -var='enable_data=true' -out=tfplan
 
       - name: Apply runtime deployment
         if: ${{ inputs.mode == 'deploy-apply' }}
@@ -172,4 +178,4 @@ jobs:
 
       - name: Plan teardown only
         if: ${{ inputs.mode == 'destroy-plan' }}
-        run: terraform plan -destroy -input=false -var='enable_runtime=true'
+        run: terraform plan -destroy -input=false -var='enable_runtime=true' -var='enable_data=true'
