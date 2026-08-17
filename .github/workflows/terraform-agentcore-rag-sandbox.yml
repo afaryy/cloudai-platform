@@ -169,8 +169,13 @@ jobs:
             --stack-name "$stack_name" \
             --query 'Stacks[0].StackStatus' \
             --output text 2>/dev/null || true)
-          if [ "$stack_status" = "ROLLBACK_FAILED" ]; then
-            echo "The synthetic RAG data stack is ROLLBACK_FAILED; retrying its managed deletion."
+          if [ "$stack_status" = "ROLLBACK_FAILED" ] || [ "$stack_status" = "ROLLBACK_COMPLETE" ]; then
+            echo "The synthetic RAG data stack is $stack_status; printing recent resource events before managed deletion."
+            aws cloudformation describe-stack-events \
+              --stack-name "$stack_name" \
+              --query 'StackEvents[?ResourceStatusReason != `null`].[Timestamp,LogicalResourceId,ResourceType,ResourceStatus,ResourceStatusReason]' \
+              --output table || true
+            echo "Deleting the failed synthetic RAG data stack."
             aws cloudformation delete-stack --stack-name "$stack_name"
             aws cloudformation wait stack-delete-complete --stack-name "$stack_name"
             echo "Removed the failed synthetic RAG data stack; no source document was uploaded."
