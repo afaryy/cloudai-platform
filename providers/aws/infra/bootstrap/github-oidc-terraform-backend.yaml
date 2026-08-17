@@ -538,6 +538,8 @@ Resources:
                   - iam:CreateRole
                   - iam:DeleteRole
                   - iam:DeleteRolePolicy
+                  - iam:AttachRolePolicy
+                  - iam:DetachRolePolicy
                   - iam:GetRole
                   - iam:GetRolePolicy
                   - iam:ListRolePolicies
@@ -548,6 +550,22 @@ Resources:
                 Resource:
                   - !GetAtt GitHubActionsTerraformRole.Arn
                   - !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/${BootstrapRoleName}"
+              - Sid: ManageOnlyAgentCoreRagFunctionalPolicy
+                Effect: Allow
+                Action:
+                  - iam:CreatePolicy
+                  - iam:CreatePolicyVersion
+                  - iam:DeletePolicy
+                  - iam:DeletePolicyVersion
+                  - iam:GetPolicy
+                  - iam:GetPolicyVersion
+                  - iam:ListEntitiesForPolicy
+                  - iam:ListPolicyTags
+                  - iam:ListPolicyVersions
+                  - iam:SetDefaultPolicyVersion
+                  - iam:TagPolicy
+                  - iam:UntagPolicy
+                Resource: !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:policy/${GitHubRepo}-agentcore-rag-functional"
 Outputs:
   BackendBucketName:
     Description: S3 bucket for Terraform state.
