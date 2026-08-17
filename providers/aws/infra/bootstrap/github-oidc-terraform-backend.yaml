@@ -240,6 +240,15 @@ Resources:
                   - !Sub "arn:${AWS::Partition}:iam::aws:policy/AmazonEKSWorkerNodePolicy"
                   - !Sub "arn:${AWS::Partition}:iam::aws:policy/AmazonEKS_CNI_Policy"
                   - !Sub "arn:${AWS::Partition}:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+              - Sid: AgentCoreRuntimeIdentityServiceLinkedRole
+                Effect: Allow
+                Action:
+                  - iam:CreateServiceLinkedRole
+                Resource:
+                  - !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/aws-service-role/runtime-identity.bedrock-agentcore.amazonaws.com/AWSServiceRoleForBedrockAgentCoreRuntimeIdentity"
+                Condition:
+                  StringEquals:
+                    iam:AWSServiceName: runtime-identity.bedrock-agentcore.amazonaws.com
               - Sid: EksSandboxClusterApply
                 Effect: Allow
                 Action:

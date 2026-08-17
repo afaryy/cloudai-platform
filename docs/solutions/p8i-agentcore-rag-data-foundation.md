@@ -10,6 +10,8 @@ The next apply created the complete data foundation successfully, then failed on
 
 The first arm64 image verification also exposed a separate least-privilege gap: the dedicated image-publisher role could push to ECR but could not pull its own digest for CI architecture verification. Terraform now grants only `ecr:GetDownloadUrlForLayer` alongside its existing repository-scoped push and manifest-read actions.
 
+The first AgentCore runtime deployment reached AWS but was denied while AgentCore attempted to create its runtime-identity service-linked role. The Terraform execution role now grants only the narrowly scoped `iam:CreateServiceLinkedRole` permission for `runtime-identity.bedrock-agentcore.amazonaws.com`.
+
 ## Purpose
 
 The AgentCore runtime needs a real Knowledge Base ID and ARN. The sandbox now creates those dependencies from code instead of accepting hand-written identifiers.
