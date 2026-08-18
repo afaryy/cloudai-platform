@@ -38,6 +38,22 @@ test("known provider failures become bounded diagnostic reason codes", async () 
   assert.doesNotMatch(JSON.stringify(response), /provider details/);
 });
 
+test("provider timeout becomes a sanitized retrieval-unavailable abstention", async () => {
+  const client: KnowledgeBaseClient = {
+    retrieveAndGenerate: async () => {
+      const error = new Error("provider timeout details must not escape");
+      error.name = "TimeoutError";
+      throw error;
+    }
+  };
+
+  const response = await retrieveGroundedAnswer(client, allowedInput);
+  assert.equal(response.outcome, "abstain");
+  assert.equal(response.reasonCode, "retrieval_unavailable");
+  assert.equal(response.audit.citationPresent, false);
+  assert.doesNotMatch(JSON.stringify(response), /provider timeout details/);
+});
+
 test("missing citations become a safe abstention", async () => {
   const client: KnowledgeBaseClient = {
     retrieveAndGenerate: async () => ({ answer: "Ungrounded answer", citations: [] })

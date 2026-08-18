@@ -119,10 +119,30 @@ provider baseline, use Gateway + Runtime when a reusable enterprise boundary
 is needed, and add AgentCore-native orchestration only when the use case
 requires bounded planning or tool use.
 
+## Behavioural evaluation cases — item 3 complete
+
+The canonical synthetic evaluation pack is
+[`behavioral-evaluation-cases.json`](../../shared/examples/agentcore-rag-poc/behavioral-evaluation-cases.json).
+It records the expected outcome, deterministic reason code, control boundary,
+and evidence level for five failure or escalation behaviours:
+
+| Case | Expected result | Boundary | Current evidence |
+| --- | --- | --- | --- |
+| Citation missing | Abstain with `insufficient_evidence` | Retrieval | Local Runtime contract test |
+| Stale source | Deny with `knowledge_source_retired` | Source lifecycle | Local admission contract test |
+| Provider timeout | Abstain with `retrieval_unavailable` | Provider failure | Local sanitisation contract test |
+| Denied tool | Deny with `tool_not_allowed` | Tool authorisation | Existing AgentOps reliability contract |
+| Human-approval boundary | Pause with `human_approval_required` | Human approval | Existing AgentOps reliability contract |
+
+The first three cases exercise the read-only RAG Runtime boundary. The last
+two deliberately remain AgentOps contract evidence: the current deployed POC
+does not execute tools or make approval decisions. All five are synthetic,
+repeatable, metadata-safe, and suitable for future provider comparisons.
+
 ## Current next work
 
 1. Keep the sandbox deployed for interview demonstrations while monitoring cost and quotas.
 2. **Complete** — keep the pattern comparison above aligned with the live AWS evidence and future AgentCore-native scope.
-3. Add behavioural evaluation cases: citation missing, stale source, provider timeout, denied tool, and human-approval boundary.
+3. **Complete** — maintain the five-case behavioural evaluation pack and keep evidence levels explicit.
 4. Compare AWS, Azure, and GCP RAG control planes using the same security, governance, observability, and FinOps criteria.
 5. Review teardown only through a separate plan and confirmation when the learning/demo cycle is complete.

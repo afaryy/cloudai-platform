@@ -31,6 +31,24 @@
 | Prompt-attack-shaped request |  |  |  |  |
 | Direct Runtime bypass |  |  |  |  |
 
+## Behavioural Evaluation Cases
+
+These cases are shared local-contract evidence unless a later protected
+validation explicitly records a different evidence level. Denied-tool and
+human-approval cases use the existing AgentOps policy contract; they are not
+claims that the current read-only RAG Runtime executes tools or owns approval.
+
+| Case | Expected outcome | Expected reason | Evidence level |
+| --- | --- | --- | --- |
+| Citation missing | Abstain | `insufficient_evidence` | Local contract |
+| Stale source | Denied before retrieval | `knowledge_source_retired` | Local contract |
+| Provider timeout | Abstain | `retrieval_unavailable` | Local contract |
+| Denied tool | Denied before execution | `tool_not_allowed` | Local contract |
+| Human-approval boundary | Approval required | `human_approval_required` | Local contract |
+
+The canonical fixture is
+[`shared/examples/agentcore-rag-poc/behavioral-evaluation-cases.json`](../../../shared/examples/agentcore-rag-poc/behavioral-evaluation-cases.json).
+
 ## Closure
 
 - Aggregate cost range only:

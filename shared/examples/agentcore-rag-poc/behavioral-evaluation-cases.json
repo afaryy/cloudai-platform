@@ -1,0 +1,72 @@
+[
+  {
+    "scenario": "synthetic-citation-missing",
+    "title": "Citation missing",
+    "boundary": "retrieval",
+    "expectedOutcome": "abstain",
+    "expectedReasonCode": "insufficient_evidence",
+    "citationRequired": true,
+    "evidenceLevel": "local-contract",
+    "runtimeRequest": {
+      "requestId": "synthetic-request-citation-missing-007",
+      "question": "What controls protect a governed AI platform?",
+      "knowledgeSource": "agentcore-poc-handbook",
+      "governance": { "sourceLifecycle": "active", "requireCitations": true, "entryPath": "gateway", "workloadState": "enabled" }
+    },
+    "simulation": "Provider returns an answer with no citations."
+  },
+  {
+    "scenario": "synthetic-stale-source",
+    "title": "Stale source",
+    "boundary": "source-lifecycle",
+    "expectedOutcome": "denied",
+    "expectedReasonCode": "knowledge_source_retired",
+    "citationRequired": true,
+    "evidenceLevel": "local-contract",
+    "runtimeRequest": {
+      "requestId": "synthetic-request-stale-source-008",
+      "question": "What controls protect a governed AI platform?",
+      "knowledgeSource": "agentcore-poc-handbook",
+      "governance": { "sourceLifecycle": "retired", "requireCitations": true, "entryPath": "gateway", "workloadState": "enabled" }
+    },
+    "simulation": "Admission stops a retired source before retrieval."
+  },
+  {
+    "scenario": "synthetic-provider-timeout",
+    "title": "Provider timeout",
+    "boundary": "provider",
+    "expectedOutcome": "abstain",
+    "expectedReasonCode": "retrieval_unavailable",
+    "citationRequired": true,
+    "evidenceLevel": "local-contract",
+    "runtimeRequest": {
+      "requestId": "synthetic-request-provider-timeout-009",
+      "question": "What controls protect a governed AI platform?",
+      "knowledgeSource": "agentcore-poc-handbook",
+      "governance": { "sourceLifecycle": "active", "requireCitations": true, "entryPath": "gateway", "workloadState": "enabled" }
+    },
+    "simulation": "The retrieval provider raises a timeout-shaped error."
+  },
+  {
+    "scenario": "synthetic-denied-tool",
+    "title": "Denied tool",
+    "boundary": "tool-authorisation",
+    "expectedOutcome": "denied",
+    "expectedReasonCode": "tool_not_allowed",
+    "citationRequired": false,
+    "evidenceLevel": "local-contract",
+    "action": { "toolId": "unapproved-tool", "actionClass": "read", "leastPrivilegeScope": "synthetic-public-knowledge" },
+    "simulation": "AgentOps rejects a tool outside the approved allowlist before execution."
+  },
+  {
+    "scenario": "synthetic-human-approval-boundary",
+    "title": "Human approval boundary",
+    "boundary": "human-approval",
+    "expectedOutcome": "approval-required",
+    "expectedReasonCode": "human_approval_required",
+    "citationRequired": false,
+    "evidenceLevel": "local-contract",
+    "action": { "toolId": "case-summary", "actionClass": "high-impact", "leastPrivilegeScope": "synthetic-case-summary" },
+    "simulation": "A high-impact action pauses for a human approval before execution."
+  }
+]
