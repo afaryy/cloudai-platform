@@ -287,8 +287,10 @@ jobs:
         run: |
           set -euo pipefail
           kb_id=$(terraform output -raw knowledge_base_id)
-          model_arn=$(terraform state show 'aws_bedrock_inference_profile.generation[0]' \
-            | awk -F' = ' '$1 == "arn" {print $2; exit}')
+          model_arn=$(terraform show -json \
+            | jq -r '.values.root_module.resources[]
+              | select(.address == "aws_bedrock_inference_profile.generation[0]")
+              | .values.arn')
           if [ -z "$model_arn" ]; then
             echo "::error::The generated application inference profile ARN was not found in Terraform state."
             exit 1
