@@ -122,7 +122,7 @@ Every provider mapping must use the same synthetic source material and test:
 
 | Provider | Initial reference path | Evidence level |
 | --- | --- | --- |
-| AWS | AgentCore Gateway + Runtime + Bedrock Knowledge Bases + Guardrails | Live POC after explicit approval |
+| AWS | AgentCore Gateway + Runtime + Bedrock Knowledge Bases + deterministic citation/abstention contract | Live POC after explicit approval |
 | Azure | Foundry and Azure AI Search RAG mapping | Architecture mapping first; optional validation later |
 | GCP | Vertex AI RAG Engine mapping | Architecture mapping first; optional validation later |
 
@@ -142,7 +142,7 @@ where only a documented mapping exists.
 ## Interview Positioning
 
 > Designed and validated a governed Amazon Bedrock AgentCore POC with
-> Gateway-enforced access, least-privilege Runtime orchestration, Bedrock
-> Guardrails, synthetic RAG citations, Terraform-defined infrastructure,
+> Gateway-enforced access, least-privilege Runtime orchestration, a
+> deterministic citation/abstention contract, synthetic RAG citations, Terraform-defined infrastructure,
 > GitHub Actions OIDC delivery, metadata-only observability, cost controls,
 > and a tested teardown path.

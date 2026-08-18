@@ -84,10 +84,45 @@ The final Gateway response contained the synthetic source citation `synthetic://
 - Every apply requires a reviewed plan, GitHub Environment approval, OIDC credentials, and an exact confirmation phrase.
 - Evidence artifacts are retained temporarily and contain only synthetic request/response data.
 
+## RAG pattern comparison — item 2 complete
+
+The POC now has a small pattern comparison to keep the live evidence separate
+from future architecture options:
+
+```mermaid
+flowchart LR
+    U[Client or workload]
+
+    U --> D[Direct Bedrock RAG<br/>RetrieveAndGenerate]
+    D --> DKB[Knowledge Base]
+    DKB --> DANS[Cited answer or abstention]
+
+    U --> G[AgentCore Gateway<br/>IAM boundary]
+    G --> R[AgentCore Runtime<br/>read-only orchestration]
+    R --> RKB[Bedrock Knowledge Base<br/>approved system profile]
+    RKB --> RANS[Sanitized citation contract]
+
+    U --> N[AgentCore-native pattern<br/>future extension]
+    N --> A[Bounded agent orchestration]
+    A --> T[Approved tools, retrieval,<br/>model routing and evaluation]
+    T --> NANS[Audited answer or<br/>human-approved action]
+```
+
+| Pattern | Role in this portfolio | Strength | Trade-off | Evidence level |
+| --- | --- | --- | --- | --- |
+| Direct Bedrock RAG | Provider-level baseline and preflight | Fewest components and a clear retrieval/model path | The caller owns authentication, response sanitisation, policy enforcement, and operational boundaries | Live direct `RetrieveAndGenerate` preflight |
+| Gateway + Runtime + RAG | Current AWS P8i implementation | Adds an IAM entry boundary, read-only runtime orchestration, and a reusable sanitised response contract | More components and some additional latency/operations | Live end-to-end Gateway evidence in [run 32144157616](https://github.com/afaryy/cloudai-platform/actions/runs/32144157616) |
+| AgentCore-native | Future extension, not a current deployment claim | Supports bounded tools, multi-step orchestration, evaluation, tracing, and human approval | Greater identity, tool-permission, evaluation, and cost complexity | Architecture option only |
+
+The selection rule is deliberately conservative: use direct Bedrock RAG as a
+provider baseline, use Gateway + Runtime when a reusable enterprise boundary
+is needed, and add AgentCore-native orchestration only when the use case
+requires bounded planning or tool use.
+
 ## Current next work
 
 1. Keep the sandbox deployed for interview demonstrations while monitoring cost and quotas.
-2. Add a small architecture diagram comparing direct Bedrock RAG, Gateway + Runtime + RAG, and AgentCore-native patterns.
+2. **Complete** — keep the pattern comparison above aligned with the live AWS evidence and future AgentCore-native scope.
 3. Add behavioural evaluation cases: citation missing, stale source, provider timeout, denied tool, and human-approval boundary.
 4. Compare AWS, Azure, and GCP RAG control planes using the same security, governance, observability, and FinOps criteria.
 5. Review teardown only through a separate plan and confirmation when the learning/demo cycle is complete.
