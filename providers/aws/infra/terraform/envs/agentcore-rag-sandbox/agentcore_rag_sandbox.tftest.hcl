@@ -10,7 +10,7 @@ run "governed_agentcore_rag_stack" {
     container_image_uri      = "111122223333.dkr.ecr.ap-southeast-2.amazonaws.com/cloudai-platform-agentcore-rag@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
     knowledge_base_id        = "ABCDEFGHIJ"
     knowledge_base_arn       = "arn:aws:bedrock:ap-southeast-2:111122223333:knowledge-base/ABCDEFGHIJ"
-    model_arn                = "arn:aws:bedrock:ap-southeast-2::foundation-model/anthropic.claude-3-haiku-20240307-v1:0"
+    model_arn                = "arn:aws:bedrock:ap-southeast-2:111122223333:inference-profile/au.anthropic.claude-haiku-4-5-20251001-v1:0"
   }
 
   assert {

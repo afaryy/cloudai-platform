@@ -11,7 +11,7 @@ GitHub Actions (OIDC + environment approval)
   -> AgentCore Gateway (AWS_IAM)
 ```
 
-The runtime has a single approved Bedrock Knowledge Base and model boundary. Terraform creates a single-region application inference profile from the approved generation foundation model, so Knowledge Base response generation receives a supported profile ARN while inference remains in the sandbox region.
+The runtime has a single approved Bedrock Knowledge Base and model boundary. The protected environment supplies either an approved foundation-model ARN or an existing system inference-profile ARN; the current sandbox uses the approved regional system profile so response generation does not depend on on-demand support for the underlying model.
 It has no memory, browser, write tools, public anonymous gateway, customer
 data, or production-system access.
 
@@ -53,6 +53,5 @@ Set these in `aws-sandbox`, never in tracked files:
 Do not commit account IDs, backend locations, state, tfvars, model approval
 evidence, Knowledge Base identifiers, image digests, credentials, prompts or
 responses.
-`AGENTCORE_RAG_MODEL_ARN` remains the approved foundation-model source;
-Terraform derives the Runtime's single-region application inference-profile ARN
-from it.
+`AGENTCORE_RAG_MODEL_ARN` is the approved foundation-model or system
+inference-profile ARN used directly for response generation.

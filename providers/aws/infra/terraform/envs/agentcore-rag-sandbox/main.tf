@@ -361,19 +361,6 @@ resource "aws_s3_object" "synthetic_handbook" {
   depends_on = [aws_cloudformation_stack.rag_data]
 }
 
-resource "aws_bedrock_inference_profile" "generation" {
-  count = var.enable_runtime ? 1 : 0
-
-  name        = "${local.name_prefix}-generation"
-  description = "Single-region application inference profile for synthetic AgentCore RAG response generation."
-
-  model_source {
-    copy_from = var.model_arn
-  }
-
-  tags = local.common_tags
-}
-
 resource "aws_iam_role_policy" "runtime_bedrock_retrieval" {
   count = var.enable_runtime ? 1 : 0
 
@@ -396,15 +383,18 @@ resource "aws_iam_role_policy" "runtime_bedrock_retrieval" {
       {
         Effect   = "Allow"
         Action   = ["bedrock:GetInferenceProfile"]
-        Resource = aws_bedrock_inference_profile.generation[0].arn
+        Resource = var.model_arn
       },
       {
         Effect = "Allow"
         Action = ["bedrock:InvokeModel"]
-        Resource = [
-          var.model_arn,
-          aws_bedrock_inference_profile.generation[0].arn
-        ]
+        Resource = concat(
+          [var.model_arn],
+          [
+            "arn:aws:bedrock:ap-southeast-2::foundation-model/anthropic.claude-haiku-4-5-20251001-v1:0",
+            "arn:aws:bedrock:ap-southeast-4::foundation-model/anthropic.claude-haiku-4-5-20251001-v1:0"
+          ]
+        )
       }
     ]
   })
