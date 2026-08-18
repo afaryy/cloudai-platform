@@ -144,5 +144,30 @@ repeatable, metadata-safe, and suitable for future provider comparisons.
 1. Keep the sandbox deployed for interview demonstrations while monitoring cost and quotas.
 2. **Complete** — keep the pattern comparison above aligned with the live AWS evidence and future AgentCore-native scope.
 3. **Complete** — maintain the five-case behavioural evaluation pack and keep evidence levels explicit.
-4. Compare AWS, Azure, and GCP RAG control planes using the same security, governance, observability, and FinOps criteria.
+4. **Complete** — compare AWS, Azure, and GCP RAG control planes using the same security, governance, observability, FinOps, teardown, and behavioural-evaluation criteria. AWS remains live evidence; Azure and GCP are public-documentation mappings pending any separately approved validation.
 5. Review teardown only through a separate plan and confirmation when the learning/demo cycle is complete.
+
+## Three-cloud control-plane comparison — item 4 complete
+
+The public-safe comparison is recorded in
+[`three-cloud-governed-rag-reference.md`](../architecture/three-cloud-governed-rag-reference.md).
+It uses one matrix for entry identity, retrieval/grounding, source permissions
+and lifecycle, deterministic admission, runtime/tool boundaries,
+observability/evaluation, FinOps, and teardown.
+
+The comparison deliberately separates evidence levels:
+
+- **AWS:** live synthetic AgentCore Gateway + Runtime + Bedrock evidence.
+- **Azure:** architecture mapping using Azure AI Search, Entra/RBAC, managed identities, Azure Monitor/Application Insights, and Foundry tracing/evaluation.
+- **GCP:** architecture mapping using Vertex AI RAG Engine/grounding/evaluation, IAM/workload identity, Cloud Logging/Monitoring, and explicit application/data-layer permission controls.
+
+The same five behavioural cases are used across providers:
+`citation missing`, `stale source`, `provider timeout`, `denied tool`, and
+`human-approval boundary`. The portable evidence is limited to outcome,
+reason code, citation-present flag, control decision, timestamp, latency
+bucket, and aggregate cost boundary; credentials, raw prompts, raw answers,
+endpoints, and provider internals are excluded.
+
+No provider ranking is claimed. The next optional work is a separately gated
+Azure or GCP validation only after service path, region, access, quota, cost,
+and teardown are approved.
