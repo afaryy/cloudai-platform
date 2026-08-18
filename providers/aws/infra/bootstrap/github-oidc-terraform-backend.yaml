@@ -511,6 +511,15 @@ Resources:
               StringEquals:
                 aws:ResourceTag/Project: cloudai-platform
                 aws:ResourceTag/Environment: agentcore-rag-sandbox
+          - Sid: InvokeOnlyTaggedAgentCoreRagInferenceProfile
+            Effect: Allow
+            Action:
+              - bedrock:InvokeModel
+            Resource: !Sub "arn:${AWS::Partition}:bedrock:${AWS::Region}:${AWS::AccountId}:application-inference-profile/*"
+            Condition:
+              StringEquals:
+                aws:ResourceTag/Project: cloudai-platform
+                aws:ResourceTag/Environment: agentcore-rag-sandbox
           - Sid: CreateTaggedAgentCoreRagInferenceProfile
             Effect: Allow
             Action:
