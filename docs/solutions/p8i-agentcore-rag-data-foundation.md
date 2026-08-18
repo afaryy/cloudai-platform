@@ -116,3 +116,11 @@ The bootstrap execution policy now grants only:
 - `bedrock-agentcore:InvokeGateway` on tagged AgentCore Gateways.
 
 It does not grant a direct Runtime invocation permission to the CI role. This preserves the Gateway-only entry boundary while allowing CI to prove the deployed path.
+
+## RAG configuration diagnosis — 2026-08-18
+
+The reviewed bootstrap change set `cloudai-bootstrap-32090769539` was executed through GitHub Actions run `32101859398`. It modified only the tagged `AgentCoreRagFunctionalPolicy` managed policy and added the narrow Bedrock permissions needed for CI diagnostics.
+
+The follow-up CI invoke run was `32101937837`. The direct `RetrieveAndGenerate` preflight reached the Knowledge Base and returned a concrete IAM error: the CI Terraform role lacked `bedrock:InvokeModel` on the Terraform-managed application inference profile. The Gateway continued to return the runtime's sanitized `retrieval_invalid_configuration` response, so this run did not yet prove that the Knowledge Base configuration itself is invalid.
+
+The next change adds `bedrock:InvokeModel` only for application inference profiles tagged `Project=cloudai-platform` and `Environment=agentcore-rag-sandbox`. After that policy is applied, the direct preflight should either succeed or expose the next provider-level validation message. The Gateway-facing Runtime policy already permits the approved generation profile and foundation model; the diagnostic gap is in the CI role.
