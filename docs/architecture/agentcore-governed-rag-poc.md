@@ -30,18 +30,60 @@ controls decide whether work is allowed. The model can only provide a grounded
 answer with citations, or an explicit inability-to-answer result when evidence
 is insufficient.
 
-```text
-Synthetic test client
-        ↓
-AgentCore Gateway
-  authentication · gateway-only policy · metadata-safe evidence
-        ↓
-AgentCore Runtime
-  read-only orchestration · least privilege · named owner
-        ↓
-Bedrock Knowledge Base + approved system inference profile
-  synthetic sources · deterministic citation contract · safe abstention
+```mermaid
+flowchart LR
+  subgraph entry["Entry and delivery"]
+    user["Synthetic client<br/>interview demo"]
+    ci["GitHub Actions<br/>OIDC + environment approval"]
+  end
+
+  subgraph control["Deterministic control plane"]
+    auth["IAM authorization<br/>Gateway-only entry"]
+    policy["Admission + source lifecycle<br/>citation-or-abstention contract"]
+    evidence["Metadata-safe evidence<br/>evaluation + cost boundary"]
+  end
+
+  subgraph runtime["AgentCore data plane — current live POC"]
+    gateway["AgentCore Gateway<br/>AWS_IAM"]
+    runtimeNode["AgentCore Runtime<br/>arm64 · read-only"]
+    kb["Bedrock Knowledge Base<br/>synthetic approved sources"]
+    model["Approved system<br/>inference profile"]
+  end
+
+  subgraph operations["Operations and future boundary"]
+    telemetry["CloudWatch / controlled CI logs<br/>sanitized traces and metrics"]
+    budget["Tags · quotas · budget<br/>manual teardown gate"]
+    future["Future only:<br/>bounded tools + human approval"]
+  end
+
+  user --> gateway
+  gateway --> auth --> runtimeNode
+  runtimeNode --> policy
+  policy --> kb
+  kb -->|"grounded passages + citations"| runtimeNode
+  runtimeNode --> model --> runtimeNode
+  runtimeNode --> evidence
+  runtimeNode --> telemetry
+  ci -->|"plan / apply / verify"| control
+  ci -->|"immutable image + deployment"| runtimeNode
+  budget -. "applies to" .-> runtime
+  budget -. "applies to" .-> operations
+  runtimeNode -. "not deployed" .-> future
+
+  denied["Direct Runtime invoke<br/>DENIED"]:::denied
+  user -. "blocked path" .-> denied
+
+  classDef denied fill:#fce8e6,stroke:#c5221f,color:#8b0000;
+  classDef futureStyle fill:#fff4ce,stroke:#b06000,color:#6b3f00;
+  class future futureStyle;
 ```
+
+**How to read the diagram:** the Gateway is the only external runtime entry;
+the Runtime may orchestrate read-only retrieval but does not decide access or
+execute tools; deterministic controls decide admission, source lifecycle, and
+whether the response must abstain; observability and cost evidence stay
+metadata-safe. The dashed tool/approval path is future scope, not a deployment
+claim.
 
 ## Scope and Boundaries
 
