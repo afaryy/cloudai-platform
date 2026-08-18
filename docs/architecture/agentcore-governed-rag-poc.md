@@ -83,6 +83,8 @@ sanitized evidence for:
 - Gateway-only access and rejection of direct Runtime invocation.
 - Active versus retired knowledge-source behaviour.
 - Cited answer, safe abstention, and deterministic admission-blocked scenarios.
+- Behavioural cases for missing citations, stale sources, provider timeout,
+  denied tools, and human-approval boundaries, with explicit evidence levels.
 - Named ownership, least-privilege boundary, budget tags, and cost range.
 - Metadata-only observability, emergency-disable outcome, and complete
   teardown.

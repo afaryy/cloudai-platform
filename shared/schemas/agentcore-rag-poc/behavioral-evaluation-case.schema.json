@@ -1,15 +1,19 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "AgentCore Governed RAG POC Behavioural Evaluation Result",
+  "title": "AgentCore Governed RAG POC Behavioural Evaluation Case",
   "type": "object",
   "additionalProperties": false,
-  "required": ["scenario", "boundary", "expectedOutcome", "expectedReasonCode", "citationRequired", "evidenceLevel"],
+  "required": ["scenario", "title", "boundary", "expectedOutcome", "expectedReasonCode", "citationRequired", "evidenceLevel", "simulation"],
   "properties": {
     "scenario": { "type": "string", "pattern": "^synthetic-" },
+    "title": { "type": "string", "minLength": 1, "maxLength": 120 },
     "boundary": { "enum": ["retrieval", "source-lifecycle", "provider", "tool-authorisation", "human-approval"] },
     "expectedOutcome": { "enum": ["answer", "abstain", "denied", "disabled", "approval-required"] },
     "expectedReasonCode": { "type": "string", "pattern": "^[a-z0-9_]+$" },
     "citationRequired": { "type": "boolean" },
-    "evidenceLevel": { "enum": ["local-contract", "architecture-mapping", "live-validation"] }
+    "evidenceLevel": { "enum": ["local-contract", "architecture-mapping", "live-validation"] },
+    "runtimeRequest": { "type": "object" },
+    "action": { "type": "object" },
+    "simulation": { "type": "string", "minLength": 1, "maxLength": 240 }
   }
 }

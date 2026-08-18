@@ -41,6 +41,35 @@ test("six synthetic evaluation cases use the closed request contract", async () 
   }
 });
 
+test("five behavioural evaluation cases preserve bounded outcomes and evidence levels", async () => {
+  const cases = JSON.parse(await readFile(resolve(examplesDirectory, "behavioral-evaluation-cases.json"), "utf8")) as Array<Record<string, any>>;
+  assert.equal(cases.length, 5);
+  assert.deepEqual(cases.map((evaluation) => evaluation.scenario), [
+    "synthetic-citation-missing",
+    "synthetic-stale-source",
+    "synthetic-provider-timeout",
+    "synthetic-denied-tool",
+    "synthetic-human-approval-boundary"
+  ]);
+
+  for (const evaluation of cases) {
+    assert.match(evaluation.scenario, /^synthetic-/);
+    assert.ok(evaluation.title);
+    assert.ok(evaluation.boundary);
+    assert.ok(evaluation.expectedOutcome);
+    assert.ok(evaluation.expectedReasonCode);
+    assert.equal(evaluation.evidenceLevel, "local-contract");
+    assert.ok(evaluation.simulation);
+  }
+
+  assert.deepEqual(validateRuntimeRequest(cases[0].runtimeRequest), { ok: true });
+  assert.deepEqual(validateRuntimeRequest(cases[1].runtimeRequest), { ok: true });
+  assert.deepEqual(validateRuntimeRequest(cases[2].runtimeRequest), { ok: true });
+  assert.equal(cases[3].action.toolId, "unapproved-tool");
+  assert.equal(cases[4].action.actionClass, "high-impact");
+  assert.equal(cases[4].expectedOutcome, "approval-required");
+});
+
 test("runtime response rejects raw provider content and accepts citation metadata", () => {
   const validResponse = {
     requestId: "synthetic-request-002",
