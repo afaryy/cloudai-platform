@@ -493,6 +493,24 @@ Resources:
               StringEquals:
                 aws:ResourceTag/Project: cloudai-platform
                 aws:ResourceTag/Environment: agentcore-rag-sandbox
+          - Sid: RetrieveOnlyTaggedAgentCoreKnowledgeBase
+            Effect: Allow
+            Action:
+              - bedrock:Retrieve
+            Resource: !Sub "arn:${AWS::Partition}:bedrock:${AWS::Region}:${AWS::AccountId}:knowledge-base/*"
+            Condition:
+              StringEquals:
+                aws:ResourceTag/Project: cloudai-platform
+                aws:ResourceTag/Environment: agentcore-rag-sandbox
+          - Sid: GenerateOnlyTaggedAgentCoreKnowledgeBase
+            Effect: Allow
+            Action:
+              - bedrock:RetrieveAndGenerate
+            Resource: "*"
+            Condition:
+              StringEquals:
+                aws:ResourceTag/Project: cloudai-platform
+                aws:ResourceTag/Environment: agentcore-rag-sandbox
           - Sid: CreateTaggedAgentCoreRagInferenceProfile
             Effect: Allow
             Action:
