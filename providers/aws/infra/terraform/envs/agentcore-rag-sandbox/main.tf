@@ -394,6 +394,11 @@ resource "aws_iam_role_policy" "runtime_bedrock_retrieval" {
         Resource = "*"
       },
       {
+        Effect   = "Allow"
+        Action   = ["bedrock:GetInferenceProfile"]
+        Resource = aws_bedrock_inference_profile.generation[0].arn
+      },
+      {
         Effect = "Allow"
         Action = ["bedrock:InvokeModel"]
         Resource = [
