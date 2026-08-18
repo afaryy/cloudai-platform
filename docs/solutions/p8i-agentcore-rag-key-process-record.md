@@ -61,6 +61,12 @@ The first implementation created an application inference profile. The approved 
 
 Bedrock required both the inference-profile ARN and the two documented regional foundation-model ARNs for cross-Region inference. The CI preflight additionally required `bedrock:GetInferenceProfile` on the exact system profile. No wildcard model/profile permission was added.
 
+### 6. Observability apply permission gap
+
+The first protected observability apply ([run 32158283596](https://github.com/afaryy/cloudai-platform/actions/runs/32158283596)) completed OIDC authentication and Terraform planning, but the apply was denied by AWS for `cloudwatch:PutDashboard` and `cloudwatch:PutMetricAlarm`. No dashboard or alarm was created, and no sandbox resource was deleted.
+
+The remediation is being kept in the CloudFormation-managed bootstrap policy rather than applied through click-ops. The Terraform execution role will receive only the lifecycle permissions for the named AgentCore RAG dashboard and two named alarms (`Get/Put/DeleteDashboard(s)` and `Describe/Put/DeleteAlarms`). A fresh bootstrap change-set review and apply are required before retrying the AgentCore deploy workflow.
+
 ## Final evidence
 
 | Evidence | Result |
@@ -162,8 +168,9 @@ introducing a second monitoring stack:
 - Prometheus, Grafana, SIEM integration, automatic incident remediation, and
   full AgentCore/ADOT trace verification remain future steps.
 
-This slice is not yet live-validated against AWS CloudWatch. No apply or
-teardown is performed as part of the contract implementation.
+The first live apply attempt was blocked by the missing bootstrap permissions
+described above. The observability resources remain pending; no teardown is
+performed as part of this work.
 
 ## Three-cloud control-plane comparison — item 4 complete
 

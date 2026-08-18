@@ -14,6 +14,12 @@ The policy is intentionally scoped to the Sydney ECR repository `cloudai-platfor
 
 It does not authorize general IAM administration, general ECR repository management, Bedrock model invocation, Knowledge Base reads, browser access, or autonomous actions. The policy also permits only the tagged, single-sandbox application inference profile lifecycle required by the AgentCore RAG response-generation path.
 
+## Observability apply remediation
+
+The first CloudWatch observability apply ([run 32158283596](https://github.com/afaryy/cloudai-platform/actions/runs/32158283596)) reached Terraform apply but was denied because the Terraform execution role did not yet have `cloudwatch:PutDashboard` or `cloudwatch:PutMetricAlarm`.
+
+The bootstrap template now scopes the additional CloudWatch lifecycle permissions to the named AgentCore RAG observability dashboard and the two named alarms. This remains a CI/CD-managed change: create and review a CloudFormation change set, apply it through the protected bootstrap workflow, then rerun the reviewed AgentCore deploy apply. No console policy edit is required.
+
 ## AWS Console steps
 
 1. Open **IAM** → **Roles**.
