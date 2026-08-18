@@ -282,6 +282,34 @@ jobs:
           echo "::error::Synthetic Knowledge Base ingestion did not complete within 10 minutes."
           exit 1
 
+      - name: Preflight direct Bedrock RAG configuration
+        if: ${{ inputs.mode == 'invoke' }}
+        run: |
+          set -euo pipefail
+          kb_id=$(terraform output -raw knowledge_base_id)
+          model_arn=$(terraform output -raw generation_model_arn)
+          request_file="${GITHUB_WORKSPACE}/shared/examples/agentcore-rag-poc/active-cited-answer.request.json"
+          response_file="$RUNNER_TEMP/bedrock-retrieve-and-generate-response.json"
+          error_file="$RUNNER_TEMP/bedrock-retrieve-and-generate-error.txt"
+          set +e
+          aws bedrock-agent-runtime retrieve-and-generate \
+            --region "$AWS_REGION" \
+            --input "$(jq -c '{text: .question}' "$request_file")" \
+            --retrieve-and-generate-configuration "$(jq -cn \
+              --arg kb_id "$kb_id" \
+              --arg model_arn "$model_arn" \
+              '{type: "KNOWLEDGE_BASE", knowledgeBaseConfiguration: {knowledgeBaseId: $kb_id, modelArn: $model_arn}}')" \
+            --output json >"$response_file" 2>"$error_file"
+          rc=$?
+          set -e
+          if [ "$rc" -ne 0 ]; then
+            echo "Direct Bedrock RetrieveAndGenerate preflight failed (the AgentCore invoke will still run):"
+            sed -E 's/(arn:aws:[^ ]*:[0-9]{12})/arn:aws:*:*:ACCOUNT/g' "$error_file"
+            exit 0
+          fi
+          echo "Direct Bedrock RetrieveAndGenerate preflight succeeded:"
+          jq '{output: .output.text, citationCount: (.citations | length)}' "$response_file"
+
       - name: Upload synthetic ingestion evidence
         if: ${{ always() && inputs.mode == 'ingest' }}
         uses: actions/upload-artifact@v4

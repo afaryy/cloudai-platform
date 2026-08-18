@@ -43,6 +43,11 @@ output "agent_runtime_arn" {
   value       = var.enable_runtime ? aws_bedrockagentcore_agent_runtime.governed_rag[0].agent_runtime_arn : null
 }
 
+output "generation_model_arn" {
+  description = "The generated application inference profile ARN used for Knowledge Base response generation."
+  value       = var.enable_runtime ? aws_bedrock_inference_profile.generation[0].arn : null
+}
+
 output "gateway_authorizer_type" {
   description = "Inbound authorizer type; IAM is required for this sandbox."
   value       = var.enable_runtime ? aws_bedrockagentcore_gateway.governed_rag[0].authorizer_type : null
