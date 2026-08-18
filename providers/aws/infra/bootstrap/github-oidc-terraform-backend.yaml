@@ -26,6 +26,10 @@ Parameters:
     Type: String
     Default: cloudai-platform-aws-sandbox-bootstrap
     Description: Dedicated GitHub OIDC role used only to update this CloudFormation bootstrap stack.
+  AgentCoreRagNamePrefix:
+    Type: String
+    Default: cloudaiplatformagentcoreragsandbox
+    Description: Name prefix used to scope the AgentCore RAG sandbox observability resources.
 
 Resources:
   TerraformStateBucket:
@@ -131,6 +135,22 @@ Resources:
                   - kms:List*
                   - autoscaling:Describe*
                 Resource: "*"
+              - Sid: ManageOnlyAgentCoreRagObservabilityDashboard
+                Effect: Allow
+                Action:
+                  - cloudwatch:DeleteDashboards
+                  - cloudwatch:GetDashboard
+                  - cloudwatch:PutDashboard
+                Resource: !Sub "arn:${AWS::Partition}:cloudwatch::${AWS::AccountId}:dashboard/${AgentCoreRagNamePrefix}-observability"
+              - Sid: ManageOnlyAgentCoreRagObservabilityAlarms
+                Effect: Allow
+                Action:
+                  - cloudwatch:DeleteAlarms
+                  - cloudwatch:DescribeAlarms
+                  - cloudwatch:PutMetricAlarm
+                Resource:
+                  - !Sub "arn:${AWS::Partition}:cloudwatch:${AWS::Region}:${AWS::AccountId}:alarm:${AgentCoreRagNamePrefix}-retrieval-unavailable"
+                  - !Sub "arn:${AWS::Partition}:cloudwatch:${AWS::Region}:${AWS::AccountId}:alarm:${AgentCoreRagNamePrefix}-answer-latency"
               - Sid: EksSandboxNetworkApply
                 Effect: Allow
                 Action:
