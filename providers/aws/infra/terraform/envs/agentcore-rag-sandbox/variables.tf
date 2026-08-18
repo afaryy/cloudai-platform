@@ -45,6 +45,12 @@ variable "enable_runtime" {
   default     = true
 }
 
+variable "observability_enabled" {
+  description = "Create the bounded CloudWatch dashboard and alarms for the AgentCore RAG runtime. This does not enable Grafana, Prometheus, SIEM, or notifications."
+  type        = bool
+  default     = true
+}
+
 variable "enable_data" {
   description = "Create the synthetic-only S3 source bucket, S3 Vectors index, Bedrock Knowledge Base, and data source."
   type        = bool

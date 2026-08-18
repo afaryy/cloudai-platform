@@ -35,6 +35,7 @@ jobs:
           - providers/aws/infra/terraform/modules/bedrock-access
           - providers/aws/infra/terraform/envs/eks-sandbox
           - providers/aws/infra/terraform/envs/bedrock-sandbox
+          - providers/aws/infra/terraform/envs/agentcore-rag-sandbox
     defaults:
       run:
         working-directory: ${{ matrix.terraform_dir }}

@@ -147,6 +147,24 @@ repeatable, metadata-safe, and suitable for future provider comparisons.
 4. **Complete** — compare AWS, Azure, and GCP RAG control planes using the same security, governance, observability, FinOps, teardown, and behavioural-evaluation criteria. AWS remains live evidence; Azure and GCP are public-documentation mappings pending any separately approved validation.
 5. **Deferred** — keep the sandbox deployed for learning and interview demonstrations. Review teardown only through a separate plan and fresh confirmation when the learning/demo cycle is complete.
 
+## Observability slice — YY-34 in progress
+
+The next implementation slice adds a bounded observability contract without
+introducing a second monitoring stack:
+
+- Runtime emits metadata-safe structured completion events using CloudWatch
+  Embedded Metric Format (EMF).
+- Metrics use bounded dimensions (`Environment`, `Route`, `Outcome`); the
+  request ID remains a log field and is not a metric dimension.
+- Terraform defines the CloudWatch dashboard and alarms with no notification
+  actions in the personal sandbox.
+- GitHub Actions runs the Runtime contract tests and Terraform tests.
+- Prometheus, Grafana, SIEM integration, automatic incident remediation, and
+  full AgentCore/ADOT trace verification remain future steps.
+
+This slice is not yet live-validated against AWS CloudWatch. No apply or
+teardown is performed as part of the contract implementation.
+
 ## Three-cloud control-plane comparison — item 4 complete
 
 The public-safe comparison is recorded in

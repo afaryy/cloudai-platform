@@ -45,3 +45,27 @@ jobs:
       - name: Test mock GenAI API
         working-directory: providers/aws/app/api
         run: pnpm test
+
+  agentcore-rag-runtime:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11.7.0
+
+      - name: Install AgentCore Runtime dependencies
+        working-directory: providers/aws/app/agentcore-rag-runtime
+        run: pnpm install --frozen-lockfile
+
+      - name: Test AgentCore Runtime and observability contract
+        working-directory: providers/aws/app/agentcore-rag-runtime
+        run: pnpm test

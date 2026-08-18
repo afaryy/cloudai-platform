@@ -57,3 +57,8 @@ output "gateway_url" {
   description = "IAM-authenticated gateway URL when runtime deployment is enabled."
   value       = var.enable_runtime ? aws_bedrockagentcore_gateway.governed_rag[0].gateway_url : null
 }
+
+output "observability_dashboard_name" {
+  description = "CloudWatch dashboard name for the bounded AgentCore RAG observability slice."
+  value       = var.enable_runtime && var.observability_enabled ? aws_cloudwatch_dashboard.agentcore_rag[0].dashboard_name : null
+}

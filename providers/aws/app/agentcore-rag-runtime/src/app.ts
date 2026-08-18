@@ -7,6 +7,7 @@ import {
   validateRuntimeRequest,
   validateRuntimeResponse
 } from "./validation.js";
+import { emitRuntimeObservation } from "./observability.js";
 
 const maxRequestBytes = 16 * 1024;
 
@@ -33,21 +34,44 @@ export function createRuntimeServer(dependencies: RuntimeDependencies): Server {
       return sendJson(response, 400, { error: validation.reasonCode });
     }
     const runtimeRequest = body as RuntimeRequest;
-
-    const admission = decideAdmission(runtimeRequest);
-    if (admission.outcome !== "allow") {
-      return sendJson(response, admission.statusCode, boundedFailure(runtimeRequest, admission.outcome, admission.reasonCode));
-    }
+    const startedAt = Date.now();
+    let observedOutcome: RuntimeResponse["outcome"] = "abstain";
+    let observedReasonCode: string | undefined;
+    let observedCitationPresent = false;
 
     try {
+      const admission = decideAdmission(runtimeRequest);
+      if (admission.outcome !== "allow") {
+        observedOutcome = admission.outcome;
+        observedReasonCode = admission.reasonCode;
+        return sendJson(response, admission.statusCode, boundedFailure(runtimeRequest, admission.outcome, admission.reasonCode));
+      }
+
       const result = await dependencies.retrieveAndGenerate(runtimeRequest);
       const safeResult = { ...result, requestId: runtimeRequest.requestId };
       if (!validateRuntimeResponse(safeResult).ok) {
+        observedOutcome = "abstain";
+        observedReasonCode = "insufficient_evidence";
         return sendJson(response, 200, boundedFailure(runtimeRequest, "abstain", "insufficient_evidence"));
       }
+      observedOutcome = safeResult.outcome;
+      observedReasonCode = safeResult.reasonCode;
+      observedCitationPresent = safeResult.audit.citationPresent;
       return sendJson(response, 200, safeResult);
     } catch {
+      observedOutcome = "abstain";
+      observedReasonCode = "retrieval_unavailable";
       return sendJson(response, 200, boundedFailure(runtimeRequest, "abstain", "retrieval_unavailable"));
+    } finally {
+      emitRuntimeObservation({
+        requestId: runtimeRequest.requestId,
+        outcome: observedOutcome,
+        reasonCode: observedReasonCode,
+        sourceLifecycle: runtimeRequest.governance.sourceLifecycle,
+        citationPresent: observedCitationPresent,
+        latencyMs: Date.now() - startedAt,
+        providerFailureClass: observedReasonCode?.startsWith("retrieval_") ? observedReasonCode.slice("retrieval_".length) : undefined
+      });
     }
   });
 }
