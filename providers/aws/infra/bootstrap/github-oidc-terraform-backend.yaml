@@ -514,6 +514,7 @@ Resources:
           - Sid: InvokeOnlyApprovedAgentCoreRagSystemInferenceProfile
             Effect: Allow
             Action:
+              - bedrock:GetInferenceProfile
               - bedrock:InvokeModel
             Resource: !Sub "arn:${AWS::Partition}:bedrock:${AWS::Region}:${AWS::AccountId}:inference-profile/au.anthropic.claude-haiku-4-5-20251001-v1:0"
           - Sid: InvokeOnlyApprovedAgentCoreRagFoundationModel
