@@ -93,7 +93,7 @@ autonomous writes or production actions.
 
 | Provider | Status | Next evidence |
 | --- | --- | --- |
-| AWS | Local contract and runtime implementation in progress | Approved Sydney sandbox preflight, then bounded validation and teardown |
+| AWS | Live synthetic AgentCore RAG POC with direct-preflight and Gateway evidence | Repeat only for a changed evaluation goal; teardown remains separately gated |
 | Azure | Architecture mapping planned | Confirm service path, region, access, cost, and teardown before any validation |
 | GCP | Architecture mapping planned | Confirm service path, region, access, cost, and teardown before any validation |
 

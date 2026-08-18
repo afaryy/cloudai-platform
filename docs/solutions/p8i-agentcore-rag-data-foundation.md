@@ -85,7 +85,7 @@ This keeps the deployment path declarative and CI-only while avoiding a manual c
 
 The data source and vector resources are tagged `TeardownRequired=true`. If an ingestion job has populated the vector index, the index must be emptied before the CloudFormation stack can delete the vector bucket. Always review `destroy-plan` before teardown.
 
-## AgentCore deployment record — 2026-08-17
+## AgentCore deployment record — 2026-08-17 (historical deployment milestone)
 
 The synthetic-only sandbox is now deployed through the protected GitHub Actions/Terraform path:
 
@@ -101,7 +101,7 @@ Deployed outputs (account number intentionally omitted):
 - Knowledge Base ID: `ZKODO1FLUS`
 - Data source ID: `MG4TMXZI3G`
 
-The next functional step is a CI-only Bedrock Knowledge Base ingestion job followed by a synthetic gateway invocation and evidence capture. Deployment success alone does not prove retrieval quality until ingestion and an end-to-end query are completed.
+At that milestone, the next functional step was a CI-only Bedrock Knowledge Base ingestion job followed by a synthetic Gateway invocation. The later functional-closure record below confirms that both ingestion and the end-to-end query completed successfully.
 
 ## Functional-closure workflow contract — 2026-08-17
 

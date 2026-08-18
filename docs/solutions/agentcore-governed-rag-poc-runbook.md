@@ -2,10 +2,12 @@
 
 ## Status
 
-**Deployment complete; functional closure in progress.** The synthetic
-Knowledge Base, AgentCore Runtime, Gateway, and Runtime target have been
-created through the protected GitHub Actions/Terraform path. Ingestion and
-end-to-end Gateway evidence are the remaining live-validation steps.
+**Deployment and primary functional validation complete.** The synthetic
+Knowledge Base, AgentCore Runtime, Gateway, and Runtime target were created
+through the protected GitHub Actions/Terraform path. Direct Bedrock preflight
+and IAM-authenticated Gateway evidence passed in run
+[32144157616](https://github.com/afaryy/cloudai-platform/actions/runs/32144157616).
+Teardown and additional scenario coverage remain separately gated.
 
 This runbook is for a personal Sydney sandbox using only self-authored,
 synthetic material. It is not production-ready guidance.
@@ -84,17 +86,18 @@ Use the [evidence template](../evidence/templates/agentcore-governed-rag-poc-evi
 The completed [read-only preflight evidence](../evidence/agentcore-governed-rag-preflight-evidence.md)
 records only pass/blocked categories and no identity details.
 The teardown order is: Gateway target, Gateway, Runtime, knowledge base/data
-source, then synthetic storage. Do not mark the POC live-validated until both
-scenario evidence and teardown evidence are complete.
+source, then synthetic storage. The active cited-answer path is live validated;
+teardown evidence is a separate closure record and is not implied by deployment
+success.
 
 ## Portfolio Statement
 
-> Built and locally validated a governed AgentCore RAG control path with
+> Built and validated a governed AgentCore RAG control path with
 > synthetic data, gateway-only admission, deterministic safety boundaries,
 > citations-or-abstention behaviour, metadata-safe evidence, and
-> confirmation-gated sandbox controls. Deployed the same path through
-> Terraform and GitHub Actions with a protected Knowledge Base ingestion job
-> and IAM-authenticated Gateway verification.
+> confirmation-gated sandbox controls. Deployed and functionally validated the
+> same path through Terraform and GitHub Actions with a protected Knowledge Base
+> ingestion job, direct Bedrock preflight, and IAM-authenticated Gateway evidence.
 
 ## Future Retrieval Evolution
 

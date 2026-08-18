@@ -99,7 +99,7 @@ It currently has six mock-first lanes:
 | P8g Direct Guardrail evaluation | Live direct evaluation validated the expected safe-allowed, PII-shaped-blocked, and prompt-attack-shaped-blocked metadata verdicts; no model invocation | `.github/workflows/terraform-bedrock-sandbox.yml`, `.github/workflows/terraform-tests.yaml`, and `providers/aws/infra/terraform/envs/bedrock-sandbox/README.md` |
 | P8h AgentCore knowledge-lookup readiness | Complete static gateway-first reference architecture; no AgentCore resource or call | `docs/solutions/p8h-agentcore-knowledge-lookup-readiness.md` |
 | P8i AgentCore synthetic contract pack | Complete local synthetic contract evidence; no AgentCore integration or live runtime validation | `shared/schemas/agentcore-readiness/`, `shared/examples/agentcore-readiness/`, `providers/aws/app/api/tests/agentcoreReadinessContracts.test.ts`, and `docs/solutions/p8i-agentcore-synthetic-contract-pack.md` |
-| AgentCore governed RAG POC | Synthetic data foundation, arm64 Runtime, IAM Gateway/Runtime target, and protected CI functional-closure workflow deployed; ingestion and Gateway evidence are the active validation gate | `providers/aws/app/agentcore-rag-runtime/`, `providers/aws/agentcore/`, `.github/workflows/terraform-agentcore-rag-sandbox.yml`, `providers/aws/infra/bootstrap/github-oidc-terraform-backend.yaml`, `docs/solutions/p8i-agentcore-rag-data-foundation.md`, `docs/solutions/agentcore-governed-rag-poc-runbook.md`, and `docs/evidence/agentcore-governed-rag-preflight-evidence.md` |
+| AgentCore governed RAG POC | Synthetic data foundation, arm64 Runtime, IAM Gateway/Runtime target, direct Bedrock preflight, and Gateway end-to-end evidence complete through protected CI; teardown remains separately gated | `providers/aws/app/agentcore-rag-runtime/`, `providers/aws/agentcore/`, `.github/workflows/terraform-agentcore-rag-sandbox.yml`, `providers/aws/infra/bootstrap/github-oidc-terraform-backend.yaml`, `docs/solutions/p8i-agentcore-rag-data-foundation.md`, `docs/solutions/p8i-agentcore-rag-key-process-record.md`, and `docs/solutions/agentcore-governed-rag-poc-runbook.md` |
 | P5a AI-assisted DevSecOps boundary | Complete | `docs/practices/ai-assisted-devsecops-pattern.md` and `.github/workflows/ai-assisted-devsecops.yml` |
 | P5b AI-assisted review evidence | Complete | `docs/evidence/ai-assisted-review-evidence.md`, `shared/schemas/ai-assisted-devsecops/`, and `shared/examples/ai-assisted-devsecops/` |
 | P6d control-plane evidence map | Complete | `docs/evidence/control-plane-evidence-map.md`, `shared/schemas/control-plane-evidence/`, and `shared/examples/control-plane-evidence/` |
@@ -112,10 +112,7 @@ The following are not part of the current portfolio scope:
 
 - unbounded or production provider calls
 - persistent provider-backed AI application deployment
-- real retrieval runtime
-- embeddings
-- vector indexes
-- provider-backed RAG answer generation
+- production-scale or customer-facing provider-backed RAG answer generation
 - persistent audit storage
 - real PII detection, jailbreak detection, or safety classification
 - runtime agent execution
