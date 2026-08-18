@@ -27,6 +27,41 @@ evaluation, metadata-safe observability, cost ownership, and teardown
 The model must not decide access, source retirement, approval, or execution.
 Those are deterministic platform controls.
 
+## Three RAG patterns used for comparison
+
+```mermaid
+flowchart TB
+    subgraph P1[Direct provider RAG]
+      C1[Client] --> B1[Bedrock / Azure / Vertex RAG API]
+      B1 --> K1[Provider knowledge index]
+      K1 --> O1[Cited answer or abstention]
+    end
+
+    subgraph P2[Gateway + Runtime + RAG]
+      C2[Client] --> G2[Gateway / API boundary]
+      G2 --> R2[Read-only runtime]
+      R2 --> K2[Approved retrieval service]
+      K2 --> O2[Sanitised citation contract]
+    end
+
+    subgraph P3[AgentCore-native extension]
+      C3[Client] --> G3[Gateway]
+      G3 --> A3[Bounded agent orchestration]
+      A3 --> T3[Approved tools + retrieval + evaluation]
+      T3 --> O3[Audited answer or human-approved action]
+    end
+```
+
+| Pattern | Reusable boundary | Best fit | Main risk to control |
+| --- | --- | --- | --- |
+| Direct provider RAG | Provider API and knowledge index | Simple cited lookup and baseline comparison | Caller must implement identity, policy, sanitisation, and audit boundaries |
+| Gateway + Runtime + RAG | Gateway, runtime, retrieval, and response contract | Enterprise read-only assistance with a stable platform boundary | More operational components and latency |
+| AgentCore-native extension | Gateway, agent runtime, tools, evaluation, and approvals | Bounded planning or tool use across approved enterprise systems | Tool authority, non-deterministic behaviour, traceability, and cost |
+
+The AWS P8i sandbox currently validates the second pattern. The first pattern
+is retained as a direct provider preflight, while the third is an architecture
+option only until a separate evaluation and approval scope is defined.
+
 ## Common Evaluation Set
 
 Each implementation uses the same synthetic handbook and the same six outcomes:
