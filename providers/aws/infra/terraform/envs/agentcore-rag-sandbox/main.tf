@@ -431,7 +431,7 @@ resource "aws_bedrockagentcore_agent_runtime" "governed_rag" {
 
   environment_variables = {
     AGENTCORE_RAG_KNOWLEDGE_BASE_ID = local.effective_knowledge_base_id
-    AGENTCORE_RAG_MODEL_ARN         = aws_bedrock_inference_profile.generation[0].arn
+    AGENTCORE_RAG_MODEL_ARN         = var.model_arn
   }
 
   network_configuration {
