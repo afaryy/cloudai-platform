@@ -12,10 +12,13 @@ production deployment claim.
 
 ## Status
 
-The synthetic data foundation, arm64 Runtime, IAM Gateway, and Runtime target
-are deployed through protected GitHub Actions/Terraform. The remaining live
-validation gate is successful Knowledge Base ingestion followed by a synthetic
-Gateway invocation; no production or employer data is involved.
+The synthetic data foundation, arm64 Runtime, IAM Gateway, Runtime target,
+Knowledge Base ingestion, direct Bedrock preflight, and synthetic Gateway
+invocation are complete through protected GitHub Actions/Terraform. The
+current sandbox remains deployed for demonstration; teardown is a separate,
+explicitly approved operation. No production or employer data is involved.
+
+Final evidence: [Gateway validation run 32144157616](https://github.com/afaryy/cloudai-platform/actions/runs/32144157616).
 
 ## Architecture Principle
 
@@ -36,8 +39,8 @@ AgentCore Gateway
 AgentCore Runtime
   read-only orchestration · least privilege · named owner
         ↓
-Bedrock Knowledge Base + Guardrails + model
-  synthetic sources · citations · safe abstention
+Bedrock Knowledge Base + approved system inference profile
+  synthetic sources · deterministic citation contract · safe abstention
 ```
 
 ## Scope and Boundaries
@@ -79,7 +82,7 @@ sanitized evidence for:
 
 - Gateway-only access and rejection of direct Runtime invocation.
 - Active versus retired knowledge-source behaviour.
-- Cited answer, safe abstention, and Guardrail-blocked scenarios.
+- Cited answer, safe abstention, and deterministic admission-blocked scenarios.
 - Named ownership, least-privilege boundary, budget tags, and cost range.
 - Metadata-only observability, emergency-disable outcome, and complete
   teardown.
@@ -92,9 +95,10 @@ sanitized evidence for:
 2. Local AWS contracts and synthetic evaluation cases.
 3. Reviewed AWS preflight: identity, region, model access, quotas, IAM,
    budget, logs, and teardown plan.
-4. Explicitly approved small AWS sandbox deployment through GitHub Actions.
-5. Sanitized validation evidence and resource destruction.
-6. Azure and GCP equivalent architecture mappings, followed by optional
+4. Completed explicitly approved small AWS sandbox deployment through GitHub Actions.
+5. Completed sanitized direct-preflight and Gateway validation evidence.
+6. Optional teardown through a separately reviewed plan and confirmation.
+7. Azure and GCP equivalent architecture mappings, followed by optional
    small validations only when their own preflight, budget, and teardown
    gates have been reviewed.
 

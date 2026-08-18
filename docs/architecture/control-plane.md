@@ -58,8 +58,9 @@ cloud-specific service calls.
 
 The control plane remains a reference coordination model rather than a complete
 runtime policy-enforcement product. Partial local mock evidence exists through
-the gateway and P6 contracts, and bounded provider evidence exists through
-manually approved synthetic Bedrock validation. Mock mode remains the default.
+the gateway and P6 contracts, and bounded provider evidence exists through the
+protected CI synthetic AgentCore RAG validation. Mock mode remains the default;
+the live AWS adapter is opt-in and sandbox-scoped.
 
 End-to-end policy enforcement, a runtime traffic proxy, and autonomous agent
 execution remain future scope. The existing gateway can emit request metadata,

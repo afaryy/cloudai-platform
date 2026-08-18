@@ -20,7 +20,7 @@ The project is AWS-first and multi-cloud-ready. It uses synthetic examples, publ
 
 `cloudai-platform` models a CloudAI control plane that coordinates governed model access, AI traffic governance, provider adapters, platform foundations, FinOps, observability, release engineering, AI-assisted delivery controls, security and operations controls, and evidence mapping.
 
-The implementation starts with a local mock GenAI / LLM Gateway API, then layers governed RAG, Guardrails as a Service, AgentOps decisions, capability governance, RAG knowledge lifecycle, EKS release engineering patterns, AI-assisted DevSecOps evidence, a control-plane evidence map, control-plane evidence scenarios, and an AI platform security/operations control matrix. This is intentional: the project proves the control model, API shape, metadata, guardrails, tests, and documentation before expanding beyond bounded, manually approved synthetic provider validation.
+The implementation starts with a local mock GenAI / LLM Gateway API, then layers governed RAG, Guardrails as a Service, AgentOps decisions, capability governance, RAG knowledge lifecycle, EKS release engineering patterns, AI-assisted DevSecOps evidence, a control-plane evidence map, control-plane evidence scenarios, and an AI platform security/operations control matrix. The AWS adapter now also includes a bounded, protected-CI AgentCore RAG validation with synthetic data; mock mode remains the default application path.
 
 ## Architecture Layers
 
@@ -31,7 +31,7 @@ The solution is organized around these layers:
 | CloudAI Control Plane | Coordinates use case intake, policy, approval, audit, provider registry, and evaluation concepts. | Reference model with partial local mock and bounded provider-validation evidence. |
 | GenAI / LLM Gateway | Provides the first model-access sub-layer for governed model calls. | Local mock API implemented. |
 | AI Traffic Governance | Broader governance layer for model, agent, tool, API, retrieval, workflow, and data egress flows. | Mock AgentOps, capability governance, RAG lifecycle, and evidence map implemented. |
-| Provider Adapters | Keep cloud-specific implementation behind provider boundaries. | AWS opt-in adapter and bounded synthetic validation; Azure/GCP mappings documented. |
+| Provider Adapters | Keep cloud-specific implementation behind provider boundaries. | AWS opt-in adapter with live synthetic AgentCore RAG evidence; Azure/GCP mappings documented. |
 | Platform Foundations | Provide IAM, KMS, network, API, runtime, CI/CD, release, and observability foundations. | Helm, Argo CD, Terraform, and sandbox-validated EKS delivery patterns. |
 | FinOps / Observability | Track token estimates, costs, logs, metrics, and operational signals. | Local metadata, token budget, and structured logs implemented. |
 | Evidence Layer | Connect control outcomes across runtime, capability, RAG, guardrail, and delivery evidence. | P6d control-plane evidence map and P6e scenario pack implemented. |
@@ -121,8 +121,8 @@ release engineering, and bounded provider validation:
    AgentOps decisions, capability governance, and evidence scenarios.
 4. **Platform delivery:** Helm, Argo CD, Terraform, release gates, rollback,
    and sandbox-validated EKS delivery for a synthetic workload.
-5. **Bounded provider validation:** manually approved, least-privilege,
-   synthetic Bedrock and Guardrail validation while the application remains
+5. **Bounded provider validation:** protected-CI, least-privilege, synthetic
+   Bedrock and AgentCore RAG validation while the application remains
    mock-first.
 
 Read [Current status](../practices/current-status.md) for the detailed implementation
@@ -180,7 +180,9 @@ The governance layer adds reusable controls around model, safety, and data acces
 - mock governed RAG query response with citation, egress decision, and audit evidence
 - local Python RAG workflow for ingest, chunking, evaluation dataset preparation, and scoring
 
-These patterns demonstrate how enterprise AI platforms can expose safety and retrieval evidence without implementing a real scanner, vector store, or provider-backed RAG runtime.
+These patterns demonstrate how enterprise AI platforms can expose safety and
+retrieval evidence locally, while the separate AWS AgentCore adapter proves a
+bounded provider-backed RAG runtime with synthetic data.
 
 ## Platform Delivery and Bounded Provider Validation
 
