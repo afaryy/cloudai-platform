@@ -385,8 +385,13 @@ resource "aws_iam_role_policy" "runtime_bedrock_retrieval" {
     Statement = [
       {
         Effect   = "Allow"
-        Action   = ["bedrock:Retrieve", "bedrock:RetrieveAndGenerate"]
+        Action   = ["bedrock:Retrieve"]
         Resource = local.effective_knowledge_base_arn
+      },
+      {
+        Effect   = "Allow"
+        Action   = ["bedrock:RetrieveAndGenerate"]
+        Resource = "*"
       },
       {
         Effect = "Allow"
