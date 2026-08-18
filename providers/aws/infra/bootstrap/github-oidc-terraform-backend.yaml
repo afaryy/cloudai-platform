@@ -511,73 +511,18 @@ Resources:
               StringEquals:
                 aws:ResourceTag/Project: cloudai-platform
                 aws:ResourceTag/Environment: agentcore-rag-sandbox
-          - Sid: InvokeOnlyTaggedAgentCoreRagInferenceProfile
+          - Sid: InvokeOnlyApprovedAgentCoreRagSystemInferenceProfile
             Effect: Allow
             Action:
               - bedrock:InvokeModel
-            Resource: !Sub "arn:${AWS::Partition}:bedrock:${AWS::Region}:${AWS::AccountId}:application-inference-profile/*"
-            Condition:
-              StringEquals:
-                aws:ResourceTag/Project: cloudai-platform
-                aws:ResourceTag/Environment: agentcore-rag-sandbox
+            Resource: !Sub "arn:${AWS::Partition}:bedrock:${AWS::Region}:${AWS::AccountId}:inference-profile/au.anthropic.claude-haiku-4-5-20251001-v1:0"
           - Sid: InvokeOnlyApprovedAgentCoreRagFoundationModel
             Effect: Allow
             Action:
               - bedrock:InvokeModel
-            Resource: !Sub "arn:${AWS::Partition}:bedrock:${AWS::Region}::foundation-model/anthropic.claude-haiku-4-5-20251001-v1:0"
-          - Sid: CreateTaggedAgentCoreRagInferenceProfile
-            Effect: Allow
-            Action:
-              - bedrock:CreateInferenceProfile
-            Resource: "*"
-            Condition:
-              StringEquals:
-                aws:RequestTag/Project: cloudai-platform
-                aws:RequestTag/Environment: agentcore-rag-sandbox
-              ForAllValues:StringEquals:
-                aws:TagKeys:
-                  - Project
-                  - Environment
-                  - DataScope
-                  - ManagedBy
-                  - CostBoundary
-                  - TeardownRequired
-                  - CloudAISlice
-              "Null":
-                aws:TagKeys: "false"
-          - Sid: TagOnlyAgentCoreRagInferenceProfileOnCreate
-            Effect: Allow
-            Action:
-              - bedrock:TagResource
-            Resource: !Sub "arn:${AWS::Partition}:bedrock:${AWS::Region}:${AWS::AccountId}:application-inference-profile/*"
-            Condition:
-              StringEquals:
-                aws:RequestTag/Project: cloudai-platform
-                aws:RequestTag/Environment: agentcore-rag-sandbox
-              ForAllValues:StringEquals:
-                aws:TagKeys:
-                  - Project
-                  - Environment
-                  - DataScope
-                  - ManagedBy
-                  - CostBoundary
-                  - TeardownRequired
-                  - CloudAISlice
-              "Null":
-                aws:TagKeys: "false"
-          - Sid: ManageOnlyTaggedAgentCoreRagInferenceProfile
-            Effect: Allow
-            Action:
-              - bedrock:DeleteInferenceProfile
-              - bedrock:GetInferenceProfile
-              - bedrock:ListTagsForResource
-              - bedrock:TagResource
-              - bedrock:UntagResource
-            Resource: !Sub "arn:${AWS::Partition}:bedrock:${AWS::Region}:${AWS::AccountId}:application-inference-profile/*"
-            Condition:
-              StringEquals:
-                aws:ResourceTag/Project: cloudai-platform
-                aws:ResourceTag/Environment: agentcore-rag-sandbox
+            Resource:
+              - !Sub "arn:${AWS::Partition}:bedrock:${AWS::Region}::foundation-model/anthropic.claude-haiku-4-5-20251001-v1:0"
+              - !Sub "arn:${AWS::Partition}:bedrock:ap-southeast-4::foundation-model/anthropic.claude-haiku-4-5-20251001-v1:0"
 
   GitHubActionsBootstrapRole:
     Type: AWS::IAM::Role

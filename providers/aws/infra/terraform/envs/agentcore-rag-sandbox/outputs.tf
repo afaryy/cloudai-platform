@@ -44,8 +44,8 @@ output "agent_runtime_arn" {
 }
 
 output "generation_model_arn" {
-  description = "The generated application inference profile ARN used for Knowledge Base response generation."
-  value       = var.enable_runtime ? aws_bedrock_inference_profile.generation[0].arn : null
+  description = "The approved foundation or system inference profile ARN used for Knowledge Base response generation."
+  value       = var.enable_runtime ? var.model_arn : null
 }
 
 output "gateway_authorizer_type" {

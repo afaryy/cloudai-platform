@@ -85,13 +85,13 @@ variable "knowledge_base_arn" {
 }
 
 variable "model_arn" {
-  description = "One approved Bedrock foundation model ARN used as the source for the generated application inference profile."
+  description = "One approved Bedrock foundation model or system inference profile ARN used for Knowledge Base response generation."
   type        = string
   default     = ""
 
   validation {
     condition     = !var.enable_runtime || can(regex("^arn:aws:bedrock:", var.model_arn))
-    error_message = "enable_runtime requires an approved Bedrock foundation model ARN."
+    error_message = "enable_runtime requires an approved Bedrock model or inference profile ARN."
   }
 }
 
