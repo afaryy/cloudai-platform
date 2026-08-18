@@ -145,7 +145,7 @@ repeatable, metadata-safe, and suitable for future provider comparisons.
 2. **Complete** — keep the pattern comparison above aligned with the live AWS evidence and future AgentCore-native scope.
 3. **Complete** — maintain the five-case behavioural evaluation pack and keep evidence levels explicit.
 4. **Complete** — compare AWS, Azure, and GCP RAG control planes using the same security, governance, observability, FinOps, teardown, and behavioural-evaluation criteria. AWS remains live evidence; Azure and GCP are public-documentation mappings pending any separately approved validation.
-5. Review teardown only through a separate plan and confirmation when the learning/demo cycle is complete.
+5. **Deferred** — keep the sandbox deployed for learning and interview demonstrations. Review teardown only through a separate plan and fresh confirmation when the learning/demo cycle is complete.
 
 ## Three-cloud control-plane comparison — item 4 complete
 
@@ -171,3 +171,11 @@ endpoints, and provider internals are excluded.
 No provider ranking is claimed. The next optional work is a separately gated
 Azure or GCP validation only after service path, region, access, quota, cost,
 and teardown are approved.
+
+## Teardown decision — deferred
+
+The AWS sandbox remains deployed intentionally for the current learning and
+interview-demonstration cycle. No destroy, delete, or other AWS mutation is
+authorized by this decision. A future teardown must be proposed as a separate
+reviewed plan that identifies resources, expected cost reduction, retained
+evidence, and recovery limitations, followed by a fresh explicit confirmation.
