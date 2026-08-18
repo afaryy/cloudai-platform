@@ -85,6 +85,100 @@ whether the response must abstain; observability and cost evidence stay
 metadata-safe. The dashed tool/approval path is future scope, not a deployment
 claim.
 
+## Architecture Walkthrough
+
+### 1. Request path
+
+1. A synthetic client sends a knowledge question to the AgentCore Gateway.
+   The Gateway is protected by AWS IAM, so the caller must present an approved
+   workload identity. There is no anonymous public entry point.
+2. The Gateway resolves the single approved Runtime target. Direct invocation
+   of the Runtime is intentionally rejected; this keeps the external contract
+   and the authorization boundary in one place.
+3. The Runtime performs deterministic admission checks before calling Bedrock.
+   It verifies the request shape, enabled-workload state, approved source
+   lifecycle, and read-only response contract. The model is not allowed to
+   decide whether the caller or source is authorised.
+4. The Runtime asks the Bedrock Knowledge Base to retrieve grounded passages
+   using the approved system inference profile. The current corpus is
+   synthetic and self-authored; no customer, employer, internal, or production
+   data is part of the path.
+5. The Runtime validates the retrieval result. A supported citation produces a
+   sanitised answer with a citation-present flag. Missing evidence, a retired
+   source, or a provider failure produces a bounded abstention reason instead
+   of an invented answer or provider diagnostic.
+6. The Gateway returns the sanitised response to the caller. The caller sees
+   the stable response contract, not credentials, raw prompts, provider ARNs,
+   endpoints, or internal exception details.
+
+### 2. Control-plane versus data-plane responsibilities
+
+| Plane | Responsibility | Current implementation boundary |
+| --- | --- | --- |
+| Entry control | Authenticate the caller and select the approved target | AgentCore Gateway with IAM; Gateway-only external entry |
+| Admission control | Decide whether the request, workload, and source are allowed | Deterministic Runtime checks and source-lifecycle contract |
+| Retrieval control | Access the approved corpus and generation boundary | Bedrock Knowledge Base plus the approved system inference profile |
+| Response control | Enforce citation-or-abstention and sanitisation | Runtime response validator and bounded reason codes |
+| Delivery control | Build, publish, deploy, and verify immutable artifacts | GitHub Actions, OIDC, Terraform, protected environments, and exact confirmation phrases |
+| Evidence control | Retain enough evidence to reproduce a decision without retaining sensitive content | Metadata-safe CI artifacts, logs, evaluation outcomes, timestamps, and cost boundary |
+| Future action control | Govern tools, writes, human approval, and autonomous actions | Not deployed; represented only as a separately gated AgentCore-native extension |
+
+This separation is the main architecture lesson. The Gateway and Runtime are
+not just an API wrapper around a model. They form a governed platform boundary
+where identity, policy, source lifecycle, evaluation, operations, and cost are
+explicit responsibilities.
+
+### 3. Failure and denial semantics
+
+The safe path is intentionally narrower than a general chatbot path:
+
+```text
+valid identity + active source + grounded citation
+        -> answer
+
+missing citation / insufficient evidence
+        -> abstain: insufficient_evidence
+
+retired or disabled source/workload
+        -> deny before retrieval
+
+provider timeout or unavailable retrieval
+        -> abstain: retrieval_unavailable
+
+direct Runtime request
+        -> deny: gateway_only_entry
+```
+
+These outcomes are deterministic and testable. A later tool-enabled design
+must add equivalent boundaries for `tool_not_allowed` and
+`human_approval_required`; it must not turn a confidence score into an
+authorization decision.
+
+### 4. Delivery and operational path
+
+The delivery path is separate from the user request path. GitHub Actions uses
+short-lived AWS credentials through OIDC, applies Terraform only after a
+protected-environment approval, and publishes an immutable Runtime image before
+deploying the Gateway and target. The CI workflow then runs a direct Bedrock
+preflight and an IAM-authenticated Gateway invocation to prove the response
+contract.
+
+Operational evidence is deliberately metadata-safe. It records the outcome,
+reason code, citation-present flag, source lifecycle decision, timestamp,
+latency/cost bucket, and evaluation result. It does not retain raw prompts,
+raw answers, credentials, or unrestricted provider diagnostics. Budget tags,
+quotas, and a manual teardown gate remain part of the sandbox operating model;
+the sandbox is currently kept deployed for demonstrations.
+
+### 5. What this diagram does and does not claim
+
+The diagram claims a live, synthetic AWS Gateway + Runtime + Bedrock RAG path
+with protected CI/CD and fail-closed response behaviour. It does not claim a
+production enterprise topology, multi-region resilience, GPU serving, model
+training, tool execution, autonomous writes, or a completed Azure/GCP
+deployment. Those are separate design or validation tracks with their own
+identity, budget, evaluation, and teardown gates.
+
 ## Scope and Boundaries
 
 The initial user story is a Cloud & AI Platform question answered only from an
