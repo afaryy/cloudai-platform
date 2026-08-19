@@ -99,6 +99,7 @@ Resources:
       ManagedPolicyArns:
         - !Ref AgentCoreRagFunctionalPolicy
         - !Ref AgentCoreRagTerraformPolicy
+        - !Ref AgentCoreRagDataPolicy
       Policies:
         - PolicyName: TerraformBackendAndEksSandboxPolicy
           PolicyDocument:
@@ -436,6 +437,15 @@ Resources:
               - bedrock-agentcore:ListAgentRuntimes
               - bedrock-agentcore:ListGateways
             Resource: "*"
+
+  AgentCoreRagDataPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    DependsOn: GitHubActionsBootstrapRole
+    Properties:
+      ManagedPolicyName: !Sub "${GitHubRepo}-agentcore-rag-data"
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
           - Sid: ManageAgentCoreRagDataStack
             Effect: Allow
             Action:
@@ -629,6 +639,7 @@ Resources:
                 Resource:
                   - !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:policy/${GitHubRepo}-agentcore-rag-functional"
                   - !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:policy/${GitHubRepo}-agentcore-rag-terraform"
+                  - !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:policy/${GitHubRepo}-agentcore-rag-data"
 
 Outputs:
   BackendBucketName:
