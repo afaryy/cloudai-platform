@@ -24,6 +24,8 @@ The first remediation attempt was rolled back because the existing Terraform exe
 
 The approved bootstrap apply run `32202901167` then exposed the independent AWS limit of 6,144 bytes for a single customer-managed policy document. The remediation is another least-privilege split delivered through CloudFormation: `AgentCoreRagTerraformPolicy` retains core AgentCore, ECR and named-role lifecycle permissions, while the new `AgentCoreRagDataPolicy` owns the RAG data stack, synthetic source documents and CloudWatch dashboard/alarm permissions. Both policies are attached to the Terraform role and managed by the bootstrap role. No console edit or teardown is used.
 
+After the split was applied, deploy run `32203948213` created the dashboard but failed while Terraform read tags on the two alarms because `cloudwatch:ListTagsForResource` was missing. The follow-up policy patch adds only that read action to the named alarm resources; no broader CloudWatch access is granted.
+
 ## AWS Console steps
 
 1. Open **IAM** → **Roles**.

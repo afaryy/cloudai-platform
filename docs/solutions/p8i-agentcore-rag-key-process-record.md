@@ -69,6 +69,8 @@ The remediation is being kept in the CloudFormation-managed bootstrap policy rat
 
 The approved bootstrap apply run `32202901167` exposed a separate AWS quota: the single `AgentCoreRagTerraformPolicy` document exceeded the 6,144-byte customer-managed policy limit. The follow-up design keeps core AgentCore/ECR/role lifecycle in `agentcore-rag-terraform` and moves the RAG data stack, synthetic source documents and CloudWatch observability into `agentcore-rag-data`. Both managed policies remain CloudFormation-controlled and attached to the Terraform role; no resource teardown is part of this recovery.
 
+The first post-split observability deploy (`32203948213`) created the dashboard, then failed on Terraform's alarm tag refresh because `cloudwatch:ListTagsForResource` was not yet allowed. The remediation adds this single read action to the two named alarm ARNs; the dashboard and existing sandbox resources remain in place.
+
 ## Final evidence
 
 | Evidence | Result |
