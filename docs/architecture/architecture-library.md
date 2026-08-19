@@ -110,6 +110,9 @@ implementation record and deferred scope.
 - [AI Factory/GPU workload readiness](./ai-factory-gpu-workload-readiness.md) —
   profile-specific admission, placement, scheduling, observability, FinOps,
   resilience, and data-centre readiness; design-only, with no GPU deployment.
+- [AI Factory workload placement comparison](./ai-factory-workload-placement-comparison.md) —
+  design-only routing matrix for interactive, batch, fine-tuning, distributed,
+  and managed-inference workloads; no GPU deployment.
 - [AI Workload Operating Contract](../practices/ai-workload-operating-contract.md) —
   documentation-first, vendor-neutral workload readiness model for service,
   batch, fine-tuning, and future distributed-training profiles.
