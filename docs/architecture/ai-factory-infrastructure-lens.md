@@ -88,7 +88,7 @@ Current boundaries:
 - no real model training;
 - no GPU cluster deployment;
 - no HyperPod deployment;
-- no persistent provider-backed AI application, provider-backed RAG runtime, or Bedrock AgentCore resource;
+- no persistent AI Factory application or high-scale provider-backed runtime; a separate synthetic Bedrock AgentCore RAG sandbox exists, but it is not an AI Factory or production deployment;
 - no real enterprise data;
 - no committed cloud account values, credentials, state, tfvars, plan files, kubeconfig, or live endpoints.
 

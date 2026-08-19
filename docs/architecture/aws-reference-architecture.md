@@ -22,7 +22,7 @@ for this platform; it is not a persistent provider-backed deployment.
 The AWS mapping should separate model access, agent runtime, ML lifecycle, and platform runtime concerns:
 
 - Amazon Bedrock is the primary managed foundation-model and GenAI application service pattern.
-- Amazon Bedrock AgentCore is the future reference point for production agent runtime, memory, identity, gateway, observability, and evaluation concepts.
+- Amazon Bedrock AgentCore is the current bounded implementation reference for the synthetic Gateway + Runtime + Knowledge Base POC, and a future reference for production agent runtime, memory, identity, gateway, observability, and evaluation patterns.
 - Amazon SageMaker AI is the ML lifecycle pattern for training, customization, deployment, MLOps, and foundation-model workflows.
 - Amazon SageMaker HyperPod is an optional capacity reference for large-scale distributed training, fine-tuning, batch inference, and high-throughput GPU-oriented serving. Its documented EKS and Slurm orchestration options make it a useful architecture pattern for an AI Factory compute plane, not a required project deployment.
 - API Gateway, Lambda, ECS, and EKS remain candidate runtime patterns for the project gateway, provider adapter, mock services, and future agent experiments.
@@ -43,7 +43,7 @@ The completed EKS sandbox design is documented in `docs/solutions/p4b-real-eks-s
 
 The bounded Bedrock sandbox design is documented in `docs/solutions/p8-real-bedrock-sandbox-design.md`. It established a tiny governed access path using synthetic inputs, IAM least privilege, manual approval, budget controls, and sanitized evidence. The P8f Guardrail attachment and P8g direct-evaluation paths extend that boundary with synthetic-only validation.
 
-Broader Guardrail policy, evaluation, data-handling, and operational ownership remain future scope. AgentCore remains future scope because it introduces agent runtime, tool, memory, gateway, observability, and evaluation concerns.
+Broader Guardrail policy, evaluation, data-handling, tool execution, and operational ownership remain future scope. The deployed AgentCore path is a synthetic, read-only sandbox with bounded CloudWatch observability; it is not a production agent platform or autonomous runtime.
 
 ## Landing Zone Scale Boundary
 

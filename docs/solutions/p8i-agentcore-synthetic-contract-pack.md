@@ -9,7 +9,10 @@ read-only knowledge-lookup capability. It tests the metadata contracts and
 governance outcomes that a future workload would need to prove before any
 runtime is permitted.
 
-This pack has **no AgentCore integration or live runtime validation**. It has
+This pack itself has **no AgentCore integration or live runtime validation**;
+the separate deployed AWS P8i sandbox is documented in
+[`p8i-agentcore-rag-data-foundation.md`](./p8i-agentcore-rag-data-foundation.md)
+and the [key process record](./p8i-agentcore-rag-key-process-record.md). It has
 no provider call, retrieval, embeddings, vector index, or customer data. It
 does not deploy a Gateway, runtime, identity, policy, Terraform, MCP server,
 or cloud resource.
