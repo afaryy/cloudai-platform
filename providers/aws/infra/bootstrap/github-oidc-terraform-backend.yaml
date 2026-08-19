@@ -500,6 +500,7 @@ Resources:
             Action:
               - cloudwatch:DeleteAlarms
               - cloudwatch:DescribeAlarms
+              - cloudwatch:ListTagsForResource
               - cloudwatch:PutMetricAlarm
             Resource:
               - !Sub "arn:${AWS::Partition}:cloudwatch:${AWS::Region}:${AWS::AccountId}:alarm:${AgentCoreRagNamePrefix}-retrieval-unavailable"
