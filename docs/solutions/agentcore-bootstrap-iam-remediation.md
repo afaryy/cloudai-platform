@@ -30,6 +30,8 @@ Because the failed provider read left both alarm instances tainted in Terraform 
 
 The first recovery attempt detected both tainted resources but used unindexed Terraform addresses; the count-based resources require `[0]`. The recovery workflow now uses the exact indexed addresses and remains fail-closed on any delete action.
 
+The corrected recovery run ([32207928683](https://github.com/afaryy/cloudai-platform/actions/runs/32207928683)) verified both named alarms, removed only their indexed taint markers, and returned a zero-change plan with no delete actions. The follow-up deploy-plan ([32208008899](https://github.com/afaryy/cloudai-platform/actions/runs/32208008899)) reconciled the dashboard and alarms successfully. The sandbox remained deployed; this recovery did not call an AWS delete API.
+
 ## AWS Console steps
 
 1. Open **IAM** → **Roles**.
