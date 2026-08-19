@@ -192,10 +192,10 @@ jobs:
         if: ${{ inputs.mode == 'observability-recover' }}
         run: |
           if [ "${{ steps.observability_state.outputs.answer_latency_tainted }}" = "true" ]; then
-            terraform untaint aws_cloudwatch_metric_alarm.answer_latency
+            terraform untaint 'aws_cloudwatch_metric_alarm.answer_latency[0]'
           fi
           if [ "${{ steps.observability_state.outputs.retrieval_unavailable_tainted }}" = "true" ]; then
-            terraform untaint aws_cloudwatch_metric_alarm.retrieval_unavailable
+            terraform untaint 'aws_cloudwatch_metric_alarm.retrieval_unavailable[0]'
           fi
           echo "Removed only tainted markers for existing CloudWatch alarms; no AWS delete operation was requested."
 

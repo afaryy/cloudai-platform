@@ -28,6 +28,8 @@ After the split was applied, deploy run `32203948213` created the dashboard but 
 
 Because the failed provider read left both alarm instances tainted in Terraform state, the repository now provides a separate `observability-recover` CI/CD mode. It verifies both named alarms exist, removes only the tainted markers, and refuses any recovery plan containing delete actions. It does not call an AWS delete API.
 
+The first recovery attempt detected both tainted resources but used unindexed Terraform addresses; the count-based resources require `[0]`. The recovery workflow now uses the exact indexed addresses and remains fail-closed on any delete action.
+
 ## AWS Console steps
 
 1. Open **IAM** → **Roles**.
