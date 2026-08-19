@@ -33,6 +33,42 @@ test("GPU workload profile schema requires an accountable, bounded workload cont
   assert.equal(schema.properties.evidence.properties.mode.const, "metadata-only");
 });
 
+test("GPU workload profile schema defines a Kueue-aware admission contract", async () => {
+  const schema = await readJson("workload-profile.schema.json", SCHEMA_DIR);
+  const admission = schema.properties.admission;
+
+  assert.equal(admission.type, "object");
+  assert.equal(admission.additionalProperties, false);
+  assert.deepEqual(admission.required, [
+    "resourceFlavor",
+    "clusterQueue",
+    "localQueue",
+    "admissionChecks",
+    "topologyIntent",
+    "maxQueueWaitSeconds",
+    "retryPolicy",
+    "preemptionPolicy"
+  ]);
+  assert.equal(admission.properties.resourceFlavor.type, "string");
+  assert.equal(admission.properties.clusterQueue.type, "string");
+  assert.equal(admission.properties.localQueue.type, "string");
+  assert.equal(admission.properties.admissionChecks.uniqueItems, true);
+  assert.deepEqual(admission.properties.topologyIntent.enum, [
+    "none",
+    "prefer-local",
+    "required-single-domain",
+    "required-multi-node-domain"
+  ]);
+  assert.equal(admission.properties.maxQueueWaitSeconds.minimum, 1);
+  assert.equal(admission.properties.retryPolicy.additionalProperties, false);
+  assert.deepEqual(admission.properties.preemptionPolicy.enum, [
+    "never",
+    "reclaim-within-cohort",
+    "borrow-within-cohort",
+    "within-queue"
+  ]);
+});
+
 test("agent/RAG and batch fixtures declare different capacity and recovery needs", async () => {
   const agent = await readJson("agent-rag-inference.synthetic.json", EXAMPLE_DIR);
   const batch = await readJson("batch-inference.synthetic.json", EXAMPLE_DIR);
