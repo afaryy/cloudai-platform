@@ -59,6 +59,36 @@ test("agent/RAG and batch fixtures declare different capacity and recovery needs
   }
 });
 
+test("fine-tuning and distributed-training fixtures declare checkpoint and topology boundaries", async () => {
+  const fineTuning = await readJson("fine-tuning.synthetic.json", EXAMPLE_DIR);
+  const distributed = await readJson("distributed-training.synthetic.json", EXAMPLE_DIR);
+
+  assert.equal(fineTuning.profile, "fine-tuning");
+  assert.equal(fineTuning.runtime.type, "hyperpod-eks");
+  assert.equal(fineTuning.capacity.queuePolicy, "reserved");
+  assert.equal(fineTuning.controls.checkpointRequired, true);
+  assert.equal(fineTuning.controls.requiresHumanApproval, true);
+  assert.ok(fineTuning.evidence.signals.includes("checkpoint-duration"));
+  assert.ok(fineTuning.evidence.signals.includes("cost-estimate"));
+
+  assert.equal(distributed.profile, "distributed-training");
+  assert.equal(distributed.runtime.type, "future-hpc");
+  assert.equal(distributed.capacity.queuePolicy, "reserved");
+  assert.equal(distributed.capacity.minAccelerators, 8);
+  assert.equal(distributed.controls.checkpointRequired, true);
+  assert.equal(distributed.controls.requiresHumanApproval, true);
+  assert.ok(distributed.evidence.signals.includes("checkpoint-duration"));
+  assert.ok(distributed.evidence.signals.includes("energy-estimate"));
+
+  for (const fixture of [fineTuning, distributed]) {
+    assert.equal(fixture.dataClassification, "synthetic-public");
+    assert.equal(fixture.controls.budgetStopRequired, true);
+    assert.equal(fixture.controls.teardownPlanRequired, true);
+    assert.equal(fixture.controls.telemetryRequired, true);
+    assert.equal(fixture.evidence.mode, "metadata-only");
+  }
+});
+
 async function readJson(fileName: string, directory: string): Promise<any> {
   return JSON.parse(await readFile(resolve(directory, fileName), "utf8"));
 }

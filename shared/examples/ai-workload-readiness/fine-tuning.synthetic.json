@@ -1,0 +1,39 @@
+{
+  "schemaVersion": "1.0",
+  "workloadId": "synthetic-fine-tuning-adapter",
+  "profile": "fine-tuning",
+  "purpose": "Produce a versioned adapter from synthetic training examples.",
+  "owner": {
+    "team": "synthetic-ml-platform",
+    "service": "adapter-training-lab",
+    "shutdownOwner": "platform-operations@example.invalid"
+  },
+  "dataClassification": "synthetic-public",
+  "runtime": {
+    "type": "hyperpod-eks",
+    "imagePolicy": "approved-digest-only",
+    "modelPolicy": "approved-model-version-only"
+  },
+  "capacity": {
+    "acceleratorClass": "gpu",
+    "minAccelerators": 4,
+    "maxAccelerators": 8,
+    "queuePolicy": "reserved"
+  },
+  "controls": {
+    "budgetStopRequired": true,
+    "teardownPlanRequired": true,
+    "telemetryRequired": true,
+    "checkpointRequired": true,
+    "requiresHumanApproval": true
+  },
+  "evidence": {
+    "mode": "metadata-only",
+    "signals": [
+      "gpu-hours",
+      "checkpoint-duration",
+      "cost-estimate",
+      "task-goodput"
+    ]
+  }
+}
