@@ -5,6 +5,7 @@ import { resolve } from "node:path";
 
 const DOC_PATH = resolve(process.cwd(), "../../../../docs/practices/ai-workload-operating-contract.md");
 const AI_FACTORY_PATH = resolve(process.cwd(), "../../../../docs/architecture/ai-factory-infrastructure-lens.md");
+const GPU_READINESS_PATH = resolve(process.cwd(), "../../../../docs/architecture/ai-factory-gpu-workload-readiness.md");
 const OBSERVABILITY_PATH = resolve(process.cwd(), "../../../../docs/practices/observability.md");
 const FINOPS_PATH = resolve(process.cwd(), "../../../../docs/practices/ai-finops.md");
 const README_PATH = resolve(process.cwd(), "../../../../README.md");
@@ -47,6 +48,16 @@ test("AI Factory documentation distinguishes orchestration from future schedulin
   assert.match(document, /Kubernetes.*service inference/i);
   assert.match(document, /batch.*training.*scheduling/i);
   assert.match(document, /does not deploy Slurm/);
+});
+
+test("GPU readiness documentation treats Kueue admission as design-only", async () => {
+  const document = await readFile(GPU_READINESS_PATH, "utf8");
+
+  assert.match(document, /Kueue-aware admission contract/);
+  assert.match(document, /does not create live Kueue resources/i);
+  assert.match(document, /device plugins.*baseline/i);
+  assert.match(document, /Dynamic Resource Allocation/);
+  assert.match(document, /future advanced allocation path/i);
 });
 
 test("observability and FinOps documents define model, workload, infrastructure, and governance signals", async () => {

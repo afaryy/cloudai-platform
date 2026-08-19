@@ -75,6 +75,72 @@
         }
       }
     },
+    "admission": {
+      "description": "Design-only shared-capacity admission intent, aligned to Kueue concepts without declaring live Kubernetes resources.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "resourceFlavor",
+        "clusterQueue",
+        "localQueue",
+        "admissionChecks",
+        "topologyIntent",
+        "maxQueueWaitSeconds",
+        "retryPolicy",
+        "preemptionPolicy"
+      ],
+      "properties": {
+        "resourceFlavor": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "clusterQueue": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "localQueue": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "cohort": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "borrowingLimit": { "type": "integer", "minimum": 0 },
+        "admissionChecks": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "enum": [
+              "budget-approved",
+              "image-approved",
+              "data-boundary-approved",
+              "topology-ready",
+              "human-approved"
+            ]
+          }
+        },
+        "topologyIntent": {
+          "type": "string",
+          "enum": [
+            "none",
+            "prefer-local",
+            "required-single-domain",
+            "required-multi-node-domain"
+          ]
+        },
+        "gangScheduling": { "type": "boolean" },
+        "maxQueueWaitSeconds": { "type": "integer", "minimum": 1 },
+        "retryPolicy": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["maxAttempts", "backoffSeconds"],
+          "properties": {
+            "maxAttempts": { "type": "integer", "minimum": 1, "maximum": 10 },
+            "backoffSeconds": { "type": "integer", "minimum": 0, "maximum": 3600 }
+          }
+        },
+        "preemptionPolicy": {
+          "type": "string",
+          "enum": [
+            "never",
+            "reclaim-within-cohort",
+            "borrow-within-cohort",
+            "within-queue"
+          ]
+        }
+      }
+    },
     "controls": {
       "type": "object",
       "additionalProperties": false,

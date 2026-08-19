@@ -93,6 +93,38 @@ For a future EKS path, the decision sequence should be:
 5. Add GPU telemetry and cost attribution before admitting the workload.
 6. Validate rollout, rollback, pause, and teardown through GitHub Actions.
 
+### Kueue-aware admission contract
+
+Kubernetes device plugins are the baseline for exposing and scheduling an
+allocated GPU as an extended resource. They do not, by themselves, define a
+shared-capacity operating model: which team may wait for capacity, who may
+borrow it, which prerequisites must pass, or when a job should be preempted.
+
+The workload-readiness schema therefore introduces a **Kueue-aware admission
+contract**. It is metadata-only and does not create live Kueue resources. The
+contract records the intent that a future Kueue `LocalQueue` and `ClusterQueue`
+would enforce:
+
+| Contract field | Future scheduler decision |
+| --- | --- |
+| `resourceFlavor` | Select the approved accelerator, locality, availability, or price class. |
+| `localQueue` and `clusterQueue` | Connect a workload owner to a governed shared-capacity boundary. |
+| `cohort` and `borrowingLimit` | Make any capacity sharing explicit rather than implicit. |
+| `admissionChecks` | Require budget, image, data-boundary, topology, or human approval before admission. |
+| `topologyIntent` and `gangScheduling` | Express locality or all-or-nothing placement intent for multi-node work. |
+| `maxQueueWaitSeconds`, retry, and preemption policy | Bound waiting and recovery behaviour before a workload consumes capacity. |
+
+The next fixture task will adopt these fields for each synthetic workload
+profile and decide where they become mandatory. This task deliberately leaves
+existing fixtures valid while the design contract is introduced.
+
+[Dynamic Resource Allocation](https://kubernetes.io/docs/concepts/scheduling-eviction/dynamic-resource-allocation/)
+is a future advanced allocation path for devices and topology-aware resources;
+it does not replace the device-plugin baseline in this portfolio today. A real
+Kueue or DRA deployment requires the separately reviewed GPU POC plan,
+Terraform/GitHub Actions delivery path, budget cap, telemetry and teardown
+controls.
+
 ### SageMaker HyperPod and managed capacity
 
 SageMaker HyperPod is a reference option for larger training, fine-tuning, and
@@ -220,6 +252,8 @@ boundaries.
 ## Sources and research notes
 
 - [Kubernetes: Schedule GPUs](https://kubernetes.io/docs/tasks/manage-gpus/scheduling-gpus/)
+- [Kubernetes: Dynamic Resource Allocation](https://kubernetes.io/docs/concepts/scheduling-eviction/dynamic-resource-allocation/)
+- [Kueue concepts](https://kueue.sigs.k8s.io/docs/concepts/)
 - [Amazon SageMaker HyperPod](https://docs.aws.amazon.com/sagemaker/latest/dg/sagemaker-hyperpod.html)
 - [HyperPod cluster and task observability](https://docs.aws.amazon.com/sagemaker/latest/dg/sagemaker-hyperpod-eks-cluster-observability-cluster.html)
 - [HyperPod usage reporting for cost attribution](https://docs.aws.amazon.com/sagemaker/latest/dg/sagemaker-hyperpod-usage-reporting.html)
