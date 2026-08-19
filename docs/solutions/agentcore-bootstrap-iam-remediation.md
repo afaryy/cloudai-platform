@@ -20,7 +20,9 @@ The first CloudWatch observability apply ([run 32158283596](https://github.com/a
 
 The bootstrap template now scopes the additional CloudWatch lifecycle permissions to the named AgentCore RAG observability dashboard and the two named alarms. This remains a CI/CD-managed change: create and review a CloudFormation change set, apply it through the protected bootstrap workflow, then rerun the reviewed AgentCore deploy apply. No console policy edit is required.
 
-The first remediation attempt was rolled back because the existing Terraform execution role inline policy was already at AWS's 10,240-byte maximum. The CloudWatch statements now live in a dedicated `AgentCoreRagTerraformPolicy` managed policy instead of increasing the inline policy size. The same policy now owns the complete AgentCore RAG Terraform lifecycle (ECR, AgentCore Runtime/Gateway, data foundation, source documents, and observability), while the existing `AgentCoreRagFunctionalPolicy` remains limited to runtime invocation and retrieval.
+The first remediation attempt was rolled back because the existing Terraform execution role inline policy was already at AWS's 10,240-byte maximum. The CloudWatch statements moved into a dedicated `AgentCoreRagTerraformPolicy` managed policy instead of increasing the inline policy size. The existing `AgentCoreRagFunctionalPolicy` remains limited to runtime invocation and retrieval.
+
+The approved bootstrap apply run `32202901167` then exposed the independent AWS limit of 6,144 bytes for a single customer-managed policy document. The remediation is another least-privilege split delivered through CloudFormation: `AgentCoreRagTerraformPolicy` retains core AgentCore, ECR and named-role lifecycle permissions, while the new `AgentCoreRagDataPolicy` owns the RAG data stack, synthetic source documents and CloudWatch dashboard/alarm permissions. Both policies are attached to the Terraform role and managed by the bootstrap role. No console edit or teardown is used.
 
 ## AWS Console steps
 
