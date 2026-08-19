@@ -1,0 +1,34 @@
+{
+  "schemaVersion": "1.0",
+  "workloadId": "synthetic-agent-rag-inference",
+  "profile": "agent-rag-inference",
+  "purpose": "Bounded synthetic retrieval-assisted response generation",
+  "owner": {
+    "team": "cloud-ai-platform",
+    "service": "agentcore-rag-sandbox",
+    "shutdownOwner": "platform-operations"
+  },
+  "dataClassification": "synthetic-public",
+  "runtime": {
+    "type": "kubernetes-gpu",
+    "imagePolicy": "approved-digest-only",
+    "modelPolicy": "approved-model-version-only"
+  },
+  "capacity": {
+    "acceleratorClass": "gpu",
+    "minAccelerators": 0,
+    "maxAccelerators": 2,
+    "queuePolicy": "autoscale"
+  },
+  "controls": {
+    "budgetStopRequired": true,
+    "teardownPlanRequired": true,
+    "telemetryRequired": true,
+    "checkpointRequired": false,
+    "requiresHumanApproval": true
+  },
+  "evidence": {
+    "mode": "metadata-only",
+    "signals": ["latency", "error-rate", "gpu-hours", "queue-time", "cost-estimate"]
+  }
+}

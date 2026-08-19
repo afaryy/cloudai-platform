@@ -200,7 +200,7 @@ boundaries.
 
 | Capability | Current project evidence | Next safe increment |
 | --- | --- | --- |
-| Workload contract | Documentation-first service, batch, fine-tuning, and distributed-training profiles | Add a versioned synthetic profile fixture and contract tests |
+| Workload contract | Documentation-first service, batch, fine-tuning, and distributed-training profiles; synthetic Agent/RAG and batch fixtures with contract tests | Add fine-tuning and distributed-training fixtures when a new readiness decision requires them |
 | Cloud foundations | Terraform, GitHub OIDC, IAM, EKS release patterns, bounded CloudWatch | Map GPU node/identity/quota controls without deploying nodes |
 | Observability | AgentCore EMF/dashboard/alarm contract | Define GPU metric names and dashboard panels using synthetic fixtures |
 | FinOps | AI FinOps principles and bounded cost metadata | Create a synthetic GPU-hour/queue/cost allocation example |
