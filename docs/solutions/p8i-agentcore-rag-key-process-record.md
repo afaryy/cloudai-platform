@@ -73,6 +73,8 @@ The first post-split observability deploy (`32203948213`) created the dashboard,
 
 The failed provider read tainted both alarm instances in Terraform state. A dedicated `observability-recover` CI/CD mode now verifies the existing alarm names, removes only those tainted markers, and fails closed if the resulting plan contains any delete action. This is state recovery, not resource deletion.
 
+The initial recovery run found the tainted instances but omitted the `[0]` count index in the `terraform untaint` addresses. The workflow was corrected to target the exact indexed alarm instances.
+
 ## Final evidence
 
 | Evidence | Result |
