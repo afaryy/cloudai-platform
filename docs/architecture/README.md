@@ -14,7 +14,7 @@ provider boundaries, and future capacity design.
   and [GCP](gcp-reference-architecture.md) reference architectures.
 - [AI Factory Infrastructure Lens](ai-factory-infrastructure-lens.md) —
   future capacity and accelerator context.
-- [AgentCore Governed RAG POC](agentcore-governed-rag-poc.md) — deployed synthetic sandbox with protected ingestion and completed direct-preflight/Gateway verification
+- [AgentCore Governed RAG POC](agentcore-governed-rag-poc.md) — deployed synthetic sandbox with protected ingestion, completed direct-preflight/Gateway verification, and bounded CloudWatch observability
   using a Gateway, Runtime, Knowledge Base, approved inference profile, and synthetic knowledge-retrieval contract.
 - [Three-Cloud Governed RAG Reference](three-cloud-governed-rag-reference.md)
   — shared control and evaluation contract with AWS, Azure, and GCP mappings.

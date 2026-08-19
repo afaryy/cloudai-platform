@@ -93,9 +93,12 @@ the supporting technical detail:
 - [Featured solutions](docs/solutions/featured-solutions.md) — four case studies with
   technical evidence, trade-offs, and explicit non-claims.
 
-AWS is the first provider with bounded implementation and validation evidence.
-Azure and GCP remain reference mappings, not provider-parity implementations.
-AgentCore, AI Factory, and GPU capacity patterns remain future design scope.
+AWS is the first provider with bounded implementation and validation evidence;
+the synthetic AgentCore Gateway + Runtime + RAG sandbox is the current AWS
+flagship POC. Azure and GCP remain reference mappings, not provider-parity
+implementations. AI Factory and GPU capacity patterns remain future design
+scope, and the AgentCore sandbox does not claim a production or autonomous
+agent platform.
 The [AI Workload Operating Contract](docs/practices/ai-workload-operating-contract.md)
 defines this as a future/design practice track within the portfolio: it does
 not add a scheduler, GPU cluster, or cloud runtime.

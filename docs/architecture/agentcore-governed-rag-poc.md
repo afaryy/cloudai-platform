@@ -18,7 +18,7 @@ invocation are complete through protected GitHub Actions/Terraform. The
 current sandbox remains deployed for demonstration; teardown is a separate,
 explicitly approved operation. No production or employer data is involved.
 
-Final evidence: [Gateway validation run 32144157616](https://github.com/afaryy/cloudai-platform/actions/runs/32144157616).
+Final RAG evidence: [Gateway validation run 32144157616](https://github.com/afaryy/cloudai-platform/actions/runs/32144157616). Observability evidence is recorded in the [P8i key process record](../solutions/p8i-agentcore-rag-key-process-record.md), including the successful policy update, alarm state recovery, and zero-change reconciliation runs.
 
 ## Architecture Principle
 
@@ -51,7 +51,7 @@ flowchart LR
   end
 
   subgraph operations["Operations and future boundary"]
-    telemetry["CloudWatch / controlled CI logs<br/>sanitized traces and metrics"]
+    telemetry["CloudWatch EMF metrics + dashboard/alarms<br/>controlled CI logs and metadata-safe evidence"]
     budget["Tags · quotas · budget<br/>manual teardown gate"]
     future["Future only:<br/>bounded tools + human approval"]
   end
