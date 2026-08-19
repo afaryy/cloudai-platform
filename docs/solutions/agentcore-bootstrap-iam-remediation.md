@@ -26,6 +26,8 @@ The approved bootstrap apply run `32202901167` then exposed the independent AWS 
 
 After the split was applied, deploy run `32203948213` created the dashboard but failed while Terraform read tags on the two alarms because `cloudwatch:ListTagsForResource` was missing. The follow-up policy patch adds only that read action to the named alarm resources; no broader CloudWatch access is granted.
 
+Because the failed provider read left both alarm instances tainted in Terraform state, the repository now provides a separate `observability-recover` CI/CD mode. It verifies both named alarms exist, removes only the tainted markers, and refuses any recovery plan containing delete actions. It does not call an AWS delete API.
+
 ## AWS Console steps
 
 1. Open **IAM** → **Roles**.

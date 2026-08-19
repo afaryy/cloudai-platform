@@ -12,6 +12,7 @@ on:
           - validate
           - bootstrap-plan
           - bootstrap-recover
+          - observability-recover
           - bootstrap-apply
           - deploy-plan
           - deploy-apply
@@ -67,13 +68,17 @@ jobs:
           echo "The sandbox accepts only synthetic data and has no anonymous gateway, write tools, memory, or browser access."
 
       - name: Check recovery, apply, ingestion, or invocation confirmation
-        if: ${{ inputs.mode == 'bootstrap-recover' || inputs.mode == 'bootstrap-apply' || inputs.mode == 'deploy-apply' || inputs.mode == 'ingest' || inputs.mode == 'invoke' }}
+        if: ${{ inputs.mode == 'bootstrap-recover' || inputs.mode == 'observability-recover' || inputs.mode == 'bootstrap-apply' || inputs.mode == 'deploy-apply' || inputs.mode == 'ingest' || inputs.mode == 'invoke' }}
         env:
           CONFIRMATION: ${{ inputs.confirmation }}
           MODE: ${{ inputs.mode }}
         run: |
           if [ "$MODE" = "bootstrap-recover" ] && [ "$CONFIRMATION" != "I_UNDERSTAND_AGENTCORE_RAG_STATE_RECOVERY" ]; then
             echo "::error::bootstrap-recover requires I_UNDERSTAND_AGENTCORE_RAG_STATE_RECOVERY."
+            exit 1
+          fi
+          if [ "$MODE" = "observability-recover" ] && [ "$CONFIRMATION" != "I_UNDERSTAND_AGENTCORE_RAG_OBSERVABILITY_STATE_RECOVERY" ]; then
+            echo "::error::observability-recover requires I_UNDERSTAND_AGENTCORE_RAG_OBSERVABILITY_STATE_RECOVERY."
             exit 1
           fi
           if [ "$MODE" = "bootstrap-apply" ] && [ "$CONFIRMATION" != "I_UNDERSTAND_AGENTCORE_RAG_BOOTSTRAP_APPLY" ]; then
@@ -145,6 +150,65 @@ jobs:
             -backend-config="region=${AWS_REGION}" \
             -backend-config="dynamodb_table=${TF_BACKEND_LOCK_TABLE}" \
             -backend-config="encrypt=true"
+
+      - name: Detect tainted CloudWatch alarm state
+        if: ${{ inputs.mode == 'observability-recover' }}
+        id: observability_state
+        run: |
+          state_json=$(terraform state pull)
+          for resource_name in answer_latency retrieval_unavailable; do
+            if jq -e --arg resource_name "$resource_name" '
+              .resources[]
+              | select(.mode == "managed" and .type == "aws_cloudwatch_metric_alarm" and .name == $resource_name)
+              | .instances[]
+              | select(.status == "tainted")
+            ' <<<"$state_json" >/dev/null; then
+              echo "${resource_name}_tainted=true" >> "$GITHUB_OUTPUT"
+              echo "aws_cloudwatch_metric_alarm.${resource_name} is tainted."
+            else
+              echo "${resource_name}_tainted=false" >> "$GITHUB_OUTPUT"
+              echo "aws_cloudwatch_metric_alarm.${resource_name} is not tainted."
+            fi
+          done
+
+      - name: Verify existing CloudWatch alarms before state recovery
+        if: ${{ inputs.mode == 'observability-recover' }}
+        run: |
+          for alarm_name in \
+            cloudaiplatformagentcoreragsandbox-answer-latency \
+            cloudaiplatformagentcoreragsandbox-retrieval-unavailable; do
+            alarm_count=$(aws cloudwatch describe-alarms \
+              --alarm-names "$alarm_name" \
+              --query 'length(MetricAlarms)' \
+              --output text)
+            if [ "$alarm_count" != "1" ]; then
+              echo "::error::Expected exactly one existing metric alarm named $alarm_name; found $alarm_count. State recovery will not mutate Terraform state."
+              exit 1
+            fi
+          done
+          echo "Both named CloudWatch alarms exist; recovery will not delete or recreate them."
+
+      - name: Recover tainted CloudWatch alarm state
+        if: ${{ inputs.mode == 'observability-recover' }}
+        run: |
+          if [ "${{ steps.observability_state.outputs.answer_latency_tainted }}" = "true" ]; then
+            terraform untaint aws_cloudwatch_metric_alarm.answer_latency
+          fi
+          if [ "${{ steps.observability_state.outputs.retrieval_unavailable_tainted }}" = "true" ]; then
+            terraform untaint aws_cloudwatch_metric_alarm.retrieval_unavailable
+          fi
+          echo "Removed only tainted markers for existing CloudWatch alarms; no AWS delete operation was requested."
+
+      - name: Plan observability state recovery result
+        if: ${{ inputs.mode == 'observability-recover' }}
+        run: |
+          terraform plan -input=false -var='enable_runtime=true' -var='enable_data=true' -out=tfplan
+          destroy_count=$(terraform show -json tfplan | jq '[.resource_changes[]? | select(.change.actions | index("delete"))] | length')
+          if [ "$destroy_count" != "0" ]; then
+            echo "::error::Observability state recovery produced a plan with $destroy_count delete action(s); refusing to continue."
+            exit 1
+          fi
+          echo "Observability state recovery plan contains zero delete actions."
 
       - name: Detect tainted ECR state before recovery
         if: ${{ inputs.mode == 'bootstrap-recover' }}

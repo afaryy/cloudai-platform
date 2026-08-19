@@ -71,6 +71,8 @@ The approved bootstrap apply run `32202901167` exposed a separate AWS quota: the
 
 The first post-split observability deploy (`32203948213`) created the dashboard, then failed on Terraform's alarm tag refresh because `cloudwatch:ListTagsForResource` was not yet allowed. The remediation adds this single read action to the two named alarm ARNs; the dashboard and existing sandbox resources remain in place.
 
+The failed provider read tainted both alarm instances in Terraform state. A dedicated `observability-recover` CI/CD mode now verifies the existing alarm names, removes only those tainted markers, and fails closed if the resulting plan contains any delete action. This is state recovery, not resource deletion.
+
 ## Final evidence
 
 | Evidence | Result |
