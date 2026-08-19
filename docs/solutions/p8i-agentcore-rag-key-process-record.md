@@ -75,6 +75,8 @@ The failed provider read tainted both alarm instances in Terraform state. A dedi
 
 The initial recovery run found the tainted instances but omitted the `[0]` count index in the `terraform untaint` addresses. The workflow was corrected to target the exact indexed alarm instances.
 
+The corrected recovery run ([run 32207928683](https://github.com/afaryy/cloudai-platform/actions/runs/32207928683)) verified that both named alarms already existed, untainted only the indexed alarm instances, and produced a recovery plan with `No changes`. Its fail-closed guard also confirmed that the plan contained zero delete actions. The follow-up deploy-plan ([run 32208008899](https://github.com/afaryy/cloudai-platform/actions/runs/32208008899)) refreshed the dashboard and both alarms successfully and again returned `No changes`. The sandbox was preserved throughout.
+
 ## Final evidence
 
 | Evidence | Result |
@@ -85,6 +87,9 @@ The initial recovery run found the tainted instances but omitted the `[0]` count
 | Final end-to-end proof | [run 32144157616](https://github.com/afaryy/cloudai-platform/actions/runs/32144157616) — direct preflight succeeded, Gateway HTTP 200, answer + active citation |
 | IAM remediation code | [PR #169](https://github.com/afaryy/cloudai-platform/pull/169) — merged |
 | Closure note | [PR #170](https://github.com/afaryy/cloudai-platform/pull/170) — merged |
+| Observability policy update | [bootstrap apply run 32205074688](https://github.com/afaryy/cloudai-platform/actions/runs/32205074688) — CloudFormation update succeeded |
+| Observability state recovery | [run 32207928683](https://github.com/afaryy/cloudai-platform/actions/runs/32207928683) — taints cleared, zero-delete plan |
+| Final observability plan | [run 32208008899](https://github.com/afaryy/cloudai-platform/actions/runs/32208008899) — dashboard and alarms reconciled, no changes |
 
 The final Gateway response contained the synthetic source citation `synthetic://agentcore-poc-handbook#retrieval`, with `citationPresent=true` and `sourceLifecycle=active`.
 
@@ -161,9 +166,9 @@ repeatable, metadata-safe, and suitable for future provider comparisons.
 4. **Complete** — compare AWS, Azure, and GCP RAG control planes using the same security, governance, observability, FinOps, teardown, and behavioural-evaluation criteria. AWS remains live evidence; Azure and GCP are public-documentation mappings pending any separately approved validation.
 5. **Deferred** — keep the sandbox deployed for learning and interview demonstrations. Review teardown only through a separate plan and fresh confirmation when the learning/demo cycle is complete.
 
-## Observability slice — YY-34 in progress
+## Observability slice — YY-34 complete
 
-The next implementation slice adds a bounded observability contract without
+This implementation slice adds a bounded observability contract without
 introducing a second monitoring stack:
 
 - Runtime emits metadata-safe structured completion events using CloudWatch
@@ -180,8 +185,13 @@ introducing a second monitoring stack:
   full AgentCore/ADOT trace verification remain future steps.
 
 The first live apply attempt was blocked by the missing bootstrap permissions
-described above. The observability resources remain pending; no teardown is
-performed as part of this work.
+described above. The policy was then updated through the protected bootstrap
+workflow, and state recovery was completed without deleting or recreating the
+existing alarms. The dashboard and alarms are now deployed and reconciled in
+Terraform. A future synthetic Gateway invoke can add real EMF datapoints for
+the dashboard; this is an evidence-enrichment step, not a prerequisite for
+the deployed observability control plane. No teardown is performed as part of
+this work.
 
 ## Three-cloud control-plane comparison — item 4 complete
 
