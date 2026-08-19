@@ -1,0 +1,34 @@
+{
+  "schemaVersion": "1.0",
+  "workloadId": "synthetic-batch-inference",
+  "profile": "batch-inference",
+  "purpose": "Bounded synthetic batch transformation with restartable output",
+  "owner": {
+    "team": "cloud-ai-platform",
+    "service": "synthetic-batch-worker",
+    "shutdownOwner": "platform-operations"
+  },
+  "dataClassification": "synthetic-public",
+  "runtime": {
+    "type": "queue-worker",
+    "imagePolicy": "approved-digest-only",
+    "modelPolicy": "approved-model-version-only"
+  },
+  "capacity": {
+    "acceleratorClass": "gpu",
+    "minAccelerators": 0,
+    "maxAccelerators": 4,
+    "queuePolicy": "preemptible"
+  },
+  "controls": {
+    "budgetStopRequired": true,
+    "teardownPlanRequired": true,
+    "telemetryRequired": true,
+    "checkpointRequired": true,
+    "requiresHumanApproval": false
+  },
+  "evidence": {
+    "mode": "metadata-only",
+    "signals": ["gpu-hours", "queue-time", "task-goodput", "checkpoint-duration", "cost-estimate"]
+  }
+}
