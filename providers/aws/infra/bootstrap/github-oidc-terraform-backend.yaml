@@ -98,6 +98,7 @@ Resources:
                 token.actions.githubusercontent.com:sub: !Sub "repo:${GitHubOrg}/${GitHubRepo}:environment:${GitHubEnvironment}"
       ManagedPolicyArns:
         - !Ref AgentCoreRagFunctionalPolicy
+        - !Ref AgentCoreRagTerraformPolicy
       Policies:
         - PolicyName: TerraformBackendAndEksSandboxPolicy
           PolicyDocument:
@@ -246,15 +247,6 @@ Resources:
                   - !Sub "arn:${AWS::Partition}:iam::aws:policy/AmazonEKSWorkerNodePolicy"
                   - !Sub "arn:${AWS::Partition}:iam::aws:policy/AmazonEKS_CNI_Policy"
                   - !Sub "arn:${AWS::Partition}:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
-              - Sid: AgentCoreRuntimeIdentityServiceLinkedRole
-                Effect: Allow
-                Action:
-                  - iam:CreateServiceLinkedRole
-                Resource:
-                  - !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/aws-service-role/runtime-identity.bedrock-agentcore.amazonaws.com/AWSServiceRoleForBedrockAgentCoreRuntimeIdentity"
-                Condition:
-                  StringEquals:
-                    iam:AWSServiceName: runtime-identity.bedrock-agentcore.amazonaws.com
               - Sid: EksSandboxClusterApply
                 Effect: Allow
                 Action:
@@ -275,209 +267,217 @@ Resources:
                   - eks:UpdateNodegroupConfig
                   - eks:UpdateNodegroupVersion
                 Resource: "*"
-              - Sid: CreateTaggedAgentCoreEcrRepository
-                Effect: Allow
-                Action:
-                  - ecr:CreateRepository
-                  - ecr:TagResource
-                Resource: "*"
-                Condition:
-                  StringEquals:
-                    aws:RequestTag/Project: cloudai-platform
-                    aws:RequestTag/Environment: agentcore-rag-sandbox
-                  ForAllValues:StringEquals:
-                    aws:TagKeys:
-                      - Project
-                      - Environment
-                      - DataScope
-                      - ManagedBy
-                      - CostBoundary
-                      - TeardownRequired
-                      - CloudAISlice
-                  "Null":
-                    aws:TagKeys: "false"
-              - Sid: ManageOnlyTheAgentCoreEcrRepository
-                Effect: Allow
-                Action:
-                  - ecr:DeleteLifecyclePolicy
-                  - ecr:DeleteRepository
-                  - ecr:DescribeImages
-                  - ecr:DescribeRepositories
-                  - ecr:GetLifecyclePolicy
-                  - ecr:ListTagsForResource
-                  - ecr:PutLifecyclePolicy
-                  - ecr:TagResource
-                  - ecr:UntagResource
-                Resource: !Sub "arn:${AWS::Partition}:ecr:${AWS::Region}:${AWS::AccountId}:repository/cloudai-platform-agentcore-rag-sandbox"
-              - Sid: CreateOnlyNamedAgentCoreRoles
-                Effect: Allow
-                Action:
-                  - iam:CreateRole
-                  - iam:TagRole
-                Resource: !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cloudaiplatformagentcoreragsandbox-*"
-                Condition:
-                  StringEquals:
-                    aws:RequestTag/Project: cloudai-platform
-                    aws:RequestTag/Environment: agentcore-rag-sandbox
-                  ForAllValues:StringEquals:
-                    aws:TagKeys:
-                      - Project
-                      - Environment
-                      - DataScope
-                      - ManagedBy
-                      - CostBoundary
-                      - TeardownRequired
-                      - CloudAISlice
-                  "Null":
-                    aws:TagKeys: "false"
-              - Sid: ManageOnlyNamedAgentCoreRoles
-                Effect: Allow
-                Action:
-                  - iam:DeleteRole
-                  - iam:DeleteRolePolicy
-                  - iam:GetRole
-                  - iam:GetRolePolicy
-                  - iam:ListRolePolicies
-                  - iam:PutRolePolicy
-                  - iam:TagRole
-                  - iam:UntagRole
-                  - iam:UpdateAssumeRolePolicy
-                Resource: !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cloudaiplatformagentcoreragsandbox-*"
-              - Sid: PassOnlySandboxRolesToAgentCore
-                Effect: Allow
-                Action:
-                  - iam:PassRole
-                Resource: !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cloudaiplatformagentcoreragsandbox-*"
-                Condition:
-                  StringEquals:
-                    iam:PassedToService: bedrock-agentcore.amazonaws.com
-              - Sid: CreateOnlyTaggedAgentCoreResources
-                Effect: Allow
-                Action:
-                  - bedrock-agentcore:CreateAgentRuntime
-                  - bedrock-agentcore:CreateGateway
-                  - bedrock-agentcore:TagResource
-                Resource: "*"
-                Condition:
-                  StringEquals:
-                    aws:RequestTag/Project: cloudai-platform
-                    aws:RequestTag/Environment: agentcore-rag-sandbox
-                  ForAllValues:StringEquals:
-                    aws:TagKeys:
-                      - Project
-                      - Environment
-                      - DataScope
-                      - ManagedBy
-                      - CostBoundary
-                      - TeardownRequired
-                      - CloudAISlice
-                  "Null":
-                    aws:TagKeys: "false"
-              - Sid: AgentCoreRuntimeProvisioningDependencies
-                Effect: Allow
-                Action:
-                  - bedrock-agentcore:CreateAgentRuntimeEndpoint
-                  - bedrock-agentcore:DeleteAgentRuntimeEndpoint
-                  - bedrock-agentcore:DeleteWorkloadIdentity
-                  - bedrock-agentcore:PassCapacityProvider
-                Resource: "*"
-              - Sid: AgentCoreCreateRuntimeWorkloadIdentity
-                Effect: Allow
-                Action:
-                  - bedrock-agentcore:CreateWorkloadIdentity
-                Resource:
-                  - !Sub "arn:${AWS::Partition}:bedrock-agentcore:${AWS::Region}:${AWS::AccountId}:workload-identity-directory/default"
-                  - !Sub "arn:${AWS::Partition}:bedrock-agentcore:${AWS::Region}:${AWS::AccountId}:workload-identity-directory/default/workload-identity/*"
-              - Sid: ManageOnlyTaggedAgentCoreResources
-                Effect: Allow
-                Action:
-                  - bedrock-agentcore:DeleteAgentRuntime
-                  - bedrock-agentcore:DeleteGateway
-                  - bedrock-agentcore:GetAgentRuntime
-                  - bedrock-agentcore:GetGateway
-                  - bedrock-agentcore:ListTagsForResource
-                  - bedrock-agentcore:TagResource
-                  - bedrock-agentcore:UntagResource
-                  - bedrock-agentcore:UpdateAgentRuntime
-                  - bedrock-agentcore:UpdateGateway
-                Resource:
-                  - !Sub "arn:${AWS::Partition}:bedrock-agentcore:${AWS::Region}:${AWS::AccountId}:runtime/*"
-                  - !Sub "arn:${AWS::Partition}:bedrock-agentcore:${AWS::Region}:${AWS::AccountId}:gateway/*"
-                Condition:
-                  StringEquals:
-                    aws:ResourceTag/Project: cloudai-platform
-                    aws:ResourceTag/Environment: agentcore-rag-sandbox
-              - Sid: ManageTargetsOnlyForTaggedGateway
-                Effect: Allow
-                Action:
-                  - bedrock-agentcore:CreateGatewayTarget
-                  - bedrock-agentcore:DeleteGatewayTarget
-                  - bedrock-agentcore:GetGatewayTarget
-                  - bedrock-agentcore:ListGatewayTargets
-                  - bedrock-agentcore:SynchronizeGatewayTargets
-                  - bedrock-agentcore:UpdateGatewayTarget
-                Resource: !Sub "arn:${AWS::Partition}:bedrock-agentcore:${AWS::Region}:${AWS::AccountId}:gateway/*"
-                Condition:
-                  StringEquals:
-                    aws:ResourceTag/Project: cloudai-platform
-                    aws:ResourceTag/Environment: agentcore-rag-sandbox
-              - Sid: ListAgentCoreForTerraformStateRefresh
-                Effect: Allow
-                Action:
-                  - bedrock-agentcore:ListAgentRuntimes
-                  - bedrock-agentcore:ListGateways
-                Resource: "*"
-              - Sid: ManageAgentCoreRagDataStack
-                Effect: Allow
-                Action:
-                  - cloudformation:CreateStack
-                Resource: "*"
-              - Sid: ManageOnlyAgentCoreRagDataStack
-                Effect: Allow
-                Action:
-                  - cloudformation:DeleteStack
-                  - cloudformation:DescribeStackEvents
-                  - cloudformation:DescribeStacks
-                  - cloudformation:GetTemplate
-                  - cloudformation:ListStackResources
-                  - cloudformation:TagResource
-                  - cloudformation:UntagResource
-                  - cloudformation:UpdateStack
-                Resource: !Sub "arn:${AWS::Partition}:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/${GitHubRepo}-agentcore-rag-data/*"
-              - Sid: PassOnlyAgentCoreRagDataRoles
-                Effect: Allow
-                Action:
-                  - iam:PassRole
-                Resource:
-                  - !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cloudaiplatformagentcoreragsandbox-knowledge-base-stack"
-                Condition:
-                  StringEquals:
-                    iam:PassedToService: cloudformation.amazonaws.com
-              - Sid: ManageOnlyAgentCoreRagSourceDocuments
-                Effect: Allow
-                Action:
-                  - s3:GetBucketLocation
-                  - s3:ListBucket
-                Resource: !Sub "arn:${AWS::Partition}:s3:::${GitHubRepo}-agentcore-rag-source-*"
-              - Sid: WriteOnlyAgentCoreRagSourceDocuments
-                Effect: Allow
-                Action:
-                  - s3:DeleteObject
-                  - s3:DeleteObjectTagging
-                  - s3:GetObject
-                  - s3:GetObjectTagging
-                  - s3:PutObject
-                  - s3:PutObjectTagging
-                Resource: !Sub "arn:${AWS::Partition}:s3:::${GitHubRepo}-agentcore-rag-source-*/*"
-
-  AgentCoreRagFunctionalPolicy:
+  AgentCoreRagTerraformPolicy:
     Type: AWS::IAM::ManagedPolicy
     DependsOn: GitHubActionsBootstrapRole
     Properties:
-      ManagedPolicyName: !Sub "${GitHubRepo}-agentcore-rag-functional"
+      ManagedPolicyName: !Sub "${GitHubRepo}-agentcore-rag-terraform"
       PolicyDocument:
         Version: "2012-10-17"
         Statement:
+          - Sid: AgentCoreRuntimeIdentityServiceLinkedRole
+            Effect: Allow
+            Action:
+              - iam:CreateServiceLinkedRole
+            Resource:
+              - !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/aws-service-role/runtime-identity.bedrock-agentcore.amazonaws.com/AWSServiceRoleForBedrockAgentCoreRuntimeIdentity"
+            Condition:
+              StringEquals:
+                iam:AWSServiceName: runtime-identity.bedrock-agentcore.amazonaws.com
+          - Sid: CreateTaggedAgentCoreEcrRepository
+            Effect: Allow
+            Action:
+              - ecr:CreateRepository
+              - ecr:TagResource
+            Resource: "*"
+            Condition:
+              StringEquals:
+                aws:RequestTag/Project: cloudai-platform
+                aws:RequestTag/Environment: agentcore-rag-sandbox
+              ForAllValues:StringEquals:
+                aws:TagKeys:
+                  - Project
+                  - Environment
+                  - DataScope
+                  - ManagedBy
+                  - CostBoundary
+                  - TeardownRequired
+                  - CloudAISlice
+              "Null":
+                aws:TagKeys: "false"
+          - Sid: ManageOnlyTheAgentCoreEcrRepository
+            Effect: Allow
+            Action:
+              - ecr:DeleteLifecyclePolicy
+              - ecr:DeleteRepository
+              - ecr:DescribeImages
+              - ecr:DescribeRepositories
+              - ecr:GetLifecyclePolicy
+              - ecr:ListTagsForResource
+              - ecr:PutLifecyclePolicy
+              - ecr:TagResource
+              - ecr:UntagResource
+            Resource: !Sub "arn:${AWS::Partition}:ecr:${AWS::Region}:${AWS::AccountId}:repository/cloudai-platform-agentcore-rag-sandbox"
+          - Sid: CreateOnlyNamedAgentCoreRoles
+            Effect: Allow
+            Action:
+              - iam:CreateRole
+              - iam:TagRole
+            Resource: !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cloudaiplatformagentcoreragsandbox-*"
+            Condition:
+              StringEquals:
+                aws:RequestTag/Project: cloudai-platform
+                aws:RequestTag/Environment: agentcore-rag-sandbox
+              ForAllValues:StringEquals:
+                aws:TagKeys:
+                  - Project
+                  - Environment
+                  - DataScope
+                  - ManagedBy
+                  - CostBoundary
+                  - TeardownRequired
+                  - CloudAISlice
+              "Null":
+                aws:TagKeys: "false"
+          - Sid: ManageOnlyNamedAgentCoreRoles
+            Effect: Allow
+            Action:
+              - iam:DeleteRole
+              - iam:DeleteRolePolicy
+              - iam:GetRole
+              - iam:GetRolePolicy
+              - iam:ListRolePolicies
+              - iam:PutRolePolicy
+              - iam:TagRole
+              - iam:UntagRole
+              - iam:UpdateAssumeRolePolicy
+            Resource: !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cloudaiplatformagentcoreragsandbox-*"
+          - Sid: PassOnlySandboxRolesToAgentCore
+            Effect: Allow
+            Action:
+              - iam:PassRole
+            Resource: !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cloudaiplatformagentcoreragsandbox-*"
+            Condition:
+              StringEquals:
+                iam:PassedToService: bedrock-agentcore.amazonaws.com
+          - Sid: CreateOnlyTaggedAgentCoreResources
+            Effect: Allow
+            Action:
+              - bedrock-agentcore:CreateAgentRuntime
+              - bedrock-agentcore:CreateGateway
+              - bedrock-agentcore:TagResource
+            Resource: "*"
+            Condition:
+              StringEquals:
+                aws:RequestTag/Project: cloudai-platform
+                aws:RequestTag/Environment: agentcore-rag-sandbox
+              ForAllValues:StringEquals:
+                aws:TagKeys:
+                  - Project
+                  - Environment
+                  - DataScope
+                  - ManagedBy
+                  - CostBoundary
+                  - TeardownRequired
+                  - CloudAISlice
+              "Null":
+                aws:TagKeys: "false"
+          - Sid: AgentCoreRuntimeProvisioningDependencies
+            Effect: Allow
+            Action:
+              - bedrock-agentcore:CreateAgentRuntimeEndpoint
+              - bedrock-agentcore:DeleteAgentRuntimeEndpoint
+              - bedrock-agentcore:DeleteWorkloadIdentity
+              - bedrock-agentcore:PassCapacityProvider
+            Resource: "*"
+          - Sid: AgentCoreCreateRuntimeWorkloadIdentity
+            Effect: Allow
+            Action:
+              - bedrock-agentcore:CreateWorkloadIdentity
+            Resource:
+              - !Sub "arn:${AWS::Partition}:bedrock-agentcore:${AWS::Region}:${AWS::AccountId}:workload-identity-directory/default"
+              - !Sub "arn:${AWS::Partition}:bedrock-agentcore:${AWS::Region}:${AWS::AccountId}:workload-identity-directory/default/workload-identity/*"
+          - Sid: ManageOnlyTaggedAgentCoreResources
+            Effect: Allow
+            Action:
+              - bedrock-agentcore:DeleteAgentRuntime
+              - bedrock-agentcore:DeleteGateway
+              - bedrock-agentcore:GetAgentRuntime
+              - bedrock-agentcore:GetGateway
+              - bedrock-agentcore:ListTagsForResource
+              - bedrock-agentcore:TagResource
+              - bedrock-agentcore:UntagResource
+              - bedrock-agentcore:UpdateAgentRuntime
+              - bedrock-agentcore:UpdateGateway
+            Resource:
+              - !Sub "arn:${AWS::Partition}:bedrock-agentcore:${AWS::Region}:${AWS::AccountId}:runtime/*"
+              - !Sub "arn:${AWS::Partition}:bedrock-agentcore:${AWS::Region}:${AWS::AccountId}:gateway/*"
+            Condition:
+              StringEquals:
+                aws:ResourceTag/Project: cloudai-platform
+                aws:ResourceTag/Environment: agentcore-rag-sandbox
+          - Sid: ManageTargetsOnlyForTaggedGateway
+            Effect: Allow
+            Action:
+              - bedrock-agentcore:CreateGatewayTarget
+              - bedrock-agentcore:DeleteGatewayTarget
+              - bedrock-agentcore:GetGatewayTarget
+              - bedrock-agentcore:ListGatewayTargets
+              - bedrock-agentcore:SynchronizeGatewayTargets
+              - bedrock-agentcore:UpdateGatewayTarget
+            Resource: !Sub "arn:${AWS::Partition}:bedrock-agentcore:${AWS::Region}:${AWS::AccountId}:gateway/*"
+            Condition:
+              StringEquals:
+                aws:ResourceTag/Project: cloudai-platform
+                aws:ResourceTag/Environment: agentcore-rag-sandbox
+          - Sid: ListAgentCoreForTerraformStateRefresh
+            Effect: Allow
+            Action:
+              - bedrock-agentcore:ListAgentRuntimes
+              - bedrock-agentcore:ListGateways
+            Resource: "*"
+          - Sid: ManageAgentCoreRagDataStack
+            Effect: Allow
+            Action:
+              - cloudformation:CreateStack
+            Resource: "*"
+          - Sid: ManageOnlyAgentCoreRagDataStack
+            Effect: Allow
+            Action:
+              - cloudformation:DeleteStack
+              - cloudformation:DescribeStackEvents
+              - cloudformation:DescribeStacks
+              - cloudformation:GetTemplate
+              - cloudformation:ListStackResources
+              - cloudformation:TagResource
+              - cloudformation:UntagResource
+              - cloudformation:UpdateStack
+            Resource: !Sub "arn:${AWS::Partition}:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/${GitHubRepo}-agentcore-rag-data/*"
+          - Sid: PassOnlyAgentCoreRagDataRoles
+            Effect: Allow
+            Action:
+              - iam:PassRole
+            Resource:
+              - !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cloudaiplatformagentcoreragsandbox-knowledge-base-stack"
+            Condition:
+              StringEquals:
+                iam:PassedToService: cloudformation.amazonaws.com
+          - Sid: ManageOnlyAgentCoreRagSourceDocuments
+            Effect: Allow
+            Action:
+              - s3:GetBucketLocation
+              - s3:ListBucket
+            Resource: !Sub "arn:${AWS::Partition}:s3:::${GitHubRepo}-agentcore-rag-source-*"
+          - Sid: WriteOnlyAgentCoreRagSourceDocuments
+            Effect: Allow
+            Action:
+              - s3:DeleteObject
+              - s3:DeleteObjectTagging
+              - s3:GetObject
+              - s3:GetObjectTagging
+              - s3:PutObject
+              - s3:PutObjectTagging
+            Resource: !Sub "arn:${AWS::Partition}:s3:::${GitHubRepo}-agentcore-rag-source-*/*"
           - Sid: ManageOnlyAgentCoreRagObservabilityDashboard
             Effect: Allow
             Action:
@@ -494,6 +494,15 @@ Resources:
             Resource:
               - !Sub "arn:${AWS::Partition}:cloudwatch:${AWS::Region}:${AWS::AccountId}:alarm:${AgentCoreRagNamePrefix}-retrieval-unavailable"
               - !Sub "arn:${AWS::Partition}:cloudwatch:${AWS::Region}:${AWS::AccountId}:alarm:${AgentCoreRagNamePrefix}-answer-latency"
+
+  AgentCoreRagFunctionalPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    DependsOn: GitHubActionsBootstrapRole
+    Properties:
+      ManagedPolicyName: !Sub "${GitHubRepo}-agentcore-rag-functional"
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
           - Sid: InvokeOnlyTaggedAgentCoreGateway
             Effect: Allow
             Action:
@@ -602,7 +611,7 @@ Resources:
                 Resource:
                   - !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/${GitHubRepo}-${GitHubEnvironment}-terraform"
                   - !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/${BootstrapRoleName}"
-              - Sid: ManageOnlyAgentCoreRagFunctionalPolicy
+              - Sid: ManageOnlyAgentCoreRagManagedPolicies
                 Effect: Allow
                 Action:
                   - iam:CreatePolicy
@@ -617,7 +626,10 @@ Resources:
                   - iam:SetDefaultPolicyVersion
                   - iam:TagPolicy
                   - iam:UntagPolicy
-                Resource: !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:policy/${GitHubRepo}-agentcore-rag-functional"
+                Resource:
+                  - !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:policy/${GitHubRepo}-agentcore-rag-functional"
+                  - !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:policy/${GitHubRepo}-agentcore-rag-terraform"
+
 Outputs:
   BackendBucketName:
     Description: S3 bucket for Terraform state.

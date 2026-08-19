@@ -65,7 +65,7 @@ Bedrock required both the inference-profile ARN and the two documented regional 
 
 The first protected observability apply ([run 32158283596](https://github.com/afaryy/cloudai-platform/actions/runs/32158283596)) completed OIDC authentication and Terraform planning, but the apply was denied by AWS for `cloudwatch:PutDashboard` and `cloudwatch:PutMetricAlarm`. No dashboard or alarm was created, and no sandbox resource was deleted.
 
-The remediation is being kept in the CloudFormation-managed bootstrap policy rather than applied through click-ops. The first remediation change set rolled back because the existing Terraform execution role inline policy was already at AWS's 10,240-byte maximum. The corrected design places only the lifecycle permissions for the named AgentCore RAG dashboard and two named alarms (`Get/Put/DeleteDashboard(s)` and `Describe/Put/DeleteAlarms`) in the existing managed functional policy. A fresh bootstrap change-set review and apply are required before retrying the AgentCore deploy workflow.
+The remediation is being kept in the CloudFormation-managed bootstrap policy rather than applied through click-ops. The first remediation change set rolled back because the existing Terraform execution role inline policy was already at AWS's 10,240-byte maximum. The corrected design moves the complete AgentCore RAG Terraform lifecycle into a dedicated `AgentCoreRagTerraformPolicy` managed policy; the existing `AgentCoreRagFunctionalPolicy` remains runtime-only. This keeps EKS/backend permissions separate from AgentCore lifecycle permissions and includes the named dashboard and two alarms (`Get/Put/DeleteDashboard(s)` and `Describe/Put/DeleteAlarms`). A fresh bootstrap change-set review and apply are required before retrying the AgentCore deploy workflow.
 
 ## Final evidence
 
@@ -164,6 +164,9 @@ introducing a second monitoring stack:
   request ID remains a log field and is not a metric dimension.
 - Terraform defines the CloudWatch dashboard and alarms with no notification
   actions in the personal sandbox.
+- The Terraform execution role receives AgentCore lifecycle permissions through
+  a dedicated managed policy, keeping the larger EKS/backend inline policy
+  below AWS's 10,240-byte limit.
 - GitHub Actions runs the Runtime contract tests and Terraform tests.
 - Prometheus, Grafana, SIEM integration, automatic incident remediation, and
   full AgentCore/ADOT trace verification remain future steps.
