@@ -160,6 +160,27 @@ GPU telemetry must connect hardware health to workload outcomes. A dashboard
 showing high utilisation alone does not prove that a job is productive or
 meeting its SLO.
 
+### Correlation-first observability panels
+
+The dashboard contract should follow the workload decision, rather than split
+GPU, scheduler, and cost signals into unrelated views. Each panel starts with
+a named workload and admission record, then joins **admission → GPU health →
+queue/checkpoint state → goodput/SLO → cost**. This makes it possible to
+distinguish an unhealthy device, unfair queueing, failed recovery, and a
+workload that is consuming capacity without delivering a useful outcome.
+
+| Panel | Correlated evidence | Decision owner and response |
+| --- | --- | --- |
+| Admission and capacity | `resourceFlavor`, queue, cohort, admission checks, wait age, allocation and borrowing | Platform owner verifies fair admission or changes the queue/quota policy. |
+| Hardware and runtime health | GPU temperature/power/error, memory, node condition, workload identity and allocated capacity | Platform/SRE isolates unhealthy capacity or investigates the runtime boundary. |
+| Progress and recovery | queue wait, retry/preemption, checkpoint duration, completion state and failed-task reason | Workload owner pauses, retries, restores from checkpoint, or corrects the job. |
+| Outcome and SLO | time-to-first-token, tokens/sec, task completion/goodput, error rate and degraded-mode outcome | Product owner validates the placement against the workload SLO. |
+| FinOps and stop control | GPU-hours, idle/borrowed capacity, token or task cost, budget state and stop condition | Cost owner stops, right-sizes, re-routes, or extends an explicitly approved budget. |
+
+The panel names are a design contract for future synthetic fixtures and a
+bounded sandbox. They are not a claim that a dashboard, metrics pipeline, or
+GPU runtime currently exists.
+
 ### Minimum signal groups
 
 | Signal group | Examples | Decision supported |
@@ -183,6 +204,9 @@ complementary option for infrastructure metrics and alarms. See [HyperPod cluste
 The project does not currently deploy these GPU tools. The current AgentCore
 POC has bounded CloudWatch EMF metrics, dashboards, and alarms; that evidence
 is a foundation for the metadata and ownership model, not GPU telemetry proof.
+
+**No DCGM, Prometheus, Grafana, Kueue, GPU Operator, or GPU sandbox deployment
+is included in this guidance.**
 
 ## FinOps and capacity controls
 

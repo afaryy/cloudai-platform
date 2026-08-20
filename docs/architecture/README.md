@@ -18,8 +18,9 @@ provider boundaries, and future capacity design.
   workload profiles, accelerator placement, GPU observability, FinOps,
   resilience, and safe future-sandbox gates; no GPU deployment.
 - [AI Factory Workload Placement Comparison](ai-factory-workload-placement-comparison.md) —
-  design-only routing criteria for Kubernetes, queue governance, managed
-  training, future HPC, and managed inference; no GPU deployment.
+  design-only routing criteria and correlation-first evidence chain for
+  Kubernetes, queue governance, managed training, future HPC, and managed
+  inference; no GPU deployment.
 - [AgentCore Governed RAG POC](agentcore-governed-rag-poc.md) — deployed synthetic sandbox with protected ingestion, completed direct-preflight/Gateway verification, and bounded CloudWatch observability
   using a Gateway, Runtime, Knowledge Base, approved inference profile, and synthetic knowledge-retrieval contract.
 - [Three-Cloud Governed RAG Reference](three-cloud-governed-rag-reference.md)
