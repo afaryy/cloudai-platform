@@ -80,3 +80,12 @@ test("AI Factory practice navigation is present without a false runtime claim", 
   assert.doesNotMatch(readme, /Implemented — GPU cluster/);
   assert.doesNotMatch(readme, /Implemented — Slurm/);
 });
+
+test("AI Factory status records complete synthetic admission fixtures without a runtime claim", async () => {
+  const status = await readFile(CURRENT_STATUS_PATH, "utf8");
+  const readiness = await readFile(GPU_READINESS_PATH, "utf8");
+
+  assert.match(status, /synthetic Agent\/RAG, batch, fine-tuning, and distributed-training workload profiles/);
+  assert.match(readiness, /synthetic Agent\/RAG, batch, fine-tuning, and distributed-training fixtures/);
+  assert.match(status, /still no current GPU, scheduler, or AI Factory implementation/);
+});

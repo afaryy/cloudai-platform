@@ -20,6 +20,26 @@
     "maxAccelerators": 4,
     "queuePolicy": "preemptible"
   },
+  "admission": {
+    "resourceFlavor": "gpu-cost-optimized",
+    "clusterQueue": "shared-batch",
+    "localQueue": "batch-inference",
+    "cohort": "batch-capacity",
+    "borrowingLimit": 2,
+    "admissionChecks": [
+      "budget-approved",
+      "image-approved",
+      "data-boundary-approved"
+    ],
+    "topologyIntent": "prefer-local",
+    "gangScheduling": false,
+    "maxQueueWaitSeconds": 900,
+    "retryPolicy": {
+      "maxAttempts": 3,
+      "backoffSeconds": 60
+    },
+    "preemptionPolicy": "reclaim-within-cohort"
+  },
   "controls": {
     "budgetStopRequired": true,
     "teardownPlanRequired": true,

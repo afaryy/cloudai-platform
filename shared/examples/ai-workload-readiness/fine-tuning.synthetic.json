@@ -1,11 +1,11 @@
 {
   "schemaVersion": "1.0",
-  "workloadId": "synthetic-agent-rag-inference",
-  "profile": "agent-rag-inference",
-  "purpose": "Bounded synthetic retrieval-assisted response generation",
+  "workloadId": "synthetic-fine-tuning-adapter",
+  "profile": "fine-tuning",
+  "purpose": "Produce a versioned adapter from synthetic training examples.",
   "owner": {
-    "team": "cloud-ai-platform",
-    "service": "agentcore-rag-sandbox",
+    "team": "synthetic-ml-platform",
+    "service": "adapter-training-lab",
     "shutdownOwner": "platform-operations"
   },
   "dataClassification": "synthetic-public",
@@ -16,15 +16,15 @@
   },
   "capacity": {
     "acceleratorClass": "gpu",
-    "minAccelerators": 0,
-    "maxAccelerators": 2,
-    "queuePolicy": "autoscale"
+    "minAccelerators": 4,
+    "maxAccelerators": 8,
+    "queuePolicy": "reserved"
   },
   "admission": {
-    "resourceFlavor": "gpu-standard-latency",
-    "clusterQueue": "shared-inference",
-    "localQueue": "agent-rag",
-    "cohort": "interactive-services",
+    "resourceFlavor": "gpu-training-standard",
+    "clusterQueue": "shared-training",
+    "localQueue": "fine-tuning",
+    "cohort": "training-capacity",
     "borrowingLimit": 0,
     "admissionChecks": [
       "budget-approved",
@@ -32,12 +32,12 @@
       "data-boundary-approved",
       "human-approved"
     ],
-    "topologyIntent": "none",
+    "topologyIntent": "prefer-local",
     "gangScheduling": false,
-    "maxQueueWaitSeconds": 120,
+    "maxQueueWaitSeconds": 1800,
     "retryPolicy": {
       "maxAttempts": 2,
-      "backoffSeconds": 5
+      "backoffSeconds": 300
     },
     "preemptionPolicy": "never"
   },
@@ -45,11 +45,16 @@
     "budgetStopRequired": true,
     "teardownPlanRequired": true,
     "telemetryRequired": true,
-    "checkpointRequired": false,
+    "checkpointRequired": true,
     "requiresHumanApproval": true
   },
   "evidence": {
     "mode": "metadata-only",
-    "signals": ["latency", "error-rate", "gpu-hours", "queue-time", "cost-estimate"]
+    "signals": [
+      "gpu-hours",
+      "checkpoint-duration",
+      "cost-estimate",
+      "task-goodput"
+    ]
   }
 }

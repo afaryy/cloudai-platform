@@ -17,6 +17,7 @@ test("GPU workload profile schema requires an accountable, bounded workload cont
     "dataClassification",
     "runtime",
     "capacity",
+    "admission",
     "controls",
     "evidence"
   ]);
@@ -37,6 +38,7 @@ test("GPU workload profile schema defines a Kueue-aware admission contract", asy
   const schema = await readJson("workload-profile.schema.json", SCHEMA_DIR);
   const admission = schema.properties.admission;
 
+  assert.ok(schema.required.includes("admission"));
   assert.equal(admission.type, "object");
   assert.equal(admission.additionalProperties, false);
   assert.deepEqual(admission.required, [
@@ -69,6 +71,49 @@ test("GPU workload profile schema defines a Kueue-aware admission contract", asy
   ]);
 });
 
+test("all synthetic workload fixtures declare a complete Kueue admission boundary", async () => {
+  const fixtures = await Promise.all([
+    readJson("agent-rag-inference.synthetic.json", EXAMPLE_DIR),
+    readJson("batch-inference.synthetic.json", EXAMPLE_DIR),
+    readJson("fine-tuning.synthetic.json", EXAMPLE_DIR),
+    readJson("distributed-training.synthetic.json", EXAMPLE_DIR)
+  ]);
+
+  const [agent, batch, fineTuning, distributed] = fixtures;
+
+  assert.equal(agent.admission.preemptionPolicy, "never");
+  assert.equal(agent.admission.topologyIntent, "none");
+  assert.ok(agent.admission.admissionChecks.includes("human-approved"));
+
+  assert.equal(batch.admission.preemptionPolicy, "reclaim-within-cohort");
+  assert.equal(batch.admission.topologyIntent, "prefer-local");
+  assert.equal(batch.admission.borrowingLimit, 2);
+
+  assert.equal(fineTuning.profile, "fine-tuning");
+  assert.equal(fineTuning.admission.preemptionPolicy, "never");
+  assert.ok(fineTuning.admission.admissionChecks.includes("human-approved"));
+
+  assert.equal(distributed.profile, "distributed-training");
+  assert.equal(distributed.admission.gangScheduling, true);
+  assert.equal(distributed.admission.topologyIntent, "required-multi-node-domain");
+  assert.ok(distributed.admission.admissionChecks.includes("topology-ready"));
+
+  for (const fixture of fixtures) {
+    assertAdmissionBoundary(fixture);
+  }
+});
+
+test("admission boundary fails closed when a required admission control is missing", async () => {
+  const agent = await readJson("agent-rag-inference.synthetic.json", EXAMPLE_DIR);
+  const missingQueueWait = {
+    ...agent,
+    admission: { ...agent.admission }
+  };
+  delete missingQueueWait.admission.maxQueueWaitSeconds;
+
+  assert.throws(() => assertAdmissionBoundary(missingQueueWait), /maxQueueWaitSeconds/);
+});
+
 test("agent/RAG and batch fixtures declare different capacity and recovery needs", async () => {
   const agent = await readJson("agent-rag-inference.synthetic.json", EXAMPLE_DIR);
   const batch = await readJson("batch-inference.synthetic.json", EXAMPLE_DIR);
@@ -97,4 +142,25 @@ test("agent/RAG and batch fixtures declare different capacity and recovery needs
 
 async function readJson(fileName: string, directory: string): Promise<any> {
   return JSON.parse(await readFile(resolve(directory, fileName), "utf8"));
+}
+
+function assertAdmissionBoundary(fixture: any): void {
+  const admission = fixture.admission;
+  assert.ok(admission, `${fixture.workloadId} must declare admission`);
+
+  for (const field of [
+    "resourceFlavor",
+    "clusterQueue",
+    "localQueue",
+    "admissionChecks",
+    "topologyIntent",
+    "maxQueueWaitSeconds",
+    "retryPolicy",
+    "preemptionPolicy"
+  ]) {
+    assert.notEqual(admission[field], undefined, `${fixture.workloadId} admission requires ${field}`);
+  }
+
+  assert.ok(admission.admissionChecks.length > 0, `${fixture.workloadId} requires admission checks`);
+  assert.ok(admission.retryPolicy.maxAttempts >= 1, `${fixture.workloadId} requires retry attempts`);
 }

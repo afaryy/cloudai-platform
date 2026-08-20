@@ -13,6 +13,7 @@
     "dataClassification",
     "runtime",
     "capacity",
+    "admission",
     "controls",
     "evidence"
   ],
