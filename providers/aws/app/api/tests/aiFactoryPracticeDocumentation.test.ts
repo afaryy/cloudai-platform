@@ -60,6 +60,18 @@ test("GPU readiness documentation treats Kueue admission as design-only", async 
   assert.match(document, /future advanced allocation path/i);
 });
 
+test("GPU placement guidance joins admission, runtime outcomes, and FinOps without a deployment claim", async () => {
+  const readiness = await readFile(GPU_READINESS_PATH, "utf8");
+  const placement = await readFile(resolve(process.cwd(), "../../../../docs/architecture/ai-factory-workload-placement-comparison.md"), "utf8");
+
+  assert.match(readiness, /## Correlation-first observability panels/);
+  assert.match(readiness, /admission → GPU health →\s*queue\/checkpoint state → goodput\/SLO → cost/i);
+  assert.match(readiness, /No DCGM, Prometheus, Grafana, Kueue, GPU Operator, or GPU sandbox deployment/i);
+  assert.match(placement, /Placement is a contract decision, not a benchmark claim/);
+  assert.match(placement, /queue wait[\s\S]*GPU\/runtime health[\s\S]*checkpoint[\s\S]*goodput[\s\S]*cost/i);
+  assert.match(placement, /does not provision GPU nodes/i);
+});
+
 test("observability and FinOps documents define model, workload, infrastructure, and governance signals", async () => {
   const observability = await readFile(OBSERVABILITY_PATH, "utf8");
   const finops = await readFile(FINOPS_PATH, "utf8");

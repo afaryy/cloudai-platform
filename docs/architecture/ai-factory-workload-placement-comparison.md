@@ -42,6 +42,28 @@ The scores are architecture heuristics, not benchmark results. They should be
 replaced with measured latency, queue, goodput, utilisation, failure-recovery,
 and cost evidence before a real placement decision.
 
+## Placement is a contract decision, not a benchmark claim
+
+Select an option only when the workload contract can be operated through its
+full evidence chain: **queue wait and admission → allocated capacity →
+GPU/runtime health → checkpoint/retry state → goodput or SLO → cost and stop
+condition**. A faster benchmark, a currently idle accelerator, or a higher
+utilisation number is not enough to justify placement when the workload cannot
+demonstrate its data, recovery, ownership, or FinOps boundaries.
+
+This keeps the initial choice deliberately practical:
+
+- use device-plugin-backed Kubernetes for bounded interactive workloads that
+  need familiar application integration and latency controls;
+- add Kueue-style governance when a shared pool needs an explicit queue,
+  fair-share, borrowing, and preemption contract;
+- use managed training or HyperPod only when repeatable training lifecycle,
+  checkpointing, topology, and usage-reporting benefits justify the additional
+  operational cost; and
+- reserve future HPC/data-centre fabric for tightly coupled workloads whose
+  measured topology, storage, fabric, capacity, and resilience needs exceed
+  the managed options.
+
 ## Recommended routing by synthetic profile
 
 | Synthetic profile | Initial placement recommendation | Admission evidence required |
@@ -76,6 +98,10 @@ is missing:
 > topology-aware placement, high-throughput storage/fabric, and restart
 > evidence. The platform gate should make those requirements explicit before
 > any scarce accelerator capacity is admitted.
+
+The observability question follows the same order: can the platform correlate
+queue wait, GPU/runtime health, checkpoint/recovery state, task goodput, and
+cost back to the admitted workload owner before it expands capacity?
 
 ## Next safe experiment
 
