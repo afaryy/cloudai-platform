@@ -1,0 +1,61 @@
+{
+  "schemaVersion": "1.0",
+  "workloadId": "synthetic-distributed-training",
+  "profile": "distributed-training",
+  "purpose": "Validate a topology-aware multi-node training contract with synthetic data.",
+  "owner": {
+    "team": "synthetic-ml-platform",
+    "service": "distributed-training-lab",
+    "shutdownOwner": "platform-operations"
+  },
+  "dataClassification": "synthetic-public",
+  "runtime": {
+    "type": "future-hpc",
+    "imagePolicy": "approved-digest-only",
+    "modelPolicy": "approved-model-version-only"
+  },
+  "capacity": {
+    "acceleratorClass": "gpu",
+    "minAccelerators": 8,
+    "maxAccelerators": 32,
+    "queuePolicy": "reserved"
+  },
+  "admission": {
+    "resourceFlavor": "gpu-training-topology",
+    "clusterQueue": "shared-training",
+    "localQueue": "distributed-training",
+    "cohort": "training-capacity",
+    "borrowingLimit": 0,
+    "admissionChecks": [
+      "budget-approved",
+      "image-approved",
+      "data-boundary-approved",
+      "topology-ready",
+      "human-approved"
+    ],
+    "topologyIntent": "required-multi-node-domain",
+    "gangScheduling": true,
+    "maxQueueWaitSeconds": 3600,
+    "retryPolicy": {
+      "maxAttempts": 2,
+      "backoffSeconds": 300
+    },
+    "preemptionPolicy": "never"
+  },
+  "controls": {
+    "budgetStopRequired": true,
+    "teardownPlanRequired": true,
+    "telemetryRequired": true,
+    "checkpointRequired": true,
+    "requiresHumanApproval": true
+  },
+  "evidence": {
+    "mode": "metadata-only",
+    "signals": [
+      "gpu-hours",
+      "checkpoint-duration",
+      "energy-estimate",
+      "task-goodput"
+    ]
+  }
+}
