@@ -191,7 +191,7 @@ jobs:
           grep -q 'aws ec2 describe-instance-type-offerings' "$workflow"
           grep -q 'TF_VAR_gpu_desired_size=1' "$workflow"
           grep -q 'TF_VAR_gpu_desired_size=0' "$workflow"
-          grep -q 'kubectl get workload -n gpu-poc' "$workflow"
+          grep -q 'kubectl get workloads.kueue.x-k8s.io -n gpu-poc' "$workflow"
           grep -q 'one_allocatable_gpu' "$workflow"
           ! grep -q 'terraform destroy' "$workflow"
           ! grep -q '^  schedule:' "$workflow"
