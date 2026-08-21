@@ -34,6 +34,7 @@ The repository can now demonstrate:
 - **P4e Helm-on-EKS Validation Workflow:** GitHub Actions OIDC, temporary kubeconfig, node readiness check, Helm lint/render, and namespace dry-run against the active sandbox without installing workloads
 - **P4f Helm Release Workflow:** optional sandbox Helm install, rollout observation, rollback, uninstall, and namespace cleanup with ClusterIP-only exposure and synthetic workload boundaries
 - **P4g Argo CD GitOps Workflow:** pinned Argo CD bootstrap, private-repository access, explicit manual sync, exact revision verification, health verification, status, ordered cleanup, and post-exercise destroy for the synthetic Helm workload
+- **YY-38 EKS GPU + Kueue POC:** approved design and implementation plan for a synthetic, one-node GPU admission path; source implementation and any live GPU apply remain pending, and a destroyed EKS sandbox must be recovered separately before use.
 - **P8 Real Bedrock Sandbox:** bounded synthetic validation for model access
   and Guardrails using least privilege, manual approval, budget controls, and
   sanitized evidence
