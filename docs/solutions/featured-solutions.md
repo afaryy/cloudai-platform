@@ -60,6 +60,45 @@ How the existing CloudAI control-plane patterns can extend into a vendor-neutral
 
 It does not implement a GPU cluster, Slurm deployment, distributed training job, Prometheus/Grafana stack, or production AI data centre.
 
+## Bounded EKS GPU + Kueue POC
+
+- **Status:** Implemented — source path; runtime pending
+- **Engineering focus:** One-node GPU admission, queue governance, and
+  fail-closed operating controls
+- **Primary technologies:** Terraform, Amazon EKS, NVIDIA device plugin,
+  Kueue, GitHub Actions OIDC
+
+### Problem
+
+Shared accelerator capacity needs more than a GPU request in a Pod spec. The
+platform must make node capacity, identity, queue admission, image provenance,
+runtime bounds, cost approval, and shutdown responsibilities explicit.
+
+### Scope
+
+The [EKS GPU + Kueue POC design](./eks-gpu-kueue-poc-design.md) and
+[operator runbook](./eks-gpu-kueue-poc-runbook.md) define a Terraform source
+path that attaches only to an existing EKS sandbox. It has one on-demand GPU
+node at most, scale-to-zero defaults, a pinned NVIDIA device plugin and Kueue
+chart, a synthetic CUDA Job, and a protected GitHub Actions lifecycle.
+
+### Technical evidence
+
+- Isolated Terraform module and remote-state environment; no second VPC or
+  EKS control plane.
+- Digest-pinned synthetic image, exactly one GPU request/limit, five-minute
+  active deadline, no retry, and bounded retention.
+- Manual `preflight`, `plan`, `apply`, `validate`, and `stop` workflow modes;
+  protected OIDC, budget flag, existing-cluster check, quota/offering check,
+  and sanitised boolean/category evidence.
+
+### What it does not claim
+
+The source implementation is not a deployed GPU runtime. It has not created
+or validated a GPU node, device-plugin allocation, Kueue admission, CUDA Job
+completion, DCGM/Prometheus/Grafana telemetry, HyperPod, Slurm, or any
+data-centre capacity.
+
 ## AI Release Engineering on EKS
 
 - **Status:** Implemented — sandbox-validated

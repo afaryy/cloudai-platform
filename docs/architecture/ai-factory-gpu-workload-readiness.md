@@ -2,13 +2,16 @@
 
 ## Status and boundary
 
-**Design and research track — no GPU or AI data-centre deployment.**
+**Source implementation ready — no live GPU or AI data-centre deployment.**
 
 This document defines the readiness model for future accelerated workloads in
-the CloudAI Platform portfolio. It does not create a GPU node, Kubernetes GPU
-operator, SageMaker HyperPod cluster, Slurm scheduler, model-training job, or
-data-centre resource. Any future sandbox requires a separate reviewed design,
-budget, quota, access, observability, rollback, and teardown plan.
+the CloudAI Platform portfolio. The [EKS GPU + Kueue POC design](../solutions/eks-gpu-kueue-poc-design.md)
+now has a Terraform and protected GitHub Actions source implementation, but
+that source implementation is not a deployed GPU runtime. It does not create a
+GPU node, Kubernetes GPU operator, SageMaker HyperPod cluster, Slurm scheduler,
+model-training job, or data-centre resource by default. Any future sandbox run
+requires its separate reviewed design, budget, quota, access, observability,
+rollback, and teardown controls.
 
 The goal is to answer an architecture question before selecting hardware:
 
@@ -101,9 +104,8 @@ shared-capacity operating model: which team may wait for capacity, who may
 borrow it, which prerequisites must pass, or when a job should be preempted.
 
 The workload-readiness schema therefore introduces a **Kueue-aware admission
-contract**. It is metadata-only and does not create live Kueue resources. The
-contract records the intent that a future Kueue `LocalQueue` and `ClusterQueue`
-would enforce:
+contract**. The schema remains metadata-only; it records the intent that a
+Kueue `LocalQueue` and `ClusterQueue` would enforce:
 
 | Contract field | Future scheduler decision |
 | --- | --- |
@@ -120,8 +122,9 @@ existing fixtures valid while the design contract is introduced.
 
 [Dynamic Resource Allocation](https://kubernetes.io/docs/concepts/scheduling-eviction/dynamic-resource-allocation/)
 is a future advanced allocation path for devices and topology-aware resources;
-it does not replace the device-plugin baseline in this portfolio today. A real
-Kueue or DRA deployment requires the separately reviewed GPU POC plan,
+it does not replace the device-plugin baseline in this portfolio today. The
+source path deliberately selects the NVIDIA device plugin rather than DRA. A
+live Kueue or DRA deployment requires the separately reviewed GPU POC plan,
 Terraform/GitHub Actions delivery path, budget cap, telemetry and teardown
 controls.
 
@@ -205,8 +208,9 @@ The project does not currently deploy these GPU tools. The current AgentCore
 POC has bounded CloudWatch EMF metrics, dashboards, and alarms; that evidence
 is a foundation for the metadata and ownership model, not GPU telemetry proof.
 
-**No DCGM, Prometheus, Grafana, Kueue, GPU Operator, or GPU sandbox deployment
-is included in this guidance.**
+**No DCGM, Prometheus, Grafana, GPU Operator, or live GPU sandbox deployment
+is included in this guidance.** The POC source declares a pinned Kueue chart,
+but does not claim that Kueue has been deployed or admitted a workload.
 
 ## FinOps and capacity controls
 
@@ -257,16 +261,16 @@ boundaries.
 | Capability | Current project evidence | Next safe increment |
 | --- | --- | --- |
 | Workload contract | Documentation-first service, batch, fine-tuning, and distributed-training profiles; synthetic Agent/RAG, batch, fine-tuning, and distributed-training fixtures with contract tests | Add an embeddings/RAG-indexing fixture when a new readiness decision requires it |
-| Cloud foundations | Terraform, GitHub OIDC, IAM, EKS release patterns, bounded CloudWatch | Map GPU node/identity/quota controls without deploying nodes |
+| Cloud foundations | Terraform, GitHub OIDC, IAM, EKS release patterns, bounded CloudWatch, and an isolated one-node GPU + Kueue source path | Run only after separate environment approval verifies the existing EKS sandbox, budget, quota, and offering |
 | Observability | AgentCore EMF/dashboard/alarm contract | Define GPU metric names and dashboard panels using synthetic fixtures |
 | FinOps | AI FinOps principles and bounded cost metadata | Create a synthetic GPU-hour/queue/cost allocation example |
-| Scheduling | Conceptual placement and queue boundaries | Compare Kubernetes scheduler, Kueue, and managed task governance |
-| Accelerated runtime | No GPU deployment | Review one small, time-boxed sandbox only after budget and teardown approval |
+| Scheduling | Conceptual placement and queue boundaries plus a Kueue source contract | Compare Kubernetes scheduler, Kueue, and managed task governance |
+| Accelerated runtime | Source implementation is not a deployed GPU runtime | Review one small, time-boxed sandbox only after budget and teardown approval |
 | Data-centre readiness | AI Factory infrastructure lens and public research | Add power, cooling, storage, fabric, sovereignty, and capacity checklist |
 
 ## Explicit non-goals
 
-- No GPU instance provisioning in this task.
+- No live GPU instance provisioning or deployment validation is claimed by this task.
 - No NVIDIA driver, GPU Operator, DCGM Exporter, HyperPod, Slurm, or EFA
   deployment.
 - No model training, fine-tuning, or high-scale inference.

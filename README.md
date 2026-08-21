@@ -41,6 +41,7 @@ provider views.
 | [AI Release Engineering on EKS](docs/solutions/featured-solutions.md#ai-release-engineering-on-eks) | **Implemented — sandbox-validated** | Terraform, Helm, GitOps, rollout, rollback, and teardown discipline for a synthetic workload. |
 | [Governed RAG Lifecycle](docs/solutions/featured-solutions.md#governed-rag-lifecycle) | **Implemented — local synthetic workflow** | Provenance, source lifecycle, evaluation artifacts, and deterministic local quality checks. |
 | [Bounded Bedrock Sandbox](docs/solutions/featured-solutions.md#bounded-bedrock-sandbox) | **Implemented — bounded synthetic sandbox validation** | Short-lived identity, least-privilege access, manual approval, and narrow synthetic Guardrail checks. |
+| [Bounded EKS GPU + Kueue POC](docs/solutions/featured-solutions.md#bounded-eks-gpu--kueue-poc) | **Implemented — source path; runtime pending** | One-node, scale-to-zero Terraform and protected workflow path for a synthetic CUDA admission check. |
 
 [Read the featured-solution evidence and boundaries →](docs/solutions/featured-solutions.md)
 
@@ -57,6 +58,9 @@ provider views.
   evidence; it is not unconstrained provider access or production operation.
 - **Design / future reference:** an architecture mapping or documented boundary
   without runtime implementation evidence.
+- **Implemented — source path; runtime pending:** reviewed code, static
+  controls, and local tests are present, but the associated cloud runtime has
+  not been deployed or validated.
 
 ## What This Portfolio Demonstrates
 
@@ -97,11 +101,12 @@ AWS is the first provider with bounded implementation and validation evidence;
 the synthetic AgentCore Gateway + Runtime + RAG sandbox is the current AWS
 flagship POC. Azure and GCP remain reference mappings, not provider-parity
 implementations. AI Factory and GPU capacity patterns remain future design
-scope, and the AgentCore sandbox does not claim a production or autonomous
-agent platform.
+scope beyond a bounded source path for a one-node EKS GPU + Kueue proof of
+concept; that source implementation is not a deployed GPU runtime. The
+AgentCore sandbox does not claim a production or autonomous agent platform.
 The [AI Workload Operating Contract](docs/practices/ai-workload-operating-contract.md)
 defines this as a future/design practice track within the portfolio: it does
-not add a scheduler, GPU cluster, or cloud runtime.
+not add a scheduler, GPU cluster, or cloud runtime by default.
 
 ## Run Locally in Mock Mode
 
