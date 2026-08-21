@@ -50,11 +50,12 @@ test("AI Factory documentation distinguishes orchestration from future schedulin
   assert.match(document, /does not deploy Slurm/);
 });
 
-test("GPU readiness documentation treats Kueue admission as design-only", async () => {
+test("GPU readiness documentation distinguishes the source path from a deployed runtime", async () => {
   const document = await readFile(GPU_READINESS_PATH, "utf8");
 
   assert.match(document, /Kueue-aware admission contract/);
-  assert.match(document, /does not create live Kueue resources/i);
+  assert.match(document, /EKS GPU \+ Kueue POC design/);
+  assert.match(document, /source implementation is not a deployed GPU runtime/i);
   assert.match(document, /device plugins.*baseline/i);
   assert.match(document, /Dynamic Resource Allocation/);
   assert.match(document, /future advanced allocation path/i);
@@ -66,10 +67,11 @@ test("GPU placement guidance joins admission, runtime outcomes, and FinOps witho
 
   assert.match(readiness, /## Correlation-first observability panels/);
   assert.match(readiness, /admission → GPU health →\s*queue\/checkpoint state → goodput\/SLO → cost/i);
-  assert.match(readiness, /No DCGM, Prometheus, Grafana, Kueue, GPU Operator, or GPU sandbox deployment/i);
+  assert.match(readiness, /No DCGM, Prometheus, Grafana, GPU Operator, or live GPU sandbox deployment/i);
   assert.match(placement, /Placement is a contract decision, not a benchmark claim/);
+  assert.match(placement, /one-node[\s\S]*Kueue[\s\S]*proof of concept/i);
   assert.match(placement, /queue wait[\s\S]*GPU\/runtime health[\s\S]*checkpoint[\s\S]*goodput[\s\S]*cost/i);
-  assert.match(placement, /does not provision GPU nodes/i);
+  assert.match(placement, /does not provision\s+GPU nodes/i);
 });
 
 test("observability and FinOps documents define model, workload, infrastructure, and governance signals", async () => {
@@ -93,11 +95,12 @@ test("AI Factory practice navigation is present without a false runtime claim", 
   assert.doesNotMatch(readme, /Implemented — Slurm/);
 });
 
-test("AI Factory status records complete synthetic admission fixtures without a runtime claim", async () => {
+test("AI Factory status records the source path without a runtime claim", async () => {
   const status = await readFile(CURRENT_STATUS_PATH, "utf8");
   const readiness = await readFile(GPU_READINESS_PATH, "utf8");
 
   assert.match(status, /synthetic Agent\/RAG, batch, fine-tuning, and distributed-training workload profiles/);
-  assert.match(readiness, /synthetic Agent\/RAG, batch, fine-tuning, and distributed-training fixtures/);
-  assert.match(status, /still no current GPU, scheduler, or AI Factory implementation/);
+  assert.match(status, /one-node GPU \+ Kueue source path/);
+  assert.match(readiness, /source implementation is not a deployed GPU runtime/i);
+  assert.match(status, /still no deployed GPU runtime, scheduler validation, or AI Factory implementation/);
 });

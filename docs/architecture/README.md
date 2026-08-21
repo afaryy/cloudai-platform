@@ -21,6 +21,10 @@ provider boundaries, and future capacity design.
   design-only routing criteria and correlation-first evidence chain for
   Kubernetes, queue governance, managed training, future HPC, and managed
   inference; no GPU deployment.
+- [EKS GPU + Kueue POC Design](../solutions/eks-gpu-kueue-poc-design.md) and
+  [runbook](../solutions/eks-gpu-kueue-poc-runbook.md) — a future synthetic GPU
+  admission path that attaches only to an active EKS sandbox; it does not claim
+  a deployed GPU runtime or authorise EKS recovery, GPU apply, stop, or teardown.
 - [AgentCore Governed RAG POC](agentcore-governed-rag-poc.md) — deployed synthetic sandbox with protected ingestion, completed direct-preflight/Gateway verification, and bounded CloudWatch observability
   using a Gateway, Runtime, Knowledge Base, approved inference profile, and synthetic knowledge-retrieval contract.
 - [Three-Cloud Governed RAG Reference](three-cloud-governed-rag-reference.md)

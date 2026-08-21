@@ -2,9 +2,10 @@
 
 ## Purpose and boundary
 
-This is a design-only comparison for YY-11. It does not provision GPU nodes,
-install a scheduler, create a managed training environment, or reserve data-
-centre capacity. The comparison uses synthetic workload contracts and asks one
+This is a comparison and source-path review for YY-11. It does not provision
+GPU nodes, install a scheduler, create a managed training environment, or
+reserve data-centre capacity. The bounded EKS GPU + Kueue source path remains
+undeployed, so this comparison uses synthetic workload contracts and asks one
 question:
 
 > Which execution pattern gives a workload the right capacity, control,
@@ -105,12 +106,17 @@ cost back to the admitted workload owner before it expands capacity?
 
 ## Next safe experiment
 
-The next experiment should remain metadata-only:
+The next safe runtime step is a **one-node Kueue proof of concept**, using the
+[reviewed design](../solutions/eks-gpu-kueue-poc-design.md) and
+[runbook](../solutions/eks-gpu-kueue-poc-runbook.md). Its source implementation
+is not a deployed GPU runtime. It must remain bounded to one on-demand node,
+synthetic data, a digest-pinned CUDA smoke Job, a protected budget flag, and a
+separate operator confirmation.
 
-1. Take the four synthetic profiles and score each placement option.
-2. Record the expected signals and fail-closed controls.
-3. Compare the score with a hypothetical quota and budget envelope.
-4. Do not create GPU capacity until a separate sandbox design is approved.
+Before that run, take the four synthetic profiles and score each placement
+option; record the expected signals and fail-closed controls; and compare the
+score with a quota and budget envelope. Do not expand GPU capacity or move to
+HyperPod, Slurm, or data-centre work from this POC.
 
 ## References
 

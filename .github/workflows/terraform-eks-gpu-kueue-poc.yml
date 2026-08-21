@@ -1,0 +1,297 @@
+name: terraform-eks-gpu-kueue-poc
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "Bounded GPU POC operation"
+        required: true
+        default: "preflight"
+        type: choice
+        options:
+          - preflight
+          - plan
+          - apply
+          - validate
+          - stop
+      confirmation:
+        description: "Exact confirmation phrase required for apply or stop"
+        required: false
+        default: ""
+        type: string
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: cloudai-eks-sandbox-control-plane
+  cancel-in-progress: false
+
+jobs:
+  gpu_poc:
+    name: Bounded EKS GPU Kueue POC
+    runs-on: ubuntu-latest
+    environment: aws-sandbox
+    env:
+      AWS_ROLE_TO_ASSUME: ${{ vars.AWS_ROLE_TO_ASSUME || secrets.AWS_ROLE_TO_ASSUME }}
+      AWS_REGION: ${{ vars.AWS_REGION || 'ap-southeast-2' }}
+      TF_BACKEND_BUCKET: ${{ vars.TF_BACKEND_BUCKET }}
+      TF_BACKEND_LOCK_TABLE: ${{ vars.TF_BACKEND_LOCK_TABLE }}
+      TF_STATE_KEY_PREFIX: ${{ vars.TF_STATE_KEY_PREFIX }}
+      TF_STATE_KEY: ${{ vars.TF_STATE_KEY_PREFIX }}/eks-gpu-kueue-poc/terraform.tfstate
+      TF_VAR_gpu_instance_type: ${{ vars.TF_VAR_GPU_INSTANCE_TYPE }}
+      TF_VAR_gpu_poc_subnet_ids: ${{ vars.TF_VAR_GPU_POC_SUBNET_IDS }}
+      TF_VAR_cuda_smoke_image: ${{ vars.TF_VAR_CUDA_SMOKE_IMAGE }}
+      TF_VAR_kueue_chart_version: ${{ vars.TF_VAR_KUEUE_CHART_VERSION }}
+      TF_VAR_gpu_min_size: "0"
+      TF_VAR_gpu_max_size: "1"
+      GPU_POC_BUDGET_ALERT_CONFIGURED: ${{ vars.GPU_POC_BUDGET_ALERT_CONFIGURED }}
+      EKS_CLUSTER_NAME: cloudai-platform-eks-sandbox
+    defaults:
+      run:
+        working-directory: providers/aws/infra/terraform/envs/eks-gpu-kueue-poc
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Explain bounded lifecycle
+        run: |
+          echo "This workflow attaches only to the existing EKS sandbox and operates a single synthetic GPU POC node."
+          echo "It does not create an EKS cluster, change a service quota, retry capacity, or select a fallback instance type."
+          echo "Apply sets desired GPU capacity to one; stop sets desired GPU capacity to zero."
+
+      - name: Validate Terraform source without backend
+        if: ${{ inputs.mode == 'validate' }}
+        run: |
+          terraform init -backend=false
+          terraform fmt -check -recursive
+          terraform validate
+          terraform test
+
+      - name: Check protected environment values
+        if: ${{ inputs.mode != 'validate' }}
+        env:
+          MODE: ${{ inputs.mode }}
+        run: |
+          missing=0
+          for name in AWS_ROLE_TO_ASSUME AWS_REGION TF_BACKEND_BUCKET TF_BACKEND_LOCK_TABLE TF_STATE_KEY_PREFIX GPU_POC_BUDGET_ALERT_CONFIGURED; do
+            if [ -z "${!name}" ]; then
+              echo "::error::$name is required in the aws-sandbox environment."
+              missing=1
+            fi
+          done
+          if [ "$GPU_POC_BUDGET_ALERT_CONFIGURED" != "true" ]; then
+            echo "::error::GPU_POC_BUDGET_ALERT_CONFIGURED must be exactly true before any remote POC operation."
+            missing=1
+          fi
+          if [ "$MODE" != "validate" ]; then
+            for name in TF_VAR_gpu_instance_type TF_VAR_gpu_poc_subnet_ids TF_VAR_cuda_smoke_image TF_VAR_kueue_chart_version; do
+              if [ -z "${!name}" ]; then
+                echo "::error::$name is required for Terraform remote operations."
+                missing=1
+              fi
+            done
+            if ! printf '%s' "$TF_VAR_cuda_smoke_image" | grep -Eq '@sha256:[a-f0-9]{64}$'; then
+              echo "::error::TF_VAR_cuda_smoke_image must be a digest-pinned image reference."
+              missing=1
+            fi
+            if ! jq -e 'type == "array" and length > 0 and all(.[]; type == "string" and startswith("subnet-"))' <<<"$TF_VAR_gpu_poc_subnet_ids" >/dev/null; then
+              echo "::error::TF_VAR_gpu_poc_subnet_ids must be a non-empty JSON list of subnet IDs."
+              missing=1
+            fi
+          fi
+          exit "$missing"
+
+      - name: Check apply or stop confirmation
+        if: ${{ inputs.mode == 'apply' || inputs.mode == 'stop' }}
+        env:
+          MODE: ${{ inputs.mode }}
+          CONFIRMATION: ${{ inputs.confirmation }}
+        run: |
+          if [ "$MODE" = "apply" ] && [ "$CONFIRMATION" != "I_UNDERSTAND_EKS_GPU_KUEUE_POC_APPLY" ]; then
+            echo "::error::apply requires I_UNDERSTAND_EKS_GPU_KUEUE_POC_APPLY."
+            exit 1
+          fi
+          if [ "$MODE" = "stop" ] && [ "$CONFIRMATION" != "I_UNDERSTAND_EKS_GPU_KUEUE_POC_STOP" ]; then
+            echo "::error::stop requires I_UNDERSTAND_EKS_GPU_KUEUE_POC_STOP."
+            exit 1
+          fi
+
+      - name: Configure AWS credentials through GitHub OIDC
+        if: ${{ inputs.mode != 'validate' }}
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ env.AWS_REGION }}
+          mask-aws-account-id: true
+
+      - name: Terraform init with isolated remote backend
+        if: ${{ inputs.mode != 'validate' }}
+        run: |
+          terraform init \
+            -backend-config="bucket=${TF_BACKEND_BUCKET}" \
+            -backend-config="key=${TF_STATE_KEY}" \
+            -backend-config="region=${AWS_REGION}" \
+            -backend-config="dynamodb_table=${TF_BACKEND_LOCK_TABLE}" \
+            -backend-config="encrypt=true"
+
+      - name: Preflight existing EKS, quota, and offering
+        if: ${{ inputs.mode == 'preflight' || inputs.mode == 'apply' }}
+        working-directory: .
+        run: |
+          cluster_json=$(aws eks describe-cluster --region "$AWS_REGION" --name "$EKS_CLUSTER_NAME" --output json)
+          cluster_status=$(jq -r '.cluster.status' <<<"$cluster_json")
+          cluster_version=$(jq -r '.cluster.version' <<<"$cluster_json")
+          if [ "$cluster_status" != "ACTIVE" ]; then
+            echo "::error::Existing EKS sandbox must be ACTIVE; this workflow will not create or recover it."
+            exit 1
+          fi
+
+          quota_value=$(aws service-quotas list-service-quotas \
+            --service-code ec2 \
+            --region "$AWS_REGION" \
+            --query 'Quotas[?contains(QuotaName, `Running On-Demand G and VT instances`)].Value | [0]' \
+            --output text)
+          if [ -z "$quota_value" ] || [ "$quota_value" = "None" ] || [ "$quota_value" = "0" ]; then
+            echo "::error::The selected on-demand GPU quota is unavailable. This workflow will not request a quota increase."
+            exit 1
+          fi
+
+          subnet_ids=($(jq -r '.[]' <<<"$TF_VAR_gpu_poc_subnet_ids"))
+          subnet_azs=$(aws ec2 describe-subnets \
+            --region "$AWS_REGION" \
+            --subnet-ids "${subnet_ids[@]}" \
+            --query 'Subnets[].AvailabilityZone' \
+            --output json)
+          if [ "$(jq 'length' <<<"$subnet_azs")" != "$(jq 'length' <<<"$TF_VAR_gpu_poc_subnet_ids")" ]; then
+            echo "::error::Every approved GPU subnet must resolve in the current account and region."
+            exit 1
+          fi
+
+          offerings=$(aws ec2 describe-instance-type-offerings \
+            --region "$AWS_REGION" \
+            --location-type availability-zone \
+            --filters "Name=instance-type,Values=$TF_VAR_gpu_instance_type" \
+            --output json)
+          while IFS= read -r availability_zone; do
+            if ! jq -e --arg availability_zone "$availability_zone" \
+              '[.InstanceTypeOfferings[].Location] | index($availability_zone) != null' <<<"$offerings" >/dev/null; then
+              echo "::error::The selected GPU type is not offered in every approved subnet Availability Zone. This workflow will not substitute a subnet or instance type."
+              exit 1
+            fi
+          done < <(jq -r '.[]' <<<"$subnet_azs")
+
+          printf '{"cluster_active":true,"cluster_version_checked":%s,"budget_alert_configured":true,"gpu_quota_available":true,"approved_subnets_checked":true,"instance_offering_available":true,"digest_pinned_image":true}\n' \
+            "$( [ -n "$cluster_version" ] && echo true || echo false )" > /tmp/gpu-poc-preflight-evidence.json
+
+      - name: Upload sanitised preflight evidence
+        if: ${{ inputs.mode == 'preflight' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: eks-gpu-kueue-poc-preflight-evidence
+          path: /tmp/gpu-poc-preflight-evidence.json
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Terraform plan without saved artifact
+        if: ${{ inputs.mode == 'plan' }}
+        run: |
+          terraform validate
+          if ! terraform plan -input=false -no-color > /tmp/gpu-poc-plan.log 2>&1; then
+            echo "::error::Terraform plan failed; raw Terraform output is not published."
+            exit 1
+          fi
+          echo '{"terraform_plan_succeeded":true}' > /tmp/gpu-poc-plan-evidence.json
+
+      - name: Upload sanitised plan evidence
+        if: ${{ inputs.mode == 'plan' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: eks-gpu-kueue-poc-plan-evidence
+          path: /tmp/gpu-poc-plan-evidence.json
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Apply one-node GPU POC after fresh plan
+        if: ${{ inputs.mode == 'apply' }}
+        run: |
+          export TF_VAR_gpu_desired_size=1
+          terraform validate
+          if ! terraform plan -input=false -no-color -out=tfplan > /tmp/gpu-poc-apply-plan.log 2>&1; then
+            echo "::error::Terraform apply plan failed; raw Terraform output is not published."
+            exit 1
+          fi
+          if ! terraform apply -input=false -auto-approve -no-color tfplan > /tmp/gpu-poc-apply.log 2>&1; then
+            echo "::error::Terraform apply failed; raw Terraform output is not published."
+            exit 1
+          fi
+          echo '{"terraform_apply_succeeded":true,"gpu_desired_size":1}' > /tmp/gpu-poc-apply-evidence.json
+
+      - name: Upload sanitised apply evidence
+        if: ${{ inputs.mode == 'apply' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: eks-gpu-kueue-poc-apply-evidence
+          path: /tmp/gpu-poc-apply-evidence.json
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Validate Kueue admission and synthetic CUDA completion
+        if: ${{ inputs.mode == 'validate' }}
+        working-directory: .
+        env:
+          KUBECONFIG: /tmp/eks-gpu-kueue-poc-kubeconfig
+        run: |
+          if ! aws eks update-kubeconfig --region "$AWS_REGION" --name "$EKS_CLUSTER_NAME" --kubeconfig "$KUBECONFIG" > /tmp/gpu-poc-kubeconfig.log 2>&1; then
+            echo "::error::Unable to prepare the temporary kubeconfig; raw cloud output is not published."
+            exit 1
+          fi
+          nodes_json=$(kubectl get nodes -l cloudai.platform/workload-class=gpu-poc -o json)
+          ready_node_count=$(jq '[.items[] | select(any(.status.conditions[]?; .type == "Ready" and .status == "True"))] | length' <<<"$nodes_json")
+          gpu_count=$(jq '[.items[].status.allocatable["nvidia.com/gpu"] // "0" | tonumber] | add // 0' <<<"$nodes_json")
+          if [ "$ready_node_count" != "1" ] || [ "$gpu_count" != "1" ]; then
+            echo "::error::Expected exactly one allocatable GPU from the bounded GPU POC node group."
+            exit 1
+          fi
+          workload_json=$(kubectl get workloads.kueue.x-k8s.io -n gpu-poc -o json | jq -e '[.items[] | select([.metadata.ownerReferences[]? | select(.kind == "Job" and .name == "cuda-smoke")] | length == 1)] | if length == 1 then .[0] else error("expected exactly one CUDA Job workload") end')
+          jq -e 'any(.status.conditions[]?; .type == "QuotaReserved" and .status == "True") and any(.status.conditions[]?; .type == "Admitted" and .status == "True")' <<<"$workload_json" >/dev/null
+          jq -e '[.status.admission.podSetAssignments[]?.flavors["nvidia.com/gpu"]] | index("gpu-poc-on-demand") != null' <<<"$workload_json" >/dev/null
+          kubectl wait --for=condition=complete job/cuda-smoke -n gpu-poc --timeout=6m
+          echo '{"one_ready_gpu_node":true,"one_allocatable_gpu":true,"kueue_quota_reserved":true,"kueue_admitted":true,"resource_flavor_checked":true,"synthetic_cuda_job_completed":true}' > /tmp/gpu-poc-validation-evidence.json
+
+      - name: Upload sanitised validation evidence
+        if: ${{ inputs.mode == 'validate' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: eks-gpu-kueue-poc-validation-evidence
+          path: /tmp/gpu-poc-validation-evidence.json
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Stop GPU POC by scaling only to zero
+        if: ${{ inputs.mode == 'stop' }}
+        run: |
+          export TF_VAR_gpu_desired_size=0
+          terraform validate
+          if ! terraform plan -input=false -no-color -out=tfplan > /tmp/gpu-poc-stop-plan.log 2>&1; then
+            echo "::error::Terraform stop plan failed; raw Terraform output is not published."
+            exit 1
+          fi
+          if ! terraform apply -input=false -auto-approve -no-color tfplan > /tmp/gpu-poc-stop.log 2>&1; then
+            echo "::error::Terraform stop failed; raw Terraform output is not published."
+            exit 1
+          fi
+          echo '{"terraform_stop_succeeded":true,"gpu_desired_size":0}' > /tmp/gpu-poc-stop-evidence.json
+
+      - name: Upload sanitised stop evidence
+        if: ${{ inputs.mode == 'stop' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: eks-gpu-kueue-poc-stop-evidence
+          path: /tmp/gpu-poc-stop-evidence.json
+          if-no-files-found: error
+          retention-days: 7
