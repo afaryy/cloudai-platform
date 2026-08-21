@@ -7,7 +7,7 @@
 
 ## Decision
 
-The POC uses the existing personal EKS sandbox in `ap-southeast-2` and adds a separate Terraform-managed on-demand GPU managed node group. One short CUDA smoke-test Job runs under Kueue admission control. GitHub Actions through the protected `aws-sandbox` environment and short-lived GitHub OIDC credentials is the only mutation path.
+The POC attaches only to an existing, `ACTIVE` personal EKS sandbox in `ap-southeast-2` and adds a separate Terraform-managed on-demand GPU managed node group. One short CUDA smoke-test Job runs under Kueue admission control. GitHub Actions through the protected `aws-sandbox` environment and short-lived GitHub OIDC credentials is the only mutation path. If the previous EKS sandbox has been destroyed, GPU POC preflight fails closed; EKS recovery remains a separate, explicitly approved operation.
 
 The repository's EKS sandbox target is Kubernetes 1.31. The POC therefore uses the NVIDIA Kubernetes device plugin, not Dynamic Resource Allocation (DRA). AWS recommends DRA for new static-capacity deployments on Kubernetes 1.34 or later. A future upgrade needs a separate design review; DRA and the device plugin must not coexist on a GPU node.
 
@@ -87,9 +87,9 @@ Raw node names, account IDs, IP addresses, registry credentials, and unredacted 
 
 Implementation creates the following ordered workflow contract:
 
-1. **Preflight (read-only):** verifies regional quota, one eligible instance offering, EKS version, AMI compatibility, protected environment, OIDC identity, image digest, and a human-owned budget alert. It uploads sanitised pass/fail evidence.
+1. **Preflight (read-only):** verifies that the named EKS sandbox exists and is `ACTIVE`, then verifies regional quota, one eligible instance offering, EKS version, AMI compatibility, protected environment, OIDC identity, image digest, and a human-owned budget alert. It uploads sanitised pass/fail evidence. A missing or inactive cluster is a recovery prerequisite, not a reason to create a cluster in this workflow.
 2. **Plan:** runs Terraform formatting, validation, and a backend-backed plan without mutation.
-3. **Apply:** requires `aws-sandbox` approval, a POC-specific exact confirmation, and a current successful preflight. Terraform creates all POC resources.
+3. **Apply:** requires `aws-sandbox` approval, a POC-specific exact confirmation, and a current successful preflight. It sets dedicated GPU desired capacity to `1` for the bounded smoke-test window because Kueue does not scale an EKS managed node group, then Terraform creates all POC resources.
 4. **Validate:** verifies node readiness, GPU allocation, Kueue admission, and Job completion; it fails closed on any missing evidence.
 5. **Stop:** changes desired GPU capacity to zero only after a distinct confirmation. It preserves definitions and state for repeatable demos.
 6. **Teardown:** is excluded from YY-38. A separate plan and explicit confirmation are required before any deletion workflow exists or runs.

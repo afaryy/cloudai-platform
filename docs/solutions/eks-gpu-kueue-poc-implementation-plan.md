@@ -13,9 +13,9 @@
 ## Global Constraints
 
 - Use \`ap-southeast-2\`. Never commit account IDs, ARNs, Terraform state, endpoints, kubeconfig, credentials, or raw cloud logs.
-- EKS 1.31 uses the NVIDIA device plugin only. Do not install DRA on a GPU node.
+- EKS 1.31 uses the NVIDIA device plugin only. Do not install DRA on a GPU node. The GPU workflow attaches only to an existing \`ACTIVE\` EKS sandbox; a missing cluster is a separate EKS recovery operation, never an implicit GPU POC action.
 - All mutations use Terraform through protected \`aws-sandbox\` GitHub Actions OIDC. No clickops or \`kubectl apply\`.
-- GPU capacity is on-demand, \`min=0\`, \`desired=0\` outside an approved run, and \`max=1\`.
+- GPU capacity is on-demand, \`min=0\`, \`desired=0\` outside an approved run, and \`max=1\`. A confirmed apply sets desired capacity to \`1\` for the smoke-test window because Kueue alone does not scale an EKS managed node group; a distinct confirmed stop restores it to \`0\`.
 - The Job is synthetic-only, immutable-image-by-digest, requests and limits one GPU, has \`backoffLimit: 0\`, and \`activeDeadlineSeconds: 300\`.
 - AUD 75 is an alert threshold, not a hard cap. Billing is a human IAM responsibility outside GitHub OIDC.
 - Apply, stop, and teardown require separate confirmations. This plan creates no teardown workflow.
@@ -200,7 +200,7 @@ Expected: failure because the environment is absent.
 
 - [ ] **Step 3: Implement provider and IAM wiring**
 
-Use \`data "aws_eks_cluster"\` and \`data "aws_eks_cluster_auth"\` for the existing cluster. Configure Helm and Kubernetes providers with cluster endpoint, decoded CA, and token. Define a dedicated GPU node role with only EKS worker, CNI, and ECR read policies. Obtain subnets through cluster/VPC data sources; do not duplicate the network or EKS cluster.
+Use \`data "aws_eks_cluster"\` and \`data "aws_eks_cluster_auth"\` for the existing cluster. Configure Helm and Kubernetes providers with cluster endpoint, decoded CA, and token. Define a dedicated GPU node role with only EKS worker, CNI, and ECR read policies. Obtain subnets through cluster/VPC data sources; do not duplicate the network or EKS cluster. The workflow preflight, not Terraform resource creation, verifies that the named cluster is \`ACTIVE\` before it can plan an apply.
 
 Require GitHub environment variables \`TF_VAR_gpu_instance_type\`, \`TF_VAR_cuda_smoke_image\`, and \`TF_VAR_kueue_chart_version\`. Do not define an image-tag fallback. Mark endpoint and certificate outputs sensitive.
 
@@ -255,7 +255,7 @@ Use only \`preflight\`, \`plan\`, \`apply\`, \`validate\`, and \`stop\` workflow
 
 Preflight checks required values, \`GPU_POC_BUDGET_ALERT_CONFIGURED=true\`, selected-family Service Quota, eligible EC2 offering, cluster version, and image digest. Upload only category/boolean JSON, never cloud identifiers.
 
-Apply requires \`I_UNDERSTAND_EKS_GPU_KUEUE_POC_APPLY\`, runs a fresh plan, then applies. Stop requires \`I_UNDERSTAND_EKS_GPU_KUEUE_POC_STOP\`, sets only \`TF_VAR_gpu_desired_size=0\`, and applies. Validate uses temporary runner kubeconfig and checks native Kueue admission, exactly one allocatable GPU, and Job completion. No mode retries, changes quota, changes instance type, or invokes destroy.
+Apply requires \`I_UNDERSTAND_EKS_GPU_KUEUE_POC_APPLY\`, first verifies the named EKS cluster is \`ACTIVE\`, sets \`TF_VAR_gpu_desired_size=1\`, runs a fresh plan, then applies. Stop requires \`I_UNDERSTAND_EKS_GPU_KUEUE_POC_STOP\`, sets only \`TF_VAR_gpu_desired_size=0\`, and applies. Validate uses temporary runner kubeconfig and checks native Kueue admission, exactly one allocatable GPU, and Job completion. No mode creates an EKS cluster, retries capacity, changes quota, changes instance type, or invokes destroy.
 
 - [ ] **Step 4: Verify source checks**
 
