@@ -6,6 +6,7 @@ on:
       - ".github/workflows/terraform-tests.yaml"
       - ".github/workflows/terraform-bedrock-sandbox.yml"
       - ".github/workflows/bedrock-gateway-adapter.yml"
+      - ".github/workflows/terraform-eks-gpu-kueue-poc.yml"
       - "providers/aws/infra/terraform/**"
       - "providers/aws/app/api/**"
   push:
@@ -15,6 +16,7 @@ on:
       - ".github/workflows/terraform-tests.yaml"
       - ".github/workflows/terraform-bedrock-sandbox.yml"
       - ".github/workflows/bedrock-gateway-adapter.yml"
+      - ".github/workflows/terraform-eks-gpu-kueue-poc.yml"
       - "providers/aws/infra/terraform/**"
       - "providers/aws/app/api/**"
   workflow_dispatch:
@@ -33,7 +35,9 @@ jobs:
           - providers/aws/infra/terraform/modules/network
           - providers/aws/infra/terraform/modules/eks
           - providers/aws/infra/terraform/modules/bedrock-access
+          - providers/aws/infra/terraform/modules/eks-gpu-kueue
           - providers/aws/infra/terraform/envs/eks-sandbox
+          - providers/aws/infra/terraform/envs/eks-gpu-kueue-poc
           - providers/aws/infra/terraform/envs/bedrock-sandbox
           - providers/aws/infra/terraform/envs/agentcore-rag-sandbox
     defaults:
@@ -152,3 +156,32 @@ jobs:
           ! grep -q 'aws bedrock-runtime' "$workflow"
           ! grep -q 'bedrock:InvokeModel' "$workflow"
           ! grep -q 'iam:PassRole' "$workflow"
+
+  eks_gpu_kueue_poc_workflow_boundary:
+    name: EKS GPU Kueue POC workflow boundary
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Check bounded manual GPU POC lifecycle
+        run: |
+          workflow=.github/workflows/terraform-eks-gpu-kueue-poc.yml
+          grep -q 'workflow_dispatch:' "$workflow"
+          grep -q 'environment: aws-sandbox' "$workflow"
+          grep -q 'id-token: write' "$workflow"
+          grep -q 'I_UNDERSTAND_EKS_GPU_KUEUE_POC_APPLY' "$workflow"
+          grep -q 'I_UNDERSTAND_EKS_GPU_KUEUE_POC_STOP' "$workflow"
+          grep -q -- '- preflight' "$workflow"
+          grep -q -- '- plan' "$workflow"
+          grep -q -- '- apply' "$workflow"
+          grep -q -- '- validate' "$workflow"
+          grep -q -- '- stop' "$workflow"
+          grep -q 'GPU_POC_BUDGET_ALERT_CONFIGURED' "$workflow"
+          grep -q 'aws service-quotas list-service-quotas' "$workflow"
+          grep -q 'aws ec2 describe-instance-type-offerings' "$workflow"
+          grep -q 'TF_VAR_gpu_desired_size=1' "$workflow"
+          grep -q 'TF_VAR_gpu_desired_size=0' "$workflow"
+          grep -q 'kubectl get workload -n gpu-poc' "$workflow"
+          grep -q 'one_allocatable_gpu' "$workflow"
+          ! grep -q 'terraform destroy' "$workflow"
+          ! grep -q '^  schedule:' "$workflow"
