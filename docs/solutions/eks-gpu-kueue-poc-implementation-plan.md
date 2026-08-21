@@ -200,7 +200,7 @@ Expected: failure because the environment is absent.
 
 - [ ] **Step 3: Implement provider and IAM wiring**
 
-Use \`data "aws_eks_cluster"\` and \`data "aws_eks_cluster_auth"\` for the existing cluster. Configure Helm and Kubernetes providers with cluster endpoint, decoded CA, and token. Define a dedicated GPU node role with only EKS worker, CNI, and ECR read policies. Obtain subnets through cluster/VPC data sources; do not duplicate the network or EKS cluster. The workflow preflight, not Terraform resource creation, verifies that the named cluster is \`ACTIVE\` before it can plan an apply.
+Use \`data "aws_eks_cluster"\` and \`data "aws_eks_cluster_auth"\` for the existing cluster. Configure Helm and Kubernetes providers with cluster endpoint, decoded CA, and token. Define a dedicated GPU node role with only EKS worker, CNI, and ECR read policies. Validate explicitly supplied, reviewed GPU subnet IDs against the existing cluster VPC; do not duplicate the network or EKS cluster or automatically select every VPC subnet. The workflow preflight, not Terraform resource creation, verifies that the named cluster is \`ACTIVE\` before it can plan an apply.
 
 Require GitHub environment variables \`TF_VAR_gpu_instance_type\`, \`TF_VAR_cuda_smoke_image\`, and \`TF_VAR_kueue_chart_version\`. Do not define an image-tag fallback. Mark endpoint and certificate outputs sensitive.
 
@@ -229,7 +229,7 @@ git commit -m "feat: add isolated EKS GPU Kueue environment"
 - Modify: \`.github/workflows/terraform-tests.yaml\`
 
 **Interfaces:**
-- Consumes: private environment values \`AWS_ROLE_TO_ASSUME\`, \`AWS_REGION\`, \`TF_BACKEND_BUCKET\`, \`TF_BACKEND_LOCK_TABLE\`, \`TF_STATE_KEY_PREFIX\`, \`TF_VAR_GPU_INSTANCE_TYPE\`, \`TF_VAR_CUDA_SMOKE_IMAGE\`, \`TF_VAR_KUEUE_CHART_VERSION\`, and \`GPU_POC_BUDGET_ALERT_CONFIGURED\`.
+- Consumes: private environment values \`AWS_ROLE_TO_ASSUME\`, \`AWS_REGION\`, \`TF_BACKEND_BUCKET\`, \`TF_BACKEND_LOCK_TABLE\`, \`TF_STATE_KEY_PREFIX\`, \`TF_VAR_GPU_INSTANCE_TYPE\`, \`TF_VAR_GPU_POC_SUBNET_IDS\`, \`TF_VAR_CUDA_SMOKE_IMAGE\`, \`TF_VAR_KUEUE_CHART_VERSION\`, and \`GPU_POC_BUDGET_ALERT_CONFIGURED\`.
 - Produces: manual \`preflight\`, \`plan\`, \`apply\`, \`validate\`, and \`stop\` modes plus sanitised evidence artifacts.
 
 - [ ] **Step 1: Add failing static workflow assertions**
@@ -255,7 +255,7 @@ Use only \`preflight\`, \`plan\`, \`apply\`, \`validate\`, and \`stop\` workflow
 
 Preflight checks required values, \`GPU_POC_BUDGET_ALERT_CONFIGURED=true\`, selected-family Service Quota, eligible EC2 offering, cluster version, and image digest. Upload only category/boolean JSON, never cloud identifiers.
 
-Apply requires \`I_UNDERSTAND_EKS_GPU_KUEUE_POC_APPLY\`, first verifies the named EKS cluster is \`ACTIVE\`, sets \`TF_VAR_gpu_desired_size=1\`, runs a fresh plan, then applies. Stop requires \`I_UNDERSTAND_EKS_GPU_KUEUE_POC_STOP\`, sets only \`TF_VAR_gpu_desired_size=0\`, and applies. Validate uses temporary runner kubeconfig and checks native Kueue admission, exactly one allocatable GPU, and Job completion. No mode creates an EKS cluster, retries capacity, changes quota, changes instance type, or invokes destroy.
+Apply requires \`I_UNDERSTAND_EKS_GPU_KUEUE_POC_APPLY\`, first verifies the named EKS cluster is \`ACTIVE\`, selected-subnet availability zones offer the approved type, sets \`TF_VAR_gpu_desired_size=1\`, runs a fresh plan, then applies. Stop requires \`I_UNDERSTAND_EKS_GPU_KUEUE_POC_STOP\`, sets only \`TF_VAR_gpu_desired_size=0\`, and applies. Validate uses temporary runner kubeconfig and checks one Ready GPU node, exactly one allocatable GPU, the owned CUDA workload's quota reservation and admission, the assigned `gpu-poc-on-demand` flavor, and Job completion. No mode creates an EKS cluster, retries capacity, changes quota, changes instance type, or invokes destroy.
 
 - [ ] **Step 4: Verify source checks**
 

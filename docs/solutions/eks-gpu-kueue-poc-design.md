@@ -52,7 +52,7 @@ The EKS control plane, default CPU node group, remote Terraform backend, lock ta
 The dedicated GPU node group has these mandatory boundaries:
 
 - On-demand capacity, `min=0`, `desired=0` outside an approved POC run, and `max=1`.
-- One approved instance type and Availability Zone. Preflight rejects unavailable capacity; it must never select a more expensive substitute.
+- One approved instance type and explicitly reviewed private EKS subnet list. Preflight proves the selected type is offered in every selected subnet Availability Zone; it must never select a more expensive substitute or an unreviewed subnet.
 - An EKS accelerated AMI compatible with the selected type and Kubernetes 1.31.
 - No SSH, public workload endpoint, or EKS API CIDR broadening.
 - Label `cloudai.platform/workload-class=gpu-poc` and a matching `NoSchedule` taint.
@@ -65,10 +65,10 @@ The `gpu-poc` namespace contains:
 | Resource | Name | Contract |
 | --- | --- | --- |
 | `ResourceFlavor` | `gpu-poc-on-demand` | Matches the labelled and tainted GPU node group. |
-| `ClusterQueue` | `gpu-poc-cluster` | Nominal quota for one `nvidia.com/gpu`, bounded CPU and memory, no borrowing or preemption. |
+| `ClusterQueue` | `gpu-poc-cluster` | Nominal quota for one `nvidia.com/gpu`, bounded CPU and memory, no borrowing or preemption; admits only the labelled synthetic `gpu-poc` namespace. |
 | `LocalQueue` | `gpu-poc` | Sole permitted queue for the CUDA Job. |
 
-The Job declares `kueue.x-k8s.io/queue-name: gpu-poc` and requests and limits exactly one GPU. Native Kueue quota-reservation and admitted conditions, including the assigned `ResourceFlavor`, are the admission evidence. The POC does not imply a custom `AdmissionCheck` controller.
+The Job declares `kueue.x-k8s.io/queue-name: gpu-poc` as a metadata **label** and requests and limits exactly one GPU. Native Kueue quota-reservation and admitted conditions, including the assigned `ResourceFlavor`, are the admission evidence. The POC does not imply a custom `AdmissionCheck` controller.
 
 ## Synthetic Job contract
 
@@ -96,7 +96,7 @@ Implementation creates the following ordered workflow contract:
 
 The existing EKS confirmation strings do not authorise GPU POC changes. The implementation plan defines the new exact strings so a design statement cannot be mistaken for operational authority.
 
-GitHub Actions uses a short-lived OIDC role scoped to the POC state, named EKS cluster and node group, required Kubernetes API access, and supporting read-only EC2/EKS queries. `iam:PassRole` is restricted to the POC node role. It receives no billing, payment-method, broad administrator, long-lived credential, or Bedrock permissions.
+GitHub Actions uses a short-lived OIDC role scoped to the POC state, named EKS cluster and node group, required Kubernetes API access, and supporting read-only EC2/EKS queries. The separately reviewed bootstrap contract limits `iam:PassRole` to `cloudai-platform-eks-sandbox-*` roles and only the EKS or EC2 services; the POC node role deliberately matches that boundary. It receives no billing, payment-method, broad administrator, long-lived credential, or Bedrock permissions.
 
 Billing remains outside GitHub Actions. The personal account uses an MFA-protected human IAM identity with billing-read and tightly scoped budget-management rights. The POC can check only a non-sensitive budget-alert readiness signal.
 

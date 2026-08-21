@@ -26,6 +26,7 @@ The POC attaches only to the existing personal EKS sandbox when that cluster is 
 The `aws-sandbox` environment retains the existing private backend and OIDC values. The GPU workflow additionally requires:
 
 - `TF_VAR_GPU_INSTANCE_TYPE`: approved on-demand GPU type available in the selected region and Availability Zone.
+- `TF_VAR_GPU_POC_SUBNET_IDS`: JSON list of explicitly reviewed private EKS subnet IDs. Each must belong to the existing sandbox VPC and offer the selected GPU type in its Availability Zone.
 - `TF_VAR_CUDA_SMOKE_IMAGE`: digest-pinned CUDA image; tags are rejected.
 - `TF_VAR_KUEUE_CHART_VERSION`: reviewed Kueue Helm chart version.
 - `GPU_POC_BUDGET_ALERT_CONFIGURED=true`: human confirmation that the budget alert is enabled outside GitHub Actions.
@@ -34,7 +35,7 @@ No value above authorises a run by itself. A protected environment approval and 
 
 ## Operation sequence
 
-1. Run read-only `preflight`. It must confirm that the EKS sandbox is `ACTIVE`, the GPU quota and instance offering are available, the CUDA image is immutable, and the budget-alert readiness flag is true.
+1. Run read-only `preflight`. It must confirm that the EKS sandbox is `ACTIVE`, the GPU quota and selected-type offering in every approved subnet Availability Zone are available, the CUDA image is immutable, and the budget-alert readiness flag is true.
 2. Run `plan`. Review the Terraform result without publishing plans, state, endpoints, account IDs, ARNs, kubeconfig, or raw cloud output.
 3. Run `apply` only after protected environment approval and `I_UNDERSTAND_EKS_GPU_KUEUE_POC_APPLY`. Apply temporarily sets dedicated GPU desired capacity to `1`; Kueue does not scale an EKS managed node group.
 4. Run `validate`. It must observe a Ready GPU node with exactly one allocatable GPU, Kueue quota reservation and admission, and Job completion within the five-minute deadline.

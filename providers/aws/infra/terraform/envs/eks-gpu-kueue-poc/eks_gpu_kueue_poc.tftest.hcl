@@ -51,6 +51,7 @@ run "attaches_to_existing_cluster_with_one_node_boundary" {
 
   variables {
     gpu_instance_type   = "g5.xlarge"
+    gpu_poc_subnet_ids  = ["subnet-synthetic-a"]
     cuda_smoke_image    = "public.ecr.aws/nvidia/cuda@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
     kueue_chart_version = "0.11.0"
   }
@@ -63,5 +64,10 @@ run "attaches_to_existing_cluster_with_one_node_boundary" {
   assert {
     condition     = var.gpu_min_size == 0 && var.gpu_desired_size == 0 && var.gpu_max_size == 1
     error_message = "The POC environment must retain the one-node boundary."
+  }
+
+  assert {
+    condition     = length(var.gpu_poc_subnet_ids) == 1 && var.gpu_poc_subnet_ids[0] == "subnet-synthetic-a"
+    error_message = "The environment must retain the explicitly approved GPU subnet boundary."
   }
 }

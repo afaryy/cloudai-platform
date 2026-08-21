@@ -41,4 +41,17 @@ run "keeps_gpu_capacity_and_image_immutable" {
     kubernetes_manifest.cuda_smoke_job.manifest.spec.ttlSecondsAfterFinished == 900)
     error_message = "The CUDA smoke Job must be Kueue-managed, short-lived, and non-retrying."
   }
+
+  assert {
+    condition     = kubernetes_manifest.cuda_smoke_job.manifest.metadata.labels["kueue.x-k8s.io/queue-name"] == "gpu-poc"
+    error_message = "Kueue Job integration requires the LocalQueue name as a metadata label."
+  }
+
+  assert {
+    condition = (
+      kubernetes_manifest.cluster_queue.manifest.spec.namespaceSelector.matchLabels["kubernetes.io/metadata.name"] == "gpu-poc" &&
+      kubernetes_manifest.cluster_queue.manifest.spec.namespaceSelector.matchLabels["cloudai.platform/data-scope"] == "synthetic-only"
+    )
+    error_message = "The ClusterQueue must admit only the synthetic GPU POC namespace."
+  }
 }

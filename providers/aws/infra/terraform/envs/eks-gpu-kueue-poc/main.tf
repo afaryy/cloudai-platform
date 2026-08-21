@@ -13,6 +13,17 @@ data "aws_subnets" "existing_cluster_vpc" {
   }
 }
 
+resource "terraform_data" "approved_gpu_subnets" {
+  input = var.gpu_poc_subnet_ids
+
+  lifecycle {
+    precondition {
+      condition     = length(setsubtract(toset(var.gpu_poc_subnet_ids), toset(data.aws_subnets.existing_cluster_vpc.ids))) == 0
+      error_message = "Every gpu_poc_subnet_ids entry must belong to the existing EKS sandbox VPC."
+    }
+  }
+}
+
 locals {
   common_tags = merge(var.tags, {
     Project          = "cloudai-platform"
@@ -60,7 +71,7 @@ module "gpu_kueue" {
   source = "../../modules/eks-gpu-kueue"
 
   cluster_name                       = data.aws_eks_cluster.existing.name
-  subnet_ids                         = data.aws_subnets.existing_cluster_vpc.ids
+  subnet_ids                         = var.gpu_poc_subnet_ids
   gpu_node_role_arn                  = aws_iam_role.gpu_node.arn
   gpu_instance_type                  = var.gpu_instance_type
   gpu_min_size                       = var.gpu_min_size
@@ -75,5 +86,6 @@ module "gpu_kueue" {
     aws_iam_role_policy_attachment.gpu_node_worker,
     aws_iam_role_policy_attachment.gpu_node_cni,
     aws_iam_role_policy_attachment.gpu_node_registry,
+    terraform_data.approved_gpu_subnets,
   ]
 }

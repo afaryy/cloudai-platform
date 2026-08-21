@@ -20,6 +20,16 @@ variable "gpu_instance_type" {
   type        = string
 }
 
+variable "gpu_poc_subnet_ids" {
+  description = "Explicit, reviewed private EKS subnet IDs for the GPU POC node group; supplied as a JSON list by protected GitHub environment variable TF_VAR_gpu_poc_subnet_ids."
+  type        = list(string)
+
+  validation {
+    condition     = length(var.gpu_poc_subnet_ids) > 0
+    error_message = "gpu_poc_subnet_ids must contain at least one explicitly reviewed subnet ID."
+  }
+}
+
 variable "cuda_smoke_image" {
   description = "Digest-pinned synthetic CUDA smoke image, supplied by protected GitHub environment variable TF_VAR_cuda_smoke_image."
   type        = string

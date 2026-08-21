@@ -111,7 +111,12 @@ resource "kubernetes_manifest" "cluster_queue" {
       name = "gpu-poc-cluster"
     }
     spec = {
-      namespaceSelector = {}
+      namespaceSelector = {
+        matchLabels = {
+          "kubernetes.io/metadata.name" = local.gpu_namespace
+          "cloudai.platform/data-scope" = "synthetic-only"
+        }
+      }
       resourceGroups = [
         {
           coveredResources = ["cpu", "memory", "nvidia.com/gpu"]
@@ -162,11 +167,9 @@ resource "kubernetes_manifest" "cuda_smoke_job" {
     metadata = {
       name      = "cuda-smoke"
       namespace = local.gpu_namespace
-      annotations = {
-        "kueue.x-k8s.io/queue-name" = "gpu-poc"
-      }
       labels = {
         "cloudai.platform/workload" = "synthetic-cuda-smoke"
+        "kueue.x-k8s.io/queue-name" = "gpu-poc"
       }
     }
     spec = {
