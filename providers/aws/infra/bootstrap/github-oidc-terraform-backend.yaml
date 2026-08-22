@@ -635,7 +635,7 @@ Resources:
                       - DataScope
                       - CostBoundary
                       - CloudAISlice
-                  Null:
+                  "Null":
                     aws:TagKeys: "false"
               - Sid: ManageOnlyTaggedCloudAiBudgets
                 Effect: Allow

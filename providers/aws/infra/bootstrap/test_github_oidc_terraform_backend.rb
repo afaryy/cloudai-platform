@@ -45,6 +45,7 @@ class GitHubOidcTerraformBackendTest < Minitest::Test
     assert_includes budget_role, "budget/cloudai-platform-*"
     assert_includes budget_role, "aws:RequestTag/Project"
     assert_includes budget_role, "aws:RequestTag/CloudAISlice"
+    assert_includes budget_role, '"Null":'
     assert_includes budget_role, "aws:ResourceTag/Project"
     assert_includes budget_role, "BudgetGuardrailsStateKey"
     assert_includes budget_role, "s3:prefix"
