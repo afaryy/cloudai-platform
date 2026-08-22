@@ -90,6 +90,7 @@ It currently has six mock-first lanes:
 | P4e Helm-on-EKS validation workflow | Live sandbox validated | `.github/workflows/helm-eks-validation.yml` and `docs/solutions/ai-release-engineering-on-eks.md` |
 | P4f Helm release workflow | Live install, rollback, and uninstall validated | `.github/workflows/helm-eks-release.yml` and `docs/solutions/ai-release-engineering-on-eks.md` |
 | P4g Argo CD GitOps workflow | Live GitOps sync, health, status, cleanup, and destroy validated | `.github/workflows/argocd-eks-gitops.yml`, `argocd/applications/cloudai-api-sandbox.yaml`, and `docs/solutions/ai-release-engineering-on-eks.md` |
+| YY-44 Cost Guardrails | Source implementation planned; no live AWS Budget or email-delivery claim | `providers/aws/infra/terraform/modules/cost-guardrails/`, `providers/aws/infra/terraform/envs/cost-guardrails/`, `.github/workflows/terraform-cost-guardrails.yml`, and `docs/solutions/yy-44-cost-guardrails-runbook.md` |
 | P8 Real Bedrock Sandbox | Bounded synthetic sandbox validation complete | `docs/solutions/p8-real-bedrock-sandbox-design.md` and `providers/aws/infra/terraform/envs/bedrock-sandbox/README.md` |
 | P8a Bedrock access readiness | Complete | `docs/solutions/p8a-bedrock-access-readiness.md` and `docs/evidence/templates/p8a-bedrock-smoke-test-evidence.md` |
 | P8b Bedrock Terraform IAM boundary | Confirmation-gated IAM apply boundary complete | `providers/aws/infra/terraform/modules/bedrock-access/`, `providers/aws/infra/terraform/envs/bedrock-sandbox/`, and `.github/workflows/terraform-bedrock-sandbox.yml` |

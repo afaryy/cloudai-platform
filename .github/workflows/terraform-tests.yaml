@@ -5,6 +5,7 @@ on:
     paths:
       - ".github/workflows/terraform-tests.yaml"
       - ".github/workflows/terraform-bedrock-sandbox.yml"
+      - ".github/workflows/terraform-cost-guardrails.yml"
       - ".github/workflows/bedrock-gateway-adapter.yml"
       - "providers/aws/infra/terraform/**"
       - "providers/aws/app/api/**"
@@ -14,6 +15,7 @@ on:
     paths:
       - ".github/workflows/terraform-tests.yaml"
       - ".github/workflows/terraform-bedrock-sandbox.yml"
+      - ".github/workflows/terraform-cost-guardrails.yml"
       - ".github/workflows/bedrock-gateway-adapter.yml"
       - "providers/aws/infra/terraform/**"
       - "providers/aws/app/api/**"
@@ -130,6 +132,24 @@ jobs:
           outputs=providers/aws/infra/terraform/modules/bedrock-access/outputs.tf
           grep -A3 'output "bedrock_guardrail_id"' "$outputs" | grep -Eq 'sensitive[[:space:]]*=[[:space:]]*true'
           grep -A3 'output "bedrock_guardrail_version"' "$outputs" | grep -Eq 'sensitive[[:space:]]*=[[:space:]]*true'
+
+  cost_guardrails_workflow_boundary:
+    name: Cost Guardrails workflow boundary
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Check protected cost guardrails delivery boundary
+        run: |
+          workflow=.github/workflows/terraform-cost-guardrails.yml
+          grep -q 'environment: aws-sandbox' "$workflow"
+          grep -q 'I_UNDERSTAND_COST_GUARDRAILS_APPLY' "$workflow"
+          grep -q 'AWS_BUDGET_GUARDRAILS_ROLE_TO_ASSUME' "$workflow"
+          grep -q 'AWS_BUDGET_ALERT_EMAIL' "$workflow"
+          grep -q 'terraform init -backend=false' "$workflow"
+          grep -q 'terraform apply -input=false -auto-approve -no-color' "$workflow"
+          ! grep -q 'terraform destroy' "$workflow"
+          ! grep -q 'echo.*AWS_BUDGET_ALERT_EMAIL' "$workflow"
 
   bedrock_gateway_adapter_workflow_boundary:
     name: Bedrock gateway adapter workflow boundary

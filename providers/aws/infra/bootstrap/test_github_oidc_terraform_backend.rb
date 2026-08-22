@@ -2,6 +2,7 @@ require "minitest/autorun"
 
 class GitHubOidcTerraformBackendTest < Minitest::Test
   TEMPLATE = File.expand_path("github-oidc-terraform-backend.yaml", __dir__)
+  COST_GUARDRAILS_MODULE = File.expand_path("../terraform/modules/cost-guardrails/main.tf", __dir__)
   REQUIRED_ACTIONS = %w[
     iam:AttachRolePolicy iam:CreatePolicy iam:CreatePolicyVersion
     iam:CreateRole iam:DeletePolicy iam:DeletePolicyVersion iam:DeleteRole
@@ -54,6 +55,20 @@ class GitHubOidcTerraformBackendTest < Minitest::Test
   def test_general_terraform_role_receives_no_billing_portal_permission
     refute_includes terraform_role, "aws-portal:ModifyBilling"
     refute_includes terraform_role, "aws-portal:ViewBilling"
+  end
+
+  def test_cost_guardrails_module_defines_only_reviewed_budget_boundaries
+    assert File.exist?(COST_GUARDRAILS_MODULE), "Cost Guardrails module must exist."
+    return unless File.exist?(COST_GUARDRAILS_MODULE)
+
+    source = File.read(COST_GUARDRAILS_MODULE)
+
+    assert_match(/name\s+=\s+"cloudai-platform-sandbox-monthly-cost"/, source)
+    assert_match(/name\s+=\s+"cloudai-platform-gpu-poc-seven-day-cost"/, source)
+    assert_match(/limit_amount\s+=\s+"50"/, source)
+    assert_match(/limit_amount\s+=\s+"20"/, source)
+    assert_match(/notification_type\s+=\s+"ACTUAL"/, source)
+    refute_includes source, "aws_budgets_budget_action"
   end
 
   private
