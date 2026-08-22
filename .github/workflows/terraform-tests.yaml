@@ -6,6 +6,8 @@ on:
       - ".github/workflows/terraform-tests.yaml"
       - ".github/workflows/terraform-bedrock-sandbox.yml"
       - ".github/workflows/terraform-cost-guardrails.yml"
+      - ".github/workflows/update-aws-bootstrap.yml"
+      - "providers/aws/infra/bootstrap/**"
       - ".github/workflows/bedrock-gateway-adapter.yml"
       - "providers/aws/infra/terraform/**"
       - "providers/aws/app/api/**"
@@ -16,6 +18,8 @@ on:
       - ".github/workflows/terraform-tests.yaml"
       - ".github/workflows/terraform-bedrock-sandbox.yml"
       - ".github/workflows/terraform-cost-guardrails.yml"
+      - ".github/workflows/update-aws-bootstrap.yml"
+      - "providers/aws/infra/bootstrap/**"
       - ".github/workflows/bedrock-gateway-adapter.yml"
       - "providers/aws/infra/terraform/**"
       - "providers/aws/app/api/**"
@@ -150,6 +154,21 @@ jobs:
           grep -q 'terraform apply -input=false -auto-approve -no-color' "$workflow"
           ! grep -q 'terraform destroy' "$workflow"
           ! grep -q 'echo.*AWS_BUDGET_ALERT_EMAIL' "$workflow"
+
+  bootstrap_budget_guardrails_handoff_boundary:
+    name: Bootstrap Budget Guardrails handoff boundary
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Check dedicated role handoff is available after bootstrap apply
+        run: |
+          workflow=.github/workflows/update-aws-bootstrap.yml
+          grep -q 'Publish Budget Guardrails role handoff' "$workflow"
+          grep -q "BudgetGuardrailsRoleArn" "$workflow"
+          grep -q 'GITHUB_STEP_SUMMARY' "$workflow"
+          grep -q "inputs.mode == 'apply' && success()" "$workflow"
+          ! grep -q 'AWS_BUDGET_ALERT_EMAIL' "$workflow"
 
   bedrock_gateway_adapter_workflow_boundary:
     name: Bedrock gateway adapter workflow boundary

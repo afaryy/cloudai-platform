@@ -159,3 +159,22 @@ jobs:
             --stack-name "$AWS_BOOTSTRAP_STACK_NAME" \
             --query 'Stacks[0].{StackStatus:StackStatus,LastUpdatedTime:LastUpdatedTime}' \
             --output json
+
+      - name: Publish Budget Guardrails role handoff
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.mode == 'apply' && success() }}
+        run: |
+          budget_guardrails_role_arn="$(aws cloudformation describe-stacks \
+            --stack-name "$AWS_BOOTSTRAP_STACK_NAME" \
+            --query "Stacks[0].Outputs[?OutputKey=='BudgetGuardrailsRoleArn'].OutputValue | [0]" \
+            --output text)"
+          if [ -z "$budget_guardrails_role_arn" ] || [ "$budget_guardrails_role_arn" = "None" ]; then
+            echo "::error::Bootstrap stack did not return BudgetGuardrailsRoleArn."
+            exit 1
+          fi
+          {
+            echo "## Budget Guardrails Environment handoff"
+            echo ""
+            echo "Add this exact value as the aws-sandbox Environment variable \\`AWS_BUDGET_GUARDRAILS_ROLE_TO_ASSUME\\`:"
+            echo ""
+            echo "\\`$budget_guardrails_role_arn\\`"
+          } >> "$GITHUB_STEP_SUMMARY"
