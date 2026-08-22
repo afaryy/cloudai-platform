@@ -17,7 +17,7 @@
 - Use actual-spend email thresholds only: 15/30/40/50 for the monthly budget and 10/15/20 for the seven-day budget.
 - Read the recipient only from protected `aws-sandbox` Environment secret `AWS_BUDGET_ALERT_EMAIL`; mark the Terraform input sensitive and never output it.
 - Assume only `AWS_BUDGET_GUARDRAILS_ROLE_TO_ASSUME` for budget workflow plan/apply; it is an Environment variable because a role ARN is not a secret.
-- The dedicated role may access only `cost-guardrails/terraform.tfstate` in the existing Terraform backend plus `budgets:ModifyBudget`, `budgets:ViewBudget`, `budgets:TagResource`, `budgets:UntagResource`, `budgets:ListTagsForResource`, `aws-portal:ModifyBilling`, and `aws-portal:ViewBilling`; it must have no EC2, EKS, Bedrock, or IAM pass-role permission.
+- The dedicated role may access only `cost-guardrails/terraform.tfstate` and its S3 lockfile in the existing Terraform backend plus `budgets:ModifyBudget`, `budgets:ViewBudget`, `budgets:TagResource`, `budgets:UntagResource`, `budgets:ListTagsForResource`, `aws-portal:ModifyBilling`, and `aws-portal:ViewBilling`; it does not access the shared DynamoDB lock table and must have no EC2, EKS, Bedrock, or IAM pass-role permission.
 - Do not create GPU, EKS, Kueue, CUDA, inference, SNS, Lambda, Budget Actions, automatic IAM deny, or automatic shutdown resources.
 - `validate` must not assume AWS credentials; `apply` requires protected-environment approval and the exact confirmation `I_UNDERSTAND_COST_GUARDRAILS_APPLY`.
 - Do not add a destroy workflow or expose state, raw plans, email addresses, account IDs, budget ARNs, or account-specific backend values in committed files or CI artifacts.
@@ -221,7 +221,7 @@ git commit -m "feat: permit Terraform budget guardrails"
 - Modify: `.github/workflows/terraform-tests.yaml`
 
 **Interfaces:**
-- Consumes: protected `aws-sandbox` Environment variable `AWS_BUDGET_GUARDRAILS_ROLE_TO_ASSUME`, `AWS_REGION`, `TF_BACKEND_BUCKET`, `TF_BACKEND_LOCK_TABLE`, and secret `AWS_BUDGET_ALERT_EMAIL`.
+- Consumes: protected `aws-sandbox` Environment variable `AWS_BUDGET_GUARDRAILS_ROLE_TO_ASSUME`, `AWS_REGION`, `TF_BACKEND_BUCKET`, and secret `AWS_BUDGET_ALERT_EMAIL`.
 - Produces: `validate`, `plan`, and confirmation-gated `apply` operations for the fixed state key `cost-guardrails/terraform.tfstate`.
 - Does not produce: workflow artifacts containing plans/state, a `destroy` operation, or an echo of `AWS_BUDGET_ALERT_EMAIL`.
 

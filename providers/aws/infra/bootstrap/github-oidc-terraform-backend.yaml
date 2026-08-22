@@ -595,8 +595,14 @@ Resources:
                 Action:
                   - s3:GetObject
                   - s3:PutObject
-                  - s3:DeleteObject
                 Resource: !Sub "${TerraformStateBucket.Arn}/${BudgetGuardrailsStateKey}"
+              - Sid: TerraformLockfileAccess
+                Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:PutObject
+                  - s3:DeleteObject
+                Resource: !Sub "${TerraformStateBucket.Arn}/${BudgetGuardrailsStateKey}.tflock"
               - Sid: ListOnlyCostGuardrailsStateKey
                 Effect: Allow
                 Action:
@@ -606,14 +612,7 @@ Resources:
                   StringLike:
                     s3:prefix:
                       - !Ref BudgetGuardrailsStateKey
-              - Sid: TerraformLockAccess
-                Effect: Allow
-                Action:
-                  - dynamodb:GetItem
-                  - dynamodb:PutItem
-                  - dynamodb:DeleteItem
-                  - dynamodb:DescribeTable
-                Resource: !Sub "arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${LockTableName}"
+                      - !Sub "${BudgetGuardrailsStateKey}.tflock"
               - Sid: CreateOnlyRequiredTaggedCloudAiBudgets
                 Effect: Allow
                 Action:

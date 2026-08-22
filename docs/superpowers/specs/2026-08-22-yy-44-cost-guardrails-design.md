@@ -61,7 +61,8 @@ for the Terraform process. It does not echo the value. Terraform state remains
 in the existing encrypted, private backend at the fixed key
 `cost-guardrails/terraform.tfstate`. The separate budget role can list and
 read/write only that key; it cannot access another environment's Terraform
-state.
+state. It uses a scoped S3 lockfile at the same key with `.tflock`, rather
+than the shared DynamoDB lock table.
 
 The bootstrap CloudFormation stack creates a second GitHub OIDC role named
 `cloudai-platform-aws-sandbox-budget-guardrails`. This role is distinct from

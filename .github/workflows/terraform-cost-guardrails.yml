@@ -36,7 +36,6 @@ jobs:
       AWS_BUDGET_ALERT_EMAIL: ${{ secrets.AWS_BUDGET_ALERT_EMAIL }}
       AWS_REGION: ${{ vars.AWS_REGION || 'us-east-1' }}
       TF_BACKEND_BUCKET: ${{ vars.TF_BACKEND_BUCKET }}
-      TF_BACKEND_LOCK_TABLE: ${{ vars.TF_BACKEND_LOCK_TABLE }}
       TF_STATE_KEY: cost-guardrails/terraform.tfstate
       TF_VAR_budget_alert_email: ${{ secrets.AWS_BUDGET_ALERT_EMAIL }}
     defaults:
@@ -78,7 +77,7 @@ jobs:
         if: ${{ inputs.mode == 'plan' || inputs.mode == 'apply' }}
         run: |
           missing=0
-          for name in AWS_BUDGET_GUARDRAILS_ROLE_TO_ASSUME AWS_BUDGET_ALERT_EMAIL AWS_REGION TF_BACKEND_BUCKET TF_BACKEND_LOCK_TABLE TF_STATE_KEY; do
+          for name in AWS_BUDGET_GUARDRAILS_ROLE_TO_ASSUME AWS_BUDGET_ALERT_EMAIL AWS_REGION TF_BACKEND_BUCKET TF_STATE_KEY; do
             if [ -z "${!name}" ]; then
               echo "::error::$name is required in the aws-sandbox Environment for Cost Guardrails ${INPUT_MODE} mode."
               missing=1
@@ -103,7 +102,7 @@ jobs:
             -backend-config="bucket=${TF_BACKEND_BUCKET}" \
             -backend-config="key=${TF_STATE_KEY}" \
             -backend-config="region=${AWS_REGION}" \
-            -backend-config="dynamodb_table=${TF_BACKEND_LOCK_TABLE}" \
+            -backend-config="use_lockfile=true" \
             -backend-config="encrypt=true"
 
       - name: Terraform plan before Cost Guardrails apply

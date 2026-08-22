@@ -48,7 +48,9 @@ class GitHubOidcTerraformBackendTest < Minitest::Test
     assert_includes budget_role, "aws:ResourceTag/Project"
     assert_includes budget_role, "BudgetGuardrailsStateKey"
     assert_includes budget_role, "s3:prefix"
+    assert_includes budget_role, "TerraformLockfileAccess"
     refute_includes budget_role, 'Resource: !Sub "${TerraformStateBucket.Arn}/*"'
+    refute_includes budget_role, "dynamodb:"
     refute_includes budget_role, "ec2:RunInstances"
     refute_includes budget_role, "eks:CreateCluster"
     refute_includes budget_role, "bedrock:InvokeModel"

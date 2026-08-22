@@ -38,6 +38,9 @@ No destroy mode is supplied by terraform-cost-guardrails.
 4. Add the approved recipient as `AWS_BUDGET_ALERT_EMAIL` (Environment secret).
    Never store the real address in repository source, a workflow input, or a
    repository-level variable.
+5. The workflow uses the scoped S3 lockfile for
+   `cost-guardrails/terraform.tfstate`; it does not need access to the shared
+   DynamoDB lock table.
 
 ## Delivery sequence
 
