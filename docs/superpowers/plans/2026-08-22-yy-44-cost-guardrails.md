@@ -4,7 +4,7 @@
 
 **Goal:** Build Terraform-managed, notification-only AWS Budget guardrails that must be live before the bounded EKS GPU/Kueue validation.
 
-**Architecture:** A standalone `cost-guardrails` Terraform environment uses an AWS provider fixed to `us-east-1` and the existing encrypted S3 state backend. It creates a monthly sandbox-total cost budget and a seven-day GPU-POC cost budget, each with direct email notifications. The protected GitHub Actions workflow injects one Environment secret as a sensitive Terraform variable; a narrow addition to the existing bootstrap role lets the existing Terraform OIDC role manage only the named CloudAI budgets.
+**Architecture:** A standalone `cost-guardrails` Terraform environment uses an AWS provider fixed to `us-east-1` and the existing encrypted S3 state backend. It creates a monthly sandbox-total cost budget and a seven-day GPU-POC cost budget, each with direct email notifications. The protected GitHub Actions workflow injects one Environment secret as a sensitive Terraform variable and assumes a dedicated Budget Guardrails OIDC role. The existing general Terraform OIDC role receives no Billing permissions.
 
 **Tech Stack:** Terraform >= 1.6, hashicorp/aws provider ~> 5.0, hashicorp/time provider, AWS Budgets, CloudFormation, GitHub Actions OIDC, Ruby Minitest, cfn-lint.
 
@@ -16,6 +16,8 @@
 - Create only two monitoring budgets: USD 50 monthly total cost and USD 20 seven-day GPU POC cost.
 - Use actual-spend email thresholds only: 15/30/40/50 for the monthly budget and 10/15/20 for the seven-day budget.
 - Read the recipient only from protected `aws-sandbox` Environment secret `AWS_BUDGET_ALERT_EMAIL`; mark the Terraform input sensitive and never output it.
+- Assume only `AWS_BUDGET_GUARDRAILS_ROLE_TO_ASSUME` for budget workflow plan/apply; it is an Environment variable because a role ARN is not a secret.
+- The dedicated role may access the existing Terraform backend plus `budgets:ModifyBudget`, `budgets:ViewBudget`, `budgets:TagResource`, `budgets:UntagResource`, `budgets:ListTagsForResource`, `aws-portal:ModifyBilling`, and `aws-portal:ViewBilling`; it must have no EC2, EKS, Bedrock, or IAM pass-role permission.
 - Do not create GPU, EKS, Kueue, CUDA, inference, SNS, Lambda, Budget Actions, automatic IAM deny, or automatic shutdown resources.
 - `validate` must not assume AWS credentials; `apply` requires protected-environment approval and the exact confirmation `I_UNDERSTAND_COST_GUARDRAILS_APPLY`.
 - Do not add a destroy workflow or expose state, raw plans, email addresses, account IDs, budget ARNs, or account-specific backend values in committed files or CI artifacts.
@@ -147,7 +149,7 @@ git add providers/aws/infra/terraform/modules/cost-guardrails providers/aws/infr
 git commit -m "feat: add Terraform cost guardrails"
 ```
 
-### Task 2: Add narrow bootstrap permissions and regression tests
+### Task 2: Create the dedicated Budget Guardrails OIDC role and regression tests
 
 **Files:**
 - Modify: `providers/aws/infra/bootstrap/github-oidc-terraform-backend.yaml`
@@ -155,24 +157,22 @@ git commit -m "feat: add Terraform cost guardrails"
 
 **Interfaces:**
 - Consumes: existing `GitHubActionsTerraformRole` trusted only by the `afaryy/cloudai-platform` `aws-sandbox` OIDC subject.
-- Produces: `TerraformBudgetGuardrailsAccess` policy statement that permits only Budgets lifecycle/read actions needed by Terraform for names prefixed `cloudai-platform-`.
-- Does not produce: new roles, managed policies, pass-role permissions, EC2/EKS permissions, Budget Actions, or SNS permissions.
+- Produces: `GitHubActionsBudgetGuardrailsRole`, trusted by the same protected GitHub OIDC subject, with backend access plus Budgets/Billing-only permissions for names prefixed `cloudai-platform-`.
+- Does not produce: Billing permissions on `GitHubActionsTerraformRole`, managed policies, pass-role permissions, EC2/EKS permissions, Budget Actions, or SNS permissions.
 
 - [ ] **Step 1: Write the failing bootstrap policy test**
 
-Add a test which extracts the new statement and asserts it includes:
+Add tests which extract the dedicated role and its inline policy. Assert the role name and trust subject match the protected environment. Assert the dedicated policy includes:
 
 ```ruby
 %w[
-  budgets:CreateBudget budgets:DeleteBudget budgets:DescribeBudget
-  budgets:DescribeBudgets budgets:ModifyBudget budgets:CreateNotification
-  budgets:DeleteNotification budgets:DescribeNotificationsForBudget
-  budgets:ModifyNotification budgets:CreateSubscriber budgets:DeleteSubscriber
-  budgets:DescribeSubscribersForNotification budgets:ModifySubscriber
+  budgets:ModifyBudget budgets:ViewBudget budgets:TagResource
+  budgets:UntagResource budgets:ListTagsForResource
+  aws-portal:ModifyBilling aws-portal:ViewBilling
 ].each { |action| assert_includes budget_statement, action }
 ```
 
-Also assert the statement contains `budget/cloudai-platform-*` and does not contain `ec2:RunInstances`, `iam:PassRole`, or `budgets:CreateBudgetAction`.
+Also assert the statement contains `budget/cloudai-platform-*`, `aws:RequestTag/Project`, and `aws:ResourceTag/Project`; it must not contain `ec2:RunInstances`, `eks:CreateCluster`, `bedrock:InvokeModel`, `iam:PassRole`, or `budgets:CreateBudgetAction`. Add a negative test asserting `GitHubActionsTerraformRole` does not contain `aws-portal:ModifyBilling`.
 
 - [ ] **Step 2: Run the bootstrap test to verify it fails**
 
@@ -182,17 +182,19 @@ Run:
 ruby providers/aws/infra/bootstrap/test_github_oidc_terraform_backend.rb
 ```
 
-Expected: failure because `TerraformBudgetGuardrailsAccess` does not exist.
+Expected: failure because `GitHubActionsBudgetGuardrailsRole` does not exist.
 
 - [ ] **Step 3: Add the least-privilege bootstrap policy statement**
 
-Add `TerraformBudgetGuardrailsAccess` under the inline policy on `GitHubActionsTerraformRole`. Split actions by resource scope if AWS Budgets requires `Resource: "*"` for create/list/describe operations; keep lifecycle actions scoped to:
+Create `GitHubActionsBudgetGuardrailsRole` with the same GitHub OIDC trust condition as the existing Terraform role. Give it the existing state bucket and lock-table access. Its inline policy must separate the globally scoped Billing portal actions from the resource-scoped Budgets actions:
 
 ```yaml
 !Sub "arn:${AWS::Partition}:budgets::${AWS::AccountId}:budget/cloudai-platform-*"
 ```
 
-Do not add `budgets:CreateBudgetAction`, IAM policy attachment, EC2, EKS, SNS, Lambda, or any unrelated permission.
+Use `aws:RequestTag/Project = cloudai-platform` plus the required request tag keys on create/modify operations, and `aws:ResourceTag/Project = cloudai-platform` on read/update/delete operations. Add the new role ARN as a CloudFormation output named `BudgetGuardrailsRoleArn`. Extend the bootstrap role's narrowly scoped role-management resource list to include only the new role name.
+
+Do not add `budgets:CreateBudgetAction`, Billing permissions to the existing Terraform role, IAM policy attachment, EC2, EKS, SNS, Lambda, or any unrelated permission.
 
 - [ ] **Step 4: Run policy and CloudFormation validation**
 
@@ -219,7 +221,7 @@ git commit -m "feat: permit Terraform budget guardrails"
 - Modify: `.github/workflows/terraform-tests.yaml`
 
 **Interfaces:**
-- Consumes: protected `aws-sandbox` Environment values `AWS_ROLE_TO_ASSUME`, `AWS_REGION`, `TF_BACKEND_BUCKET`, `TF_BACKEND_LOCK_TABLE`, `TF_STATE_KEY_PREFIX`, and secret `AWS_BUDGET_ALERT_EMAIL`.
+- Consumes: protected `aws-sandbox` Environment variable `AWS_BUDGET_GUARDRAILS_ROLE_TO_ASSUME`, `AWS_REGION`, `TF_BACKEND_BUCKET`, `TF_BACKEND_LOCK_TABLE`, `TF_STATE_KEY_PREFIX`, and secret `AWS_BUDGET_ALERT_EMAIL`.
 - Produces: `validate`, `plan`, and confirmation-gated `apply` operations for the state key `${TF_STATE_KEY_PREFIX}/cost-guardrails/terraform.tfstate`.
 - Does not produce: workflow artifacts containing plans/state, a `destroy` operation, or an echo of `AWS_BUDGET_ALERT_EMAIL`.
 
@@ -262,12 +264,13 @@ jobs:
     runs-on: ubuntu-latest
     environment: aws-sandbox
     env:
+      AWS_BUDGET_GUARDRAILS_ROLE_TO_ASSUME: ${{ vars.AWS_BUDGET_GUARDRAILS_ROLE_TO_ASSUME }}
       AWS_BUDGET_ALERT_EMAIL: ${{ secrets.AWS_BUDGET_ALERT_EMAIL }}
       TF_STATE_KEY: ${{ vars.TF_STATE_KEY_PREFIX }}/cost-guardrails/terraform.tfstate
       TF_VAR_budget_alert_email: ${{ secrets.AWS_BUDGET_ALERT_EMAIL }}
 ```
 
-Require `mode` values `validate`, `plan`, and `apply`. For `apply`, validate the exact confirmation phrase before configuring AWS credentials. For `plan` and `apply`, require each backend/OIDC input and `AWS_BUDGET_ALERT_EMAIL` to be non-empty, configure OIDC with masked account ID, initialise the S3 backend, and run Terraform. Run `validate` with `terraform init -backend=false` and no AWS credential step. Print only fixed sanitized messages after apply; do not invoke `terraform show`, write a plan artifact, or echo secrets.
+Require `mode` values `validate`, `plan`, and `apply`. For `apply`, validate the exact confirmation phrase before configuring AWS credentials. For `plan` and `apply`, require each backend input, `AWS_BUDGET_GUARDRAILS_ROLE_TO_ASSUME`, and `AWS_BUDGET_ALERT_EMAIL` to be non-empty; configure OIDC with the dedicated role and masked account ID, initialise the S3 backend, and run Terraform. Run `validate` with `terraform init -backend=false` and no AWS credential step. Print only fixed sanitized messages after apply; do not invoke `terraform show`, write a plan artifact, or echo secrets.
 
 - [ ] **Step 4: Run workflow boundary checks and repository CI tests**
 
@@ -302,7 +305,7 @@ git commit -m "ci: add cost guardrails workflow"
 - Modify: `docs/practices/current-status.md`
 
 **Interfaces:**
-- Consumes: GitHub `aws-sandbox` Environment secret `AWS_BUDGET_ALERT_EMAIL`, existing backend variables and roles, and the workflow from Task 3.
+- Consumes: GitHub `aws-sandbox` Environment secret `AWS_BUDGET_ALERT_EMAIL`, Environment variable `AWS_BUDGET_GUARDRAILS_ROLE_TO_ASSUME`, existing backend variables, and the workflow from Task 3.
 - Produces: a public-safe setup/runbook and a clearly marked `planned` status until protected live evidence exists.
 
 - [ ] **Step 1: Write the documentation assertions as a checklist**
@@ -311,6 +314,7 @@ The runbook must contain these exact operational statements:
 
 ```text
 AWS_BUDGET_ALERT_EMAIL is an aws-sandbox Environment secret, not a repository variable.
+AWS_BUDGET_GUARDRAILS_ROLE_TO_ASSUME is an aws-sandbox Environment variable, not a secret.
 AWS Budgets notification delivery can be delayed and is not an immediate shutdown mechanism.
 Apply requires I_UNDERSTAND_COST_GUARDRAILS_APPLY and a protected aws-sandbox approval.
 No destroy mode is supplied by terraform-cost-guardrails.
@@ -318,7 +322,7 @@ No destroy mode is supplied by terraform-cost-guardrails.
 
 - [ ] **Step 2: Document the exact manual steps**
 
-Document: root-only Billing IAM Access prerequisite already completed; GitHub Environment secret creation; validate → bootstrap change-set plan/apply → cost-guardrails plan/apply; email subscription/notification confirmation; redacted evidence capture; and the separate GPU `stop` responsibility.
+Document: root-only Billing IAM Access prerequisite already completed; GitHub Environment secret and variable creation; validate → bootstrap change-set plan/apply → cost-guardrails plan/apply; notification-delivery verification; redacted evidence capture; and the separate GPU `stop` responsibility.
 
 The README must state that no account ID, backend value, budget ARN, recipient email, raw plan, or state is committed.
 

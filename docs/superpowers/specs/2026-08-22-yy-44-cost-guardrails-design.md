@@ -42,11 +42,12 @@ after the guardrail workflow has created and verified the budgets.
 
 ```text
 GitHub aws-sandbox Environment
-  secret: AWS_BUDGET_ALERT_EMAIL
+  variable: AWS_BUDGET_GUARDRAILS_ROLE_TO_ASSUME
+  secret:   AWS_BUDGET_ALERT_EMAIL
               |
               v
 terraform-cost-guardrails workflow
-  protected environment approval + OIDC
+  protected environment approval + dedicated OIDC role
               |
               v
 Terraform cost-guardrails environment (AWS us-east-1)
@@ -57,22 +58,28 @@ AWS Budgets -> direct email notifications
 
 The workflow maps the environment secret to the sensitive Terraform input only
 for the Terraform process. It does not echo the value. Terraform state remains
-in the existing encrypted, private backend; its access boundary remains the
-existing GitHub OIDC Terraform role.
+in the existing encrypted, private backend. The separate budget role has only
+the backend permissions needed for this environment.
 
-The bootstrap CloudFormation stack receives only the additional AWS Budgets
-permissions required by this environment. Permissions are limited to managing
-the named CloudAI sandbox-budget resources plus read/describe operations that
-the Terraform provider requires. The role does not receive new EC2, EKS, IAM
-or shutdown permissions as part of this change.
+The bootstrap CloudFormation stack creates a second GitHub OIDC role named
+`cloudai-platform-aws-sandbox-budget-guardrails`. This role is distinct from
+the existing general Terraform role. It has access only to the existing
+Terraform backend, the named CloudAI budget resources, required budget tag
+operations, and the AWS Billing portal permissions required by the Budgets API.
+The general Terraform role receives no AWS Billing permissions. The budget role
+has no EC2, EKS, Bedrock, IAM pass-role, or shutdown permissions.
+
+The protected GitHub environment stores the budget role ARN as the non-secret
+variable `AWS_BUDGET_GUARDRAILS_ROLE_TO_ASSUME`. It stores the recipient only
+as the secret `AWS_BUDGET_ALERT_EMAIL`.
 
 ## Delivery behaviour
 
 The new manually dispatched workflow supports `validate`, `plan`, and `apply`:
 
 - `validate` is source-only and does not assume AWS credentials.
-- `plan` and `apply` require the protected `aws-sandbox` environment and the
-  existing OIDC role/backend inputs.
+- `plan` and `apply` require the protected `aws-sandbox` environment, the
+  dedicated budget-role ARN, and the existing backend inputs.
 - `apply` requires a dedicated confirmation phrase, distinct from GPU or EKS
   confirmation phrases.
 - `apply` exposes only a sanitised success/failure summary and no plan file or
@@ -87,8 +94,9 @@ The implementation must include:
 
 1. Terraform module and environment tests that assert the two budget names,
    periods, limits, notifications, sensitive input, and required tags.
-2. Bootstrap policy tests that assert the budget permissions are present and do
-   not broaden unrelated infrastructure permissions.
+2. Bootstrap policy tests that assert the dedicated budget role has only its
+   backend, Budgets, tag, and required Billing portal permissions, while the
+   existing general Terraform role has no new Billing permission.
 3. Workflow boundary tests that assert protected-environment use, no secret
    echoing, confirmation-gated apply, and source-only validate behaviour.
 4. A runbook describing the GitHub Environment secret, notification-confirmation
