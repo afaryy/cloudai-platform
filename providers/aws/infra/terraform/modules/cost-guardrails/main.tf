@@ -32,8 +32,8 @@ resource "aws_budgets_budget" "gpu_poc_seven_day_cost" {
   limit_amount      = "20"
   limit_unit        = "USD"
   time_unit         = "CUSTOM"
-  time_period_start = time_static.gpu_poc_budget_start.rfc3339
-  time_period_end   = time_offset.gpu_poc_budget_end.rfc3339
+  time_period_start = formatdate("YYYY-MM-DD_hh:mm", time_static.gpu_poc_budget_start.rfc3339)
+  time_period_end   = formatdate("YYYY-MM-DD_hh:mm", time_offset.gpu_poc_budget_end.rfc3339)
   tags              = var.tags
 
   dynamic "notification" {

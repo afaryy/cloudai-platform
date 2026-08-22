@@ -1,0 +1,5 @@
+bucket         = "replace-with-private-backend-bucket"
+key            = "cost-guardrails/terraform.tfstate"
+region         = "us-east-1"
+dynamodb_table = "replace-with-private-lock-table"
+encrypt        = true

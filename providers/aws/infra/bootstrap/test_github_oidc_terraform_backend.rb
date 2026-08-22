@@ -44,7 +44,11 @@ class GitHubOidcTerraformBackendTest < Minitest::Test
 
     assert_includes budget_role, "budget/cloudai-platform-*"
     assert_includes budget_role, "aws:RequestTag/Project"
+    assert_includes budget_role, "aws:RequestTag/CloudAISlice"
     assert_includes budget_role, "aws:ResourceTag/Project"
+    assert_includes budget_role, "BudgetGuardrailsStateKey"
+    assert_includes budget_role, "s3:prefix"
+    refute_includes budget_role, 'Resource: !Sub "${TerraformStateBucket.Arn}/*"'
     refute_includes budget_role, "ec2:RunInstances"
     refute_includes budget_role, "eks:CreateCluster"
     refute_includes budget_role, "bedrock:InvokeModel"
@@ -55,6 +59,8 @@ class GitHubOidcTerraformBackendTest < Minitest::Test
   def test_general_terraform_role_receives_no_billing_portal_permission
     refute_includes terraform_role, "aws-portal:ModifyBilling"
     refute_includes terraform_role, "aws-portal:ViewBilling"
+    assert_includes terraform_role, '- !Sub "${TerraformStateBucket.Arn}"'
+    assert_includes terraform_role, '- !Sub "${TerraformStateBucket.Arn}/*"'
   end
 
   def test_cost_guardrails_module_defines_only_reviewed_budget_boundaries
@@ -68,6 +74,12 @@ class GitHubOidcTerraformBackendTest < Minitest::Test
     assert_match(/limit_amount\s+=\s+"50"/, source)
     assert_match(/limit_amount\s+=\s+"20"/, source)
     assert_match(/notification_type\s+=\s+"ACTUAL"/, source)
+    assert_equal 2, source.scan('resource "aws_budgets_budget"').length
+    assert_includes source, 'toset(["15", "30", "40", "50"])'
+    assert_includes source, 'toset(["10", "15", "20"])'
+    assert_equal 2, source.scan('formatdate("YYYY-MM-DD_hh:mm"').length
+    assert_includes source, "time_unit         = \"CUSTOM\""
+    assert_includes source, "offset_days  = 7"
     refute_includes source, "aws_budgets_budget_action"
   end
 

@@ -29,7 +29,9 @@ Set the following protected Environment values before a `plan` or `apply`:
 - `AWS_BUDGET_ALERT_EMAIL` — recipient for budget notifications; it is a GitHub
   Environment secret.
 - Existing backend values: `AWS_REGION`, `TF_BACKEND_BUCKET`,
-  `TF_BACKEND_LOCK_TABLE`, and `TF_STATE_KEY_PREFIX`.
+  and `TF_BACKEND_LOCK_TABLE`. The state key is deliberately fixed to
+  `cost-guardrails/terraform.tfstate` so the dedicated role cannot access
+  other environment state objects.
 
 Do not commit account IDs, backend values, budget ARNs, recipient email
 addresses, raw plans, Terraform state, or tfvars.

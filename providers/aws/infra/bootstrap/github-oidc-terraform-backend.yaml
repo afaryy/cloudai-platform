@@ -26,6 +26,10 @@ Parameters:
     Type: String
     Default: cloudai-platform-aws-sandbox-bootstrap
     Description: Dedicated GitHub OIDC role used only to update this CloudFormation bootstrap stack.
+  BudgetGuardrailsStateKey:
+    Type: String
+    Default: cost-guardrails/terraform.tfstate
+    Description: Exact private Terraform state key permitted to the dedicated Budget Guardrails role.
   AgentCoreRagNamePrefix:
     Type: String
     Default: cloudaiplatformagentcoreragsandbox
@@ -592,10 +596,16 @@ Resources:
                   - s3:GetObject
                   - s3:PutObject
                   - s3:DeleteObject
+                Resource: !Sub "${TerraformStateBucket.Arn}/${BudgetGuardrailsStateKey}"
+              - Sid: ListOnlyCostGuardrailsStateKey
+                Effect: Allow
+                Action:
                   - s3:ListBucket
-                Resource:
-                  - !Sub "${TerraformStateBucket.Arn}"
-                  - !Sub "${TerraformStateBucket.Arn}/*"
+                Resource: !Sub "${TerraformStateBucket.Arn}"
+                Condition:
+                  StringLike:
+                    s3:prefix:
+                      - !Ref BudgetGuardrailsStateKey
               - Sid: TerraformLockAccess
                 Effect: Allow
                 Action:
@@ -614,6 +624,10 @@ Resources:
                   StringEquals:
                     aws:RequestTag/Project: cloudai-platform
                     aws:RequestTag/Environment: cost-guardrails
+                    aws:RequestTag/ManagedBy: terraform
+                    aws:RequestTag/DataScope: synthetic-only
+                    aws:RequestTag/CostBoundary: pre-gpu-poc
+                    aws:RequestTag/CloudAISlice: YY-44
                   ForAllValues:StringEquals:
                     aws:TagKeys:
                       - Project
@@ -742,6 +756,9 @@ Outputs:
   BudgetGuardrailsRoleArn:
     Description: Store as AWS_BUDGET_GUARDRAILS_ROLE_TO_ASSUME in the aws-sandbox GitHub environment.
     Value: !GetAtt GitHubActionsBudgetGuardrailsRole.Arn
+  BudgetGuardrailsStateKey:
+    Description: Fixed state key used only by the dedicated Budget Guardrails Terraform workflow.
+    Value: !Ref BudgetGuardrailsStateKey
   BootstrapRoleArn:
     Description: Store privately as AWS_BOOTSTRAP_ROLE_TO_ASSUME in the aws-sandbox GitHub environment.
     Value: !GetAtt GitHubActionsBootstrapRole.Arn

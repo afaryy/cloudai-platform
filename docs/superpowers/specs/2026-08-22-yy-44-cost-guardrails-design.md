@@ -58,8 +58,10 @@ AWS Budgets -> direct email notifications
 
 The workflow maps the environment secret to the sensitive Terraform input only
 for the Terraform process. It does not echo the value. Terraform state remains
-in the existing encrypted, private backend. The separate budget role has only
-the backend permissions needed for this environment.
+in the existing encrypted, private backend at the fixed key
+`cost-guardrails/terraform.tfstate`. The separate budget role can list and
+read/write only that key; it cannot access another environment's Terraform
+state.
 
 The bootstrap CloudFormation stack creates a second GitHub OIDC role named
 `cloudai-platform-aws-sandbox-budget-guardrails`. This role is distinct from
@@ -72,6 +74,10 @@ has no EC2, EKS, Bedrock, IAM pass-role, or shutdown permissions.
 The protected GitHub environment stores the budget role ARN as the non-secret
 variable `AWS_BUDGET_GUARDRAILS_ROLE_TO_ASSUME`. It stores the recipient only
 as the secret `AWS_BUDGET_ALERT_EMAIL`.
+
+The GPU POC uses the AWS provider's required custom-budget timestamp format
+`YYYY-MM-DD_hh:mm`. Terraform converts the stable `time_static` and
+`time_offset` RFC3339 values before passing them to AWS Budgets.
 
 ## Delivery behaviour
 
