@@ -565,6 +565,92 @@ Resources:
               - !Sub "arn:${AWS::Partition}:bedrock:${AWS::Region}::foundation-model/anthropic.claude-haiku-4-5-20251001-v1:0"
               - !Sub "arn:${AWS::Partition}:bedrock:ap-southeast-4::foundation-model/anthropic.claude-haiku-4-5-20251001-v1:0"
 
+  GitHubActionsBudgetGuardrailsRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${GitHubRepo}-${GitHubEnvironment}-budget-guardrails"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Federated: !Ref ExistingGitHubOidcProviderArn
+            Action: sts:AssumeRoleWithWebIdentity
+            Condition:
+              StringEquals:
+                token.actions.githubusercontent.com:aud: sts.amazonaws.com
+              StringLike:
+                token.actions.githubusercontent.com:sub: !Sub "repo:${GitHubOrg}/${GitHubRepo}:environment:${GitHubEnvironment}"
+      Policies:
+        - PolicyName: CostGuardrailsTerraformPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Sid: TerraformBackendAccess
+                Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:PutObject
+                  - s3:DeleteObject
+                  - s3:ListBucket
+                Resource:
+                  - !Sub "${TerraformStateBucket.Arn}"
+                  - !Sub "${TerraformStateBucket.Arn}/*"
+              - Sid: TerraformLockAccess
+                Effect: Allow
+                Action:
+                  - dynamodb:GetItem
+                  - dynamodb:PutItem
+                  - dynamodb:DeleteItem
+                  - dynamodb:DescribeTable
+                Resource: !Sub "arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${LockTableName}"
+              - Sid: CreateOnlyRequiredTaggedCloudAiBudgets
+                Effect: Allow
+                Action:
+                  - budgets:ModifyBudget
+                  - budgets:TagResource
+                Resource: !Sub "arn:${AWS::Partition}:budgets::${AWS::AccountId}:budget/cloudai-platform-*"
+                Condition:
+                  StringEquals:
+                    aws:RequestTag/Project: cloudai-platform
+                    aws:RequestTag/Environment: cost-guardrails
+                  ForAllValues:StringEquals:
+                    aws:TagKeys:
+                      - Project
+                      - Environment
+                      - ManagedBy
+                      - DataScope
+                      - CostBoundary
+                      - CloudAISlice
+                  Null:
+                    aws:TagKeys: "false"
+              - Sid: ManageOnlyTaggedCloudAiBudgets
+                Effect: Allow
+                Action:
+                  - budgets:ModifyBudget
+                  - budgets:ViewBudget
+                  - budgets:TagResource
+                  - budgets:UntagResource
+                  - budgets:ListTagsForResource
+                Resource: !Sub "arn:${AWS::Partition}:budgets::${AWS::AccountId}:budget/cloudai-platform-*"
+                Condition:
+                  StringEquals:
+                    aws:ResourceTag/Project: cloudai-platform
+                    aws:ResourceTag/Environment: cost-guardrails
+              - Sid: RequiredBillingPortalAccessForBudgets
+                Effect: Allow
+                Action:
+                  - aws-portal:ModifyBilling
+                  - aws-portal:ViewBilling
+                Resource: "*"
+      Tags:
+        - Key: Project
+          Value: cloudai-platform
+        - Key: Environment
+          Value: cost-guardrails
+        - Key: ManagedBy
+          Value: cloudformation
+
   GitHubActionsBootstrapRole:
     Type: AWS::IAM::Role
     Properties:
@@ -604,7 +690,7 @@ Resources:
                 Resource:
                   - !Sub "arn:${AWS::Partition}:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/${AWS::StackName}/*"
                   - !Sub "arn:${AWS::Partition}:cloudformation:${AWS::Region}:${AWS::AccountId}:changeSet/cloudai-bootstrap-*/*"
-              - Sid: ManageOnlyTerraformAndBootstrapRoles
+              - Sid: ManageOnlyTerraformBootstrapAndBudgetRoles
                 Effect: Allow
                 Action:
                   - iam:CreateRole
@@ -621,6 +707,7 @@ Resources:
                   - iam:UpdateAssumeRolePolicy
                 Resource:
                   - !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/${GitHubRepo}-${GitHubEnvironment}-terraform"
+                  - !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/${GitHubRepo}-${GitHubEnvironment}-budget-guardrails"
                   - !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/${BootstrapRoleName}"
               - Sid: ManageOnlyAgentCoreRagManagedPolicies
                 Effect: Allow
@@ -652,6 +739,9 @@ Outputs:
   GitHubActionsRoleArn:
     Description: Store privately as AWS_ROLE_TO_ASSUME in the aws-sandbox GitHub environment.
     Value: !GetAtt GitHubActionsTerraformRole.Arn
+  BudgetGuardrailsRoleArn:
+    Description: Store as AWS_BUDGET_GUARDRAILS_ROLE_TO_ASSUME in the aws-sandbox GitHub environment.
+    Value: !GetAtt GitHubActionsBudgetGuardrailsRole.Arn
   BootstrapRoleArn:
     Description: Store privately as AWS_BOOTSTRAP_ROLE_TO_ASSUME in the aws-sandbox GitHub environment.
     Value: !GetAtt GitHubActionsBootstrapRole.Arn

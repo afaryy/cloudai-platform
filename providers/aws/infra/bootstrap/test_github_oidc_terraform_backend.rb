@@ -27,9 +27,46 @@ class GitHubOidcTerraformBackendTest < Minitest::Test
     refute_includes bedrock_statement, "iam:PassRole"
   end
 
+  def test_includes_dedicated_budget_guardrails_role
+    assert_includes template, "GitHubActionsBudgetGuardrailsRole:"
+    assert_includes budget_role, 'RoleName: !Sub "${GitHubRepo}-${GitHubEnvironment}-budget-guardrails"'
+    assert_includes budget_role, 'token.actions.githubusercontent.com:sub: !Sub "repo:${GitHubOrg}/${GitHubRepo}:environment:${GitHubEnvironment}"'
+    assert_includes template, "BudgetGuardrailsRoleArn:"
+  end
+
+  def test_budget_guardrails_role_allows_only_required_budgets_and_billing_actions
+    %w[
+      budgets:ModifyBudget budgets:ViewBudget budgets:TagResource
+      budgets:UntagResource budgets:ListTagsForResource
+      aws-portal:ModifyBilling aws-portal:ViewBilling
+    ].each { |action| assert_includes budget_role, action }
+
+    assert_includes budget_role, "budget/cloudai-platform-*"
+    assert_includes budget_role, "aws:RequestTag/Project"
+    assert_includes budget_role, "aws:ResourceTag/Project"
+    refute_includes budget_role, "ec2:RunInstances"
+    refute_includes budget_role, "eks:CreateCluster"
+    refute_includes budget_role, "bedrock:InvokeModel"
+    refute_includes budget_role, "iam:PassRole"
+    refute_includes budget_role, "budgets:CreateBudgetAction"
+  end
+
+  def test_general_terraform_role_receives_no_billing_portal_permission
+    refute_includes terraform_role, "aws-portal:ModifyBilling"
+    refute_includes terraform_role, "aws-portal:ViewBilling"
+  end
+
   private
 
   def bedrock_statement
     template.split("Sid: BedrockSandboxIamApply", 2).fetch(1, "").split(/\n\s+- Sid:/, 2).first.to_s
+  end
+
+  def terraform_role
+    template.split("GitHubActionsTerraformRole:", 2).fetch(1, "").split("AgentCoreRagTerraformPolicy:", 2).first.to_s
+  end
+
+  def budget_role
+    template.split("GitHubActionsBudgetGuardrailsRole:", 2).fetch(1, "").split("AgentCoreRagTerraformPolicy:", 2).first.to_s
   end
 end
