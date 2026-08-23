@@ -21,6 +21,10 @@ provider boundaries, and future capacity design.
   design-only routing criteria and correlation-first evidence chain for
   Kubernetes, queue governance, managed training, future HPC, and managed
   inference; no GPU deployment.
+- [Private EKS Reference Architecture](private-eks-reference-architecture.md) —
+  the production-oriented private-worker and private-GPU target, with
+  endpoint-first egress, VPC-connected delivery, image promotion, Kueue, and
+  cost boundaries; separate from the low-cost public-subnet sandbox.
 - [EKS GPU + Kueue POC Design](../solutions/eks-gpu-kueue-poc-design.md) and
   [runbook](../solutions/eks-gpu-kueue-poc-runbook.md) — a future synthetic GPU
   admission path that attaches only to an active EKS sandbox; it does not claim
