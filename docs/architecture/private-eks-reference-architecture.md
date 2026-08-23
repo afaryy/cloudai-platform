@@ -100,7 +100,8 @@ The preferred baseline is endpoint-first:
 | ECR DKR | Interface endpoint | Container layer pulls |
 | S3 | Gateway endpoint | ECR layer storage and selected artifacts |
 | STS | Interface endpoint | Web identity and short-lived credentials |
-| EKS | Interface endpoint where required | Cluster API and AWS control operations |
+| EKS service API | `com.amazonaws.<region>.eks` interface endpoint | AWS EKS service operations from private nodes/runner |
+| Kubernetes API | EKS private cluster endpoint and control-plane ENIs | Kubernetes API access from the VPC-connected delivery runner; not the EKS service endpoint |
 | EC2 | Interface endpoint where required | Node and infrastructure API operations |
 | CloudWatch Logs | Interface endpoint | Private log delivery |
 | SSM Messages | Optional interface endpoint | Only for approved private debugging paths |
@@ -119,6 +120,9 @@ private EKS API endpoint. Therefore:
   VPC-connected self-hosted runner or equivalent in-VPC build job;
 - the runner uses short-lived OIDC-derived credentials;
 - runner security groups and subnet placement are documented;
+- the runner has approved outbound connectivity to GitHub Actions services for
+  job reception, action downloads, OIDC exchange, logs, and artifacts through a
+  controlled NAT, proxy, or equivalent in-VPC egress path;
 - no long-lived AWS credentials are stored in GitHub;
 - a GitHub-hosted runner may only be used for the intermediate private-worker
   profile when its network path is explicitly reviewed.
@@ -141,6 +145,13 @@ Approved CUDA tag
 The image digest, not the mutable tag, is the deployment input. A NAT-based
 public image pull is an explicit exception and must appear in the cost and
 security review.
+
+Image-promotion evidence must show that the source digest and promoted digest
+match, the target repository is private, the image scan gate passed, the
+deployment references a digest rather than a mutable tag, and the private node
+pulled through the approved ECR/S3 endpoint path (or records the approved NAT
+exception). Public ECR reachability must never be inferred from a successful
+deployment alone.
 
 ## GPU and Kueue boundary
 
@@ -177,6 +188,18 @@ monthly sandbox budget and USD 20 daily GPU budget are not assumed to cover the
 private variant. Budget alerts are evidence and governance controls, not hard
 service caps; the workflow must still provide protected scale-to-zero and
 separate teardown controls.
+
+The protected CI contract uses these exact inputs before an apply:
+
+- `PRIVATE_EKS_BUDGET_APPROVED=true`;
+- `PRIVATE_EKS_MONTHLY_BUDGET_USD` set to the separately approved numeric
+  ceiling;
+- `PRIVATE_EKS_RUNNER_READY=true`;
+- `PRIVATE_EKS_ENDPOINT_POLICY_READY=true`;
+- an explicit apply confirmation matching the private-environment workflow.
+
+The workflow must fail closed when any input is absent, malformed, or not
+approved for the selected environment.
 
 ## Evidence and public-safety boundary
 

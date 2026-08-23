@@ -60,13 +60,18 @@ features. The baseline endpoint set is:
 - ECR Docker registry
 - S3 gateway
 - STS
-- EKS
+- EKS service API (`com.amazonaws.<region>.eks`); this is distinct from the
+  Kubernetes API endpoint exposed by the EKS control plane
 - EC2
 - CloudWatch Logs
 
 SSM Messages is added only when the private execution/debugging path requires
-it. Endpoint security groups and endpoint policies are least-privilege and
-documented.
+it. Private DNS must be enabled for interface endpoints, endpoint security
+groups must allow only worker and runner security groups, and endpoint policies
+must be scoped for the intended ECR repositories, S3 gateway access, STS,
+CloudWatch Logs, and AWS control-plane calls. The private Kubernetes API is
+reached through the control-plane ENIs from the VPC-connected runner; it is not
+provided by the EKS service endpoint.
 
 NAT is an explicit fallback for dependencies that cannot use VPC endpoints,
 including public package registries or public ECR images. Production designs
@@ -84,7 +89,10 @@ The GPU POC uses a digest-pinned CUDA image. Private nodes must either:
 
 The preferred enterprise pattern is a private ECR mirror with immutable digest
 verification, image scanning, lifecycle policy, and a documented promotion
-record. A Public ECR reference alone does not prove private-subnet reachability.
+record. The promotion record must prove source/promoted digest equality, private
+repository ownership, scan-gate success, digest-based deployment input, and a
+pull through ECR/S3 endpoints (or an explicitly approved NAT exception). A
+Public ECR reference alone does not prove private-subnet reachability.
 
 ### Decision 6: Cost is a gate, not a reason to weaken the target architecture
 
@@ -100,6 +108,18 @@ The private variant cannot be applied until:
 - GPU daily guardrails remain enabled before GPU capacity is added;
 - the stop and teardown owner is documented;
 - the plan proves that the existing public sandbox is unaffected.
+
+The protected CI gate names are fixed for the reference implementation:
+
+- `PRIVATE_EKS_BUDGET_APPROVED=true`;
+- `PRIVATE_EKS_MONTHLY_BUDGET_USD` contains the approved numeric ceiling;
+- `PRIVATE_EKS_RUNNER_READY=true`;
+- `PRIVATE_EKS_ENDPOINT_POLICY_READY=true`;
+- the private workflow's explicit apply confirmation is present.
+
+The VPC-connected runner also needs controlled outbound access to GitHub Actions
+services for job reception, action downloads, OIDC, logs, and artifacts. This
+path must use an approved NAT, proxy, or equivalent in-VPC egress design.
 
 ## Target architecture
 

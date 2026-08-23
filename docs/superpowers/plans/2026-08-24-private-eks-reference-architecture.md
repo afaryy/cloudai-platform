@@ -58,6 +58,12 @@
 
   Assert the public-safe documents contain `private`, `controlled egress`, `VPC-connected`, `no public IP`, and `existing public-subnet sandbox` boundaries, and do not claim private runtime completion.
 
+  The contract test must also assert that the documents distinguish the EKS AWS
+  service endpoint from the private Kubernetes API endpoint, document controlled
+  GitHub Actions service egress for the VPC runner, and name the protected CI
+  inputs `PRIVATE_EKS_BUDGET_APPROVED`, `PRIVATE_EKS_MONTHLY_BUDGET_USD`,
+  `PRIVATE_EKS_RUNNER_READY`, and `PRIVATE_EKS_ENDPOINT_POLICY_READY`.
+
 - [ ] **Step 7: Run tests**
 
   ```bash
