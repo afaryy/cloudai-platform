@@ -40,10 +40,16 @@ jobs:
       TF_BACKEND_LOCK_TABLE: ${{ vars.TF_BACKEND_LOCK_TABLE }}
       TF_STATE_KEY_PREFIX: ${{ vars.TF_STATE_KEY_PREFIX }}
       TF_STATE_KEY: ${{ vars.TF_STATE_KEY_PREFIX }}/eks-gpu-kueue-poc/terraform.tfstate
-      TF_VAR_gpu_instance_type: ${{ vars.TF_VAR_GPU_INSTANCE_TYPE }}
-      TF_VAR_gpu_poc_subnet_ids: ${{ vars.TF_VAR_GPU_POC_SUBNET_IDS }}
-      TF_VAR_cuda_smoke_image: ${{ vars.TF_VAR_CUDA_SMOKE_IMAGE }}
-      TF_VAR_kueue_chart_version: ${{ vars.TF_VAR_KUEUE_CHART_VERSION }}
+      # Validation needs syntactically valid placeholders; remote modes still
+      # fail closed against the raw protected values below.
+      TF_VAR_gpu_instance_type: ${{ vars.TF_VAR_GPU_INSTANCE_TYPE || 'validation-placeholder' }}
+      TF_VAR_gpu_poc_subnet_ids: ${{ vars.TF_VAR_GPU_POC_SUBNET_IDS || '["subnet-validation-placeholder"]' }}
+      TF_VAR_cuda_smoke_image: ${{ vars.TF_VAR_CUDA_SMOKE_IMAGE || 'public.ecr.aws/cloudai/validation@sha256:0000000000000000000000000000000000000000000000000000000000000000' }}
+      TF_VAR_kueue_chart_version: ${{ vars.TF_VAR_KUEUE_CHART_VERSION || '0.0.0' }}
+      GPU_INSTANCE_TYPE_CONFIGURED: ${{ vars.TF_VAR_GPU_INSTANCE_TYPE }}
+      GPU_POC_SUBNET_IDS_CONFIGURED: ${{ vars.TF_VAR_GPU_POC_SUBNET_IDS }}
+      CUDA_SMOKE_IMAGE_CONFIGURED: ${{ vars.TF_VAR_CUDA_SMOKE_IMAGE }}
+      KUEUE_CHART_VERSION_CONFIGURED: ${{ vars.TF_VAR_KUEUE_CHART_VERSION }}
       TF_VAR_gpu_min_size: "0"
       TF_VAR_gpu_max_size: "1"
       GPU_POC_BUDGET_ALERT_CONFIGURED: ${{ vars.GPU_POC_BUDGET_ALERT_CONFIGURED }}
@@ -89,7 +95,7 @@ jobs:
             missing=1
           fi
           if [ "$MODE" != "validate" ]; then
-            for name in TF_VAR_gpu_instance_type TF_VAR_gpu_poc_subnet_ids TF_VAR_cuda_smoke_image TF_VAR_kueue_chart_version; do
+            for name in GPU_INSTANCE_TYPE_CONFIGURED GPU_POC_SUBNET_IDS_CONFIGURED CUDA_SMOKE_IMAGE_CONFIGURED KUEUE_CHART_VERSION_CONFIGURED; do
               if [ -z "${!name}" ]; then
                 echo "::error::$name is required for Terraform remote operations."
                 missing=1
