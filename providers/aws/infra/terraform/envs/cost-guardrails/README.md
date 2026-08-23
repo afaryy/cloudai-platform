@@ -29,6 +29,12 @@ Set the following protected Environment values before a `plan` or `apply`:
   approved bootstrap update; it is a GitHub Environment variable, not a secret.
 - `AWS_BUDGET_ALERT_EMAIL` — recipient for budget notifications; it is a GitHub
   Environment secret.
+- `MONTHLY_SANDBOX_BUDGET_USD` — optional Environment variable, default `50`.
+- `GPU_DAILY_BUDGET_USD` — optional Environment variable, default `20`.
+- `MONTHLY_ALERT_THRESHOLDS_USD` — optional comma-separated Environment
+  variable, default `15,30,40,50`.
+- `GPU_ALERT_THRESHOLDS_USD` — optional comma-separated Environment variable,
+  default `10,15,20`.
 - Existing backend values: `AWS_REGION` and `TF_BACKEND_BUCKET`. The state key
   is deliberately fixed to `cost-guardrails/terraform.tfstate` so the
   dedicated role cannot access other environment state objects. This

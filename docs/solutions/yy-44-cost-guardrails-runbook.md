@@ -20,6 +20,17 @@ AWS_BUDGET_ALERT_EMAIL is an aws-sandbox Environment secret, not a repository va
 
 AWS_BUDGET_GUARDRAILS_ROLE_TO_ASSUME is an aws-sandbox Environment variable, not a secret.
 
+Budget amounts and notification thresholds are also controlled by the
+protected `aws-sandbox` Environment variables below. If absent, the workflow
+uses the documented defaults:
+
+| Environment variable | Default |
+| --- | ---: |
+| `MONTHLY_SANDBOX_BUDGET_USD` | `50` |
+| `GPU_DAILY_BUDGET_USD` | `20` |
+| `MONTHLY_ALERT_THRESHOLDS_USD` | `15,30,40,50` |
+| `GPU_ALERT_THRESHOLDS_USD` | `10,15,20` |
+
 AWS Budgets notification delivery can be delayed and is not an immediate shutdown mechanism.
 
 Apply requires I_UNDERSTAND_COST_GUARDRAILS_APPLY and a protected aws-sandbox approval.

@@ -38,6 +38,10 @@ jobs:
       TF_BACKEND_BUCKET: ${{ vars.TF_BACKEND_BUCKET }}
       TF_STATE_KEY: cost-guardrails/terraform.tfstate
       TF_VAR_budget_alert_email: ${{ secrets.AWS_BUDGET_ALERT_EMAIL }}
+      TF_VAR_monthly_budget_usd: ${{ vars.MONTHLY_SANDBOX_BUDGET_USD || '50' }}
+      TF_VAR_gpu_daily_budget_usd: ${{ vars.GPU_DAILY_BUDGET_USD || '20' }}
+      TF_VAR_monthly_alert_thresholds: ${{ vars.MONTHLY_ALERT_THRESHOLDS_USD || '15,30,40,50' }}
+      TF_VAR_gpu_alert_thresholds: ${{ vars.GPU_ALERT_THRESHOLDS_USD || '10,15,20' }}
     defaults:
       run:
         working-directory: providers/aws/infra/terraform/envs/cost-guardrails
