@@ -4,8 +4,8 @@ output "monthly_budget_name" {
 }
 
 output "gpu_poc_budget_name" {
-  description = "Reviewed name of the bounded seven-day GPU POC budget."
-  value       = aws_budgets_budget.gpu_poc_seven_day_cost.name
+  description = "Reviewed name of the bounded daily GPU POC budget."
+  value       = aws_budgets_budget.gpu_poc_daily_cost.name
 }
 
 output "monthly_budget_limit_usd" {
@@ -14,6 +14,6 @@ output "monthly_budget_limit_usd" {
 }
 
 output "gpu_poc_budget_limit_usd" {
-  description = "Seven-day GPU POC guardrail limit in USD."
-  value       = aws_budgets_budget.gpu_poc_seven_day_cost.limit_amount
+  description = "Daily GPU POC guardrail limit in USD."
+  value       = aws_budgets_budget.gpu_poc_daily_cost.limit_amount
 }

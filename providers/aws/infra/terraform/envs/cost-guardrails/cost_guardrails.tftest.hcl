@@ -1,7 +1,5 @@
 mock_provider "aws" {}
 
-mock_provider "time" {}
-
 run "applies_cost_guardrails_tags_and_budget_boundaries" {
   command = plan
 
@@ -15,7 +13,7 @@ run "applies_cost_guardrails_tags_and_budget_boundaries" {
   }
 
   assert {
-    condition     = output.gpu_poc_budget_name == "cloudai-platform-gpu-poc-seven-day-cost"
-    error_message = "The environment must expose the reviewed GPU POC budget boundary."
+    condition     = output.gpu_poc_budget_name == "cloudai-platform-gpu-poc-daily-cost"
+    error_message = "The environment must expose the reviewed daily GPU POC budget boundary."
   }
 }

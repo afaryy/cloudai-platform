@@ -12,7 +12,7 @@ The workflow manages exactly two budgets:
 | Budget | Limit | Period | Actual-spend notification thresholds |
 | --- | ---: | --- | --- |
 | `cloudai-platform-sandbox-monthly-cost` | USD 50 | Monthly | 15, 30, 40, 50 USD |
-| `cloudai-platform-gpu-poc-seven-day-cost` | USD 20 | Seven-day custom | 10, 15, 20 USD |
+| `cloudai-platform-gpu-poc-daily-cost` | USD 20/day | Daily recurring cap during seven-day window | 10, 15, 20 USD |
 
 ## Required safety statements
 
@@ -54,7 +54,9 @@ No destroy mode is supplied by terraform-cost-guardrails.
 4. Add `AWS_BUDGET_GUARDRAILS_ROLE_TO_ASSUME` from the new CloudFormation
    output to the protected Environment.
 5. Run `terraform-cost-guardrails` with `mode=plan`; verify it proposes exactly
-   two budget resources plus the short custom-period timer resources.
+   two budget resources and no timer resources. The daily GPU cap and the
+   separately approved seven-day teardown window together provide the bounded
+   demo control.
 6. Run `mode=apply` with the exact confirmation phrase. Review GitHub's
    protected Environment approval request before approval.
 7. Verify the budgets through sanitized workflow evidence and, after a future

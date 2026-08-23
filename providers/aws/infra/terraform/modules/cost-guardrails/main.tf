@@ -1,10 +1,3 @@
-resource "time_static" "gpu_poc_budget_start" {}
-
-resource "time_offset" "gpu_poc_budget_end" {
-  base_rfc3339 = time_static.gpu_poc_budget_start.rfc3339
-  offset_days  = 7
-}
-
 resource "aws_budgets_budget" "sandbox_monthly_cost" {
   name         = "cloudai-platform-sandbox-monthly-cost"
   budget_type  = "COST"
@@ -26,15 +19,13 @@ resource "aws_budgets_budget" "sandbox_monthly_cost" {
   }
 }
 
-resource "aws_budgets_budget" "gpu_poc_seven_day_cost" {
-  name              = "cloudai-platform-gpu-poc-seven-day-cost"
-  budget_type       = "COST"
-  limit_amount      = "20"
-  limit_unit        = "USD"
-  time_unit         = "CUSTOM"
-  time_period_start = formatdate("YYYY-MM-DD_hh:mm", time_static.gpu_poc_budget_start.rfc3339)
-  time_period_end   = formatdate("YYYY-MM-DD_hh:mm", time_offset.gpu_poc_budget_end.rfc3339)
-  tags              = var.tags
+resource "aws_budgets_budget" "gpu_poc_daily_cost" {
+  name         = "cloudai-platform-gpu-poc-daily-cost"
+  budget_type  = "COST"
+  limit_amount = "20"
+  limit_unit   = "USD"
+  time_unit    = "DAILY"
+  tags         = var.tags
 
   dynamic "notification" {
     for_each = toset(["10", "15", "20"])
