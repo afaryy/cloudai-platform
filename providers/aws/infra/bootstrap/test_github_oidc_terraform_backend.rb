@@ -30,6 +30,7 @@ class GitHubOidcTerraformBackendTest < Minitest::Test
 
   def test_includes_dedicated_budget_guardrails_role
     assert_includes template, "GitHubActionsBudgetGuardrailsRole:"
+    assert_includes budget_role, "DependsOn: GitHubActionsBootstrapRole"
     assert_includes budget_role, 'RoleName: !Sub "${GitHubRepo}-${GitHubEnvironment}-budget-guardrails"'
     assert_includes budget_role, 'token.actions.githubusercontent.com:sub: !Sub "repo:${GitHubOrg}/${GitHubRepo}:environment:${GitHubEnvironment}"'
     assert_includes template, "BudgetGuardrailsRoleArn:"
