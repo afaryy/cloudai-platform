@@ -1,7 +1,5 @@
 mock_provider "aws" {}
 
-mock_provider "time" {}
-
 run "defines_the_two_bounded_notification_budgets" {
   command = plan
 
@@ -15,8 +13,8 @@ run "defines_the_two_bounded_notification_budgets" {
   }
 
   assert {
-    condition     = output.gpu_poc_budget_name == "cloudai-platform-gpu-poc-seven-day-cost"
-    error_message = "The GPU POC budget must retain its reviewed name."
+    condition     = output.gpu_poc_budget_name == "cloudai-platform-gpu-poc-daily-cost"
+    error_message = "The GPU POC budget must retain its daily guardrail name."
   }
 
   assert {
@@ -26,6 +24,6 @@ run "defines_the_two_bounded_notification_budgets" {
 
   assert {
     condition     = output.gpu_poc_budget_limit_usd == "20"
-    error_message = "The seven-day GPU POC budget must remain capped at USD 20."
+    error_message = "The daily GPU POC budget must remain capped at USD 20."
   }
 }

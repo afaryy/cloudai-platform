@@ -9,11 +9,12 @@ automatic shutdown, Budget Action, SNS, Lambda, or deletion path.
 | Budget | Period | Limit | Actual-spend notifications |
 | --- | --- | --- | --- |
 | `cloudai-platform-sandbox-monthly-cost` | Monthly | USD 50 | USD 15, 30, 40, 50 |
-| `cloudai-platform-gpu-poc-seven-day-cost` | Seven-day custom period | USD 20 | USD 10, 15, 20 |
+| `cloudai-platform-gpu-poc-daily-cost` | Daily recurring cap during the seven-day demo window | USD 20/day | USD 10, 15, 20 |
 
-The custom GPU budget begins when its Terraform state is first created and
-ends seven days later. It is a notification control, not an immediate
-technical shutdown mechanism.
+AWS Budgets does not support a Terraform `CUSTOM` time unit. The GPU guardrail
+therefore uses a supported daily budget and the operator's separately approved
+seven-day demo window/teardown plan provides the outer lifecycle boundary. It
+is a notification control, not an immediate technical shutdown mechanism.
 
 ## Protected delivery only
 
