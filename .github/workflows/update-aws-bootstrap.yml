@@ -17,6 +17,15 @@ on:
           - plan
           - apply
           - diagnose
+          - recover-budget-guardrails-orphan
+      budget_guardrails_role_mode:
+        description: "For plan/apply: permissions-only prepares Bootstrap IAM; provision creates the dedicated role"
+        required: true
+        default: "provision"
+        type: choice
+        options:
+          - permissions-only
+          - provision
       change_set_name:
         description: "Required for apply: reviewed cloudai-bootstrap-* change set name"
         required: false
@@ -50,6 +59,7 @@ jobs:
       TF_BACKEND_BUCKET: ${{ vars.TF_BACKEND_BUCKET }}
       TF_BACKEND_LOCK_TABLE: ${{ vars.TF_BACKEND_LOCK_TABLE }}
       CHANGE_SET_NAME: ${{ inputs.change_set_name }}
+      CREATE_BUDGET_GUARDRAILS_ROLE: ${{ inputs.budget_guardrails_role_mode == 'permissions-only' && 'false' || 'true' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -59,7 +69,7 @@ jobs:
         run: pipx run cfn-lint providers/aws/infra/bootstrap/github-oidc-terraform-backend.yaml
 
       - name: Check bootstrap environment configuration
-        if: ${{ github.event_name == 'workflow_dispatch' && (inputs.mode == 'plan' || inputs.mode == 'apply' || inputs.mode == 'diagnose') }}
+        if: ${{ github.event_name == 'workflow_dispatch' && (inputs.mode == 'plan' || inputs.mode == 'apply' || inputs.mode == 'diagnose' || inputs.mode == 'recover-budget-guardrails-orphan') }}
         run: |
           missing=0
           for name in AWS_BOOTSTRAP_ROLE_TO_ASSUME AWS_TERRAFORM_ROLE_TO_ASSUME AWS_BOOTSTRAP_STACK_NAME AWS_OIDC_PROVIDER_ARN TF_BACKEND_BUCKET TF_BACKEND_LOCK_TABLE; do
@@ -83,13 +93,23 @@ jobs:
             echo "::error::apply requires I_UNDERSTAND_AWS_BOOTSTRAP_APPLY."
             exit 1
           fi
+
+      - name: Check orphan recovery confirmation
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.mode == 'recover-budget-guardrails-orphan' }}
+        env:
+          CONFIRMATION: ${{ inputs.confirmation }}
+        run: |
+          if [ "$CONFIRMATION" != "I_UNDERSTAND_BUDGET_GUARDRAILS_ORPHAN_ROLE_RECOVERY" ]; then
+            echo "::error::orphan recovery requires I_UNDERSTAND_BUDGET_GUARDRAILS_ORPHAN_ROLE_RECOVERY."
+            exit 1
+          fi
           if ! [[ "$CHANGE_SET_NAME" =~ ^cloudai-bootstrap-[0-9]+$ ]]; then
             echo "::error::apply requires the exact reviewed change set name emitted by plan."
             exit 1
           fi
 
       - name: Configure AWS credentials through GitHub OIDC
-        if: ${{ github.event_name == 'workflow_dispatch' && (inputs.mode == 'plan' || inputs.mode == 'apply' || inputs.mode == 'diagnose') }}
+        if: ${{ github.event_name == 'workflow_dispatch' && (inputs.mode == 'plan' || inputs.mode == 'apply' || inputs.mode == 'diagnose' || inputs.mode == 'recover-budget-guardrails-orphan') }}
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ env.AWS_BOOTSTRAP_ROLE_TO_ASSUME }}
@@ -125,7 +145,8 @@ jobs:
               "ParameterKey=GitHubOrg,ParameterValue=afaryy,UsePreviousValue=false" \
               "ParameterKey=GitHubRepo,ParameterValue=cloudai-platform,UsePreviousValue=false" \
               "ParameterKey=GitHubEnvironment,ParameterValue=aws-sandbox,UsePreviousValue=false" \
-              "ParameterKey=ExistingGitHubOidcProviderArn,ParameterValue=$AWS_OIDC_PROVIDER_ARN,UsePreviousValue=false"
+              "ParameterKey=ExistingGitHubOidcProviderArn,ParameterValue=$AWS_OIDC_PROVIDER_ARN,UsePreviousValue=false" \
+              "ParameterKey=CreateBudgetGuardrailsRole,ParameterValue=$CREATE_BUDGET_GUARDRAILS_ROLE,UsePreviousValue=false"
           set +e
           aws cloudformation wait change-set-create-complete \
             --stack-name "$AWS_BOOTSTRAP_STACK_NAME" \
@@ -160,8 +181,57 @@ jobs:
             --query 'Stacks[0].{StackStatus:StackStatus,LastUpdatedTime:LastUpdatedTime}' \
             --output json
 
+      - name: Recover only validated Budget Guardrails orphan role
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.mode == 'recover-budget-guardrails-orphan' }}
+        run: |
+          role_name="cloudai-platform-aws-sandbox-budget-guardrails"
+          expected_policy="CostGuardrailsTerraformPolicy"
+
+          set +e
+          role_document="$(aws iam get-role --role-name "$role_name" --query 'Role.AssumeRolePolicyDocument' --output json 2>&1)"
+          get_role_status=$?
+          set -e
+
+          if [ "$get_role_status" -ne 0 ]; then
+            if [[ "$role_document" == *"NoSuchEntity"* ]]; then
+              echo "## Budget Guardrails orphan recovery" >> "$GITHUB_STEP_SUMMARY"
+              echo "Result: absent; no IAM resource was deleted." >> "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+            echo "::error::Unable to inspect the candidate orphan role; refusing deletion."
+            exit 1
+          fi
+
+          if ! jq -e '
+            .Statement[]
+            | select(.Action == "sts:AssumeRoleWithWebIdentity")
+            | select(.Principal.Federated | endswith(":oidc-provider/token.actions.githubusercontent.com"))
+            | select(.Condition.StringLike["token.actions.githubusercontent.com:sub"] == "repo:afaryy/cloudai-platform:environment:aws-sandbox")
+          ' <<< "$role_document" >/dev/null; then
+            echo "::error::Unexpected orphan role state; refusing deletion."
+            exit 1
+          fi
+
+          inline_policies="$(aws iam list-role-policies --role-name "$role_name" --query 'PolicyNames' --output json)"
+          attached_policies="$(aws iam list-attached-role-policies --role-name "$role_name" --query 'AttachedPolicies' --output json)"
+          role_tags="$(aws iam list-role-tags --role-name "$role_name" --query 'Tags' --output json)"
+
+          if ! jq -e --arg policy "$expected_policy" 'length == 1 and .[0] == $policy' <<< "$inline_policies" >/dev/null || \
+            ! jq -e 'length == 0' <<< "$attached_policies" >/dev/null || \
+            ! jq -e 'map({(.Key): .Value}) | add | .Project == "cloudai-platform" and .Environment == "cost-guardrails" and .ManagedBy == "cloudformation"' <<< "$role_tags" >/dev/null; then
+            echo "::error::Unexpected orphan role state; refusing deletion."
+            exit 1
+          fi
+
+          aws iam delete-role-policy --role-name "$role_name" --policy-name "$expected_policy"
+          aws iam delete-role --role-name "$role_name"
+          {
+            echo "## Budget Guardrails orphan recovery"
+            echo "Result: recovered; the validated partial role was deleted."
+          } >> "$GITHUB_STEP_SUMMARY"
+
       - name: Publish Budget Guardrails role handoff
-        if: ${{ github.event_name == 'workflow_dispatch' && inputs.mode == 'apply' && success() }}
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.mode == 'apply' && inputs.budget_guardrails_role_mode == 'provision' && success() }}
         run: |
           budget_guardrails_role_arn="$(aws cloudformation describe-stacks \
             --stack-name "$AWS_BOOTSTRAP_STACK_NAME" \
@@ -177,4 +247,12 @@ jobs:
             echo "Add this exact value as the aws-sandbox Environment variable \\`AWS_BUDGET_GUARDRAILS_ROLE_TO_ASSUME\\`:"
             echo ""
             echo "\\`$budget_guardrails_role_arn\\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Publish Bootstrap permissions-only handoff
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.mode == 'apply' && inputs.budget_guardrails_role_mode == 'permissions-only' && success() }}
+        run: |
+          {
+            echo "## Budget Guardrails Bootstrap permission stage"
+            echo "Bootstrap permissions are prepared. Do not run the provision stage until a separately approved orphan-recovery check has completed."
           } >> "$GITHUB_STEP_SUMMARY"

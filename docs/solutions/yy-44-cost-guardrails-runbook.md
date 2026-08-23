@@ -30,7 +30,7 @@ No destroy mode is supplied by terraform-cost-guardrails.
 
 1. The AWS account root user has already enabled IAM access to Billing. Do not
    use root credentials in this workflow.
-2. Merge the reviewed bootstrap change that creates the dedicated
+2. Complete the staged bootstrap recovery path that prepares the dedicated
    `budget-guardrails` OIDC role. The existing general Terraform role must not
    receive Billing permissions.
 3. In the protected `aws-sandbox` Environment, add the bootstrap output role
@@ -46,18 +46,26 @@ No destroy mode is supplied by terraform-cost-guardrails.
 
 1. Run `terraform-cost-guardrails` with `mode=validate`. This is source-only;
    it does not request AWS credentials.
-2. Run the existing bootstrap workflow in change-set plan mode. Review the
-   change set for only the dedicated role, its backend access, Budgets/Billing
-   actions, bootstrap-role resource list change, and role ARN output.
-3. Execute the bootstrap change set only after its separate confirmation and
-   protected Environment approval. Save only redacted success evidence.
-4. Add `AWS_BUDGET_GUARDRAILS_ROLE_TO_ASSUME` from the new CloudFormation
-   output to the protected Environment.
-5. Run `terraform-cost-guardrails` with `mode=plan`; verify it proposes exactly
+2. Run the Bootstrap workflow in **permissions-only** change-set plan mode.
+   Review that it modifies only the Bootstrap role; it must not create the
+   dedicated role or output an ARN in this stage.
+3. Execute that permissions-only change set only after its separate
+   confirmation and protected Environment approval.
+4. If the recovery summary identifies a validated partial role, use the
+   separately confirmed recovery mode. It refuses to delete if the role name,
+   OIDC trust, tags, inline-policy list, or attached-policy list differs from
+   the expected state.
+5. Run a **provision** change-set plan and review the dedicated role, its
+   backend access, Budgets/Billing actions, bootstrap-role resource list
+   change, and role ARN output.
+6. Execute the provision change set only after a new confirmation and
+   protected Environment approval. Add `AWS_BUDGET_GUARDRAILS_ROLE_TO_ASSUME`
+   from the private job summary to the protected Environment.
+7. Run `terraform-cost-guardrails` with `mode=plan`; verify it proposes exactly
    two budget resources plus the short custom-period timer resources.
-6. Run `mode=apply` with the exact confirmation phrase. Review GitHub's
+8. Run `mode=apply` with the exact confirmation phrase. Review GitHub's
    protected Environment approval request before approval.
-7. Verify the budgets through sanitized workflow evidence and, after a future
+9. Verify the budgets through sanitized workflow evidence and, after a future
    threshold is crossed, the recipient's notification delivery. Do not record
    the recipient address, account identifier, budget ARN, raw plan, or state.
 
@@ -79,22 +87,33 @@ AWS console edits.
 4. Do not set `AWS_BUDGET_GUARDRAILS_ROLE_TO_ASSUME` yet: it is created by the
    approved bootstrap update in the next section.
 
-### B. Create the dedicated role through the bootstrap workflow
+### B. Stage, recover, and create the dedicated role through the bootstrap workflow
 
 1. Open **Actions → update-aws-bootstrap → Run workflow**.
-2. Select its change-set plan mode; do not select execute/apply initially.
-3. Review the generated change set. It must show only the new dedicated
-   Budget Guardrails role, its exact state/lockfile permissions, AWS Budgets
-   and required Billing portal permissions, bootstrap-role management scope,
-   and the `BudgetGuardrailsRoleArn` output.
-4. Reject the run if it adds EC2, EKS, Bedrock, `iam:PassRole`, a Budget
-   Action, general-role Billing permissions, broad S3 object access, or shared
-   DynamoDB lock-table access.
-5. Only after that review, run the bootstrap execution mode with
+2. Select `mode=plan` and `budget_guardrails_role_mode=permissions-only`; do
+   not select execute/apply initially.
+3. Review the generated change set. It must show only the in-place Bootstrap
+   role update that permits its fixed Budget Guardrails role target. Reject it
+   if it creates compute, an agent service, a Budget Action, broad S3 access,
+   shared DynamoDB access, or a dedicated role in this stage.
+4. Only after that review, run the Bootstrap execution mode with
    `confirmation=I_UNDERSTAND_AWS_BOOTSTRAP_APPLY` and the exact reviewed
-   `cloudai-bootstrap-...` change-set name. Approve the protected
+   `cloudai-bootstrap-...` change-set name, keeping
+   `budget_guardrails_role_mode=permissions-only`. Approve the protected
    `aws-sandbox` deployment.
-6. In the successful job summary, open **Budget Guardrails Environment
+5. Run `mode=recover-budget-guardrails-orphan` only if the prior failure left a
+   candidate partial role. It requires exactly
+   `I_UNDERSTAND_BUDGET_GUARDRAILS_ORPHAN_ROLE_RECOVERY`. The workflow is a
+   no-op when the role is absent and blocks rather than deleting if any
+   identity, policy, or tag check differs.
+6. Run `mode=plan` with `budget_guardrails_role_mode=provision`. Review the
+   new dedicated role and all existing no-go conditions: no EC2, EKS, Bedrock,
+   `iam:PassRole`, Budget Action, general-role Billing permissions, broad S3
+   object access, or shared DynamoDB lock-table access.
+7. Run `mode=apply` with the new exact reviewed change-set name,
+   `confirmation=I_UNDERSTAND_AWS_BOOTSTRAP_APPLY`, and
+   `budget_guardrails_role_mode=provision`.
+8. In the successful job summary, open **Budget Guardrails Environment
    handoff**. Copy its `BudgetGuardrailsRoleArn` value into the protected
    Environment variable `AWS_BUDGET_GUARDRAILS_ROLE_TO_ASSUME`. This is an
    intentional private handoff; do not copy that value into a repository file,

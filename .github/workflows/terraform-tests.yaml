@@ -173,6 +173,11 @@ jobs:
           grep -q 'GITHUB_STEP_SUMMARY' "$workflow"
           grep -q "inputs.mode == 'apply' && success()" "$workflow"
           ! grep -q 'AWS_BUDGET_ALERT_EMAIL' "$workflow"
+          grep -q 'recover-budget-guardrails-orphan' "$workflow"
+          grep -q 'I_UNDERSTAND_BUDGET_GUARDRAILS_ORPHAN_ROLE_RECOVERY' "$workflow"
+          grep -q 'CostGuardrailsTerraformPolicy' "$workflow"
+          grep -q 'Unexpected orphan role state; refusing deletion' "$workflow"
+          ! grep -q 'aws iam delete-role --role-name .*\*' "$workflow"
 
   bedrock_gateway_adapter_workflow_boundary:
     name: Bedrock gateway adapter workflow boundary

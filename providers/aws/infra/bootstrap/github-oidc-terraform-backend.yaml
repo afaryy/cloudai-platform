@@ -30,10 +30,18 @@ Parameters:
     Type: String
     Default: cost-guardrails/terraform.tfstate
     Description: Exact private Terraform state key permitted to the dedicated Budget Guardrails role.
+  CreateBudgetGuardrailsRole:
+    Type: String
+    Default: "true"
+    AllowedValues: ["true", "false"]
+    Description: Set false to prepare Bootstrap permissions without provisioning the Budget Guardrails role.
   AgentCoreRagNamePrefix:
     Type: String
     Default: cloudaiplatformagentcoreragsandbox
     Description: Name prefix used to scope the AgentCore RAG sandbox observability resources.
+
+Conditions:
+  CreateBudgetGuardrailsRoleCondition: !Equals [!Ref CreateBudgetGuardrailsRole, "true"]
 
 Resources:
   TerraformStateBucket:
@@ -572,6 +580,7 @@ Resources:
   GitHubActionsBudgetGuardrailsRole:
     Type: AWS::IAM::Role
     DependsOn: GitHubActionsBootstrapRole
+    Condition: CreateBudgetGuardrailsRoleCondition
     Properties:
       RoleName: !Sub "${GitHubRepo}-${GitHubEnvironment}-budget-guardrails"
       AssumeRolePolicyDocument:
@@ -754,6 +763,7 @@ Outputs:
     Description: Store privately as AWS_ROLE_TO_ASSUME in the aws-sandbox GitHub environment.
     Value: !GetAtt GitHubActionsTerraformRole.Arn
   BudgetGuardrailsRoleArn:
+    Condition: CreateBudgetGuardrailsRoleCondition
     Description: Store as AWS_BUDGET_GUARDRAILS_ROLE_TO_ASSUME in the aws-sandbox GitHub environment.
     Value: !GetAtt GitHubActionsBudgetGuardrailsRole.Arn
   BudgetGuardrailsStateKey:
