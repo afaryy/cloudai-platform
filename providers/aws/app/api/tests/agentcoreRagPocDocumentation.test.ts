@@ -5,6 +5,18 @@ import test from "node:test";
 
 const repoRoot = resolve(process.cwd(), "../../../..");
 
+test("AgentCore POC is discoverable from the public portfolio navigation", async () => {
+  const readme = await readFile(resolve(repoRoot, "README.md"), "utf8");
+  const library = await readFile(resolve(repoRoot, "docs/architecture/architecture-library.md"), "utf8");
+  const solutions = await readFile(resolve(repoRoot, "docs/solutions/featured-solutions.md"), "utf8");
+
+  assert.match(readme, /AgentCore Governed RAG POC/i);
+  assert.match(library, /AgentCore Governed RAG POC/i);
+  assert.match(solutions, /## AgentCore Governed RAG POC/i);
+  assert.match(solutions, /sandbox-validated/i);
+  assert.match(solutions, /not a production autonomous[- ]agent platform/i);
+});
+
 test("AgentCore RAG runbook preserves synthetic-only and manual-deployment boundaries", async () => {
   const runbook = await readFile(resolve(repoRoot, "docs/solutions/agentcore-governed-rag-poc-runbook.md"), "utf8");
   assert.match(runbook, /synthetic/i);

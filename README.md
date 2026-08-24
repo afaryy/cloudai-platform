@@ -41,6 +41,7 @@ provider views.
 | [AI Release Engineering on EKS](docs/solutions/featured-solutions.md#ai-release-engineering-on-eks) | **Implemented — sandbox-validated** | Terraform, Helm, GitOps, rollout, rollback, and teardown discipline for a synthetic workload. |
 | [Governed RAG Lifecycle](docs/solutions/featured-solutions.md#governed-rag-lifecycle) | **Implemented — local synthetic workflow** | Provenance, source lifecycle, evaluation artifacts, and deterministic local quality checks. |
 | [Bounded Bedrock Sandbox](docs/solutions/featured-solutions.md#bounded-bedrock-sandbox) | **Implemented — bounded synthetic sandbox validation** | Short-lived identity, least-privilege access, manual approval, and narrow synthetic Guardrail checks. |
+| [AgentCore Governed RAG POC](docs/solutions/featured-solutions.md#agentcore-governed-rag-poc) | **Implemented — sandbox-validated** | Gateway-only Runtime access, synthetic Knowledge Base ingestion, citations-or-abstention behavior, and bounded CloudWatch evidence. |
 | [Bounded EKS GPU + Kueue POC](docs/solutions/featured-solutions.md#bounded-eks-gpu--kueue-poc) | **Implemented — source path; runtime pending** | One-node, scale-to-zero Terraform and protected workflow path for a synthetic CUDA admission check. |
 | [Private EKS Enterprise AI target](docs/solutions/featured-solutions.md#private-eks-enterprise-ai-target) | **Implemented — source path; runtime pending** | Private worker topology, endpoint-first egress, protected VPC-connected delivery, and no-public-IP controls; GPU extension remains gated. |
 

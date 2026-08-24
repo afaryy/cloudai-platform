@@ -14,7 +14,7 @@ material without implying that every document represents a deployed capability.
 - **Deep reviewer:** use this complete library to follow architecture,
   controls, provider references, and implementation records.
 
-Start with [Featured solutions](../solutions/featured-solutions.md) for the four concise
+Start with [Featured solutions](../solutions/featured-solutions.md) for the concise
 case studies, or follow the [solution walkthrough](../solutions/cloudai-platform-solution-walkthrough.md)
 for a guided repository tour. Read [Current status](../practices/current-status.md) for the
 implementation record and deferred scope.
@@ -71,6 +71,10 @@ implementation record and deferred scope.
   delivery controls and synthetic review artifacts.
 - [Bounded Bedrock sandbox design](../solutions/p8-real-bedrock-sandbox-design.md) —
   narrow, manual-approval, synthetic validation boundaries.
+- [AgentCore Governed RAG POC](./agentcore-governed-rag-poc.md) — deployed synthetic
+  sandbox with protected Knowledge Base ingestion, Gateway-only Runtime access,
+  direct Bedrock preflight, Gateway end-to-end evidence, and bounded CloudWatch
+  observability; not a production autonomous-agent platform.
 - [AgentCore knowledge-lookup readiness](../solutions/p8h-agentcore-knowledge-lookup-readiness.md)
   — gateway-first future reference only; no AgentCore resource or call.
 
@@ -85,6 +89,10 @@ implementation record and deferred scope.
 - [Bedrock sandbox environment record](../../providers/aws/infra/terraform/envs/bedrock-sandbox/README.md)
   — implementation boundary for the provider validation paths; it contains no
   committed account values, prompts, responses, or workflow logs.
+- [AgentCore RAG data foundation](../solutions/p8i-agentcore-rag-data-foundation.md),
+  [key process record](../solutions/p8i-agentcore-rag-key-process-record.md), and
+  [runbook](../solutions/agentcore-governed-rag-poc-runbook.md) — synthetic source,
+  deployment, validation, evidence, and teardown records for the bounded POC.
 
 ## Evidence, Security, Operations, and FinOps
 

@@ -1,6 +1,6 @@
 # Featured Solutions
 
-These four cases provide a short, public-safe route through the repository. They show bounded engineering evidence rather than production claims. All examples use synthetic data, generic identifiers, and documented control boundaries.
+These cases provide a short, public-safe route through the repository. They show bounded engineering evidence rather than production claims. All examples use synthetic data, generic identifiers, and documented control boundaries.
 
 ## Governed AI Gateway
 
@@ -262,3 +262,57 @@ How to extend cloud-platform controls into a real provider boundary while retain
 ### What it does not claim
 
 It is not a production Bedrock service, chatbot, knowledge base, agent runtime, or broad Guardrail effectiveness assessment.
+
+## AgentCore Governed RAG POC
+
+- **Status:** Implemented — sandbox-validated
+- **Engineering focus:** Gateway-only agent-runtime access, governed retrieval, citations-or-abstention behavior, and bounded operational evidence
+- **Primary technologies:** Terraform, GitHub Actions OIDC, Amazon Bedrock Knowledge Bases, AgentCore Gateway, AgentCore Runtime, IAM, and CloudWatch
+
+### Problem
+
+An enterprise knowledge assistant needs more than a model endpoint. It needs a controlled entry point, approved source lifecycle, read-only retrieval, explicit failure behavior, and evidence that can be reviewed without publishing prompts, answers, credentials, or customer data.
+
+### Scope
+
+The POC uses self-authored synthetic material and a protected CI/CD path to create and validate a bounded Knowledge Base, AgentCore Runtime, Gateway, and Runtime target. The Runtime is reachable through the Gateway contract, direct Runtime bypass is denied, and the response contract requires a citation or a safe abstention.
+
+### Architecture summary
+
+The [AgentCore Governed RAG architecture](../architecture/agentcore-governed-rag-poc.md) places the flow behind a Gateway-only boundary:
+
+```text
+synthetic request
+  -> Gateway admission and IAM boundary
+  -> AgentCore Runtime
+  -> approved Knowledge Base retrieval
+  -> cited answer or safe abstention
+  -> sanitized evidence and CloudWatch signals
+```
+
+The [POC runbook](./agentcore-governed-rag-poc-runbook.md) records the protected workflow sequence, confirmation gates, evidence rules, and separately gated teardown boundary.
+
+### Technical evidence
+
+- [AgentCore Runtime implementation](../../providers/aws/app/agentcore-rag-runtime/) with admission, deployment controls, validation, and observability contracts.
+- [AgentCore Terraform environment](../../providers/aws/infra/terraform/envs/agentcore-rag-sandbox/) with isolated state and protected workflow modes.
+- [Synthetic RAG data foundation](./p8i-agentcore-rag-data-foundation.md) and [key process record](./p8i-agentcore-rag-key-process-record.md).
+- Gateway-only IAM target, direct Bedrock preflight, protected ingestion, and sanitized invocation evidence.
+
+### Test or validation evidence
+
+The local contract suite covers admission, direct-runtime bypass denial, disabled and retired-source behavior, insufficient evidence, prompt-attack-shaped blocking, sanitized provider failures, and confirmation gates. Protected CI also validated the synthetic Knowledge Base ingestion path, IAM-authenticated Gateway path, and bounded CloudWatch observability.
+
+### Key trade-offs
+
+- Synthetic content and read-only retrieval provide reproducible, public-safe evidence but do not represent customer-data quality or production answer accuracy.
+- The Gateway and Runtime boundary demonstrates a governed integration pattern; it is not a general autonomous-agent platform.
+- CloudWatch evidence is bounded to the sandbox validation and does not claim long-term SLO, SIEM, or enterprise incident-management integration.
+
+### What this demonstrates
+
+How a platform engineer can extend Terraform, OIDC, IAM, CI/CD, RAG governance, deterministic evaluation, and observability controls into a real but deliberately bounded AgentCore provider path.
+
+### What it does not claim
+
+It is not a production autonomous agent platform, customer-facing knowledge assistant, broad model-safety assessment, or unrestricted tool-execution environment. Teardown remains separately confirmed and is not implied by deployment success.
