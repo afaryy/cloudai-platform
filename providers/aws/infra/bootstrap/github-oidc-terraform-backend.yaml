@@ -133,6 +133,7 @@ Resources:
                   - ec2:Describe*
                   - eks:Describe*
                   - eks:List*
+                  - servicequotas:ListServiceQuotas
                   - iam:Get*
                   - iam:List*
                   - cloudwatch:Describe*

@@ -38,6 +38,12 @@ The `aws-sandbox` environment retains the existing private backend and OIDC valu
 - `TF_VAR_KUEUE_CHART_VERSION`: reviewed Kueue Helm chart version.
 - `GPU_POC_BUDGET_ALERT_CONFIGURED=true`: human confirmation that the budget alert is enabled outside GitHub Actions.
 
+The shared Terraform OIDC role also needs the narrow read-only
+`servicequotas:ListServiceQuotas` permission so discovery can distinguish a
+quota value from an access-denied condition. This permission does not request,
+raise, or consume quota and must be applied through the reviewed bootstrap
+CloudFormation workflow before quota discovery can succeed.
+
 No value above authorises a run by itself. A protected environment approval and the applicable exact confirmation are still required.
 
 ## Operation sequence
