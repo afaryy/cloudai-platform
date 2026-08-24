@@ -177,6 +177,8 @@ jobs:
           grep -q "BudgetGuardrailsRoleArn" "$workflow"
           grep -q 'GITHUB_STEP_SUMMARY' "$workflow"
           grep -q "inputs.mode == 'apply' && success()" "$workflow"
+          grep -q 'printf .*budget_guardrails_role_arn' "$workflow"
+          ! grep -q 'echo.*AWS_BUDGET_GUARDRAILS_ROLE_TO_ASSUME' "$workflow"
           ! grep -q 'AWS_BUDGET_ALERT_EMAIL' "$workflow"
 
   budget_guardrails_orphan_recovery_boundary:
