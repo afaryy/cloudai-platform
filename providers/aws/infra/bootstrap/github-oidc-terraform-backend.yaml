@@ -691,6 +691,7 @@ Resources:
                 Action:
                   - cloudformation:CreateChangeSet
                   - cloudformation:DescribeStackEvents
+                  - cloudformation:DescribeStackResources
                   - cloudformation:DescribeStacks
                   - cloudformation:GetTemplate
                   - cloudformation:ListStackResources
@@ -714,7 +715,9 @@ Resources:
                   - iam:DetachRolePolicy
                   - iam:GetRole
                   - iam:GetRolePolicy
+                  - iam:ListAttachedRolePolicies
                   - iam:ListRolePolicies
+                  - iam:ListRoleTags
                   - iam:PutRolePolicy
                   - iam:TagRole
                   - iam:UntagRole
