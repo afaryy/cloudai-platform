@@ -97,6 +97,13 @@ jobs:
             fi
           elif jq -e --arg role "$ROLE_NAME" \
             'any(.[]?; .PhysicalResourceId == $role)' "$stack_resources" >/dev/null; then
+            {
+              echo "## Budget Guardrails orphan recovery"
+              echo "Result: managed; the Bootstrap CloudFormation stack owns the role; no IAM resource was changed."
+            } >> "$GITHUB_STEP_SUMMARY"
+            if [[ "$MODE" == "inspect" ]]; then
+              exit 0
+            fi
             fail_closed
           fi
 

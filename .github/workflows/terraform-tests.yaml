@@ -207,6 +207,7 @@ jobs:
           grep -q -F 'aws iam delete-role --role-name "$ROLE_NAME"' "$workflow"
           grep -q 'GITHUB_STEP_SUMMARY' "$workflow"
           grep -q 'inputs.mode == '\''recover'\''' "$workflow"
+          grep -q 'Result: managed' "$workflow"
           ! grep -q 'target_role_name' "$workflow"
           ! grep -q 'AWS_BUDGET_ALERT_EMAIL' "$workflow"
           ! grep -Eq 'aws iam delete-role --role-name[[:space:]]+\\*' "$workflow"
