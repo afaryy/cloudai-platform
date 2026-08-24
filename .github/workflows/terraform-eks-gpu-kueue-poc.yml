@@ -4,11 +4,12 @@ on:
   workflow_dispatch:
     inputs:
       mode:
-        description: "Bounded GPU POC operation"
+        description: "Bounded GPU POC operation; discover is read-only"
         required: true
         default: "preflight"
         type: choice
         options:
+          - discover
           - preflight
           - plan
           - apply
@@ -68,6 +69,7 @@ jobs:
         run: |
           echo "This workflow attaches only to the existing EKS sandbox and operates a single synthetic GPU POC node."
           echo "It does not create an EKS cluster, change a service quota, retry capacity, or select a fallback instance type."
+          echo "Discovery is read-only and does not initialise Terraform, change capacity, or write GitHub environment variables."
           echo "Apply sets desired GPU capacity to one; stop sets desired GPU capacity to zero."
 
       - name: Validate Terraform source without backend
@@ -83,18 +85,25 @@ jobs:
         env:
           MODE: ${{ inputs.mode }}
         run: |
+          set -euo pipefail
           missing=0
-          for name in AWS_ROLE_TO_ASSUME AWS_REGION TF_BACKEND_BUCKET TF_BACKEND_LOCK_TABLE TF_STATE_KEY_PREFIX GPU_POC_BUDGET_ALERT_CONFIGURED; do
+          for name in AWS_ROLE_TO_ASSUME AWS_REGION; do
             if [ -z "${!name}" ]; then
               echo "::error::$name is required in the aws-sandbox environment."
               missing=1
             fi
           done
-          if [ "$GPU_POC_BUDGET_ALERT_CONFIGURED" != "true" ]; then
-            echo "::error::GPU_POC_BUDGET_ALERT_CONFIGURED must be exactly true before any remote POC operation."
-            missing=1
-          fi
-          if [ "$MODE" != "validate" ]; then
+          if [ "$MODE" != "discover" ]; then
+            for name in TF_BACKEND_BUCKET TF_BACKEND_LOCK_TABLE TF_STATE_KEY_PREFIX GPU_POC_BUDGET_ALERT_CONFIGURED; do
+              if [ -z "${!name}" ]; then
+                echo "::error::$name is required in the aws-sandbox environment."
+                missing=1
+              fi
+            done
+            if [ "$GPU_POC_BUDGET_ALERT_CONFIGURED" != "true" ]; then
+              echo "::error::GPU_POC_BUDGET_ALERT_CONFIGURED must be exactly true before any remote POC operation."
+              missing=1
+            fi
             for name in GPU_INSTANCE_TYPE_CONFIGURED GPU_POC_SUBNET_IDS_CONFIGURED CUDA_SMOKE_IMAGE_CONFIGURED KUEUE_CHART_VERSION_CONFIGURED; do
               if [ -z "${!name}" ]; then
                 echo "::error::$name is required for Terraform remote operations."
@@ -135,8 +144,131 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
           mask-aws-account-id: true
 
+      - name: Discover existing EKS GPU candidates (read-only)
+        if: ${{ inputs.mode == 'discover' }}
+        working-directory: .
+        env:
+          CUDA_DISCOVERY_TAG: "12.4.1-base-ubuntu22.04"
+          KUEUE_CHART_VERSION_RECOMMENDED: "0.11.0"
+        run: |
+          set -euo pipefail
+
+          cluster_json=$(aws eks describe-cluster \
+            --region "$AWS_REGION" \
+            --name "$EKS_CLUSTER_NAME" \
+            --output json)
+          cluster_status=$(jq -r '.cluster.status' <<<"$cluster_json")
+          if [ "$cluster_status" != "ACTIVE" ]; then
+            echo "::error::Existing EKS sandbox must be ACTIVE; discovery will not create or recover it."
+            exit 1
+          fi
+
+          subnet_ids_json=$(jq -c '.cluster.resourcesVpcConfig.subnetIds // []' <<<"$cluster_json")
+          if ! jq -e 'length > 0 and all(.[]; type == "string" and startswith("subnet-"))' <<<"$subnet_ids_json" >/dev/null; then
+            echo "::error::The existing EKS sandbox did not return usable subnet IDs."
+            exit 1
+          fi
+
+          subnet_ids=($(jq -r '.[]' <<<"$subnet_ids_json"))
+          subnet_details=$(aws ec2 describe-subnets \
+            --region "$AWS_REGION" \
+            --subnet-ids "${subnet_ids[@]}" \
+            --query 'Subnets[].{AvailabilityZone:AvailabilityZone,MapPublicIpOnLaunch:MapPublicIpOnLaunch}' \
+            --output json)
+          subnet_azs=$(jq -c '[.[].AvailabilityZone] | unique' <<<"$subnet_details")
+          if [ "$(jq 'length' <<<"$subnet_azs")" = "0" ]; then
+            echo "::error::The existing EKS sandbox did not resolve any subnet Availability Zones."
+            exit 1
+          fi
+
+          quota_value=$(aws service-quotas list-service-quotas \
+            --service-code ec2 \
+            --region "$AWS_REGION" \
+            --query 'Quotas[?contains(QuotaName, `Running On-Demand G and VT instances`)].Value | [0]' \
+            --output text)
+          quota_available=false
+          if [ -n "$quota_value" ] && [ "$quota_value" != "None" ] && [ "$quota_value" != "0" ]; then
+            quota_available=true
+          fi
+
+          offering_for_type() {
+            local gpu_type="$1"
+            local offerings
+            local available=true
+            offerings=$(aws ec2 describe-instance-type-offerings \
+              --region "$AWS_REGION" \
+              --location-type availability-zone \
+              --filters "Name=instance-type,Values=$gpu_type" \
+              --output json)
+            while IFS= read -r availability_zone; do
+              if ! jq -e --arg availability_zone "$availability_zone" \
+                '[.InstanceTypeOfferings[].Location] | index($availability_zone) != null' <<<"$offerings" >/dev/null; then
+                available=false
+                break
+              fi
+            done < <(jq -r '.[]' <<<"$subnet_azs")
+            printf '%s' "$available"
+          }
+
+          g4dn_available=$(offering_for_type g4dn.xlarge)
+          g5_available=$(offering_for_type g5.xlarge)
+
+          registry_token=$(curl -fsS \
+            "https://auth.docker.io/token?service=registry.docker.io&scope=repository:nvidia/cuda:pull" \
+            | jq -r '.token')
+          if [ -z "$registry_token" ] || [ "$registry_token" = "null" ]; then
+            echo "::error::The official Docker Hub registry token could not be obtained."
+            exit 1
+          fi
+          manifest_headers=$(mktemp)
+          curl -fsSIL \
+            -H "Authorization: Bearer $registry_token" \
+            -H 'Accept: application/vnd.docker.distribution.manifest.list.v2+json' \
+            -D "$manifest_headers" \
+            "https://registry-1.docker.io/v2/nvidia/cuda/manifests/$CUDA_DISCOVERY_TAG" \
+            >/dev/null
+          cuda_digest=$(awk 'tolower($1) == "docker-content-digest:" {print $2}' "$manifest_headers" | tr -d '\r' | tail -n 1)
+          if [ -z "$cuda_digest" ] || ! [[ "$cuda_digest" =~ ^sha256:[a-f0-9]{64}$ ]]; then
+            echo "::error::The official CUDA discovery tag did not return an immutable digest."
+            exit 1
+          fi
+
+          mkdir -p /tmp/gpu-discovery
+          printf '{"cluster_active":true,"cluster_subnet_count":%s,"availability_zone_count":%s,"gpu_quota_available":%s,"g4dn_xlarge_offered_all_approved_azs":%s,"g5_xlarge_offered_all_approved_azs":%s,"cuda_digest_lookup_succeeded":true,"kueue_chart_version_recommended":"%s"}\n' \
+            "$(jq 'length' <<<"$subnet_ids_json")" \
+            "$(jq 'length' <<<"$subnet_azs")" \
+            "$quota_available" \
+            "$g4dn_available" \
+            "$g5_available" \
+            "$KUEUE_CHART_VERSION_RECOMMENDED" > /tmp/gpu-discovery/evidence.json
+
+          {
+            echo "## GPU discovery evidence"
+            echo "Discovery is read-only; no Terraform, Helm, kubectl, quota, node-group, or GitHub environment-variable mutation was performed."
+            echo ""
+            echo "### Private operator handoff"
+            echo "Review this output in the private repository before configuring aws-sandbox variables. Do not copy it into public notes."
+            echo ""
+            echo "TF_VAR_GPU_POC_SUBNET_IDS=$subnet_ids_json"
+            echo "GPU quota available: $quota_available"
+            echo "g4dn.xlarge offered in every approved AZ: $g4dn_available"
+            echo "g5.xlarge offered in every approved AZ: $g5_available"
+            echo "TF_VAR_CUDA_SMOKE_IMAGE=docker.io/nvidia/cuda@$cuda_digest"
+            echo "TF_VAR_KUEUE_CHART_VERSION=$KUEUE_CHART_VERSION_RECOMMENDED"
+            echo "CUDA discovery tag reviewed: docker.io/nvidia/cuda:$CUDA_DISCOVERY_TAG"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload sanitised GPU discovery evidence
+        if: ${{ inputs.mode == 'discover' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: eks-gpu-kueue-poc-discovery-evidence
+          path: /tmp/gpu-discovery/evidence.json
+          if-no-files-found: error
+          retention-days: 7
+
       - name: Terraform init with isolated remote backend
-        if: ${{ inputs.mode != 'validate' }}
+        if: ${{ inputs.mode != 'validate' && inputs.mode != 'discover' }}
         run: |
           terraform init \
             -backend-config="bucket=${TF_BACKEND_BUCKET}" \

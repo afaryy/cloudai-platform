@@ -88,9 +88,9 @@ chart, a synthetic CUDA Job, and a protected GitHub Actions lifecycle.
   EKS control plane.
 - Digest-pinned synthetic image, exactly one GPU request/limit, five-minute
   active deadline, no retry, and bounded retention.
-- Manual `preflight`, `plan`, `apply`, `validate`, and `stop` workflow modes;
+- Manual `discover`, `preflight`, `plan`, `apply`, `validate`, and `stop` workflow modes;
   protected OIDC, budget flag, existing-cluster check, quota/offering check,
-  and sanitised boolean/category evidence.
+  private operator handoff, and sanitised boolean/category evidence.
 
 ### What it does not claim
 
