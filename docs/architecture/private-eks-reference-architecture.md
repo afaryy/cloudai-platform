@@ -2,11 +2,14 @@
 
 ## Status
 
-**Design complete for YY-48; runtime implementation is separate work.**
+**YY-48 design complete; YY-49 Terraform source and YY-50 protected CI path
+implemented; private-worker runtime validation remains pending.**
 
 This document defines the target topology for the public Enterprise AI and GPU
 architecture. The existing EKS sandbox remains a low-cost development profile
-and is intentionally not treated as production-ready.
+and is intentionally not treated as production-ready. The private variant is a
+reviewed source and delivery path, not evidence that a private cluster or GPU
+runtime is currently deployed.
 
 ## Why the separation matters
 
