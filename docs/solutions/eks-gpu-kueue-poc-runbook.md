@@ -42,7 +42,7 @@ No value above authorises a run by itself. A protected environment approval and 
 
 ## Operation sequence
 
-1. Run read-only `discover` first. It identifies the existing EKS subnet IDs and Availability Zones, compares the approved candidate GPU offerings and quota, resolves an official CUDA image digest, and records the reviewed Kueue chart version. Discovery does not initialise Terraform, enable capacity, or write GitHub environment variables.
+1. Run read-only `discover` first. When the existing EKS sandbox is `ACTIVE`, it identifies the cluster subnet IDs and Availability Zones, compares the approved candidate GPU offerings and quota, resolves an official CUDA image digest, and records the reviewed Kueue chart version. If the named sandbox is missing or not active, discovery records that fact and may report region-level offering evidence, but it must not invent subnet IDs or configure any GPU environment variable. Discovery does not initialise Terraform, enable capacity, or write GitHub environment variables.
 2. Review the private operator handoff from `discover`, then set the protected environment values explicitly. Do not copy subnet IDs or image digests into public notes.
 3. Run read-only `preflight`. It must confirm that the EKS sandbox is `ACTIVE`, the GPU quota and selected-type offering in every approved subnet Availability Zone are available, the CUDA image is immutable, and the budget-alert readiness flag is true.
 4. Run `plan`. Review the Terraform result without publishing plans, state, endpoints, account IDs, ARNs, kubeconfig, or raw cloud output.
