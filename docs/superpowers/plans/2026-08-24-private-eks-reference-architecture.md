@@ -146,23 +146,23 @@
 - Consumes: isolated Terraform environment from Task 2.
 - Produces: plan-only CI, protected apply boundary, VPC-connected runner contract, and sanitised evidence.
 
-- [ ] **Step 1: Define modes**
+- [x] **Step 1: Define modes**
 
   Support `validate`, `plan`, `preflight`, `apply`, and `stop`; do not add an unreviewed destroy mode.
 
-- [ ] **Step 2: Define protected inputs**
+- [x] **Step 2: Define protected inputs**
 
   Require dedicated backend values, role ARN, private-variant budget readiness, runner readiness, endpoint-policy readiness, and exact apply/stop confirmations.
 
-- [ ] **Step 3: Enforce network reachability**
+- [x] **Step 3: Enforce network reachability**
 
   Run Kubernetes API operations on a VPC-connected self-hosted runner or explicitly documented in-VPC build job. Do not assume GitHub-hosted runner reachability to a private EKS endpoint.
 
-- [ ] **Step 4: Add sanitised evidence**
+- [x] **Step 4: Add sanitised evidence**
 
   Publish only status categories, resource-class labels, route/endpoint checks, bootstrap result, and operator outcome; never publish account IDs, ARNs, endpoints, kubeconfig, state, plans, or raw logs.
 
-- [ ] **Step 5: Validate workflow source**
+- [x] **Step 5: Validate workflow source**
 
   Run the repository workflow contract tests and confirm the workflow contains separate state, OIDC, environment protection, no public worker IP, and no raw-output publication checks.
 
