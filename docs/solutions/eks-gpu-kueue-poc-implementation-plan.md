@@ -4,7 +4,7 @@
 
 **Goal:** Build a Terraform- and GitHub Actions-managed one-node synthetic CUDA proof of concept that demonstrates EKS GPU allocation and Kueue admission without deploying it through ordinary CI.
 
-**Architecture:** A separate Terraform environment reads the existing EKS sandbox by name and manages only a dedicated GPU node group plus Kueue and Kubernetes resources. A protected manual workflow supports read-only preflight, plan, explicit apply, validation, and explicit scale-to-zero. It includes no destroy mode.
+**Architecture:** A separate Terraform environment reads the existing EKS sandbox by name and manages only a dedicated GPU node group plus Kueue and Kubernetes resources. A protected manual workflow supports read-only discovery and preflight, plan, explicit apply, validation, and explicit scale-to-zero. It includes no destroy mode.
 
 **Tech Stack:** Terraform 1.6+, AWS provider 5.x, Helm provider, Kubernetes provider, Amazon EKS 1.31, NVIDIA Kubernetes device plugin, Kueue, Kubernetes \`batch/v1\` Job, GitHub Actions OIDC, Node built-in test runner.
 
@@ -26,7 +26,7 @@
 | --- | --- |
 | \`providers/aws/infra/terraform/modules/eks-gpu-kueue/\` | GPU node group, device plugin, Kueue queue resources, and suspended synthetic Job. |
 | \`providers/aws/infra/terraform/envs/eks-gpu-kueue-poc/\` | Existing EKS lookup, provider setup, isolated state shape, and environment tests. |
-| \`.github/workflows/terraform-eks-gpu-kueue-poc.yml\` | Manual preflight, plan, apply, validate, and stop operations. |
+| \`.github/workflows/terraform-eks-gpu-kueue-poc.yml\` | Manual read-only discovery and protected preflight, plan, apply, validate, and stop operations. |
 | \`.github/workflows/terraform-tests.yaml\` | Terraform test matrix and protected-workflow static checks. |
 | \`providers/aws/app/api/tests/eksGpuKueuePocDocumentation.test.ts\` | Public documentation and operational-boundary tests. |
 | \`docs/solutions/eks-gpu-kueue-poc-runbook.md\` | Human operator sequence and sanitised evidence fields. |
@@ -70,7 +70,7 @@ Expected: failure because the test and runbook are absent.
 
 - [ ] **Step 3: Implement the runbook and navigation**
 
-Document the exact path \`preflight -> plan -> apply -> validate -> stop\`. Specify that apply needs protected-environment approval and the GPU-specific confirmation; list only sanitised evidence; state that a failed stage does not retry capacity; and state that source implementation does not equal a deployed GPU POC.
+Document the exact path \`discover -> review -> configure protected variables -> preflight -> plan -> apply -> validate -> stop\`. Specify that discovery is read-only and does not configure variables or capacity; apply needs protected-environment approval and the GPU-specific confirmation; list only sanitised evidence; state that a failed stage does not retry capacity; and state that source implementation does not equal a deployed GPU POC.
 
 - [ ] **Step 4: Verify the focused test passes**
 
@@ -230,7 +230,7 @@ git commit -m "feat: add isolated EKS GPU Kueue environment"
 
 **Interfaces:**
 - Consumes: private environment values \`AWS_ROLE_TO_ASSUME\`, \`AWS_REGION\`, \`TF_BACKEND_BUCKET\`, \`TF_BACKEND_LOCK_TABLE\`, \`TF_STATE_KEY_PREFIX\`, \`TF_VAR_GPU_INSTANCE_TYPE\`, \`TF_VAR_GPU_POC_SUBNET_IDS\`, \`TF_VAR_CUDA_SMOKE_IMAGE\`, \`TF_VAR_KUEUE_CHART_VERSION\`, and \`GPU_POC_BUDGET_ALERT_CONFIGURED\`.
-- Produces: manual \`preflight\`, \`plan\`, \`apply\`, \`validate\`, and \`stop\` modes plus sanitised evidence artifacts.
+- Produces: manual \`discover\`, \`preflight\`, \`plan\`, \`apply\`, \`validate\`, and \`stop\` modes plus sanitised evidence artifacts.
 
 - [ ] **Step 1: Add failing static workflow assertions**
 
@@ -241,6 +241,9 @@ grep -q 'environment: aws-sandbox' "$workflow"
 grep -q 'id-token: write' "$workflow"
 grep -q 'I_UNDERSTAND_EKS_GPU_KUEUE_POC_APPLY' "$workflow"
 grep -q 'I_UNDERSTAND_EKS_GPU_KUEUE_POC_STOP' "$workflow"
+grep -q -- '- discover' "$workflow"
+grep -q "inputs.mode == 'discover'" "$workflow"
+grep -q 'Discovery is read-only' "$workflow"
 ! grep -q 'terraform destroy' "$workflow"
 ! grep -q '^  schedule:' "$workflow"
 \`\`\`
@@ -251,9 +254,9 @@ Run the exact block from Step 1. Expected: failure because the workflow is absen
 
 - [ ] **Step 3: Implement fail-closed lifecycle modes**
 
-Use only \`preflight\`, \`plan\`, \`apply\`, \`validate\`, and \`stop\` workflow choices; \`contents: read\`, \`id-token: write\`, \`environment: aws-sandbox\`, and the existing non-cancelling EKS concurrency group.
+Use \`discover\`, \`preflight\`, \`plan\`, \`apply\`, \`validate\`, and \`stop\` workflow choices; \`contents: read\`, \`id-token: write\`, \`environment: aws-sandbox\`, and the existing non-cancelling EKS concurrency group. \`discover\` is read-only and requires only the existing AWS OIDC boundary; it must not initialise Terraform or configure GPU capacity.
 
-Preflight checks required values, \`GPU_POC_BUDGET_ALERT_CONFIGURED=true\`, selected-family Service Quota, eligible EC2 offering, cluster version, and image digest. Upload only category/boolean JSON, never cloud identifiers.
+Discovery identifies the existing cluster subnet IDs and Availability Zones, compares \`g4dn.xlarge\` and \`g5.xlarge\` offerings, reports the selected-family Service Quota, resolves an official digest-pinned CUDA image candidate, and records the reviewed Kueue chart version. It writes a private operator handoff but uploads only category/boolean JSON. Preflight checks required values, \`GPU_POC_BUDGET_ALERT_CONFIGURED=true\`, selected-family Service Quota, eligible EC2 offering, cluster version, and image digest.
 
 Apply requires \`I_UNDERSTAND_EKS_GPU_KUEUE_POC_APPLY\`, first verifies the named EKS cluster is \`ACTIVE\`, selected-subnet availability zones offer the approved type, sets \`TF_VAR_gpu_desired_size=1\`, runs a fresh plan, then applies. Stop requires \`I_UNDERSTAND_EKS_GPU_KUEUE_POC_STOP\`, sets only \`TF_VAR_gpu_desired_size=0\`, and applies. Validate uses temporary runner kubeconfig and checks one Ready GPU node, exactly one allocatable GPU, the owned CUDA workload's quota reservation and admission, the assigned `gpu-poc-on-demand` flavor, and Job completion. No mode creates an EKS cluster, retries capacity, changes quota, changes instance type, or invokes destroy.
 
