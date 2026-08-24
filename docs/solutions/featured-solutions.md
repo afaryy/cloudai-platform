@@ -99,6 +99,50 @@ or validated a GPU node, device-plugin allocation, Kueue admission, CUDA Job
 completion, DCGM/Prometheus/Grafana telemetry, HyperPod, Slurm, or any
 data-centre capacity.
 
+## Private EKS Enterprise AI Target
+
+- **Status:** Implemented — source and protected CI path; runtime pending
+- **Engineering focus:** Private worker topology, endpoint-first egress, VPC-connected delivery, and cost/safety boundaries
+- **Primary technologies:** Terraform, Amazon VPC, Amazon EKS, VPC endpoints, GitHub Actions OIDC, self-hosted runner contract
+
+### Problem
+
+The low-cost public-subnet EKS sandbox is useful for inexpensive development
+validation, but it is not the preferred topology for enterprise worker or GPU
+capacity. Enterprise AI workloads need private workers, explicit AWS-service
+access, controlled egress, private API operations, and evidence that does not
+expose account-specific details.
+
+### Scope
+
+The [private EKS reference architecture](../architecture/private-eks-reference-architecture.md),
+[Terraform environment](../../providers/aws/infra/terraform/envs/eks-private-sandbox),
+and [protected delivery runbook](./eks-private-sandbox-runbook.md) define a
+separate state boundary from `eks-sandbox`. The source path creates public
+ingress/egress subnets, private worker subnets with no public IP assignment,
+endpoint-first AWS service access, private-only EKS API intent, and a
+VPC-connected runner contract. NAT is an explicit exception and disabled by
+default.
+
+### Technical evidence
+
+- Terraform native tests cover subnet public-IP prohibition, endpoint-policy
+  scope, private DNS, endpoint security-group sources, and the explicit NAT
+  exception path.
+- The protected workflow supports source validation, isolated plan,
+  same-run apply preflight, exact endpoint-set checks, sanitised evidence, and
+  fail-closed scale-to-zero stop.
+- The existing public EKS sandbox remains unchanged and is not reused as the
+  private environment's Terraform state.
+
+### What it does not claim
+
+The private EKS worker/bootstrap runtime has not yet been applied or validated.
+No private GPU node, Kueue admission, CUDA smoke test, HyperPod, Slurm, or
+data-centre capacity is claimed. The shared EKS module's cluster-admin access
+is documented as a temporary bootstrap exception until provisioning,
+cluster-bootstrap, and namespace-scoped identities are separated.
+
 ## AI Release Engineering on EKS
 
 - **Status:** Implemented — sandbox-validated

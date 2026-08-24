@@ -57,6 +57,8 @@ The repository can now demonstrate:
 - **P5a AI-Assisted DevSecOps Boundary:** advisory AI use, human review, CI/security checks, and release evidence
 - **P5b AI-Assisted Review Evidence:** review summaries, threat-model checklists, CI failure summaries, and release-note drafts
 - **P6f AI Platform Security and Operations Controls:** identity, data protection, AI AppSec, delivery, operations, and FinOps
+- **YY-49 Private EKS Terraform baseline:** separate private-subnet worker target, endpoint-first egress, private-only API intent, and no-public-IP controls; source path only
+- **YY-50 Private EKS protected CI path:** VPC-connected runner contract, same-run plan preflight, exact endpoint checks, sanitized evidence, and fail-closed stop; runtime validation pending
 
 **P6 AI Traffic Governance / AgentOps** is the control-plane evidence track.
 It currently has six mock-first lanes:
@@ -91,6 +93,8 @@ It currently has six mock-first lanes:
 | P4e Helm-on-EKS validation workflow | Live sandbox validated | `.github/workflows/helm-eks-validation.yml` and `docs/solutions/ai-release-engineering-on-eks.md` |
 | P4f Helm release workflow | Live install, rollback, and uninstall validated | `.github/workflows/helm-eks-release.yml` and `docs/solutions/ai-release-engineering-on-eks.md` |
 | P4g Argo CD GitOps workflow | Live GitOps sync, health, status, cleanup, and destroy validated | `.github/workflows/argocd-eks-gitops.yml`, `argocd/applications/cloudai-api-sandbox.yaml`, and `docs/solutions/ai-release-engineering-on-eks.md` |
+| YY-49 private EKS Terraform baseline | Source implemented; runtime pending | `providers/aws/infra/terraform/envs/eks-private-sandbox/`, `providers/aws/infra/terraform/modules/private-egress/`, `providers/aws/infra/terraform/modules/private-network/`, and `docs/architecture/private-eks-reference-architecture.md` |
+| YY-50 private EKS protected CI path | Source implemented; runtime pending | `.github/workflows/terraform-eks-private-sandbox.yml` and `docs/solutions/eks-private-sandbox-runbook.md` |
 | YY-44 Cost Guardrails | Source implementation planned; no live AWS Budget or email-delivery claim | `providers/aws/infra/terraform/modules/cost-guardrails/`, `providers/aws/infra/terraform/envs/cost-guardrails/`, `.github/workflows/terraform-cost-guardrails.yml`, and `docs/solutions/yy-44-cost-guardrails-runbook.md` |
 | P8 Real Bedrock Sandbox | Bounded synthetic sandbox validation complete | `docs/solutions/p8-real-bedrock-sandbox-design.md` and `providers/aws/infra/terraform/envs/bedrock-sandbox/README.md` |
 | P8a Bedrock access readiness | Complete | `docs/solutions/p8a-bedrock-access-readiness.md` and `docs/evidence/templates/p8a-bedrock-smoke-test-evidence.md` |

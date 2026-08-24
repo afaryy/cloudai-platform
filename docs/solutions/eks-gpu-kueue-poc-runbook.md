@@ -6,7 +6,14 @@ This runbook defines the manual, protected operation of the synthetic EKS GPU + 
 
 The POC demonstrates one short CUDA smoke-test Job under Kueue admission control. It uses only synthetic metadata and a digest-pinned CUDA image. It does not process customer, personal, internal, production, or model-training data.
 
-The POC attaches only to the existing personal EKS sandbox when that cluster is `ACTIVE`. If the EKS sandbox was previously destroyed, stop here: recover the baseline EKS sandbox through its separately approved Terraform workflow before attempting this POC. The GPU workflow does not create a new EKS control plane.
+The current bounded POC source path attaches only to the existing public-subnet
+personal EKS sandbox when that cluster is `ACTIVE`. If the sandbox was
+previously destroyed, stop here: recover the baseline sandbox through its
+separately approved Terraform workflow before attempting this POC. The GPU
+workflow does not create a new EKS control plane. A separate private EKS target
+now exists for Enterprise AI/GPU architecture, but its ordinary private-worker
+bootstrap must pass before this GPU path is migrated or treated as runtime
+evidence.
 
 ## Boundaries
 
@@ -26,7 +33,7 @@ The POC attaches only to the existing personal EKS sandbox when that cluster is 
 The `aws-sandbox` environment retains the existing private backend and OIDC values. The GPU workflow additionally requires:
 
 - `TF_VAR_GPU_INSTANCE_TYPE`: approved on-demand GPU type available in the selected region and Availability Zone.
-- `TF_VAR_GPU_POC_SUBNET_IDS`: JSON list of explicitly reviewed private EKS subnet IDs. Each must belong to the existing sandbox VPC and offer the selected GPU type in its Availability Zone.
+- `TF_VAR_GPU_POC_SUBNET_IDS`: JSON list of explicitly reviewed EKS subnet IDs. In the current public-sandbox POC these are selected existing sandbox subnets; a future private-target run must use private subnets from `eks-private-sandbox` and its separate state boundary.
 - `TF_VAR_CUDA_SMOKE_IMAGE`: digest-pinned CUDA image; tags are rejected.
 - `TF_VAR_KUEUE_CHART_VERSION`: reviewed Kueue Helm chart version.
 - `GPU_POC_BUDGET_ALERT_CONFIGURED=true`: human confirmation that the budget alert is enabled outside GitHub Actions.
