@@ -153,33 +153,54 @@ jobs:
         run: |
           set -euo pipefail
 
-          cluster_json=$(aws eks describe-cluster \
+          cluster_lookup_status="not_found"
+          cluster_status="NOT_FOUND"
+          cluster_active=false
+          subnet_ids_json='[]'
+          approved_subnet_azs='[]'
+          cluster_error_file=$(mktemp)
+          cluster_inventory=$(aws eks list-clusters \
+            --region "$AWS_REGION" \
+            --output json)
+          cluster_inventory_count=$(jq '.clusters // [] | length' <<<"$cluster_inventory")
+          if cluster_json=$(aws eks describe-cluster \
             --region "$AWS_REGION" \
             --name "$EKS_CLUSTER_NAME" \
-            --output json)
-          cluster_status=$(jq -r '.cluster.status' <<<"$cluster_json")
-          if [ "$cluster_status" != "ACTIVE" ]; then
-            echo "::error::Existing EKS sandbox must be ACTIVE; discovery will not create or recover it."
-            exit 1
+            --output json 2>"$cluster_error_file"); then
+            cluster_lookup_status="found"
+            cluster_status=$(jq -r '.cluster.status // "UNKNOWN"' <<<"$cluster_json")
+            if [ "$cluster_status" = "ACTIVE" ]; then
+              cluster_active=true
+              subnet_ids_json=$(jq -c '.cluster.resourcesVpcConfig.subnetIds // []' <<<"$cluster_json")
+              if jq -e 'length > 0 and all(.[]; type == "string" and startswith("subnet-"))' <<<"$subnet_ids_json" >/dev/null; then
+                subnet_ids=($(jq -r '.[]' <<<"$subnet_ids_json"))
+                subnet_details=$(aws ec2 describe-subnets \
+                  --region "$AWS_REGION" \
+                  --subnet-ids "${subnet_ids[@]}" \
+                  --query 'Subnets[].{AvailabilityZone:AvailabilityZone,MapPublicIpOnLaunch:MapPublicIpOnLaunch}' \
+                  --output json)
+                approved_subnet_azs=$(jq -c '[.[].AvailabilityZone] | unique' <<<"$subnet_details")
+              else
+                cluster_active=false
+                cluster_lookup_status="invalid_subnets"
+                subnet_ids_json='[]'
+              fi
+            else
+              cluster_lookup_status="not_active"
+            fi
+          else
+            if ! grep -q 'ResourceNotFoundException' "$cluster_error_file"; then
+              cat "$cluster_error_file" >&2
+              exit 1
+            fi
+            echo "::warning::Existing EKS sandbox $EKS_CLUSTER_NAME was not found; no subnet IDs can be approved from the cluster."
           fi
 
-          subnet_ids_json=$(jq -c '.cluster.resourcesVpcConfig.subnetIds // []' <<<"$cluster_json")
-          if ! jq -e 'length > 0 and all(.[]; type == "string" and startswith("subnet-"))' <<<"$subnet_ids_json" >/dev/null; then
-            echo "::error::The existing EKS sandbox did not return usable subnet IDs."
-            exit 1
-          fi
-
-          subnet_ids=($(jq -r '.[]' <<<"$subnet_ids_json"))
-          subnet_details=$(aws ec2 describe-subnets \
+          region_azs=$(aws ec2 describe-availability-zones \
             --region "$AWS_REGION" \
-            --subnet-ids "${subnet_ids[@]}" \
-            --query 'Subnets[].{AvailabilityZone:AvailabilityZone,MapPublicIpOnLaunch:MapPublicIpOnLaunch}' \
+            --filters Name=state,Values=available \
+            --query 'AvailabilityZones[].ZoneName' \
             --output json)
-          subnet_azs=$(jq -c '[.[].AvailabilityZone] | unique' <<<"$subnet_details")
-          if [ "$(jq 'length' <<<"$subnet_azs")" = "0" ]; then
-            echo "::error::The existing EKS sandbox did not resolve any subnet Availability Zones."
-            exit 1
-          fi
 
           quota_value=$(aws service-quotas list-service-quotas \
             --service-code ec2 \
@@ -193,8 +214,13 @@ jobs:
 
           offering_for_type() {
             local gpu_type="$1"
+            local candidate_azs="$2"
             local offerings
             local available=true
+            if [ "$(jq 'length' <<<"$candidate_azs")" = "0" ]; then
+              printf 'null'
+              return
+            fi
             offerings=$(aws ec2 describe-instance-type-offerings \
               --region "$AWS_REGION" \
               --location-type availability-zone \
@@ -206,12 +232,14 @@ jobs:
                 available=false
                 break
               fi
-            done < <(jq -r '.[]' <<<"$subnet_azs")
+            done < <(jq -r '.[]' <<<"$candidate_azs")
             printf '%s' "$available"
           }
 
-          g4dn_available=$(offering_for_type g4dn.xlarge)
-          g5_available=$(offering_for_type g5.xlarge)
+          g4dn_approved_available=$(offering_for_type g4dn.xlarge "$approved_subnet_azs")
+          g5_approved_available=$(offering_for_type g5.xlarge "$approved_subnet_azs")
+          g4dn_region_available=$(offering_for_type g4dn.xlarge "$region_azs")
+          g5_region_available=$(offering_for_type g5.xlarge "$region_azs")
 
           registry_token=$(curl -fsS \
             "https://auth.docker.io/token?service=registry.docker.io&scope=repository:nvidia/cuda:pull" \
@@ -234,13 +262,25 @@ jobs:
           fi
 
           mkdir -p /tmp/gpu-discovery
-          printf '{"cluster_active":true,"cluster_subnet_count":%s,"availability_zone_count":%s,"gpu_quota_available":%s,"g4dn_xlarge_offered_all_approved_azs":%s,"g5_xlarge_offered_all_approved_azs":%s,"cuda_digest_lookup_succeeded":true,"kueue_chart_version_recommended":"%s"}\n' \
-            "$(jq 'length' <<<"$subnet_ids_json")" \
-            "$(jq 'length' <<<"$subnet_azs")" \
-            "$quota_available" \
-            "$g4dn_available" \
-            "$g5_available" \
-            "$KUEUE_CHART_VERSION_RECOMMENDED" > /tmp/gpu-discovery/evidence.json
+          jq -n \
+            --arg cluster_name "$EKS_CLUSTER_NAME" \
+            --arg cluster_lookup_status "$cluster_lookup_status" \
+            --arg cluster_status "$cluster_status" \
+            --argjson cluster_active "$cluster_active" \
+            --argjson cluster_inventory_count "$cluster_inventory_count" \
+            --argjson approved_subnet_count "$(jq 'length' <<<"$subnet_ids_json")" \
+            --argjson approved_az_count "$(jq 'length' <<<"$approved_subnet_azs")" \
+            --argjson region_az_count "$(jq 'length' <<<"$region_azs")" \
+            --arg quota_value "$quota_value" \
+            --argjson gpu_quota_available "$quota_available" \
+            --argjson g4dn_approved_available "$g4dn_approved_available" \
+            --argjson g5_approved_available "$g5_approved_available" \
+            --argjson g4dn_region_available "$g4dn_region_available" \
+            --argjson g5_region_available "$g5_region_available" \
+            --arg cuda_digest "$cuda_digest" \
+            --arg kueue_chart_version "$KUEUE_CHART_VERSION_RECOMMENDED" \
+            '{cluster_name:$cluster_name,cluster_lookup_status:$cluster_lookup_status,cluster_status:$cluster_status,cluster_active:$cluster_active,cluster_inventory_count:$cluster_inventory_count,approved_subnet_count:$approved_subnet_count,approved_az_count:$approved_az_count,region_az_count:$region_az_count,gpu_quota_value:$quota_value,gpu_quota_available:$gpu_quota_available,g4dn_xlarge_offered_all_approved_azs:$g4dn_approved_available,g5_xlarge_offered_all_approved_azs:$g5_approved_available,g4dn_xlarge_offered_all_region_azs:$g4dn_region_available,g5_xlarge_offered_all_region_azs:$g5_region_available,cuda_digest_lookup_succeeded:true,cuda_digest:$cuda_digest,kueue_chart_version_recommended:$kueue_chart_version}' \
+            > /tmp/gpu-discovery/evidence.json
 
           {
             echo "## GPU discovery evidence"
@@ -249,10 +289,20 @@ jobs:
             echo "### Private operator handoff"
             echo "Review this output in the private repository before configuring aws-sandbox variables. Do not copy it into public notes."
             echo ""
-            echo "TF_VAR_GPU_POC_SUBNET_IDS=$subnet_ids_json"
+            echo "Cluster lookup: $cluster_lookup_status ($cluster_status)"
+            echo "EKS cluster inventory count: $cluster_inventory_count"
+            echo "GPU quota value: $quota_value"
             echo "GPU quota available: $quota_available"
-            echo "g4dn.xlarge offered in every approved AZ: $g4dn_available"
-            echo "g5.xlarge offered in every approved AZ: $g5_available"
+            echo "g4dn.xlarge offered in every approved AZ: $g4dn_approved_available"
+            echo "g5.xlarge offered in every approved AZ: $g5_approved_available"
+            echo "g4dn.xlarge offered in every available region AZ: $g4dn_region_available"
+            echo "g5.xlarge offered in every available region AZ: $g5_region_available"
+            if [ "$cluster_active" = "true" ]; then
+              echo "TF_VAR_GPU_POC_SUBNET_IDS=$subnet_ids_json"
+            else
+              echo "TF_VAR_GPU_POC_SUBNET_IDS=NOT_AVAILABLE_UNTIL_EKS_SANDBOX_IS_ACTIVE"
+              echo "No GPU environment variables should be configured from this run."
+            fi
             echo "TF_VAR_CUDA_SMOKE_IMAGE=docker.io/nvidia/cuda@$cuda_digest"
             echo "TF_VAR_KUEUE_CHART_VERSION=$KUEUE_CHART_VERSION_RECOMMENDED"
             echo "CUDA discovery tag reviewed: docker.io/nvidia/cuda:$CUDA_DISCOVERY_TAG"
