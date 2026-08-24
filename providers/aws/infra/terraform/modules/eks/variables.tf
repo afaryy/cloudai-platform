@@ -8,6 +8,18 @@ variable "subnet_ids" {
   type        = list(string)
 }
 
+variable "cluster_security_group_ids" {
+  description = "Additional security groups attached to the EKS control plane ENIs."
+  type        = list(string)
+  default     = []
+}
+
+variable "node_security_group_ids" {
+  description = "Security groups attached to managed worker nodes through a launch template."
+  type        = list(string)
+  default     = []
+}
+
 variable "kubernetes_version" {
   description = "Kubernetes version for the sandbox EKS cluster."
   type        = string
@@ -32,11 +44,13 @@ variable "endpoint_public_access_cidrs" {
   default     = ["203.0.113.10/32"]
 
   validation {
-    condition = length(var.endpoint_public_access_cidrs) > 0 && alltrue([
-      for cidr in var.endpoint_public_access_cidrs :
-      cidr != "0.0.0.0/0" && endswith(cidr, "/32")
-    ])
-    error_message = "EKS public endpoint access must use explicit /32 CIDRs and must not include 0.0.0.0/0."
+    condition = !var.endpoint_public_access || (
+      length(var.endpoint_public_access_cidrs) > 0 && alltrue([
+        for cidr in var.endpoint_public_access_cidrs :
+        cidr != "0.0.0.0/0" && endswith(cidr, "/32")
+      ])
+    )
+    error_message = "When EKS public endpoint access is enabled, use explicit /32 CIDRs and never include 0.0.0.0/0."
   }
 }
 

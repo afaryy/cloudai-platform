@@ -61,6 +61,7 @@ resource "aws_eks_cluster" "this" {
 
   vpc_config {
     subnet_ids              = var.subnet_ids
+    security_group_ids      = var.cluster_security_group_ids
     endpoint_private_access = var.endpoint_private_access
     endpoint_public_access  = var.endpoint_public_access
     public_access_cidrs     = var.endpoint_public_access_cidrs
@@ -71,6 +72,19 @@ resource "aws_eks_cluster" "this" {
   depends_on = [
     aws_iam_role_policy_attachment.cluster
   ]
+}
+
+resource "aws_launch_template" "node" {
+  count = length(var.node_security_group_ids) > 0 ? 1 : 0
+
+  name_prefix            = "${var.cluster_name}-node-"
+  update_default_version = true
+  vpc_security_group_ids = var.node_security_group_ids
+
+  tag_specifications {
+    resource_type = "instance"
+    tags          = var.tags
+  }
 }
 
 resource "aws_eks_node_group" "this" {
@@ -87,6 +101,15 @@ resource "aws_eks_node_group" "this" {
     desired_size = var.node_desired_size
     max_size     = var.node_max_size
     min_size     = var.node_min_size
+  }
+
+  dynamic "launch_template" {
+    for_each = length(var.node_security_group_ids) > 0 ? [1] : []
+
+    content {
+      id      = aws_launch_template.node[0].id
+      version = aws_launch_template.node[0].latest_version
+    }
   }
 
   tags = var.tags

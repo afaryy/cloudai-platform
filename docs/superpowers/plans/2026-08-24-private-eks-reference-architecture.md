@@ -34,27 +34,27 @@
 - Consumes: existing EKS sandbox design, YY-47 decision, current cost-guardrail boundaries.
 - Produces: approved topology, endpoint matrix, CI reachability model, cost categories and non-goals.
 
-- [ ] **Step 1: Verify the current sandbox boundary**
+- [x] **Step 1: Verify the current sandbox boundary**
 
   Confirm that the current EKS environment remains documented as a low-cost public-subnet sandbox and that its Terraform state key is not reused.
 
-- [ ] **Step 2: Define the private topology**
+- [x] **Step 2: Define the private topology**
 
   Document public ingress/egress subnets, private worker/GPU subnets, endpoint security groups, route tables, private API target, and VPC-connected delivery runner.
 
-- [ ] **Step 3: Define endpoint-first egress**
+- [x] **Step 3: Define endpoint-first egress**
 
   Record S3 gateway plus ECR API/DKR, STS, EKS, EC2 and CloudWatch Logs endpoints as the baseline; record NAT as an explicit exception for public dependencies.
 
-- [ ] **Step 4: Define image promotion**
+- [x] **Step 4: Define image promotion**
 
   Require immutable CUDA digest verification and a private ECR mirror when private nodes cannot reach Public ECR through an approved egress path.
 
-- [ ] **Step 5: Define cost gates**
+- [x] **Step 5: Define cost gates**
 
   Separate fixed endpoint/cluster/runner costs from variable node/GPU/transfer/observability costs and require an approved monthly budget before apply.
 
-- [ ] **Step 6: Add a documentation contract test**
+- [x] **Step 6: Add a documentation contract test**
 
   Assert the public-safe documents contain `private`, `controlled egress`, `VPC-connected`, `no public IP`, and `existing public-subnet sandbox` boundaries, and do not claim private runtime completion.
 
@@ -64,13 +64,13 @@
   inputs `PRIVATE_EKS_BUDGET_APPROVED`, `PRIVATE_EKS_MONTHLY_BUDGET_USD`,
   `PRIVATE_EKS_RUNNER_READY`, and `PRIVATE_EKS_ENDPOINT_POLICY_READY`.
 
-- [ ] **Step 7: Run tests**
+- [x] **Step 7: Run tests**
 
   ```bash
   corepack pnpm@11.7.0 --dir providers/aws/app/api test
   ```
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit**
 
   ```bash
   git add docs/superpowers/specs/2026-08-24-private-eks-reference-architecture-design.md docs/architecture/private-eks-reference-architecture.md
@@ -89,31 +89,36 @@
 - Consumes: Task 1 topology and endpoint matrix.
 - Produces: isolated private EKS Terraform environment with a separate state key and deterministic outputs.
 
-- [ ] **Step 1: Create the environment skeleton**
+- [x] **Step 1: Create the environment skeleton**
 
   Add `backend.s3.tf`, `versions.tf`, `providers.tf`, `variables.tf`, `locals.tf`, `main.tf`, `outputs.tf`, `README.md`, and native `.tftest.hcl` files under `envs/eks-private-sandbox`.
 
-- [ ] **Step 2: Define isolated naming and state**
+- [x] **Step 2: Define isolated naming and state**
 
   Use `${TF_STATE_KEY_PREFIX}/eks-private-sandbox/terraform.tfstate` and a name prefix that cannot collide with `eks-sandbox`.
 
-- [ ] **Step 3: Define subnet and route intent**
+- [x] **Step 3: Define subnet and route intent**
 
   Define at least two Availability Zones, public ingress/egress subnet CIDRs, private worker subnet CIDRs, private GPU subnet intent, and private route tables without embedding live account values.
 
-- [ ] **Step 4: Add endpoint controls**
+- [x] **Step 4: Add endpoint controls**
 
   Create S3 gateway, ECR API/DKR, STS, EKS, EC2 and CloudWatch Logs interface endpoints with endpoint security groups and endpoint policies.
 
-- [ ] **Step 5: Prohibit public worker IPs**
+- [x] **Step 5: Prohibit public worker IPs**
 
   Add Terraform tests that fail if worker subnets are public or if the node group is configured to assign public IPs.
 
-- [ ] **Step 6: Define private API delivery**
+- [x] **Step 6: Define private API delivery**
 
   Configure the private API target and document the VPC-connected runner requirement. Expose only metadata-safe outputs.
 
-- [ ] **Step 7: Run source validation**
+  The current shared EKS module's cluster-admin provisioning access is a
+  temporary bootstrap exception. Follow-up CI work must separate provisioning,
+  cluster bootstrap, and namespace-scoped workload identities before runtime
+  validation is claimed.
+
+- [x] **Step 7: Run source validation**
 
   ```bash
   terraform -chdir=providers/aws/infra/terraform/envs/eks-private-sandbox init -backend=false
