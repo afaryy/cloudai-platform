@@ -27,3 +27,27 @@ variable "tags" {
   type        = map(string)
   default     = {}
 }
+
+variable "monthly_budget_usd" {
+  description = "Monthly sandbox budget limit in USD; normally supplied by the GitHub Environment."
+  type        = number
+  default     = 50
+}
+
+variable "gpu_daily_budget_usd" {
+  description = "Daily GPU demo budget limit in USD; normally supplied by the GitHub Environment."
+  type        = number
+  default     = 20
+}
+
+variable "monthly_alert_thresholds" {
+  description = "Comma-separated monthly notification thresholds; normally supplied by the GitHub Environment."
+  type        = string
+  default     = "15,30,40,50"
+}
+
+variable "gpu_alert_thresholds" {
+  description = "Comma-separated daily GPU notification thresholds; normally supplied by the GitHub Environment."
+  type        = string
+  default     = "10,15,20"
+}
