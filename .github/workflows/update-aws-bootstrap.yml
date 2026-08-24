@@ -172,9 +172,9 @@ jobs:
             exit 1
           fi
           {
-            echo "## Budget Guardrails Environment handoff"
-            echo ""
-            echo "Add this exact value as the aws-sandbox Environment variable \\`AWS_BUDGET_GUARDRAILS_ROLE_TO_ASSUME\\`:"
-            echo ""
-            echo "\\`$budget_guardrails_role_arn\\`"
+            printf '%s\n' '## Budget Guardrails Environment handoff'
+            printf '%s\n' ''
+            printf '%s\n' 'Add this exact value as the aws-sandbox Environment variable `AWS_BUDGET_GUARDRAILS_ROLE_TO_ASSUME`:'
+            printf '%s\n' ''
+            printf '`%s`\n' "$budget_guardrails_role_arn"
           } >> "$GITHUB_STEP_SUMMARY"
