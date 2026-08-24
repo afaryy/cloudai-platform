@@ -24,7 +24,9 @@ provider boundaries, and future capacity design.
 - [Private EKS Reference Architecture](private-eks-reference-architecture.md) —
   the production-oriented private-worker and private-GPU target, with
   endpoint-first egress, VPC-connected delivery, image promotion, Kueue, and
-  cost boundaries; separate from the low-cost public-subnet sandbox.
+  cost boundaries; its Terraform source and protected CI path are separate
+  from the low-cost public-subnet sandbox, and runtime validation remains
+  pending.
 - [EKS GPU + Kueue POC Design](../solutions/eks-gpu-kueue-poc-design.md) and
   [runbook](../solutions/eks-gpu-kueue-poc-runbook.md) — a future synthetic GPU
   admission path that attaches only to an active EKS sandbox; it does not claim

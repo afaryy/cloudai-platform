@@ -10,6 +10,7 @@ on:
       - "providers/aws/infra/bootstrap/**"
       - ".github/workflows/bedrock-gateway-adapter.yml"
       - ".github/workflows/terraform-eks-gpu-kueue-poc.yml"
+      - ".github/workflows/terraform-eks-private-sandbox.yml"
       - "providers/aws/infra/terraform/**"
       - "providers/aws/app/api/**"
   push:
@@ -23,6 +24,7 @@ on:
       - "providers/aws/infra/bootstrap/**"
       - ".github/workflows/bedrock-gateway-adapter.yml"
       - ".github/workflows/terraform-eks-gpu-kueue-poc.yml"
+      - ".github/workflows/terraform-eks-private-sandbox.yml"
       - "providers/aws/infra/terraform/**"
       - "providers/aws/app/api/**"
   workflow_dispatch:
@@ -44,6 +46,7 @@ jobs:
           - providers/aws/infra/terraform/modules/eks-gpu-kueue
           - providers/aws/infra/terraform/envs/eks-sandbox
           - providers/aws/infra/terraform/envs/eks-gpu-kueue-poc
+          - providers/aws/infra/terraform/envs/eks-private-sandbox
           - providers/aws/infra/terraform/envs/bedrock-sandbox
           - providers/aws/infra/terraform/envs/agentcore-rag-sandbox
     defaults:
@@ -234,3 +237,41 @@ jobs:
           grep -q 'one_allocatable_gpu' "$workflow"
           ! grep -q 'terraform destroy' "$workflow"
           ! grep -q '^  schedule:' "$workflow"
+
+  eks_private_sandbox_workflow_boundary:
+    name: Private EKS sandbox workflow boundary
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Check protected private EKS delivery boundary
+        run: |
+          workflow=.github/workflows/terraform-eks-private-sandbox.yml
+          grep -q 'workflow_dispatch:' "$workflow"
+          grep -q -- '- validate' "$workflow"
+          grep -q -- '- plan' "$workflow"
+          grep -q -- '- preflight' "$workflow"
+          grep -q -- '- apply' "$workflow"
+          grep -q -- '- stop' "$workflow"
+          grep -q 'runs-on: \[self-hosted, private-eks, ap-southeast-2\]' "$workflow"
+          grep -q 'environment: aws-private-eks' "$workflow"
+          grep -q 'id-token: write' "$workflow"
+          grep -q 'cloudai-eks-private-sandbox-delivery' "$workflow"
+          grep -q 'eks-private-sandbox/terraform.tfstate' "$workflow"
+          grep -q 'PRIVATE_EKS_BUDGET_APPROVED' "$workflow"
+          grep -q 'PRIVATE_EKS_MONTHLY_BUDGET_USD' "$workflow"
+          grep -q 'PRIVATE_EKS_RUNNER_READY' "$workflow"
+          grep -q 'PRIVATE_EKS_ENDPOINT_POLICY_READY' "$workflow"
+          grep -q 'PRIVATE_EKS_BACKEND_READY' "$workflow"
+          grep -q 'PRIVATE_EKS_BOOTSTRAP_ROLE_READY' "$workflow"
+          grep -q 'I_UNDERSTAND_PRIVATE_EKS_APPLY' "$workflow"
+          grep -q 'I_UNDERSTAND_PRIVATE_EKS_STOP' "$workflow"
+          grep -q 'terraform apply -input=false -auto-approve -no-color' "$workflow"
+          grep -q 'aws eks describe-cluster' "$workflow"
+          grep -q 'endpointPrivateAccess' "$workflow"
+          grep -q 'MapPublicIpOnLaunch == false' "$workflow"
+          grep -q 'approved_endpoint_set_verified' "$workflow"
+          grep -q 'raw_identifiers_published' "$workflow"
+          ! grep -q 'terraform destroy' "$workflow"
+          ! grep -q 'eks-sandbox/terraform.tfstate' "$workflow"
+          ! grep -q 'gpu_instance_type' "$workflow"

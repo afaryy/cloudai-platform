@@ -1,6 +1,6 @@
 # Featured Solutions
 
-These four cases provide a short, public-safe route through the repository. They show bounded engineering evidence rather than production claims. All examples use synthetic data, generic identifiers, and documented control boundaries.
+These cases provide a short, public-safe route through the repository. They show bounded engineering evidence rather than production claims. All examples use synthetic data, generic identifiers, and documented control boundaries.
 
 ## Governed AI Gateway
 
@@ -98,6 +98,50 @@ The source implementation is not a deployed GPU runtime. It has not created
 or validated a GPU node, device-plugin allocation, Kueue admission, CUDA Job
 completion, DCGM/Prometheus/Grafana telemetry, HyperPod, Slurm, or any
 data-centre capacity.
+
+## Private EKS Enterprise AI Target
+
+- **Status:** Implemented — source and protected CI path; runtime pending
+- **Engineering focus:** Private worker topology, endpoint-first egress, VPC-connected delivery, and cost/safety boundaries
+- **Primary technologies:** Terraform, Amazon VPC, Amazon EKS, VPC endpoints, GitHub Actions OIDC, self-hosted runner contract
+
+### Problem
+
+The low-cost public-subnet EKS sandbox is useful for inexpensive development
+validation, but it is not the preferred topology for enterprise worker or GPU
+capacity. Enterprise AI workloads need private workers, explicit AWS-service
+access, controlled egress, private API operations, and evidence that does not
+expose account-specific details.
+
+### Scope
+
+The [private EKS reference architecture](../architecture/private-eks-reference-architecture.md),
+[Terraform environment](../../providers/aws/infra/terraform/envs/eks-private-sandbox),
+and [protected delivery runbook](./eks-private-sandbox-runbook.md) define a
+separate state boundary from `eks-sandbox`. The source path creates public
+ingress/egress subnets, private worker subnets with no public IP assignment,
+endpoint-first AWS service access, private-only EKS API intent, and a
+VPC-connected runner contract. NAT is an explicit exception and disabled by
+default.
+
+### Technical evidence
+
+- Terraform native tests cover subnet public-IP prohibition, endpoint-policy
+  scope, private DNS, endpoint security-group sources, and the explicit NAT
+  exception path.
+- The protected workflow supports source validation, isolated plan,
+  same-run apply preflight, exact endpoint-set checks, sanitised evidence, and
+  fail-closed scale-to-zero stop.
+- The existing public EKS sandbox remains unchanged and is not reused as the
+  private environment's Terraform state.
+
+### What it does not claim
+
+The private EKS worker/bootstrap runtime has not yet been applied or validated.
+No private GPU node, Kueue admission, CUDA smoke test, HyperPod, Slurm, or
+data-centre capacity is claimed. The shared EKS module's cluster-admin access
+is documented as a temporary bootstrap exception until provisioning,
+cluster-bootstrap, and namespace-scoped identities are separated.
 
 ## AI Release Engineering on EKS
 
@@ -218,3 +262,57 @@ How to extend cloud-platform controls into a real provider boundary while retain
 ### What it does not claim
 
 It is not a production Bedrock service, chatbot, knowledge base, agent runtime, or broad Guardrail effectiveness assessment.
+
+## AgentCore Governed RAG POC
+
+- **Status:** Implemented — sandbox-validated
+- **Engineering focus:** Gateway-only agent-runtime access, governed retrieval, citations-or-abstention behavior, and bounded operational evidence
+- **Primary technologies:** Terraform, GitHub Actions OIDC, Amazon Bedrock Knowledge Bases, AgentCore Gateway, AgentCore Runtime, IAM, and CloudWatch
+
+### Problem
+
+An enterprise knowledge assistant needs more than a model endpoint. It needs a controlled entry point, approved source lifecycle, read-only retrieval, explicit failure behavior, and evidence that can be reviewed without publishing prompts, answers, credentials, or customer data.
+
+### Scope
+
+The POC uses self-authored synthetic material and a protected CI/CD path to create and validate a bounded Knowledge Base, AgentCore Runtime, Gateway, and Runtime target. The Runtime is reachable through the Gateway contract, direct Runtime bypass is denied, and the response contract requires a citation or a safe abstention.
+
+### Architecture summary
+
+The [AgentCore Governed RAG architecture](../architecture/agentcore-governed-rag-poc.md) places the flow behind a Gateway-only boundary:
+
+```text
+synthetic request
+  -> Gateway admission and IAM boundary
+  -> AgentCore Runtime
+  -> approved Knowledge Base retrieval
+  -> cited answer or safe abstention
+  -> sanitized evidence and CloudWatch signals
+```
+
+The [POC runbook](./agentcore-governed-rag-poc-runbook.md) records the protected workflow sequence, confirmation gates, evidence rules, and separately gated teardown boundary.
+
+### Technical evidence
+
+- [AgentCore Runtime implementation](../../providers/aws/app/agentcore-rag-runtime/) with admission, deployment controls, validation, and observability contracts.
+- [AgentCore Terraform environment](../../providers/aws/infra/terraform/envs/agentcore-rag-sandbox/) with isolated state and protected workflow modes.
+- [Synthetic RAG data foundation](./p8i-agentcore-rag-data-foundation.md) and [key process record](./p8i-agentcore-rag-key-process-record.md).
+- Gateway-only IAM target, direct Bedrock preflight, protected ingestion, and sanitized invocation evidence.
+
+### Test or validation evidence
+
+The local contract suite covers admission, direct-runtime bypass denial, disabled and retired-source behavior, insufficient evidence, prompt-attack-shaped blocking, sanitized provider failures, and confirmation gates. Protected CI also validated the synthetic Knowledge Base ingestion path, IAM-authenticated Gateway path, and bounded CloudWatch observability.
+
+### Key trade-offs
+
+- Synthetic content and read-only retrieval provide reproducible, public-safe evidence but do not represent customer-data quality or production answer accuracy.
+- The Gateway and Runtime boundary demonstrates a governed integration pattern; it is not a general autonomous-agent platform.
+- CloudWatch evidence is bounded to the sandbox validation and does not claim long-term SLO, SIEM, or enterprise incident-management integration.
+
+### What this demonstrates
+
+How a platform engineer can extend Terraform, OIDC, IAM, CI/CD, RAG governance, deterministic evaluation, and observability controls into a real but deliberately bounded AgentCore provider path.
+
+### What it does not claim
+
+It is not a production autonomous agent platform, customer-facing knowledge assistant, broad model-safety assessment, or unrestricted tool-execution environment. Teardown remains separately confirmed and is not implied by deployment success.

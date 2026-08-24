@@ -1,0 +1,316 @@
+name: terraform-eks-private-sandbox
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "Private EKS lifecycle operation"
+        required: true
+        default: "validate"
+        type: choice
+        options:
+          - validate
+          - plan
+          - preflight
+          - apply
+          - stop
+      confirmation:
+        description: "Exact confirmation required for apply or stop"
+        required: false
+        default: ""
+        type: string
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: cloudai-eks-private-sandbox-delivery
+  cancel-in-progress: false
+
+env:
+  TERRAFORM_DIR: providers/aws/infra/terraform/envs/eks-private-sandbox
+  TF_STATE_KEY_SUFFIX: eks-private-sandbox/terraform.tfstate
+
+jobs:
+  source_validation:
+    name: Private EKS source validation
+    if: ${{ inputs.mode == 'validate' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: providers/aws/infra/terraform/envs/eks-private-sandbox
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Validate private EKS source without backend
+        run: |
+          terraform init -backend=false
+          terraform fmt -check -recursive
+          terraform validate
+          terraform test
+
+  remote_delivery:
+    name: Private EKS protected delivery
+    if: ${{ inputs.mode != 'validate' }}
+    runs-on: [self-hosted, private-eks, ap-southeast-2]
+    environment: aws-private-eks
+    defaults:
+      run:
+        working-directory: providers/aws/infra/terraform/envs/eks-private-sandbox
+    env:
+      AWS_ROLE_TO_ASSUME: ${{ vars.AWS_ROLE_TO_ASSUME || secrets.AWS_ROLE_TO_ASSUME }}
+      AWS_REGION: ${{ vars.AWS_REGION || 'ap-southeast-2' }}
+      TF_BACKEND_BUCKET: ${{ vars.TF_BACKEND_BUCKET }}
+      TF_BACKEND_LOCK_TABLE: ${{ vars.TF_BACKEND_LOCK_TABLE }}
+      TF_STATE_KEY_PREFIX: ${{ vars.TF_STATE_KEY_PREFIX }}
+      TF_STATE_KEY: ${{ vars.TF_STATE_KEY_PREFIX }}/eks-private-sandbox/terraform.tfstate
+      TF_VAR_github_actions_principal_arn: ${{ vars.PRIVATE_EKS_GITHUB_ACTIONS_PRINCIPAL_ARN }}
+      TF_VAR_delivery_runner_security_group_id: ${{ vars.PRIVATE_EKS_DELIVERY_RUNNER_SECURITY_GROUP_ID }}
+      TF_VAR_private_artifact_bucket_arns: ${{ vars.PRIVATE_EKS_ARTIFACT_BUCKET_ARNS_JSON }}
+      PRIVATE_EKS_BUDGET_APPROVED: ${{ vars.PRIVATE_EKS_BUDGET_APPROVED }}
+      PRIVATE_EKS_MONTHLY_BUDGET_USD: ${{ vars.PRIVATE_EKS_MONTHLY_BUDGET_USD }}
+      PRIVATE_EKS_RUNNER_READY: ${{ vars.PRIVATE_EKS_RUNNER_READY }}
+      PRIVATE_EKS_ENDPOINT_POLICY_READY: ${{ vars.PRIVATE_EKS_ENDPOINT_POLICY_READY }}
+      PRIVATE_EKS_BACKEND_READY: ${{ vars.PRIVATE_EKS_BACKEND_READY }}
+      PRIVATE_EKS_BOOTSTRAP_ROLE_READY: ${{ vars.PRIVATE_EKS_BOOTSTRAP_ROLE_READY }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Explain private delivery boundary
+        run: |
+          echo "This workflow targets only the separate eks-private-sandbox state key."
+          echo "Remote operations require the private-eks environment and a VPC-connected self-hosted runner."
+          echo "The existing public eks-sandbox is not read, changed, or destroyed."
+          echo "GPU, Kueue, HyperPod, Slurm, and data-centre provisioning are outside this workflow."
+
+      - name: Check protected private EKS inputs
+        env:
+          MODE: ${{ inputs.mode }}
+          CONFIRMATION: ${{ inputs.confirmation }}
+        run: |
+          missing=0
+          for name in AWS_ROLE_TO_ASSUME AWS_REGION TF_BACKEND_BUCKET TF_BACKEND_LOCK_TABLE TF_STATE_KEY_PREFIX TF_VAR_github_actions_principal_arn TF_VAR_delivery_runner_security_group_id TF_VAR_private_artifact_bucket_arns PRIVATE_EKS_BUDGET_APPROVED PRIVATE_EKS_MONTHLY_BUDGET_USD PRIVATE_EKS_RUNNER_READY PRIVATE_EKS_ENDPOINT_POLICY_READY PRIVATE_EKS_BACKEND_READY PRIVATE_EKS_BOOTSTRAP_ROLE_READY; do
+            if [ -z "${!name}" ]; then
+              echo "::error::$name is required in the aws-private-eks environment."
+              missing=1
+            fi
+          done
+          if [ "$PRIVATE_EKS_BUDGET_APPROVED" != "true" ]; then
+            echo "::error::PRIVATE_EKS_BUDGET_APPROVED must be exactly true."
+            missing=1
+          fi
+          if ! awk 'BEGIN { exit !(ARGV[1] > 0) }' "$PRIVATE_EKS_MONTHLY_BUDGET_USD"; then
+            echo "::error::PRIVATE_EKS_MONTHLY_BUDGET_USD must be a positive number."
+            missing=1
+          fi
+          for name in PRIVATE_EKS_RUNNER_READY PRIVATE_EKS_ENDPOINT_POLICY_READY PRIVATE_EKS_BACKEND_READY PRIVATE_EKS_BOOTSTRAP_ROLE_READY; do
+            if [ "${!name}" != "true" ]; then
+              echo "::error::$name must be exactly true before remote operations."
+              missing=1
+            fi
+          done
+          if ! jq -e 'type == "array" and length > 0 and all(.[]; type == "string" and startswith("arn:aws:s3:::"))' <<<"$TF_VAR_private_artifact_bucket_arns" >/dev/null; then
+            echo "::error::PRIVATE_EKS_ARTIFACT_BUCKET_ARNS_JSON must be a non-empty JSON list of explicit S3 bucket ARNs."
+            missing=1
+          fi
+          if [ "$MODE" = "apply" ] && [ "$CONFIRMATION" != "I_UNDERSTAND_PRIVATE_EKS_APPLY" ]; then
+            echo "::error::apply requires I_UNDERSTAND_PRIVATE_EKS_APPLY."
+            missing=1
+          fi
+          if [ "$MODE" = "stop" ] && [ "$CONFIRMATION" != "I_UNDERSTAND_PRIVATE_EKS_STOP" ]; then
+            echo "::error::stop requires I_UNDERSTAND_PRIVATE_EKS_STOP."
+            missing=1
+          fi
+          exit "$missing"
+
+      - name: Configure AWS credentials through GitHub OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ env.AWS_REGION }}
+          mask-aws-account-id: true
+
+      - name: Terraform init with isolated remote backend
+        run: |
+          terraform init \
+            -backend-config="bucket=${TF_BACKEND_BUCKET}" \
+            -backend-config="key=${TF_STATE_KEY}" \
+            -backend-config="region=${AWS_REGION}" \
+            -backend-config="dynamodb_table=${TF_BACKEND_LOCK_TABLE}" \
+            -backend-config="encrypt=true"
+
+      - name: Terraform plan without saved artifact
+        if: ${{ inputs.mode == 'plan' }}
+        run: |
+          terraform validate
+          terraform plan -input=false -no-color > /tmp/private-eks-plan.log 2>&1
+          printf '{"mode":"plan","terraform_plan_succeeded":true,"state_key_suffix":"%s"}\n' "$TF_STATE_KEY_SUFFIX" > /tmp/private-eks-plan-evidence.json
+
+      - name: Private endpoint and route preflight
+        if: ${{ inputs.mode == 'preflight' || inputs.mode == 'apply' }}
+        env:
+          MODE: ${{ inputs.mode }}
+        run: |
+          if [ "$MODE" = "apply" ]; then
+            terraform plan -input=false -no-color -out=/tmp/private-eks-apply.tfplan > /tmp/private-eks-apply-plan.log 2>&1
+            terraform show -json /tmp/private-eks-apply.tfplan > /tmp/private-eks-apply-plan.json
+            if [ "$(jq '[.resource_changes[]? | select(.change.actions | index("delete"))] | length' /tmp/private-eks-apply-plan.json)" -ne 0 ]; then
+              echo "::error::Apply preflight found delete actions; refusing to continue."
+              exit 1
+            fi
+            if ! jq -e '[.resource_changes[]? | select(.type == "aws_eks_cluster") | .change.after.vpc_config[0].endpoint_public_access] | all(.[]; . == false)' /tmp/private-eks-apply-plan.json >/dev/null; then
+              echo "::error::Apply preflight could not prove a private-only EKS API endpoint."
+              exit 1
+            fi
+            if ! jq -e '[.resource_changes[]? | select(.type == "aws_subnet" and (.address | contains("private"))) | .change.after.map_public_ip_on_launch] | all(.[]; . == false)' /tmp/private-eks-apply-plan.json >/dev/null; then
+              echo "::error::Apply preflight could not prove private worker subnets have no public IPs."
+              exit 1
+            fi
+            if jq -e '[.resource_changes[]? | select(.address | test("gpu|kueue|hyperpod|slurm"; "i"))] | length > 0' /tmp/private-eks-apply-plan.json >/dev/null; then
+              echo "::error::GPU/Kueue/HyperPod/Slurm resources are outside this worker baseline."
+              exit 1
+            fi
+            printf '{"mode":"apply","plan_preflight_succeeded":true,"delete_actions":0,"eks_api_private_only":true,"private_subnets_no_public_ip":true,"gpu_capacity_added":false,"raw_identifiers_published":false}\n' > /tmp/private-eks-preflight-evidence.json
+          else
+            terraform output -json > /tmp/private-eks-outputs.json
+            vpc_id=$(jq -r '.vpc_id.value' /tmp/private-eks-outputs.json)
+            cluster_name=$(jq -r '.cluster_name.value' /tmp/private-eks-outputs.json)
+            private_subnets=$(jq -r '.private_subnet_ids.value[]' /tmp/private-eks-outputs.json)
+            if [ -z "$vpc_id" ] || [ "$vpc_id" = "null" ] || [ -z "$cluster_name" ] || [ "$cluster_name" = "null" ]; then
+              echo "::error::Private EKS state must exist before preflight; no cluster or VPC is created by preflight."
+              exit 1
+            fi
+            cluster_json=$(aws eks describe-cluster --name "$cluster_name" --region "$AWS_REGION" --output json)
+            endpoint_private=$(jq -r '.cluster.resourcesVpcConfig.endpointPrivateAccess' <<<"$cluster_json")
+            endpoint_public=$(jq -r '.cluster.resourcesVpcConfig.endpointPublicAccess' <<<"$cluster_json")
+            if [ "$endpoint_private" != "true" ] || [ "$endpoint_public" != "false" ]; then
+              echo "::error::EKS API endpoint must be private-only."
+              exit 1
+            fi
+            subnet_json=$(aws ec2 describe-subnets --subnet-ids $private_subnets --region "$AWS_REGION" --output json)
+            if ! jq -e 'all(.Subnets[]; .MapPublicIpOnLaunch == false)' <<<"$subnet_json" >/dev/null; then
+              echo "::error::Private worker subnets must not assign public IPs."
+              exit 1
+            fi
+            endpoint_json=$(aws ec2 describe-vpc-endpoints --filters "Name=vpc-id,Values=$vpc_id" --region "$AWS_REGION" --output json)
+            for service in ecr.api ecr.dkr sts eks ec2 logs; do
+              if ! jq -e --arg service "com.amazonaws.${AWS_REGION}.${service}" --arg vpc "$vpc_id" 'any(.VpcEndpoints[]?; .State == "available" and .VpcId == $vpc and .ServiceName == $service and .VpcEndpointType == "Interface" and .PrivateDnsEnabled == true)' <<<"$endpoint_json" >/dev/null; then
+                echo "::error::Required available private interface endpoint is missing: $service."
+                exit 1
+              fi
+            done
+            if ! jq -e --arg service "com.amazonaws.${AWS_REGION}.s3" --arg vpc "$vpc_id" 'any(.VpcEndpoints[]?; .State == "available" and .VpcId == $vpc and .ServiceName == $service and .VpcEndpointType == "Gateway")' <<<"$endpoint_json" >/dev/null; then
+              echo "::error::Required available S3 gateway endpoint is missing."
+              exit 1
+            fi
+            printf '{"mode":"preflight","vpc_present":true,"cluster_present":true,"eks_api_private_only":true,"private_subnets_no_public_ip":true,"approved_endpoint_set_verified":true,"raw_identifiers_published":false}\n' > /tmp/private-eks-preflight-evidence.json
+          fi
+
+      - name: Upload sanitised preflight evidence
+        if: ${{ inputs.mode == 'preflight' || inputs.mode == 'apply' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: eks-private-sandbox-preflight-evidence
+          path: /tmp/private-eks-preflight-evidence.json
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Apply private worker baseline after fresh plan
+        if: ${{ inputs.mode == 'apply' }}
+        run: |
+          terraform apply -input=false -auto-approve -no-color /tmp/private-eks-apply.tfplan > /tmp/private-eks-apply.log 2>&1
+          printf '{"mode":"apply","terraform_apply_succeeded":true,"gpu_capacity_added":false,"raw_identifiers_published":false}\n' > /tmp/private-eks-apply-evidence.json
+
+      - name: Upload sanitised apply evidence
+        if: ${{ inputs.mode == 'apply' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: eks-private-sandbox-apply-evidence
+          path: /tmp/private-eks-apply-evidence.json
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Verify private worker baseline after apply
+        if: ${{ inputs.mode == 'apply' }}
+        run: |
+          terraform output -json > /tmp/private-eks-outputs.json
+          vpc_id=$(jq -r '.vpc_id.value' /tmp/private-eks-outputs.json)
+          cluster_name=$(jq -r '.cluster_name.value' /tmp/private-eks-outputs.json)
+          private_subnets=$(jq -r '.private_subnet_ids.value[]' /tmp/private-eks-outputs.json)
+          cluster_json=$(aws eks describe-cluster --name "$cluster_name" --region "$AWS_REGION" --output json)
+          endpoint_private=$(jq -r '.cluster.resourcesVpcConfig.endpointPrivateAccess' <<<"$cluster_json")
+          endpoint_public=$(jq -r '.cluster.resourcesVpcConfig.endpointPublicAccess' <<<"$cluster_json")
+          if [ "$endpoint_private" != "true" ] || [ "$endpoint_public" != "false" ]; then
+            echo "::error::Applied EKS API endpoint is not private-only."
+            exit 1
+          fi
+          subnet_json=$(aws ec2 describe-subnets --subnet-ids $private_subnets --region "$AWS_REGION" --output json)
+          if ! jq -e 'all(.Subnets[]; .MapPublicIpOnLaunch == false)' <<<"$subnet_json" >/dev/null; then
+            echo "::error::Applied private worker subnets assign public IPs."
+            exit 1
+          fi
+          endpoint_json=$(aws ec2 describe-vpc-endpoints --filters "Name=vpc-id,Values=$vpc_id" --region "$AWS_REGION" --output json)
+          for service in ecr.api ecr.dkr sts eks ec2 logs; do
+            if ! jq -e --arg service "com.amazonaws.${AWS_REGION}.${service}" --arg vpc "$vpc_id" 'any(.VpcEndpoints[]?; .State == "available" and .VpcId == $vpc and .ServiceName == $service and .VpcEndpointType == "Interface" and .PrivateDnsEnabled == true)' <<<"$endpoint_json" >/dev/null; then
+              echo "::error::Applied environment is missing required interface endpoint: $service."
+              exit 1
+            fi
+          done
+          if ! jq -e --arg service "com.amazonaws.${AWS_REGION}.s3" --arg vpc "$vpc_id" 'any(.VpcEndpoints[]?; .State == "available" and .VpcId == $vpc and .ServiceName == $service and .VpcEndpointType == "Gateway")' <<<"$endpoint_json" >/dev/null; then
+            echo "::error::Applied environment is missing the required S3 gateway endpoint."
+            exit 1
+          fi
+          printf '{"mode":"apply","private_worker_baseline_verified":true,"eks_api_private_only":true,"private_subnets_no_public_ip":true,"approved_endpoint_set_verified":true,"raw_identifiers_published":false}\n' > /tmp/private-eks-post-apply-evidence.json
+
+      - name: Upload sanitised post-apply evidence
+        if: ${{ inputs.mode == 'apply' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: eks-private-sandbox-post-apply-evidence
+          path: /tmp/private-eks-post-apply-evidence.json
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Stop private workers without destroying the environment
+        if: ${{ inputs.mode == 'stop' }}
+        run: |
+          state_resources=$(terraform state list 2>/dev/null || true)
+          if ! grep -Eq '(^|\.)aws_eks_cluster\.this$|(^|\.)aws_vpc\.this$' <<<"$state_resources"; then
+            echo "::error::Stop requires an existing private EKS state; it will not create a new environment."
+            exit 1
+          fi
+          cluster_name=$(terraform output -raw cluster_name)
+          if [ -z "$cluster_name" ] || [ "$cluster_name" = "null" ]; then
+            echo "::error::Stop requires an existing private EKS cluster output."
+            exit 1
+          fi
+          aws eks describe-cluster --name "$cluster_name" --region "$AWS_REGION" >/dev/null
+          terraform plan -input=false -no-color -var='node_min_size=0' -var='node_desired_size=0' -var='node_max_size=1' -out=/tmp/private-eks-stop.tfplan > /tmp/private-eks-stop-plan.log 2>&1
+          terraform show -json /tmp/private-eks-stop.tfplan > /tmp/private-eks-stop-plan.json
+          delete_actions=$(jq '[.resource_changes[]? | select(.change.actions | index("delete"))] | length' /tmp/private-eks-stop-plan.json)
+          if [ "$delete_actions" -ne 0 ]; then
+            echo "::error::Stop plan contains delete actions; refusing to continue."
+            exit 1
+          fi
+          terraform apply -input=false -auto-approve -no-color /tmp/private-eks-stop.tfplan > /tmp/private-eks-stop.log 2>&1
+          printf '{"mode":"stop","worker_capacity_set_to_zero":true,"delete_actions":%s,"environment_destroyed":false,"raw_identifiers_published":false}\n' "$delete_actions" > /tmp/private-eks-stop-evidence.json
+
+      - name: Upload sanitised stop evidence
+        if: ${{ inputs.mode == 'stop' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: eks-private-sandbox-stop-evidence
+          path: /tmp/private-eks-stop-evidence.json
+          if-no-files-found: error
+          retention-days: 7
