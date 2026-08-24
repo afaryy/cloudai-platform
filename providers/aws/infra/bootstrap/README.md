@@ -102,6 +102,26 @@ Execution order:
 No AWS Console inline-policy attachment and no laptop-local AWS deployment is
 part of this path.
 
+## Separate Budget Guardrails Orphan Recovery
+
+If a failed Bootstrap update leaves the fixed Budget Guardrails role partially
+created, use `.github/workflows/recover-budget-guardrails-orphan.yml` rather
+than adding recovery inputs to normal Bootstrap apply. The workflow is
+protected by the `aws-sandbox` Environment and defaults to `mode=inspect`.
+
+The recovery workflow never accepts a caller-supplied role name. It checks
+CloudFormation ownership, GitHub OIDC trust, required tags, the exact inline
+policy name, and the absence of attached managed policies. Any unexpected
+state fails closed. An absent role is an idempotent no-op.
+
+Only `mode=recover` with the exact confirmation
+`I_UNDERSTAND_BUDGET_GUARDRAILS_ORPHAN_ROLE_RECOVERY` can delete the validated
+fixed role and its fixed inline policy. The workflow publishes only a
+metadata-safe category and does not create a replacement role or execute a
+normal Bootstrap stack update. Its read permissions are needed for inspection;
+`iam:DeleteRolePolicy` and `iam:DeleteRole` are required only for the separate,
+explicitly approved recovery action.
+
 ## Safety Notes
 
 - Prefer `ap-southeast-2` for Australia-first examples unless there is a reason to choose another region.

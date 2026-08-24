@@ -36,6 +36,17 @@ class GitHubOidcTerraformBackendTest < Minitest::Test
     assert_includes template, "BudgetGuardrailsRoleArn:"
   end
 
+  def test_bootstrap_role_can_inspect_only_the_recovery_contract
+    assert_includes bootstrap_stack_statement, "cloudformation:DescribeStackResources"
+    assert_includes bootstrap_role_management_statement, "iam:ListAttachedRolePolicies"
+    assert_includes bootstrap_role_management_statement, "iam:ListRoleTags"
+    assert_includes bootstrap_role_management_statement, "iam:DeleteRole"
+    assert_includes bootstrap_role_management_statement, "iam:DeleteRolePolicy"
+    assert_includes bootstrap_role_management_statement, 'role/${GitHubRepo}-${GitHubEnvironment}-budget-guardrails'
+    refute_includes bootstrap_role_management_statement, "iam:DeleteUser"
+    refute_includes bootstrap_role_management_statement, "iam:DeletePolicy"
+  end
+
   def test_budget_guardrails_role_allows_only_required_budgets_and_billing_actions
     %w[
       budgets:ModifyBudget budgets:ViewBudget budgets:TagResource
@@ -74,16 +85,19 @@ class GitHubOidcTerraformBackendTest < Minitest::Test
     source = File.read(COST_GUARDRAILS_MODULE)
 
     assert_match(/name\s+=\s+"cloudai-platform-sandbox-monthly-cost"/, source)
-    assert_match(/name\s+=\s+"cloudai-platform-gpu-poc-seven-day-cost"/, source)
-    assert_match(/limit_amount\s+=\s+"50"/, source)
-    assert_match(/limit_amount\s+=\s+"20"/, source)
+    assert_match(/name\s+=\s+"cloudai-platform-gpu-poc-daily-cost"/, source)
+    assert_match(/limit_amount\s+=\s+tostring\(var\.monthly_budget_usd\)/, source)
+    assert_match(/limit_amount\s+=\s+tostring\(var\.gpu_daily_budget_usd\)/, source)
+    variables = File.read(File.expand_path("../terraform/modules/cost-guardrails/variables.tf", __dir__))
+    assert_match(/default\s+=\s+50/, variables)
+    assert_match(/default\s+=\s+20/, variables)
     assert_match(/notification_type\s+=\s+"ACTUAL"/, source)
     assert_equal 2, source.scan('resource "aws_budgets_budget"').length
-    assert_includes source, 'toset(["15", "30", "40", "50"])'
-    assert_includes source, 'toset(["10", "15", "20"])'
-    assert_equal 2, source.scan('formatdate("YYYY-MM-DD_hh:mm"').length
-    assert_includes source, "time_unit         = \"CUSTOM\""
-    assert_includes source, "offset_days  = 7"
+    assert_includes variables, 'default     = "15,30,40,50"'
+    assert_includes variables, 'default     = "10,15,20"'
+    refute_includes source, 'formatdate("YYYY-MM-DD_hh:mm"'
+    refute_includes source, 'time_unit         = "CUSTOM"'
+    refute_includes source, "offset_days  = 7"
     refute_includes source, "aws_budgets_budget_action"
   end
 
@@ -99,5 +113,17 @@ class GitHubOidcTerraformBackendTest < Minitest::Test
 
   def budget_role
     template.split("GitHubActionsBudgetGuardrailsRole:", 2).fetch(1, "").split("AgentCoreRagTerraformPolicy:", 2).first.to_s
+  end
+
+  def bootstrap_role
+    template.split("GitHubActionsBootstrapRole:", 2).fetch(1, "").split("Outputs:", 2).first.to_s
+  end
+
+  def bootstrap_stack_statement
+    bootstrap_role.split("Sid: ManageOnlyThisBootstrapStack", 2).fetch(1, "").split(/\n\s+- Sid:/, 2).first.to_s
+  end
+
+  def bootstrap_role_management_statement
+    bootstrap_role.split("Sid: ManageOnlyTerraformBootstrapAndBudgetRoles", 2).fetch(1, "").split(/\n\s+- Sid:/, 2).first.to_s
   end
 end

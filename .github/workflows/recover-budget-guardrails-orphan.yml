@@ -1,0 +1,180 @@
+name: Recover Budget Guardrails orphan role
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "Inspect first; recover only after a separately reviewed confirmation"
+        required: true
+        default: inspect
+        type: choice
+        options:
+          - inspect
+          - recover
+      confirmation:
+        description: "Required only for recover: I_UNDERSTAND_BUDGET_GUARDRAILS_ORPHAN_ROLE_RECOVERY"
+        required: false
+        default: ""
+        type: string
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: cloudai-budget-guardrails-orphan-recovery
+  cancel-in-progress: false
+
+jobs:
+  recover:
+    name: Inspect or recover validated orphan role
+    runs-on: ubuntu-latest
+    environment: aws-sandbox
+    env:
+      AWS_REGION: ${{ vars.AWS_REGION || 'ap-southeast-2' }}
+      AWS_BOOTSTRAP_ROLE_TO_ASSUME: ${{ vars.AWS_BOOTSTRAP_ROLE_TO_ASSUME || secrets.AWS_BOOTSTRAP_ROLE_TO_ASSUME }}
+      AWS_BOOTSTRAP_STACK_NAME: ${{ vars.AWS_BOOTSTRAP_STACK_NAME }}
+      MODE: ${{ inputs.mode }}
+      CONFIRMATION: ${{ inputs.confirmation }}
+      ROLE_NAME: cloudai-platform-aws-sandbox-budget-guardrails
+      EXPECTED_INLINE_POLICY: CostGuardrailsTerraformPolicy
+      EXPECTED_PROJECT_TAG: cloudai-platform
+      EXPECTED_ENVIRONMENT_TAG: cost-guardrails
+      EXPECTED_MANAGED_BY_TAG: cloudformation
+      EXPECTED_OIDC_SUBJECT: repo:afaryy/cloudai-platform:environment:aws-sandbox
+    steps:
+      - name: Validate protected recovery inputs
+        run: |
+          set -euo pipefail
+          if [[ "$MODE" != "inspect" && "$MODE" != "recover" ]]; then
+            echo "::error::mode must be inspect or recover."
+            exit 1
+          fi
+          for name in AWS_BOOTSTRAP_ROLE_TO_ASSUME AWS_BOOTSTRAP_STACK_NAME; do
+            if [[ -z "${!name}" ]]; then
+              echo "::error::$name is required in the protected aws-sandbox environment."
+              exit 1
+            fi
+          done
+
+      - name: Validate recovery confirmation
+        if: ${{ inputs.mode == 'recover' }}
+        run: |
+          set -euo pipefail
+          if [[ "$CONFIRMATION" != "I_UNDERSTAND_BUDGET_GUARDRAILS_ORPHAN_ROLE_RECOVERY" ]]; then
+            echo "::error::recover requires I_UNDERSTAND_BUDGET_GUARDRAILS_ORPHAN_ROLE_RECOVERY."
+            exit 1
+          fi
+
+      - name: Configure AWS credentials through GitHub OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.AWS_BOOTSTRAP_ROLE_TO_ASSUME }}
+          aws-region: ${{ env.AWS_REGION }}
+          mask-aws-account-id: true
+
+      - name: Inspect fixed role and optionally recover it
+        run: |
+          set -euo pipefail
+
+          fail_closed() {
+            echo "::error::Unexpected orphan role state; refusing recovery."
+            {
+              echo "## Budget Guardrails orphan recovery"
+              echo "Result: blocked; no IAM resource was changed."
+            } >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          }
+
+          stack_error="$(mktemp)"
+          stack_resources="$(mktemp)"
+          if ! aws cloudformation describe-stack-resources \
+            --stack-name "$AWS_BOOTSTRAP_STACK_NAME" \
+            --query 'StackResources[].{LogicalResourceId:LogicalResourceId,PhysicalResourceId:PhysicalResourceId,ResourceStatus:ResourceStatus,ResourceType:ResourceType}' \
+            --output json >"$stack_resources" 2>"$stack_error"; then
+            if ! grep -q 'does not exist' "$stack_error"; then
+              fail_closed
+            fi
+          elif jq -e --arg role "$ROLE_NAME" \
+            'any(.[]?; .PhysicalResourceId == $role)' "$stack_resources" >/dev/null; then
+            fail_closed
+          fi
+
+          role_error="$(mktemp)"
+          trust_document="$(mktemp)"
+          if ! aws iam get-role \
+            --role-name "$ROLE_NAME" \
+            --query 'Role.AssumeRolePolicyDocument' \
+            --output json >"$trust_document" 2>"$role_error"; then
+            if grep -q 'NoSuchEntity' "$role_error"; then
+              {
+                echo "## Budget Guardrails orphan recovery"
+                echo "Result: absent; no IAM resource was changed."
+              } >> "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+            fail_closed
+          fi
+
+          if ! jq -e --arg expected_subject "$EXPECTED_OIDC_SUBJECT" '
+            (.Statement | if type == "array" then . else [.] end)
+            | any(.[];
+              ((.Action == "sts:AssumeRoleWithWebIdentity") or
+               ((.Action | type) == "array" and (.Action | index("sts:AssumeRoleWithWebIdentity")) != null))
+              and (.Principal.Federated | type == "string" and endswith(":oidc-provider/token.actions.githubusercontent.com"))
+              and (.Condition.StringLike["token.actions.githubusercontent.com:sub"] == $expected_subject)
+            )
+          ' "$trust_document" >/dev/null; then
+            fail_closed
+          fi
+
+          inline_policies="$(mktemp)"
+          attached_policies="$(mktemp)"
+          role_tags="$(mktemp)"
+          aws iam list-role-policies \
+            --role-name "$ROLE_NAME" \
+            --query 'PolicyNames' \
+            --output json >"$inline_policies" 2>/dev/null || fail_closed
+          aws iam list-attached-role-policies \
+            --role-name "$ROLE_NAME" \
+            --query 'AttachedPolicies' \
+            --output json >"$attached_policies" 2>/dev/null || fail_closed
+          aws iam list-role-tags \
+            --role-name "$ROLE_NAME" \
+            --query 'Tags' \
+            --output json >"$role_tags" 2>/dev/null || fail_closed
+
+          if ! jq -e --arg expected_policy "$EXPECTED_INLINE_POLICY" \
+            'length == 1 and .[0] == $expected_policy' "$inline_policies" >/dev/null; then
+            fail_closed
+          fi
+          if ! jq -e 'length == 0' "$attached_policies" >/dev/null; then
+            fail_closed
+          fi
+          if ! jq -e \
+            --arg project "$EXPECTED_PROJECT_TAG" \
+            --arg environment "$EXPECTED_ENVIRONMENT_TAG" \
+            --arg managed_by "$EXPECTED_MANAGED_BY_TAG" \
+            'map({(.Key): .Value}) | add as $tags
+             | ($tags.Project == $project
+                and $tags.Environment == $environment
+                and $tags.ManagedBy == $managed_by)' "$role_tags" >/dev/null; then
+            fail_closed
+          fi
+
+          if [[ "$MODE" == "inspect" ]]; then
+            {
+              echo "## Budget Guardrails orphan recovery"
+              echo "Result: validated; no IAM resource was changed."
+            } >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          aws iam delete-role-policy \
+            --role-name "$ROLE_NAME" \
+            --policy-name "$EXPECTED_INLINE_POLICY"
+          aws iam delete-role --role-name "$ROLE_NAME"
+          {
+            echo "## Budget Guardrails orphan recovery"
+            echo "Result: recovered; the validated orphan role was deleted."
+          } >> "$GITHUB_STEP_SUMMARY"

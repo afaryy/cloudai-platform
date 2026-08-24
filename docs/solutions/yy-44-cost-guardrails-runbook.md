@@ -37,6 +37,41 @@ Apply requires I_UNDERSTAND_COST_GUARDRAILS_APPLY and a protected aws-sandbox ap
 
 No destroy mode is supplied by terraform-cost-guardrails.
 
+## Separate orphan-role recovery path
+
+The normal `update-aws-bootstrap` workflow remains the only path for changing
+the Bootstrap CloudFormation stack. A failed or interrupted stack update may
+leave a partial Budget Guardrails role behind; that case is handled by the
+separate `recover-budget-guardrails-orphan` workflow.
+
+The recovery workflow has a fixed target role and no role-name input:
+
+`cloudai-platform-aws-sandbox-budget-guardrails`
+
+Run it in this order:
+
+1. Run `mode=inspect` first. An absent role is a successful no-op. A role
+   referenced by the configured CloudFormation stack, or any role whose trust,
+   tags, inline policy, or attached-policy state differs from the expected
+   orphan contract, returns `blocked` and is not changed.
+2. Review the protected `aws-sandbox` Environment result. The inspect mode does
+   not delete anything and publishes only a status category.
+3. Only when the result is a validated orphan, run `mode=recover` with the
+   exact confirmation `I_UNDERSTAND_BUDGET_GUARDRAILS_ORPHAN_ROLE_RECOVERY` and
+   approve the protected Environment deployment.
+4. The recovery mode deletes only the fixed inline policy
+   `CostGuardrailsTerraformPolicy` and then the fixed role. It does not create
+   a replacement role, change the Bootstrap stack, or alter budgets.
+
+The bootstrap/recovery role needs only the following additional IAM actions for
+this separate path: `iam:GetRole`, `iam:ListRolePolicies`,
+`iam:ListAttachedRolePolicies`, `iam:ListRoleTags`,
+`cloudformation:DescribeStackResources`, and, for the explicitly confirmed
+`recover` mode only, `iam:DeleteRolePolicy` and `iam:DeleteRole`. Grant these
+through the reviewed IaC bootstrap path; do not attach an inline policy in the
+AWS Console. Never record the role ARN, account ID, policy document, or raw
+AWS output in repository evidence.
+
 ## One-time prerequisites
 
 1. The AWS account root user has already enabled IAM access to Billing. Do not

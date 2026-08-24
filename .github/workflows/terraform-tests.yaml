@@ -7,6 +7,7 @@ on:
       - ".github/workflows/terraform-bedrock-sandbox.yml"
       - ".github/workflows/terraform-cost-guardrails.yml"
       - ".github/workflows/update-aws-bootstrap.yml"
+      - ".github/workflows/recover-budget-guardrails-orphan.yml"
       - "providers/aws/infra/bootstrap/**"
       - ".github/workflows/bedrock-gateway-adapter.yml"
       - ".github/workflows/terraform-eks-gpu-kueue-poc.yml"
@@ -20,6 +21,7 @@ on:
       - ".github/workflows/terraform-bedrock-sandbox.yml"
       - ".github/workflows/terraform-cost-guardrails.yml"
       - ".github/workflows/update-aws-bootstrap.yml"
+      - ".github/workflows/recover-budget-guardrails-orphan.yml"
       - "providers/aws/infra/bootstrap/**"
       - ".github/workflows/bedrock-gateway-adapter.yml"
       - ".github/workflows/terraform-eks-gpu-kueue-poc.yml"
@@ -173,6 +175,41 @@ jobs:
           grep -q 'GITHUB_STEP_SUMMARY' "$workflow"
           grep -q "inputs.mode == 'apply' && success()" "$workflow"
           ! grep -q 'AWS_BUDGET_ALERT_EMAIL' "$workflow"
+
+  budget_guardrails_orphan_recovery_boundary:
+    name: Budget Guardrails orphan recovery boundary
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Check fail-closed orphan recovery boundary
+        run: |
+          workflow=.github/workflows/recover-budget-guardrails-orphan.yml
+          test -f "$workflow"
+          grep -q 'workflow_dispatch:' "$workflow"
+          grep -q -- '- inspect' "$workflow"
+          grep -q -- '- recover' "$workflow"
+          grep -q 'environment: aws-sandbox' "$workflow"
+          grep -q 'id-token: write' "$workflow"
+          grep -q 'cloudai-platform-aws-sandbox-budget-guardrails' "$workflow"
+          grep -q 'I_UNDERSTAND_BUDGET_GUARDRAILS_ORPHAN_ROLE_RECOVERY' "$workflow"
+          grep -q 'cloudformation describe-stack-resources' "$workflow"
+          grep -q 'iam get-role' "$workflow"
+          grep -q 'iam list-role-policies' "$workflow"
+          grep -q 'iam list-attached-role-policies' "$workflow"
+          grep -q 'iam list-role-tags' "$workflow"
+          grep -A3 -F 'aws iam delete-role-policy \' "$workflow" | grep -q -- '--role-name "$ROLE_NAME"'
+          grep -q -F 'aws iam delete-role --role-name "$ROLE_NAME"' "$workflow"
+          grep -q 'GITHUB_STEP_SUMMARY' "$workflow"
+          grep -q 'inputs.mode == '\''recover'\''' "$workflow"
+          ! grep -q 'target_role_name' "$workflow"
+          ! grep -q 'AWS_BUDGET_ALERT_EMAIL' "$workflow"
+          ! grep -Eq 'aws iam delete-role --role-name[[:space:]]+\\*' "$workflow"
+          runbook=docs/solutions/yy-44-cost-guardrails-runbook.md
+          grep -q 'Separate orphan-role recovery path' "$runbook"
+          grep -q 'I_UNDERSTAND_BUDGET_GUARDRAILS_ORPHAN_ROLE_RECOVERY' "$runbook"
+          grep -q 'mode=inspect' "$runbook"
+          grep -q 'mode=recover' "$runbook"
 
   bedrock_gateway_adapter_workflow_boundary:
     name: Bedrock gateway adapter workflow boundary
