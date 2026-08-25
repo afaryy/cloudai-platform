@@ -74,6 +74,7 @@ class GitHubOidcTerraformBackendTest < Minitest::Test
   def test_general_terraform_role_receives_no_billing_portal_permission
     refute_includes terraform_role, "aws-portal:ModifyBilling"
     refute_includes terraform_role, "aws-portal:ViewBilling"
+    assert_includes terraform_role, "servicequotas:ListServiceQuotas"
     assert_includes terraform_role, '- !Sub "${TerraformStateBucket.Arn}"'
     assert_includes terraform_role, '- !Sub "${TerraformStateBucket.Arn}/*"'
   end
