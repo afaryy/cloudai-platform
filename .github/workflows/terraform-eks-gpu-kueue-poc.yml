@@ -151,6 +151,7 @@ jobs:
           CUDA_DISCOVERY_TAG: "12.4.1-base-ubuntu22.04"
           KUEUE_CHART_VERSION_RECOMMENDED: "0.11.0"
         run: |
+          source scripts/gpu-quota.sh
           set -euo pipefail
 
           cluster_lookup_status="not_found"
@@ -205,8 +206,9 @@ jobs:
           quota_value=$(aws service-quotas list-service-quotas \
             --service-code ec2 \
             --region "$AWS_REGION" \
-            --query 'Quotas[?contains(QuotaName, `Running On-Demand G and VT instances`)].Value | [0]' \
+            --query 'Quotas[?contains(QuotaName, `Running On-Demand G and VT instances`)].Value' \
             --output text)
+          quota_value=$(extract_positive_quota "$quota_value")
           quota_available=false
           if [ -n "$quota_value" ] && [ "$quota_value" != "None" ] && [ "$quota_value" != "0" ]; then
             quota_available=true
@@ -331,6 +333,8 @@ jobs:
         if: ${{ inputs.mode == 'preflight' || inputs.mode == 'apply' }}
         working-directory: .
         run: |
+          source scripts/gpu-quota.sh
+          set -euo pipefail
           cluster_json=$(aws eks describe-cluster --region "$AWS_REGION" --name "$EKS_CLUSTER_NAME" --output json)
           cluster_status=$(jq -r '.cluster.status' <<<"$cluster_json")
           cluster_version=$(jq -r '.cluster.version' <<<"$cluster_json")
@@ -342,8 +346,9 @@ jobs:
           quota_value=$(aws service-quotas list-service-quotas \
             --service-code ec2 \
             --region "$AWS_REGION" \
-            --query 'Quotas[?contains(QuotaName, `Running On-Demand G and VT instances`)].Value | [0]' \
+            --query 'Quotas[?contains(QuotaName, `Running On-Demand G and VT instances`)].Value' \
             --output text)
+          quota_value=$(extract_positive_quota "$quota_value")
           if [ -z "$quota_value" ] || [ "$quota_value" = "None" ] || [ "$quota_value" = "0" ]; then
             echo "::error::The selected on-demand GPU quota is unavailable. This workflow will not request a quota increase."
             exit 1

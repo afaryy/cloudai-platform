@@ -12,6 +12,8 @@ on:
       - ".github/workflows/bedrock-gateway-adapter.yml"
       - ".github/workflows/terraform-eks-gpu-kueue-poc.yml"
       - ".github/workflows/terraform-eks-private-sandbox.yml"
+      - "scripts/gpu-quota.sh"
+      - "scripts/tests/test-gpu-quota.sh"
       - "providers/aws/infra/terraform/**"
       - "providers/aws/app/api/**"
   push:
@@ -27,6 +29,8 @@ on:
       - ".github/workflows/bedrock-gateway-adapter.yml"
       - ".github/workflows/terraform-eks-gpu-kueue-poc.yml"
       - ".github/workflows/terraform-eks-private-sandbox.yml"
+      - "scripts/gpu-quota.sh"
+      - "scripts/tests/test-gpu-quota.sh"
       - "providers/aws/infra/terraform/**"
       - "providers/aws/app/api/**"
   workflow_dispatch:
@@ -82,6 +86,16 @@ jobs:
 
       - name: Terraform test
         run: terraform test
+
+  gpu_quota_parser:
+    name: GPU quota parser regression test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run GPU quota parser test
+        run: bash scripts/tests/test-gpu-quota.sh
 
   bedrock_workflow_boundary:
     name: Bedrock apply workflow boundary
