@@ -1,0 +1,193 @@
+name: terraform-eks-private-network
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "Private network foundation operation"
+        required: true
+        default: "validate"
+        type: choice
+        options:
+          - validate
+          - plan
+          - apply
+      confirmation:
+        description: "Exact confirmation required for apply"
+        required: false
+        default: ""
+        type: string
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: cloudai-eks-private-network
+  cancel-in-progress: false
+
+env:
+  TERRAFORM_DIR: providers/aws/infra/terraform/envs/eks-private-network
+
+jobs:
+  source_validation:
+    name: Private network source validation
+    if: ${{ inputs.mode == 'validate' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: providers/aws/infra/terraform/envs/eks-private-network
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Validate network source without backend
+        run: |
+          terraform init -backend=false
+          terraform fmt -check -recursive
+          terraform validate
+          terraform test
+
+  protected_network:
+    name: Protected private network foundation
+    if: ${{ inputs.mode != 'validate' }}
+    runs-on: ubuntu-latest
+    environment: aws-private-eks
+    defaults:
+      run:
+        working-directory: providers/aws/infra/terraform/envs/eks-private-network
+    env:
+      AWS_ROLE_TO_ASSUME: ${{ vars.AWS_ROLE_TO_ASSUME || secrets.AWS_ROLE_TO_ASSUME }}
+      AWS_REGION: ${{ vars.AWS_REGION || 'ap-southeast-2' }}
+      TF_BACKEND_BUCKET: ${{ vars.TF_BACKEND_BUCKET }}
+      TF_BACKEND_LOCK_TABLE: ${{ vars.TF_BACKEND_LOCK_TABLE }}
+      TF_STATE_KEY: ${{ vars.TF_STATE_KEY_PREFIX }}/eks-private-network/terraform.tfstate
+      TF_VAR_endpoint_principal_arns: ${{ vars.PRIVATE_EKS_ENDPOINT_PRINCIPAL_ARNS_JSON }}
+      TF_VAR_private_ecr_repository_arns: ${{ vars.PRIVATE_EKS_PRIVATE_ECR_REPOSITORY_ARNS_JSON }}
+      TF_VAR_private_artifact_bucket_arns: ${{ vars.PRIVATE_EKS_ARTIFACT_BUCKET_ARNS_JSON }}
+      TF_VAR_enable_nat_gateway: ${{ vars.PRIVATE_EKS_ENABLE_NAT_GATEWAY || 'false' }}
+      PRIVATE_EKS_NETWORK_BUDGET_APPROVED: ${{ vars.PRIVATE_EKS_NETWORK_BUDGET_APPROVED }}
+      PRIVATE_EKS_NETWORK_MONTHLY_BUDGET_USD: ${{ vars.PRIVATE_EKS_NETWORK_MONTHLY_BUDGET_USD }}
+      PRIVATE_EKS_NETWORK_APPLY_READY: ${{ vars.PRIVATE_EKS_NETWORK_APPLY_READY }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Explain network-only boundary
+        run: |
+          echo "This workflow manages only the separate private network foundation state."
+          echo "It runs on a GitHub-hosted runner for AWS API calls and never calls Kubernetes clients or the private Kubernetes API."
+          echo "It does not create EKS, ARC, GPU, Kueue, HyperPod, Slurm, or data-centre resources."
+          echo "The old public EKS sandbox state is not read, changed, or destroyed."
+
+      - name: Check protected network inputs
+        env:
+          MODE: ${{ inputs.mode }}
+          CONFIRMATION: ${{ inputs.confirmation }}
+        run: |
+          set -euo pipefail
+          missing=0
+          for name in AWS_ROLE_TO_ASSUME AWS_REGION TF_BACKEND_BUCKET TF_BACKEND_LOCK_TABLE TF_STATE_KEY TF_VAR_endpoint_principal_arns TF_VAR_private_ecr_repository_arns TF_VAR_private_artifact_bucket_arns PRIVATE_EKS_NETWORK_BUDGET_APPROVED PRIVATE_EKS_NETWORK_MONTHLY_BUDGET_USD PRIVATE_EKS_NETWORK_APPLY_READY; do
+            if [ -z "${!name}" ]; then
+              echo "::error::$name is required in the aws-private-eks environment."
+              missing=1
+            fi
+          done
+          if [ "$PRIVATE_EKS_NETWORK_BUDGET_APPROVED" != "true" ]; then
+            echo "::error::PRIVATE_EKS_NETWORK_BUDGET_APPROVED must be exactly true."
+            missing=1
+          fi
+          if ! awk 'BEGIN { exit !(ARGV[1] > 0) }' "$PRIVATE_EKS_NETWORK_MONTHLY_BUDGET_USD"; then
+            echo "::error::PRIVATE_EKS_NETWORK_MONTHLY_BUDGET_USD must be a positive number."
+            missing=1
+          fi
+          if [ "$PRIVATE_EKS_NETWORK_APPLY_READY" != "true" ]; then
+            echo "::error::PRIVATE_EKS_NETWORK_APPLY_READY must be exactly true before remote operations."
+            missing=1
+          fi
+          if ! jq -e 'type == "array" and length >= 3 and all(.[]; type == "string" and startswith("arn:aws:iam::") and contains(":role/") and (contains("*") | not))' <<<"$TF_VAR_endpoint_principal_arns" >/dev/null; then
+            echo "::error::PRIVATE_EKS_ENDPOINT_PRINCIPAL_ARNS_JSON must contain explicit IAM role ARNs."
+            missing=1
+          fi
+          if ! jq -e 'type == "array" and length > 0 and all(.[]; type == "string" and startswith("arn:aws:ecr:"))' <<<"$TF_VAR_private_ecr_repository_arns" >/dev/null; then
+            echo "::error::PRIVATE_EKS_PRIVATE_ECR_REPOSITORY_ARNS_JSON must contain explicit ECR ARNs."
+            missing=1
+          fi
+          if ! jq -e 'type == "array" and length > 0 and all(.[]; type == "string" and startswith("arn:aws:s3:::"))' <<<"$TF_VAR_private_artifact_bucket_arns" >/dev/null; then
+            echo "::error::PRIVATE_EKS_ARTIFACT_BUCKET_ARNS_JSON must contain explicit S3 bucket ARNs."
+            missing=1
+          fi
+          if [ "$MODE" = "apply" ] && [ "$CONFIRMATION" != "I_UNDERSTAND_PRIVATE_EKS_NETWORK_APPLY" ]; then
+            echo "::error::apply requires I_UNDERSTAND_PRIVATE_EKS_NETWORK_APPLY."
+            missing=1
+          fi
+          if [ "$TF_VAR_enable_nat_gateway" != "false" ] && [ "$TF_VAR_enable_nat_gateway" != "true" ]; then
+            echo "::error::PRIVATE_EKS_ENABLE_NAT_GATEWAY must be exactly true or false."
+            missing=1
+          fi
+          exit "$missing"
+
+      - name: Configure AWS credentials through GitHub OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ env.AWS_REGION }}
+          mask-aws-account-id: true
+
+      - name: Terraform init with isolated network backend
+        run: |
+          terraform init \
+            -backend-config="bucket=${TF_BACKEND_BUCKET}" \
+            -backend-config="key=${TF_STATE_KEY}" \
+            -backend-config="region=${AWS_REGION}" \
+            -backend-config="dynamodb_table=${TF_BACKEND_LOCK_TABLE}" \
+            -backend-config="encrypt=true"
+
+      - name: Terraform plan without saved artifact
+        if: ${{ inputs.mode == 'plan' }}
+        run: |
+          terraform validate
+          terraform plan -input=false -no-color > /tmp/private-network-plan.log 2>&1
+          printf '{"mode":"plan","terraform_plan_succeeded":true,"state_key_suffix":"eks-private-network/terraform.tfstate","raw_identifiers_published":false}\n' > /tmp/private-network-plan-evidence.json
+
+      - name: Fresh no-delete plan before apply
+        if: ${{ inputs.mode == 'apply' }}
+        run: |
+          terraform plan -input=false -no-color -out=/tmp/private-network-apply.tfplan > /tmp/private-network-apply-plan.log 2>&1
+          terraform show -json /tmp/private-network-apply.tfplan > /tmp/private-network-apply-plan.json
+          if [ "$(jq '[.resource_changes[]? | select(.change.actions | index("delete"))] | length' /tmp/private-network-apply-plan.json)" -ne 0 ]; then
+            echo "::error::Network apply preflight found delete actions; refusing to continue."
+            exit 1
+          fi
+          if ! jq -e '[.resource_changes[]? | select(.type == "aws_subnet" and (.address | contains("private"))) | .change.after.map_public_ip_on_launch] | all(.[]; . == false)' /tmp/private-network-apply-plan.json >/dev/null; then
+            echo "::error::Network plan could not prove private subnets have no public IPs."
+            exit 1
+          fi
+          if jq -e '[.resource_changes[]? | select(.address | test("eks|gpu|kueue|arc|codebuild_project"; "i"))] | length > 0' /tmp/private-network-apply-plan.json >/dev/null; then
+            echo "::error::Network state must not contain EKS, GPU, ARC, or runner resources."
+            exit 1
+          fi
+          printf '{"mode":"apply","plan_preflight_succeeded":true,"delete_actions":0,"private_subnets_no_public_ip":true,"kubernetes_api_called":false,"raw_identifiers_published":false}\n' > /tmp/private-network-preflight-evidence.json
+
+      - name: Apply network foundation after fresh plan
+        if: ${{ inputs.mode == 'apply' }}
+        run: |
+          terraform apply -input=false -auto-approve -no-color /tmp/private-network-apply.tfplan > /tmp/private-network-apply.log 2>&1
+          printf '{"mode":"apply","terraform_apply_succeeded":true,"kubernetes_api_called":false,"raw_identifiers_published":false}\n' > /tmp/private-network-apply-evidence.json
+
+      - name: Upload sanitised network evidence
+        if: ${{ inputs.mode == 'apply' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: eks-private-network-evidence
+          path: /tmp/private-network-*-evidence.json
+          if-no-files-found: error
+          retention-days: 7

@@ -2,13 +2,16 @@
 
 This runbook describes the protected CI path for the separate
 `eks-private-sandbox` Terraform environment. It does not change the existing
-public-subnet EKS sandbox.
+public-subnet EKS sandbox. The earlier public-subnet sandbox was a low-cost
+development profile and has been destroyed; it is not the private target and
+is not used as evidence of private-worker or private-GPU validation.
 
 ## Operating boundary
 
 - Source validation runs on a GitHub-hosted runner with no AWS credentials.
-- Remote `plan`, `preflight`, `apply`, and `stop` run only on the
-  `self-hosted`, `private-eks`, `ap-southeast-2` runner labels.
+- Remote `plan`, `preflight`, `apply`, and `stop` run only on the run-scoped
+  CodeBuild-hosted ephemeral runner label
+  `codebuild-${PRIVATE_EKS_RUNNER_PROJECT_NAME}-${github.run_id}-${github.run_attempt}`.
 - The runner must have VPC reachability to the private EKS Kubernetes API and
   approved VPC endpoints. GitHub-hosted runners are not assumed to reach the
   private API.
@@ -18,6 +21,44 @@ public-subnet EKS sandbox.
 - No destroy mode exists in this workflow. `stop` scales worker capacity to
   zero but intentionally leaves the control plane, endpoints, and state in
   place for later review.
+
+## Runner roles and delivery phases
+
+This runbook uses two distinct delivery phases. They are complementary rather
+than competing alternatives.
+
+| Phase | Runner | Responsibility | Required state |
+| --- | --- | --- | --- |
+| Bootstrap/recovery | VPC-connected ephemeral GitHub Actions-compatible runner | Terraform backend, private network and EKS lifecycle, endpoint preflight, stop and recovery | May run before the target cluster exists or when it is unhealthy |
+| Steady state | ARC controller with ephemeral runner scale sets inside private EKS | Helm, Argo CD, Kueue, GPU smoke workloads and cluster-local delivery | Requires a healthy private EKS cluster and validated worker baseline |
+
+ARC cannot be the only runner for this workflow because its controller and
+runner pods depend on the EKS cluster they would be asked to create. The
+VPC-connected path also remains necessary for recovery if EKS or ARC becomes
+unavailable. Once the private worker baseline is validated, ARC can be added
+as the preferred workload-delivery path with a separate namespace, workload
+identity, Kubernetes RBAC, restricted egress, and narrower permissions than
+the bootstrap role.
+
+The VPC-connected requirement is a network boundary, not a requirement for a
+long-lived EC2 host. A CodeBuild-hosted ephemeral runner is the preferred
+implementation for this project; an equivalent private build runner is
+acceptable if it provides the same outbound GitHub, private AWS endpoint, and
+private Kubernetes API reachability.
+
+```text
+GitHub Actions validation
+  -> VPC-connected runner
+  -> private EKS bootstrap / preflight / recovery
+  -> validated private EKS
+  -> ARC ephemeral scale sets
+  -> Helm / Argo CD / Kueue / GPU delivery
+```
+
+Do not report ARC as deployed or runtime-validated until the private-EKS
+runner and worker prerequisites have passed the protected workflow. The
+current repository documents the source contract; runtime validation remains
+pending.
 
 ## Required protected variables
 
@@ -37,6 +78,9 @@ commit their values:
 | `PRIVATE_EKS_BUDGET_APPROVED` | Must be exactly `true` |
 | `PRIVATE_EKS_MONTHLY_BUDGET_USD` | Positive monthly budget value |
 | `PRIVATE_EKS_RUNNER_READY` | Must be exactly `true` after runner verification |
+| `PRIVATE_EKS_RUNNER_PROJECT_NAME` | Exact CodeBuild project name used by the run-scoped label |
+| `PRIVATE_EKS_NETWORK_STATE_KEY` | Reviewed network foundation state-key suffix |
+| `PRIVATE_EKS_RUNNER_FOUNDATION_READY` | Must be exactly `true` after CodeBuild runner verification |
 | `PRIVATE_EKS_ENDPOINT_POLICY_READY` | Must be exactly `true` after endpoint review |
 | `PRIVATE_EKS_BACKEND_READY` | Must be exactly `true` after state backend review |
 | `PRIVATE_EKS_BOOTSTRAP_ROLE_READY` | Must be exactly `true` for the temporary bootstrap exception |
@@ -66,6 +110,22 @@ Terraform plans, or raw command output.
 The temporary shared-module cluster-admin access entry is a bootstrap
 exception. Runtime validation remains incomplete until provisioning,
 cluster-bootstrap, and namespace-scoped workload identities are separated.
+
+## Current source implementation
+
+The source-only foundation is split into three independently managed states:
+
+1. `eks-private-network` creates the VPC, private subnets, endpoint policy,
+   route, and security-group boundary. It never calls the Kubernetes API.
+2. `eks-private-runner` creates the CodeBuild project, webhook, CloudWatch log
+   group, and least-privilege CodeBuild service role. It consumes reviewed IDs
+   from the network state and does not store GitHub tokens in Terraform.
+3. `eks-private-sandbox` creates the private EKS worker baseline and is routed
+   to the run-scoped CodeBuild label only after the runner readiness gate.
+
+The ARC handoff is a separate post-bootstrap workflow. It is not a replacement
+for the network or recovery path and remains runtime-pending until the private
+worker baseline has been validated.
 
 Do not add GPU, Kueue, HyperPod, Slurm, or real data-centre capacity until the
 ordinary private-worker validation is independently approved.
