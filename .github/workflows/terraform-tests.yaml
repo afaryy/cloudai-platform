@@ -12,6 +12,8 @@ on:
       - ".github/workflows/bedrock-gateway-adapter.yml"
       - ".github/workflows/terraform-eks-gpu-kueue-poc.yml"
       - ".github/workflows/terraform-eks-private-sandbox.yml"
+      - ".github/workflows/terraform-eks-private-network.yml"
+      - ".github/workflows/arc-private-eks-handoff.yml"
       - "scripts/gpu-quota.sh"
       - "scripts/tests/test-gpu-quota.sh"
       - "providers/aws/infra/terraform/**"
@@ -29,6 +31,8 @@ on:
       - ".github/workflows/bedrock-gateway-adapter.yml"
       - ".github/workflows/terraform-eks-gpu-kueue-poc.yml"
       - ".github/workflows/terraform-eks-private-sandbox.yml"
+      - ".github/workflows/terraform-eks-private-network.yml"
+      - ".github/workflows/arc-private-eks-handoff.yml"
       - "scripts/gpu-quota.sh"
       - "scripts/tests/test-gpu-quota.sh"
       - "providers/aws/infra/terraform/**"
@@ -53,6 +57,9 @@ jobs:
           - providers/aws/infra/terraform/envs/eks-sandbox
           - providers/aws/infra/terraform/envs/eks-gpu-kueue-poc
           - providers/aws/infra/terraform/envs/eks-private-sandbox
+          - providers/aws/infra/terraform/modules/private-runner
+          - providers/aws/infra/terraform/envs/eks-private-network
+          - providers/aws/infra/terraform/envs/eks-private-runner
           - providers/aws/infra/terraform/envs/bedrock-sandbox
           - providers/aws/infra/terraform/envs/agentcore-rag-sandbox
     defaults:
@@ -316,7 +323,7 @@ jobs:
           grep -q -- '- preflight' "$workflow"
           grep -q -- '- apply' "$workflow"
           grep -q -- '- stop' "$workflow"
-          grep -q 'runs-on: \[self-hosted, private-eks, ap-southeast-2\]' "$workflow"
+          grep -q 'runs-on: codebuild-' "$workflow"
           grep -q 'environment: aws-private-eks' "$workflow"
           grep -q 'id-token: write' "$workflow"
           grep -q 'cloudai-eks-private-sandbox-delivery' "$workflow"
@@ -324,6 +331,8 @@ jobs:
           grep -q 'PRIVATE_EKS_BUDGET_APPROVED' "$workflow"
           grep -q 'PRIVATE_EKS_MONTHLY_BUDGET_USD' "$workflow"
           grep -q 'PRIVATE_EKS_RUNNER_READY' "$workflow"
+          grep -q 'PRIVATE_EKS_NETWORK_STATE_KEY' "$workflow"
+          grep -q 'runner_foundation_ready' "$workflow"
           grep -q 'PRIVATE_EKS_ENDPOINT_POLICY_READY' "$workflow"
           grep -q 'PRIVATE_EKS_BACKEND_READY' "$workflow"
           grep -q 'PRIVATE_EKS_BOOTSTRAP_ROLE_READY' "$workflow"
@@ -338,3 +347,45 @@ jobs:
           ! grep -q 'terraform destroy' "$workflow"
           ! grep -q 'eks-sandbox/terraform.tfstate' "$workflow"
           ! grep -q 'gpu_instance_type' "$workflow"
+
+  eks_private_network_runner_workflow_boundary:
+    name: Private network and runner workflow boundary
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Check network bootstrap and CodeBuild runner boundary
+        run: |
+          network_workflow=.github/workflows/terraform-eks-private-network.yml
+          eks_workflow=.github/workflows/terraform-eks-private-sandbox.yml
+          grep -q 'workflow_dispatch:' "$network_workflow"
+          grep -q 'runs-on: ubuntu-latest' "$network_workflow"
+          grep -q 'terraform init -backend=false' "$network_workflow"
+          ! grep -q 'kubectl' "$network_workflow"
+          ! grep -q 'helm ' "$network_workflow"
+          grep -q 'codebuild-' "$eks_workflow"
+          grep -q 'github.run_id' "$eks_workflow"
+          grep -q 'I_UNDERSTAND_PRIVATE_EKS_APPLY' "$eks_workflow"
+          grep -q 'PRIVATE_EKS_RUNNER_READY' "$eks_workflow"
+
+  arc_private_eks_handoff_boundary:
+    name: ARC private EKS handoff boundary
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Check post-bootstrap ARC handoff boundary
+        run: |
+          workflow=.github/workflows/arc-private-eks-handoff.yml
+          grep -q 'workflow_dispatch:' "$workflow"
+          grep -q 'runs-on: codebuild-' "$workflow"
+          grep -q 'environment: aws-private-eks' "$workflow"
+          grep -q 'PRIVATE_EKS_RUNNER_READY' "$workflow"
+          grep -q 'PRIVATE_EKS_ENDPOINT_POLICY_READY' "$workflow"
+          grep -q 'I_UNDERSTAND_PRIVATE_EKS_ARC_APPLY' "$workflow"
+          grep -q 'gha-runner-scale-set-controller' "$workflow"
+          grep -q 'gha-runner-scale-set' "$workflow"
+          grep -q 'runnerGroup="private-eks"' "$workflow"
+          grep -q 'minRunners=0' "$workflow"
+          grep -q 'maxRunners=1' "$workflow"
+          grep -q 'raw_identifiers_published' "$workflow"

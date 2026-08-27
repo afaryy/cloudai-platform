@@ -59,7 +59,7 @@ jobs:
   remote_delivery:
     name: Private EKS protected delivery
     if: ${{ inputs.mode != 'validate' }}
-    runs-on: [self-hosted, private-eks, ap-southeast-2]
+    runs-on: codebuild-${{ vars.PRIVATE_EKS_RUNNER_PROJECT_NAME }}-${{ github.run_id }}-${{ github.run_attempt }}
     environment: aws-private-eks
     defaults:
       run:
@@ -74,6 +74,9 @@ jobs:
       TF_VAR_github_actions_principal_arn: ${{ vars.PRIVATE_EKS_GITHUB_ACTIONS_PRINCIPAL_ARN }}
       TF_VAR_delivery_runner_security_group_id: ${{ vars.PRIVATE_EKS_DELIVERY_RUNNER_SECURITY_GROUP_ID }}
       TF_VAR_private_artifact_bucket_arns: ${{ vars.PRIVATE_EKS_ARTIFACT_BUCKET_ARNS_JSON }}
+      PRIVATE_EKS_RUNNER_PROJECT_NAME: ${{ vars.PRIVATE_EKS_RUNNER_PROJECT_NAME }}
+      PRIVATE_EKS_NETWORK_STATE_KEY: ${{ vars.PRIVATE_EKS_NETWORK_STATE_KEY }}
+      PRIVATE_EKS_RUNNER_FOUNDATION_READY: ${{ vars.PRIVATE_EKS_RUNNER_FOUNDATION_READY }}
       PRIVATE_EKS_BUDGET_APPROVED: ${{ vars.PRIVATE_EKS_BUDGET_APPROVED }}
       PRIVATE_EKS_MONTHLY_BUDGET_USD: ${{ vars.PRIVATE_EKS_MONTHLY_BUDGET_USD }}
       PRIVATE_EKS_RUNNER_READY: ${{ vars.PRIVATE_EKS_RUNNER_READY }}
@@ -93,6 +96,7 @@ jobs:
           echo "Remote operations require the private-eks environment and a VPC-connected self-hosted runner."
           echo "The existing public eks-sandbox is not read, changed, or destroyed."
           echo "GPU, Kueue, HyperPod, Slurm, and data-centre provisioning are outside this workflow."
+          echo "Network handoff state: ${PRIVATE_EKS_NETWORK_STATE_KEY:-unset}."
 
       - name: Check protected private EKS inputs
         env:
@@ -100,7 +104,7 @@ jobs:
           CONFIRMATION: ${{ inputs.confirmation }}
         run: |
           missing=0
-          for name in AWS_ROLE_TO_ASSUME AWS_REGION TF_BACKEND_BUCKET TF_BACKEND_LOCK_TABLE TF_STATE_KEY_PREFIX TF_VAR_github_actions_principal_arn TF_VAR_delivery_runner_security_group_id TF_VAR_private_artifact_bucket_arns PRIVATE_EKS_BUDGET_APPROVED PRIVATE_EKS_MONTHLY_BUDGET_USD PRIVATE_EKS_RUNNER_READY PRIVATE_EKS_ENDPOINT_POLICY_READY PRIVATE_EKS_BACKEND_READY PRIVATE_EKS_BOOTSTRAP_ROLE_READY; do
+          for name in AWS_ROLE_TO_ASSUME AWS_REGION TF_BACKEND_BUCKET TF_BACKEND_LOCK_TABLE TF_STATE_KEY_PREFIX TF_VAR_github_actions_principal_arn TF_VAR_delivery_runner_security_group_id TF_VAR_private_artifact_bucket_arns PRIVATE_EKS_RUNNER_PROJECT_NAME PRIVATE_EKS_NETWORK_STATE_KEY PRIVATE_EKS_RUNNER_FOUNDATION_READY PRIVATE_EKS_BUDGET_APPROVED PRIVATE_EKS_MONTHLY_BUDGET_USD PRIVATE_EKS_RUNNER_READY PRIVATE_EKS_ENDPOINT_POLICY_READY PRIVATE_EKS_BACKEND_READY PRIVATE_EKS_BOOTSTRAP_ROLE_READY; do
             if [ -z "${!name}" ]; then
               echo "::error::$name is required in the aws-private-eks environment."
               missing=1
@@ -114,7 +118,7 @@ jobs:
             echo "::error::PRIVATE_EKS_MONTHLY_BUDGET_USD must be a positive number."
             missing=1
           fi
-          for name in PRIVATE_EKS_RUNNER_READY PRIVATE_EKS_ENDPOINT_POLICY_READY PRIVATE_EKS_BACKEND_READY PRIVATE_EKS_BOOTSTRAP_ROLE_READY; do
+          for name in PRIVATE_EKS_RUNNER_FOUNDATION_READY PRIVATE_EKS_RUNNER_READY PRIVATE_EKS_ENDPOINT_POLICY_READY PRIVATE_EKS_BACKEND_READY PRIVATE_EKS_BOOTSTRAP_ROLE_READY; do
             if [ "${!name}" != "true" ]; then
               echo "::error::$name must be exactly true before remote operations."
               missing=1
@@ -181,7 +185,7 @@ jobs:
               echo "::error::GPU/Kueue/HyperPod/Slurm resources are outside this worker baseline."
               exit 1
             fi
-            printf '{"mode":"apply","plan_preflight_succeeded":true,"delete_actions":0,"eks_api_private_only":true,"private_subnets_no_public_ip":true,"gpu_capacity_added":false,"raw_identifiers_published":false}\n' > /tmp/private-eks-preflight-evidence.json
+          printf '{"mode":"apply","plan_preflight_succeeded":true,"delete_actions":0,"eks_api_private_only":true,"private_subnets_no_public_ip":true,"runner_foundation_ready":true,"gpu_capacity_added":false,"raw_identifiers_published":false}\n' > /tmp/private-eks-preflight-evidence.json
           else
             terraform output -json > /tmp/private-eks-outputs.json
             vpc_id=$(jq -r '.vpc_id.value' /tmp/private-eks-outputs.json)

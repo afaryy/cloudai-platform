@@ -1,0 +1,227 @@
+name: arc-private-eks-handoff
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "ARC handoff operation"
+        required: true
+        default: "validate"
+        type: choice
+        options:
+          - validate
+          - install
+          - smoke
+      confirmation:
+        description: "Exact confirmation required for install or smoke"
+        required: false
+        default: ""
+        type: string
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: cloudai-eks-private-arc-handoff
+  cancel-in-progress: false
+
+jobs:
+  arc_source_validation:
+    name: ARC handoff source validation
+    if: ${{ inputs.mode == 'validate' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Check ARC handoff contract
+        run: |
+          grep -q 'runs-on: codebuild-' .github/workflows/arc-private-eks-handoff.yml
+          grep -q 'oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set-controller' .github/workflows/arc-private-eks-handoff.yml
+          grep -q 'oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set' .github/workflows/arc-private-eks-handoff.yml
+          grep -q 'I_UNDERSTAND_PRIVATE_EKS_ARC_APPLY' .github/workflows/arc-private-eks-handoff.yml
+          grep -q 'PRIVATE_EKS_RUNNER_READY' .github/workflows/arc-private-eks-handoff.yml
+
+  private_eks_validation:
+    name: Private EKS validation before ARC
+    if: ${{ inputs.mode != 'validate' }}
+    runs-on: codebuild-${{ vars.PRIVATE_EKS_RUNNER_PROJECT_NAME }}-${{ github.run_id }}-${{ github.run_attempt }}
+    environment: aws-private-eks
+    env:
+      AWS_ROLE_TO_ASSUME: ${{ vars.AWS_ROLE_TO_ASSUME || secrets.AWS_ROLE_TO_ASSUME }}
+      AWS_REGION: ${{ vars.AWS_REGION || 'ap-southeast-2' }}
+      EKS_CLUSTER_NAME: ${{ vars.PRIVATE_EKS_CLUSTER_NAME }}
+      PRIVATE_EKS_RUNNER_READY: ${{ vars.PRIVATE_EKS_RUNNER_READY }}
+      PRIVATE_EKS_ENDPOINT_POLICY_READY: ${{ vars.PRIVATE_EKS_ENDPOINT_POLICY_READY }}
+    steps:
+      - name: Check private EKS validation inputs
+        run: |
+          set -euo pipefail
+          for name in AWS_ROLE_TO_ASSUME AWS_REGION EKS_CLUSTER_NAME PRIVATE_EKS_RUNNER_READY PRIVATE_EKS_ENDPOINT_POLICY_READY; do
+            if [ -z "${!name}" ]; then
+              echo "::error::$name is required before ARC handoff."
+              exit 1
+            fi
+          done
+          for name in PRIVATE_EKS_RUNNER_READY PRIVATE_EKS_ENDPOINT_POLICY_READY; do
+            if [ "${!name}" != "true" ]; then
+              echo "::error::$name must be exactly true before ARC handoff."
+              exit 1
+            fi
+          done
+
+      - name: Check private runner client tools
+        run: |
+          command -v aws >/dev/null
+          command -v kubectl >/dev/null || { echo "::error::kubectl must be present in the reviewed runner image."; exit 1; }
+
+      - name: Configure AWS credentials through GitHub OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ env.AWS_REGION }}
+          mask-aws-account-id: true
+
+      - name: Verify private EKS API reachability
+        env:
+          KUBECONFIG: ${{ runner.temp }}/private-eks-validation-kubeconfig
+        run: |
+          aws eks update-kubeconfig --region "$AWS_REGION" --name "$EKS_CLUSTER_NAME" --kubeconfig "$KUBECONFIG" >/dev/null
+          kubectl auth can-i get namespaces
+          kubectl get namespace kube-system >/dev/null
+
+  arc_handoff:
+    name: Private EKS ARC handoff
+    if: ${{ inputs.mode != 'validate' }}
+    needs: private_eks_validation
+    runs-on: codebuild-${{ vars.PRIVATE_EKS_RUNNER_PROJECT_NAME }}-${{ github.run_id }}-${{ github.run_attempt }}
+    environment: aws-private-eks
+    env:
+      AWS_ROLE_TO_ASSUME: ${{ vars.AWS_ROLE_TO_ASSUME || secrets.AWS_ROLE_TO_ASSUME }}
+      AWS_REGION: ${{ vars.AWS_REGION || 'ap-southeast-2' }}
+      EKS_CLUSTER_NAME: ${{ vars.PRIVATE_EKS_CLUSTER_NAME }}
+      PRIVATE_EKS_RUNNER_PROJECT_NAME: ${{ vars.PRIVATE_EKS_RUNNER_PROJECT_NAME }}
+      ARC_NAMESPACE: arc-systems
+      ARC_RUNNER_NAMESPACE: arc-runners
+      ARC_RUNNER_SCALE_SET_NAME: ${{ vars.PRIVATE_EKS_ARC_RUNNER_SCALE_SET_NAME || 'private-eks-arc-runners' }}
+      ARC_HELM_CHART_VERSION: ${{ vars.PRIVATE_EKS_ARC_CHART_VERSION }}
+      ARC_GITHUB_CONFIG_URL: ${{ vars.PRIVATE_EKS_ARC_GITHUB_CONFIG_URL }}
+      ARC_GITHUB_APP_ID: ${{ secrets.PRIVATE_EKS_ARC_GITHUB_APP_ID }}
+      ARC_GITHUB_APP_INSTALLATION_ID: ${{ secrets.PRIVATE_EKS_ARC_GITHUB_APP_INSTALLATION_ID }}
+      ARC_GITHUB_APP_PRIVATE_KEY: ${{ secrets.PRIVATE_EKS_ARC_GITHUB_APP_PRIVATE_KEY }}
+      PRIVATE_EKS_RUNNER_READY: ${{ vars.PRIVATE_EKS_RUNNER_READY }}
+      PRIVATE_EKS_ENDPOINT_POLICY_READY: ${{ vars.PRIVATE_EKS_ENDPOINT_POLICY_READY }}
+      PRIVATE_EKS_ARC_APPLY_READY: ${{ vars.PRIVATE_EKS_ARC_APPLY_READY }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Explain ARC handoff boundary
+        run: |
+          echo "This workflow runs only after the private EKS worker and VPC-connected runner baseline are ready."
+          echo "ARC is the steady-state in-cluster delivery path; it is not the bootstrap path."
+          echo "The workflow is limited to the configured synthetic runner scale set and namespace."
+
+      - name: Check protected ARC inputs
+        env:
+          MODE: ${{ inputs.mode }}
+          CONFIRMATION: ${{ inputs.confirmation }}
+        run: |
+          set -euo pipefail
+          missing=0
+          for name in AWS_ROLE_TO_ASSUME AWS_REGION EKS_CLUSTER_NAME PRIVATE_EKS_RUNNER_PROJECT_NAME ARC_GITHUB_CONFIG_URL ARC_GITHUB_APP_ID ARC_GITHUB_APP_INSTALLATION_ID ARC_GITHUB_APP_PRIVATE_KEY ARC_HELM_CHART_VERSION PRIVATE_EKS_RUNNER_READY PRIVATE_EKS_ENDPOINT_POLICY_READY PRIVATE_EKS_ARC_APPLY_READY; do
+            if [ -z "${!name}" ]; then
+              echo "::error::$name is required in the aws-private-eks environment."
+              missing=1
+            fi
+          done
+          for name in PRIVATE_EKS_RUNNER_READY PRIVATE_EKS_ENDPOINT_POLICY_READY PRIVATE_EKS_ARC_APPLY_READY; do
+            if [ "${!name}" != "true" ]; then
+              echo "::error::$name must be exactly true before ARC handoff."
+              missing=1
+            fi
+          done
+          if [ "$MODE" != "install" ] && [ "$MODE" != "smoke" ]; then
+            echo "::error::Unexpected ARC mode: $MODE."
+            missing=1
+          fi
+          if [ "$CONFIRMATION" != "I_UNDERSTAND_PRIVATE_EKS_ARC_APPLY" ]; then
+            echo "::error::ARC install and smoke require I_UNDERSTAND_PRIVATE_EKS_ARC_APPLY."
+            missing=1
+          fi
+          exit "$missing"
+
+      - name: Check private runner client tools
+        run: |
+          command -v aws >/dev/null
+          command -v kubectl >/dev/null || { echo "::error::kubectl must be present in the reviewed runner image; no public download is attempted."; exit 1; }
+          command -v helm >/dev/null || { echo "::error::helm must be present in the reviewed runner image; no public download is attempted."; exit 1; }
+          kubectl version --client=true
+          helm version
+
+      - name: Configure AWS credentials through GitHub OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ env.AWS_REGION }}
+          mask-aws-account-id: true
+
+      - name: Update private EKS kubeconfig
+        env:
+          KUBECONFIG: ${{ runner.temp }}/private-eks-kubeconfig
+        run: |
+          aws eks update-kubeconfig \
+            --region "$AWS_REGION" \
+            --name "$EKS_CLUSTER_NAME" \
+            --kubeconfig "$KUBECONFIG" \
+            >/dev/null
+          echo "KUBECONFIG=$KUBECONFIG" >> "$GITHUB_ENV"
+          echo "Private EKS kubeconfig created in runner temp storage only."
+
+      - name: Verify private EKS API access
+        run: |
+          kubectl auth can-i get namespaces
+          kubectl get namespace kube-system >/dev/null
+
+      - name: Install ARC controller and runner scale set
+        if: ${{ inputs.mode == 'install' }}
+        run: |
+          kubectl create namespace "$ARC_NAMESPACE" --dry-run=client -o yaml | kubectl apply -f -
+          kubectl create namespace "$ARC_RUNNER_NAMESPACE" --dry-run=client -o yaml | kubectl apply -f -
+          helm upgrade --install arc-controller oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set-controller \
+            --namespace "$ARC_NAMESPACE" \
+            --version "$ARC_HELM_CHART_VERSION" \
+            --wait \
+            --timeout 10m
+          kubectl create secret generic private-eks-arc-github-app \
+            --namespace "$ARC_RUNNER_NAMESPACE" \
+            --from-literal=github_app_id="$ARC_GITHUB_APP_ID" \
+            --from-literal=github_app_installation_id="$ARC_GITHUB_APP_INSTALLATION_ID" \
+            --from-literal=github_app_private_key="$ARC_GITHUB_APP_PRIVATE_KEY" \
+            --dry-run=client -o yaml | kubectl apply -f -
+          helm upgrade --install "$ARC_RUNNER_SCALE_SET_NAME" oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set \
+            --namespace "$ARC_RUNNER_NAMESPACE" \
+            --version "$ARC_HELM_CHART_VERSION" \
+            --set-string githubConfigUrl="$ARC_GITHUB_CONFIG_URL" \
+            --set githubConfigSecret=private-eks-arc-github-app \
+            --set runnerGroup="private-eks" \
+            --set minRunners=0 \
+            --set maxRunners=1 \
+            --wait \
+            --timeout 10m
+
+      - name: Smoke-test ARC scale set contract
+        run: |
+          kubectl wait --for=condition=available deployment --all -n "$ARC_NAMESPACE" --timeout=5m
+          kubectl get autoscalingrunnerset "$ARC_RUNNER_SCALE_SET_NAME" -n "$ARC_RUNNER_NAMESPACE" >/dev/null
+          printf '{"mode":"%s","arc_controller_ready":true,"runner_scale_set_ready":true,"raw_identifiers_published":false}\n' "$MODE" > "$RUNNER_TEMP/arc-handoff-evidence.json"
+
+      - name: Upload sanitised ARC evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: private-eks-arc-handoff-evidence
+          path: ${{ runner.temp }}/arc-handoff-evidence.json
+          if-no-files-found: error
+          retention-days: 7
