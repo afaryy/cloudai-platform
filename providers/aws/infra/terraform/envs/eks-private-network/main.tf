@@ -2,8 +2,6 @@ data "aws_availability_zones" "available" {
   state = "available"
 }
 
-data "aws_caller_identity" "current" {}
-
 resource "aws_security_group" "delivery_runner" {
   name        = "${local.name_prefix}-delivery-runner-sg"
   description = "Private delivery runner access for network and EKS lifecycle operations"

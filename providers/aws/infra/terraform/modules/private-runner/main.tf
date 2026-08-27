@@ -8,8 +8,6 @@ locals {
   })
 }
 
-data "aws_region" "current" {}
-
 locals {
   runner_assume_role = jsonencode({
     Version = "2012-10-17"
