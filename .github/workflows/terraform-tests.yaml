@@ -421,6 +421,56 @@ jobs:
           ! grep -q 'network_foundation_private_subnet_ids' "$variables"
           ! grep -q 'network_foundation_runner_security_group_id' "$variables"
 
+  bootstrap_private_eks_runner_role_boundary:
+    name: Bootstrap private EKS runner role boundary
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Check dedicated runner state and lifecycle role
+        run: |
+          ruby -ryaml <<'RUBY'
+          template = YAML.load_file("providers/aws/infra/bootstrap/github-oidc-terraform-backend.yaml")
+          parameters = template.fetch("Parameters")
+          resources = template.fetch("Resources")
+          outputs = template.fetch("Outputs")
+
+          raise "missing runner state parameter" unless parameters.key?("PrivateEKSRunnerStateKey")
+          role = resources.fetch("GitHubActionsPrivateEKSRunnerRole")
+          properties = role.fetch("Properties")
+          subject = properties
+            .fetch("AssumeRolePolicyDocument")
+            .fetch("Statement")
+            .first
+            .fetch("Condition")
+            .fetch("StringLike")
+            .fetch("token.actions.githubusercontent.com:sub")
+          raise "runner trust must use aws-private-eks" unless subject.end_with?("environment:aws-private-eks")
+
+          statements = properties.fetch("Policies").first
+            .fetch("PolicyDocument")
+            .fetch("Statement")
+            .to_h { |statement| [statement.fetch("Sid"), statement] }
+          runner_state = statements.fetch("PrivateEKSRunnerStateAccess")
+          raise "runner state must be writable" unless %w[s3:GetObject s3:PutObject s3:DeleteObject].all? { |action| runner_state.fetch("Action").include?(action) }
+          network_state = statements.fetch("PrivateEKSNetworkStateReadOnly")
+          raise "network state must be read only" unless network_state.fetch("Action") == ["s3:GetObject"]
+
+          pass_role = statements.fetch("PassOnlyPrivateEKSRunnerServiceRole")
+          raise "PassRole must be exact" unless pass_role.fetch("Action") == ["iam:PassRole"]
+          raise "PassRole must not use wildcard resource" if pass_role.fetch("Resource") == "*"
+          passed_to_service = pass_role
+            .fetch("Condition")
+            .fetch("StringEquals")
+            .fetch("iam:PassedToService")
+          raise "PassRole must target CodeBuild" unless passed_to_service == "codebuild.amazonaws.com"
+
+          raise "missing runner role output" unless outputs.key?("PrivateEKSRunnerRoleArn")
+          raise "missing runner state output" unless outputs.key?("PrivateEKSRunnerStateKey")
+          toolkit = template.fetch("Metadata").fetch("AWSToolsMetrics").fetch("AWSAgentToolkit")
+          raise "missing CloudFormation toolkit attribution" unless toolkit == "aws-cloudformation@2"
+          RUBY
+
   arc_private_eks_handoff_boundary:
     name: ARC private EKS handoff boundary
     runs-on: ubuntu-latest
