@@ -9,6 +9,11 @@ output "vpc_id" {
   sensitive   = true
 }
 
+output "vpc_cidr" {
+  description = "CIDR owned by the private network foundation."
+  value       = var.vpc_cidr
+}
+
 output "private_subnet_ids" {
   description = "Private worker and runner subnet IDs; do not publish live output values."
   value       = module.network.private_subnet_ids

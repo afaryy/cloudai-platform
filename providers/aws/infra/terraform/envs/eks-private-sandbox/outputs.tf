@@ -5,13 +5,13 @@ output "environment_name" {
 
 output "vpc_id" {
   description = "Private EKS VPC ID; do not publish live output values."
-  value       = module.network.vpc_id
+  value       = data.terraform_remote_state.network.outputs.vpc_id
   sensitive   = true
 }
 
 output "private_subnet_ids" {
   description = "Private worker subnet IDs; do not publish live output values."
-  value       = module.network.private_subnet_ids
+  value       = data.terraform_remote_state.network.outputs.private_subnet_ids
   sensitive   = true
 }
 
@@ -31,7 +31,7 @@ output "node_group_name" {
   value       = module.eks.node_group_name
 }
 
-output "nat_enabled" {
-  description = "Whether the optional NAT fallback is enabled."
-  value       = module.egress.nat_enabled
+output "network_state_consumed" {
+  description = "Sanitised category confirming the reviewed private-network state is the source of network inputs."
+  value       = data.terraform_remote_state.network.outputs.network_foundation_ready == true
 }

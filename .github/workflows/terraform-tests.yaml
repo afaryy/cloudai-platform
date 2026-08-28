@@ -277,7 +277,8 @@ jobs:
           grep -q -- '- preflight' "$workflow"
           grep -q -- '- plan' "$workflow"
           grep -q -- '- apply' "$workflow"
-          grep -q -- '- validate' "$workflow"
+          grep -q -- '- source-validate' "$workflow"
+          grep -q -- '- runtime-validate' "$workflow"
           grep -q -- '- stop' "$workflow"
           grep -q -- '- discover' "$workflow"
           grep -q "inputs.mode == 'discover'" "$workflow"
@@ -296,7 +297,11 @@ jobs:
           grep -q 'QuotaReserved' "$workflow"
           grep -q 'gpu-poc-on-demand' "$workflow"
           grep -q 'raw Terraform output is not published' "$workflow"
-          grep -q 'inputs.mode != '\''validate'\''' "$workflow"
+          grep -q "inputs.mode == 'source-validate'" "$workflow"
+          grep -q "inputs.mode == 'runtime-validate'" "$workflow"
+          grep -q "inputs.mode != 'source-validate'" "$workflow"
+          ! grep -A80 "inputs.mode == 'source-validate'" "$workflow" | grep -q 'aws eks update-kubeconfig'
+          grep -A180 "inputs.mode == 'runtime-validate'" "$workflow" | grep -q 'aws eks update-kubeconfig'
           ! grep -q 'terraform destroy' "$workflow"
           grep -q 'aws ec2 describe-instance-type-offerings' "$workflow"
           grep -q 'auth.docker.io/token' "$workflow"
@@ -331,7 +336,9 @@ jobs:
           grep -q 'PRIVATE_EKS_BUDGET_APPROVED' "$workflow"
           grep -q 'PRIVATE_EKS_MONTHLY_BUDGET_USD' "$workflow"
           grep -q 'PRIVATE_EKS_RUNNER_READY' "$workflow"
-          grep -q 'PRIVATE_EKS_NETWORK_STATE_KEY' "$workflow"
+          grep -q 'TF_VAR_network_state_bucket' "$workflow"
+          grep -q 'TF_VAR_network_state_key' "$workflow"
+          grep -q 'TF_VAR_network_state_region' "$workflow"
           grep -q 'runner_foundation_ready' "$workflow"
           grep -q 'PRIVATE_EKS_ENDPOINT_POLICY_READY' "$workflow"
           grep -q 'PRIVATE_EKS_BACKEND_READY' "$workflow"
@@ -347,6 +354,13 @@ jobs:
           ! grep -q 'terraform destroy' "$workflow"
           ! grep -q 'eks-sandbox/terraform.tfstate' "$workflow"
           ! grep -q 'gpu_instance_type' "$workflow"
+          composition=providers/aws/infra/terraform/envs/eks-private-sandbox/main.tf
+          variables=providers/aws/infra/terraform/envs/eks-private-sandbox/variables.tf
+          ! grep -q 'module "network"' "$composition"
+          ! grep -q 'module "egress"' "$composition"
+          grep -q 'data "terraform_remote_state" "network"' "$composition"
+          ! grep -q 'variable "delivery_runner_security_group_id"' "$variables"
+          ! grep -q 'variable "private_artifact_bucket_arns"' "$variables"
 
   eks_private_network_runner_workflow_boundary:
     name: Private network and runner workflow boundary

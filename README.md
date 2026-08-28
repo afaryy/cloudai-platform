@@ -43,7 +43,7 @@ provider views.
 | [Bounded Bedrock Sandbox](docs/solutions/featured-solutions.md#bounded-bedrock-sandbox) | **Implemented — bounded synthetic sandbox validation** | Short-lived identity, least-privilege access, manual approval, and narrow synthetic Guardrail checks. |
 | [AgentCore Governed RAG POC](docs/solutions/featured-solutions.md#agentcore-governed-rag-poc) | **Implemented — sandbox-validated** | Gateway-only Runtime access, synthetic Knowledge Base ingestion, citations-or-abstention behavior, and bounded CloudWatch evidence. |
 | [Bounded EKS GPU + Kueue POC](docs/solutions/featured-solutions.md#bounded-eks-gpu--kueue-poc) | **Implemented — source path; runtime pending** | One-node, scale-to-zero Terraform and protected workflow path for a synthetic CUDA admission check. |
-| [Private EKS Enterprise AI target](docs/solutions/featured-solutions.md#private-eks-enterprise-ai-target) | **Implemented — source path; runtime pending** | Private worker topology, endpoint-first egress, protected VPC-connected delivery, and no-public-IP controls; GPU extension remains gated. |
+| [Private EKS Enterprise AI target](docs/solutions/featured-solutions.md#private-eks-enterprise-ai-target) | **Implemented — source path; runtime pending** | Single network-state ownership, private workers, endpoint-first egress, protected VPC-connected delivery, and no-public-IP controls; GPU extension remains gated. |
 
 [Read the featured-solution evidence and boundaries →](docs/solutions/featured-solutions.md)
 
@@ -96,15 +96,16 @@ the supporting technical detail:
   guided technical reading sequence and evidence progression.
 - [Current status](docs/practices/current-status.md) — implementation record, bounded
   sandbox validation, deferred scope, and recommended next slice.
-- [Featured solutions](docs/solutions/featured-solutions.md) — four case studies with
+- [Featured solutions](docs/solutions/featured-solutions.md) — curated case studies with
   technical evidence, trade-offs, and explicit non-claims.
 
 AWS is the first provider with bounded implementation and validation evidence;
 the synthetic AgentCore Gateway + Runtime + RAG sandbox is the current AWS
 flagship POC. Azure and GCP remain reference mappings, not provider-parity
 implementations. The private EKS Enterprise AI target now has a separate
-Terraform source path and protected CI delivery contract, but its private
-worker/bootstrap runtime and GPU extension remain unvalidated. AI Factory and
+network, runner, and EKS Terraform state model plus a protected CI delivery
+contract, but its private worker/bootstrap runtime and GPU extension remain
+unvalidated. AI Factory and
 GPU capacity patterns remain future design scope beyond a bounded source path
 for a one-node EKS GPU + Kueue proof of concept; that source implementation is
 not a deployed GPU runtime. The

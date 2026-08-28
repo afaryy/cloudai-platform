@@ -35,6 +35,9 @@ The repository can now demonstrate:
 - **P4f Helm Release Workflow:** optional sandbox Helm install, rollout observation, rollback, uninstall, and namespace cleanup with ClusterIP-only exposure and synthetic workload boundaries
 - **P4g Argo CD GitOps Workflow:** pinned Argo CD bootstrap, private-repository access, explicit manual sync, exact revision verification, health verification, status, ordered cleanup, and post-exercise destroy for the synthetic Helm workload
 - **YY-38 EKS GPU + Kueue POC:** approved design, Terraform source path, protected workflow, and local tests for a synthetic, one-node GPU admission path; the source implementation is not a deployed GPU runtime, and a destroyed EKS sandbox must be recovered separately before any live apply.
+- **YY-44 Cost Guardrails:** protected Terraform apply completed for exactly two
+  notification-only AWS Budgets. Notification delivery has not been validated,
+  and the budgets do not provide automatic shutdown or a real-time kill switch.
 - **P8 Real Bedrock Sandbox:** bounded synthetic validation for model access
   and Guardrails using least privilege, manual approval, budget controls, and
   sanitized evidence
@@ -57,8 +60,12 @@ The repository can now demonstrate:
 - **P5a AI-Assisted DevSecOps Boundary:** advisory AI use, human review, CI/security checks, and release evidence
 - **P5b AI-Assisted Review Evidence:** review summaries, threat-model checklists, CI failure summaries, and release-note drafts
 - **P6f AI Platform Security and Operations Controls:** identity, data protection, AI AppSec, delivery, operations, and FinOps
-- **YY-49 Private EKS Terraform baseline:** separate private-subnet worker target, endpoint-first egress, private-only API intent, and no-public-IP controls; source path only
+- **YY-49 Private EKS Terraform baseline:** separate private-subnet worker target that consumes one network-owned remote state for VPC, CIDR, subnets, endpoint-first egress boundaries, and shared security groups; private-only API intent and no-public-IP controls; source path only
 - **YY-50 Private EKS protected CI path:** VPC-connected CodeBuild runner contract, same-run plan preflight, exact endpoint checks, sanitized evidence, and fail-closed stop; runtime validation pending
+
+Private EKS, ARC and GPU source: source implemented; runtime validation pending.
+The earlier public EKS sandbox was destroyed and is not the private GPU target.
+AgentCore RAG is a separate managed-runtime path and is not hosted on EKS.
 
 **P6 AI Traffic Governance / AgentOps** is the control-plane evidence track.
 It currently has six mock-first lanes:
@@ -93,12 +100,12 @@ It currently has six mock-first lanes:
 | P4e Helm-on-EKS validation workflow | Live sandbox validated | `.github/workflows/helm-eks-validation.yml` and `docs/solutions/ai-release-engineering-on-eks.md` |
 | P4f Helm release workflow | Live install, rollback, and uninstall validated | `.github/workflows/helm-eks-release.yml` and `docs/solutions/ai-release-engineering-on-eks.md` |
 | P4g Argo CD GitOps workflow | Live GitOps sync, health, status, cleanup, and destroy validated | `.github/workflows/argocd-eks-gitops.yml`, `argocd/applications/cloudai-api-sandbox.yaml`, and `docs/solutions/ai-release-engineering-on-eks.md` |
-| YY-49 private EKS Terraform baseline | Source implemented; runtime pending | `providers/aws/infra/terraform/envs/eks-private-sandbox/`, `providers/aws/infra/terraform/modules/private-egress/`, `providers/aws/infra/terraform/modules/private-network/`, and `docs/architecture/private-eks-reference-architecture.md` |
+| YY-49 private EKS Terraform baseline | Source implemented with a single private-network remote-state owner; runtime pending | `providers/aws/infra/terraform/envs/eks-private-sandbox/`, `providers/aws/infra/terraform/envs/eks-private-network/`, and `docs/architecture/private-eks-reference-architecture.md` |
 | YY-50 private EKS protected CI path | Source implemented; runtime pending | `.github/workflows/terraform-eks-private-sandbox.yml` and `docs/solutions/eks-private-sandbox-runbook.md` |
 | YY-51 private EKS network foundation | Source implemented; runtime pending | `providers/aws/infra/terraform/envs/eks-private-network/`, `.github/workflows/terraform-eks-private-network.yml`, and `docs/architecture/private-eks-reference-architecture.md` |
 | YY-52 VPC-connected CodeBuild runner foundation | Source implemented; runtime pending | `providers/aws/infra/terraform/modules/private-runner/`, `providers/aws/infra/terraform/envs/eks-private-runner/`, and `docs/solutions/eks-private-sandbox-runbook.md` |
-| Private-EKS GitHub environment readiness | Configuration prerequisite documented; environment and reviewer gate still pending | `docs/solutions/private-eks-github-environment-readiness.md` |
-| YY-44 Cost Guardrails | Source implementation planned; no live AWS Budget or email-delivery claim | `providers/aws/infra/terraform/modules/cost-guardrails/`, `providers/aws/infra/terraform/envs/cost-guardrails/`, `.github/workflows/terraform-cost-guardrails.yml`, and `docs/solutions/yy-44-cost-guardrails-runbook.md` |
+| Private-EKS GitHub environment readiness | Environment, required reviewer, main branch policy, backend/OIDC names, and network bootstrap variables configured; runner/EKS/ARC values and runtime validation pending | `docs/solutions/private-eks-github-environment-readiness.md` |
+| YY-44 Cost Guardrails | Protected apply complete for exactly two notification-only AWS Budgets; notification delivery not validated; no automatic shutdown claim | `providers/aws/infra/terraform/modules/cost-guardrails/`, `providers/aws/infra/terraform/envs/cost-guardrails/`, `.github/workflows/terraform-cost-guardrails.yml`, and `docs/solutions/yy-44-cost-guardrails-runbook.md` |
 | P8 Real Bedrock Sandbox | Bounded synthetic sandbox validation complete | `docs/solutions/p8-real-bedrock-sandbox-design.md` and `providers/aws/infra/terraform/envs/bedrock-sandbox/README.md` |
 | P8a Bedrock access readiness | Complete | `docs/solutions/p8a-bedrock-access-readiness.md` and `docs/evidence/templates/p8a-bedrock-smoke-test-evidence.md` |
 | P8b Bedrock Terraform IAM boundary | Confirmation-gated IAM apply boundary complete | `providers/aws/infra/terraform/modules/bedrock-access/`, `providers/aws/infra/terraform/envs/bedrock-sandbox/`, and `.github/workflows/terraform-bedrock-sandbox.yml` |

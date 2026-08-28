@@ -68,7 +68,7 @@ flowchart LR
   ci -->|"immutable image + deployment"| runtimeNode
   budget -. "applies to" .-> runtime
   budget -. "applies to" .-> operations
-  runtimeNode -. "not deployed" .-> future
+  runtimeNode -. "future scope only" .-> future
 
   denied["Direct Runtime invoke<br/>DENIED"]:::denied
   user -. "blocked path" .-> denied

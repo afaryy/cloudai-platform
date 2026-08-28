@@ -118,17 +118,30 @@ expose account-specific details.
 The [private EKS reference architecture](../architecture/private-eks-reference-architecture.md),
 [Terraform environment](../../providers/aws/infra/terraform/envs/eks-private-sandbox),
 and [protected delivery runbook](./eks-private-sandbox-runbook.md) define a
-separate state boundary from `eks-sandbox`. The source path creates public
-ingress/egress subnets, private worker subnets with no public IP assignment,
-endpoint-first AWS service access, private-only EKS API intent, and a
-VPC-connected runner contract. NAT is an explicit exception and disabled by
-default.
+separate boundary from `eks-sandbox` with three state owners:
+
+- `eks-private-network` owns the VPC, VPC CIDR, controlled public-egress
+  subnets, private subnets, routes, endpoints, shared security groups, and the
+  optional NAT decision;
+- `eks-private-runner` currently declares reviewed network-output inputs for
+  the CodeBuild-hosted ephemeral delivery runner; direct remote-state
+  consumption and its protected lifecycle workflow are the next source gate;
+- `eks-private-sandbox` consumes the same network remote state and owns only
+  the EKS control plane, its control-plane security group, and CPU worker
+  baseline without recreating network resources.
+
+The resulting source path defines no-public-IP workers, endpoint-first AWS
+service access, private-only EKS API intent, and a VPC-connected runner
+contract. NAT is an explicit network-state exception and disabled by default.
 
 ### Technical evidence
 
 - Terraform native tests cover subnet public-IP prohibition, endpoint-policy
   scope, private DNS, endpoint security-group sources, and the explicit NAT
   exception path.
+- Remote-state contract tests prove the EKS composition receives its VPC CIDR,
+  private subnets, worker security group, and runner security group from the
+  network state rather than copied inputs.
 - The protected workflow supports source validation, isolated plan,
   same-run apply preflight, exact endpoint-set checks, sanitised evidence, and
   fail-closed scale-to-zero stop.
@@ -163,7 +176,7 @@ Terraform provides the sandbox foundation; GitHub Actions uses short-lived OIDC 
 
 ### Technical evidence
 
-- [Helm chart](../helm/ai-api-service), [Argo CD application](../argocd/applications/cloudai-api-sandbox.yaml), Terraform, and manual GitHub Actions workflows.
+- [Helm chart](../../helm/ai-api-service), [Argo CD application](../../argocd/applications/cloudai-api-sandbox.yaml), Terraform, and manual GitHub Actions workflows.
 - Explicit release gates, rollback guidance, synthetic-only configuration, and post-exercise teardown.
 
 ### Test or validation evidence
@@ -243,7 +256,7 @@ GitHub Actions assumes dedicated short-lived roles through OIDC. Terraform contr
 
 ### Technical evidence
 
-- [Bedrock Terraform environment](../providers/aws/infra/terraform/envs/bedrock-sandbox), separate IAM boundaries, and protected manual workflow modes.
+- [Bedrock Terraform environment](../../providers/aws/infra/terraform/envs/bedrock-sandbox), separate IAM boundaries, and protected manual workflow modes.
 - [Current status](../practices/current-status.md) records bounded synthetic smoke, guarded attachment, and direct-evaluation validation.
 
 ### Test or validation evidence
