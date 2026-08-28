@@ -159,10 +159,10 @@ passed.
 The source implementation uses three independently recoverable states. The
 ownership direction is one-way: `eks-private-network` owns the VPC, VPC CIDR,
 private subnets, routes, endpoints, shared worker security group, and delivery
-runner security group. `eks-private-sandbox` now consumes that network remote
-state directly. The current `eks-private-runner` source still accepts reviewed
-network-output inputs; replacing them with direct remote-state consumption and
-adding its protected lifecycle workflow is the next implementation gate.
+runner security group. Both `eks-private-runner` and `eks-private-sandbox` now
+consume that network remote state directly. The protected runner lifecycle
+workflow is source implemented; provisioning its dedicated OIDC role and
+protected runtime validation remain pending.
 
 ```mermaid
 flowchart LR
@@ -171,7 +171,7 @@ flowchart LR
   eks_state["eks-private-sandbox state<br/>private EKS control plane<br/>CPU worker baseline"]
   arc_state["ARC handoff<br/>post-bootstrap Helm state<br/>runtime pending"]
 
-  network_state -. "Task 3: direct remote-state handoff pending" .-> runner_state
+  network_state -- "reviewed remote-state outputs" --> runner_state
   network_state -- "reviewed remote-state outputs" --> eks_state
   runner_state -- "bootstrap / recovery path" --> eks_state
   eks_state -. "only after runtime validation" .-> arc_state

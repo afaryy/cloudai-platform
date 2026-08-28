@@ -10,6 +10,8 @@ const featuredSolutionsPath = resolve(repoRoot, "docs/solutions/featured-solutio
 const deliveryRunbookPath = resolve(repoRoot, "docs/solutions/eks-private-sandbox-runbook.md");
 const environmentReadinessPath = resolve(repoRoot, "docs/solutions/private-eks-github-environment-readiness.md");
 const runnerMainPath = resolve(repoRoot, "providers/aws/infra/terraform/envs/eks-private-runner/main.tf");
+const runnerWorkflowPath = resolve(repoRoot, ".github/workflows/terraform-eks-private-runner.yml");
+const runnerRunbookPath = resolve(repoRoot, "docs/solutions/vpc-connected-runner-runbook.md");
 
 test("private EKS architecture preserves the public sandbox boundary", async () => {
   const architecture = await readFile(architecturePath, "utf8");
@@ -99,14 +101,21 @@ test("private EKS readiness reflects the configured environment without overstat
   assert.match(runbook, /first private-EKS deployment.*same-run.*plan preflight/is);
 });
 
-test("private runner documentation preserves its current pre-remote-state boundary", async () => {
-  const [runnerMain, architecture, runbook] = await Promise.all([
+test("private runner consumes network state without overstating runtime readiness", async () => {
+  const [runnerMain, runnerWorkflow, runnerRunbook, architecture, runbook] = await Promise.all([
     readFile(runnerMainPath, "utf8"),
+    readFile(runnerWorkflowPath, "utf8"),
+    readFile(runnerRunbookPath, "utf8"),
     readFile(architecturePath, "utf8"),
     readFile(deliveryRunbookPath, "utf8"),
   ]);
 
-  assert.doesNotMatch(runnerMain, /terraform_remote_state/);
-  assert.match(architecture, /direct remote-state consumption.*next implementation gate/is);
-  assert.match(runbook, /Direct remote-state consumption.*next implementation gate/is);
+  assert.match(runnerMain, /data "terraform_remote_state" "network"/);
+  assert.match(runnerMain, /private_subnet_ids\s*=\s*data\.terraform_remote_state\.network\.outputs\.private_subnet_ids/);
+  assert.match(runnerWorkflow, /AWS_PRIVATE_EKS_RUNNER_ROLE_TO_ASSUME/);
+  assert.match(runnerWorkflow, /I_UNDERSTAND_PRIVATE_EKS_RUNNER_APPLY/);
+  assert.match(runnerRunbook, /dedicated runner-state OIDC role/i);
+  assert.match(runnerRunbook, /runtime validation remains pending/i);
+  assert.match(architecture, /protected runner lifecycle\s+workflow is source implemented/is);
+  assert.match(runbook, /protected lifecycle workflow is source implemented/is);
 });

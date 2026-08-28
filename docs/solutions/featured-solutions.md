@@ -123,9 +123,9 @@ separate boundary from `eks-sandbox` with three state owners:
 - `eks-private-network` owns the VPC, VPC CIDR, controlled public-egress
   subnets, private subnets, routes, endpoints, shared security groups, and the
   optional NAT decision;
-- `eks-private-runner` currently declares reviewed network-output inputs for
-  the CodeBuild-hosted ephemeral delivery runner; direct remote-state
-  consumption and its protected lifecycle workflow are the next source gate;
+- `eks-private-runner` consumes reviewed network remote-state outputs for the
+  CodeBuild-hosted ephemeral delivery runner; its protected lifecycle workflow
+  is source implemented while dedicated-role and runtime validation are pending;
 - `eks-private-sandbox` consumes the same network remote state and owns only
   the EKS control plane, its control-plane security group, and CPU worker
   baseline without recreating network resources.

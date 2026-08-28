@@ -36,4 +36,10 @@ output "runner_ephemeral" {
 output "runner_security_group_ids" {
   description = "Security groups attached to CodeBuild builds."
   value       = module.runner.runner_security_group_ids
+  sensitive   = true
+}
+
+output "network_state_consumed" {
+  description = "Boolean category confirming that the runner consumes the reviewed private-network state."
+  value       = true
 }

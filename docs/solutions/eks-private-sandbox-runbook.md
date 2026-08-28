@@ -115,10 +115,10 @@ The source-only foundation is split into three independently managed states:
 1. `eks-private-network` creates the VPC, private subnets, endpoint policy,
    route, and security-group boundary. It never calls the Kubernetes API.
 2. `eks-private-runner` creates the CodeBuild project, webhook, CloudWatch log
-   group, and least-privilege CodeBuild service role. Its current source accepts
-   reviewed network-output inputs and does not store GitHub tokens in Terraform.
-   Direct remote-state consumption and the protected runner lifecycle workflow
-   remain the next implementation gate.
+   group, and least-privilege CodeBuild service role. It consumes reviewed
+   network outputs directly from remote state and does not store GitHub tokens
+   in Terraform. Its protected lifecycle workflow is source implemented;
+   dedicated runner-role provisioning and runtime validation remain pending.
 3. `eks-private-sandbox` consumes the network state's VPC, VPC CIDR, private
    subnets, worker security group, and delivery-runner security group. It
    creates only the EKS/CPU-worker boundary and is routed to the run-scoped

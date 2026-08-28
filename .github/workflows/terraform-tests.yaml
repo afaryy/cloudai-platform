@@ -388,6 +388,39 @@ jobs:
           grep -q 'I_UNDERSTAND_PRIVATE_EKS_APPLY' "$eks_workflow"
           grep -q 'PRIVATE_EKS_RUNNER_READY' "$eks_workflow"
 
+  eks_private_runner_lifecycle_workflow_boundary:
+    name: Private EKS runner lifecycle workflow boundary
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Check protected CodeBuild runner lifecycle boundary
+        run: |
+          workflow=.github/workflows/terraform-eks-private-runner.yml
+          test -f "$workflow"
+          grep -q -- '- source-validate' "$workflow"
+          grep -q -- '- plan' "$workflow"
+          grep -q -- '- apply' "$workflow"
+          grep -q -- '- runtime-validate' "$workflow"
+          grep -q 'I_UNDERSTAND_PRIVATE_EKS_RUNNER_APPLY' "$workflow"
+          grep -q 'environment: aws-private-eks' "$workflow"
+          grep -q 'id-token: write' "$workflow"
+          grep -q 'AWS_PRIVATE_EKS_RUNNER_ROLE_TO_ASSUME' "$workflow"
+          grep -q 'TF_VAR_network_state_bucket' "$workflow"
+          grep -q 'TF_VAR_network_state_key' "$workflow"
+          grep -q 'TF_VAR_network_state_region' "$workflow"
+          grep -q 'aws codebuild batch-get-projects' "$workflow"
+          grep -q 'runner_project_present' "$workflow"
+          grep -q 'raw_identifiers_published' "$workflow"
+          ! grep -q 'terraform destroy' "$workflow"
+          ! grep -q 'runs-on: codebuild-' "$workflow"
+          composition=providers/aws/infra/terraform/envs/eks-private-runner/main.tf
+          variables=providers/aws/infra/terraform/envs/eks-private-runner/variables.tf
+          grep -q 'data "terraform_remote_state" "network"' "$composition"
+          ! grep -q 'network_foundation_vpc_id' "$variables"
+          ! grep -q 'network_foundation_private_subnet_ids' "$variables"
+          ! grep -q 'network_foundation_runner_security_group_id' "$variables"
+
   arc_private_eks_handoff_boundary:
     name: ARC private EKS handoff boundary
     runs-on: ubuntu-latest

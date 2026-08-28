@@ -69,10 +69,18 @@ These are consumed by `.github/workflows/terraform-eks-private-network.yml`:
 
 ### Private runner and EKS variables
 
-These are consumed by `.github/workflows/terraform-eks-private-sandbox.yml`:
+These are consumed by `.github/workflows/terraform-eks-private-runner.yml` and
+`.github/workflows/terraform-eks-private-sandbox.yml`:
 
 | Name | Classification | Purpose |
 | --- | --- | --- |
+| `AWS_PRIVATE_EKS_RUNNER_ROLE_TO_ASSUME` | variable or secret | Dedicated OIDC role for runner-state Terraform; must not reuse the private-network role |
+| `PRIVATE_EKS_RUNNER_GITHUB_REPOSITORY_URL` | variable | Exact repository URL connected to the CodeBuild GitHub source |
+| `PRIVATE_EKS_RUNNER_SOURCE_AUTH_TYPE` | variable | `NONE` for a reviewed account-level connection, or an explicitly approved CodeBuild source-auth type |
+| `PRIVATE_EKS_RUNNER_SOURCE_AUTH_RESOURCE` | variable | Optional approved connection or secret ARN; never a raw token |
+| `PRIVATE_EKS_RUNNER_APPLY_READY` | variable | Must be exactly `true` after the runner plan and identity boundary are reviewed |
+| `PRIVATE_EKS_RUNNER_BUDGET_APPROVED` | variable | Must be exactly `true` before protected runner operations |
+| `PRIVATE_EKS_RUNNER_MONTHLY_BUDGET_USD` | variable | Positive monthly budget allocated to the CodeBuild runner foundation |
 | `PRIVATE_EKS_RUNNER_PROJECT_NAME` | variable | Exact CodeBuild project name used in the run-scoped runner label |
 | `PRIVATE_EKS_RUNNER_FOUNDATION_READY` | variable | Must be exactly `true` after runner foundation validation |
 | `PRIVATE_EKS_RUNNER_READY` | variable | Must be exactly `true` after runner reachability validation |
@@ -124,9 +132,12 @@ Follow this order so a missing prerequisite fails before any AWS API call:
    approved. The protected workflow performs its own fresh no-delete plan.
 8. Ensure the applied network state contains the current remote-output
    contract, including `vpc_cidr`, before any consumer state is planned.
-9. After bootstrap network verification, configure the private-runner and
-   private-EKS variables. The CodeBuild account-level GitHub source connection
-   must be reviewed separately; no GitHub token is stored in Terraform.
+9. After bootstrap network verification, provision and review a dedicated
+   runner-state OIDC role. Configure `AWS_PRIVATE_EKS_RUNNER_ROLE_TO_ASSUME`
+   with that role; do not reuse or expand the network-state role. Then configure
+   the remaining private-runner and private-EKS variables. The CodeBuild
+   account-level GitHub source connection must be reviewed separately; no
+   GitHub token is stored in Terraform.
 10. Discover and review the actual delivery-runner and private-worker role ARNs,
    update the endpoint principal list, select `expanded`, and run a new
    endpoint-policy plan before private runtime use.

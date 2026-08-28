@@ -260,7 +260,7 @@ git commit -m "refactor: consume private network state from EKS"
 - Consumes: private-network remote-state outputs and the dedicated runner OIDC role.
 - Produces: CodeBuild project label `codebuild-<project>-${{ github.run_id }}-${{ github.run_attempt }}` and sanitised lifecycle evidence.
 
-- [ ] **Step 1: Add failing workflow-boundary checks**
+- [x] **Step 1: Add failing workflow-boundary checks**
 
 ```bash
 workflow=.github/workflows/terraform-eks-private-runner.yml
@@ -275,7 +275,7 @@ grep -q 'id-token: write' "$workflow"
 ! grep -q 'terraform destroy' "$workflow"
 ```
 
-- [ ] **Step 2: Verify the new boundary test fails**
+- [x] **Step 2: Verify the new boundary test fails**
 
 Run:
 
@@ -285,7 +285,7 @@ test -f .github/workflows/terraform-eks-private-runner.yml
 
 Expected: exit 1.
 
-- [ ] **Step 3: Make the runner environment consume network remote state**
+- [x] **Step 3: Make the runner environment consume network remote state**
 
 Use the same `network_state_bucket`, `network_state_key`, and
 `network_state_region` interface from Task 2. Replace direct VPC/subnet/SG
@@ -299,7 +299,7 @@ security_group_ids = [data.terraform_remote_state.network.outputs.delivery_runne
 
 Keep all three outputs sensitive at the network boundary.
 
-- [ ] **Step 4: Create the workflow**
+- [x] **Step 4: Create the workflow**
 
 The dispatch contract is:
 
@@ -326,7 +326,7 @@ Runtime validation must query CodeBuild project configuration and emit only:
 {"runner_project_present":true,"vpc_attached":true,"private_subnets_configured":true,"logs_configured":true}
 ```
 
-- [ ] **Step 5: Run Terraform and workflow tests**
+- [x] **Step 5: Run Terraform and workflow tests**
 
 ```bash
 terraform -chdir=providers/aws/infra/terraform/envs/eks-private-runner init -backend=false
@@ -337,7 +337,7 @@ cd providers/aws/app/api && pnpm test
 
 Expected: all commands exit 0.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add .github/workflows/terraform-eks-private-runner.yml .github/workflows/terraform-tests.yaml providers/aws/infra/terraform/envs/eks-private-runner docs/solutions/vpc-connected-runner-runbook.md
