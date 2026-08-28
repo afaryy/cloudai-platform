@@ -194,5 +194,8 @@ deletion is implied by this runbook.
 
 Commit only public-safe code, tests, and documentation. Keep change-set links,
 workflow run identifiers, timestamps, recipient confirmation, and any
-account-specific evidence in private notes. Until both protected applies
-succeed, this feature remains source implementation only.
+account-specific evidence in private notes. The dedicated-role bootstrap and
+Cost Guardrails Terraform apply have completed through protected workflows,
+creating exactly two notification-only AWS Budgets. Notification delivery has
+not been validated. This evidence does not claim automatic shutdown, real-time
+enforcement, GPU deployment, EKS deployment, or deletion capability.

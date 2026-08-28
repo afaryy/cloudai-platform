@@ -176,7 +176,7 @@ Terraform provides the sandbox foundation; GitHub Actions uses short-lived OIDC 
 
 ### Technical evidence
 
-- [Helm chart](../helm/ai-api-service), [Argo CD application](../argocd/applications/cloudai-api-sandbox.yaml), Terraform, and manual GitHub Actions workflows.
+- [Helm chart](../../helm/ai-api-service), [Argo CD application](../../argocd/applications/cloudai-api-sandbox.yaml), Terraform, and manual GitHub Actions workflows.
 - Explicit release gates, rollback guidance, synthetic-only configuration, and post-exercise teardown.
 
 ### Test or validation evidence
@@ -256,7 +256,7 @@ GitHub Actions assumes dedicated short-lived roles through OIDC. Terraform contr
 
 ### Technical evidence
 
-- [Bedrock Terraform environment](../providers/aws/infra/terraform/envs/bedrock-sandbox), separate IAM boundaries, and protected manual workflow modes.
+- [Bedrock Terraform environment](../../providers/aws/infra/terraform/envs/bedrock-sandbox), separate IAM boundaries, and protected manual workflow modes.
 - [Current status](../practices/current-status.md) records bounded synthetic smoke, guarded attachment, and direct-evaluation validation.
 
 ### Test or validation evidence

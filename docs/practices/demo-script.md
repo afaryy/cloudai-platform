@@ -202,7 +202,15 @@ Open:
 
 Talk track:
 
-The P4 release engineering track shows how the mock AI API could be packaged and promoted using Helm, optional personal EKS sandbox readiness, Argo CD, release gates, and rollback decisions. The default repo still does not deploy to AWS. P4b explains the Terraform backend, GitHub OIDC, budget, manual approval, synthetic workload, and teardown gates required before any personal sandbox apply.
+The P4 release engineering track shows how the mock AI API can be packaged and
+promoted using Helm, an optional personal EKS sandbox, Argo CD, release gates,
+and rollback decisions. The default local walkthrough does not call or mutate
+AWS. Separately, protected and manually approved AWS workflows have validated
+bounded synthetic EKS release paths, Bedrock and AgentCore controls, and cost
+guardrails; those provider paths are opt-in and are not run by this
+walkthrough. P4b explains the Terraform backend, GitHub OIDC, budget, manual
+approval, synthetic workload, and teardown gates required before any repeat
+personal sandbox apply.
 
 ### 12. Show AI-Assisted DevSecOps Evidence
 
