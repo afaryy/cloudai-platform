@@ -73,13 +73,10 @@ commit their values:
 | `TF_BACKEND_LOCK_TABLE` | Terraform state lock table |
 | `TF_STATE_KEY_PREFIX` | State namespace prefix |
 | `PRIVATE_EKS_GITHUB_ACTIONS_PRINCIPAL_ARN` | Approved OIDC principal ARN passed to Terraform |
-| `PRIVATE_EKS_DELIVERY_RUNNER_SECURITY_GROUP_ID` | VPC-connected runner security group |
-| `PRIVATE_EKS_ARTIFACT_BUCKET_ARNS_JSON` | Explicit JSON list of private S3 artifact bucket ARNs |
 | `PRIVATE_EKS_BUDGET_APPROVED` | Must be exactly `true` |
 | `PRIVATE_EKS_MONTHLY_BUDGET_USD` | Positive monthly budget value |
 | `PRIVATE_EKS_RUNNER_READY` | Must be exactly `true` after runner verification |
 | `PRIVATE_EKS_RUNNER_PROJECT_NAME` | Exact CodeBuild project name used by the run-scoped label |
-| `PRIVATE_EKS_NETWORK_STATE_KEY` | Reviewed network foundation state-key suffix |
 | `PRIVATE_EKS_RUNNER_FOUNDATION_READY` | Must be exactly `true` after CodeBuild runner verification |
 | `PRIVATE_EKS_ENDPOINT_POLICY_READY` | Must be exactly `true` after endpoint review |
 | `PRIVATE_EKS_BACKEND_READY` | Must be exactly `true` after state backend review |
@@ -120,8 +117,10 @@ The source-only foundation is split into three independently managed states:
 2. `eks-private-runner` creates the CodeBuild project, webhook, CloudWatch log
    group, and least-privilege CodeBuild service role. It consumes reviewed IDs
    from the network state and does not store GitHub tokens in Terraform.
-3. `eks-private-sandbox` creates the private EKS worker baseline and is routed
-   to the run-scoped CodeBuild label only after the runner readiness gate.
+3. `eks-private-sandbox` consumes the network state's VPC, VPC CIDR, private
+   subnets, worker security group, and delivery-runner security group. It creates only
+   the EKS/CPU-worker boundary and is routed to the run-scoped CodeBuild label
+   after the runner readiness gate.
 
 The ARC handoff is a separate post-bootstrap workflow. It is not a replacement
 for the network or recovery path and remains runtime-pending until the private

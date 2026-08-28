@@ -33,6 +33,11 @@ run "plans_endpoint_first_network_without_nat" {
   }
 
   assert {
+    condition     = output.vpc_cidr == var.vpc_cidr
+    error_message = "The network state must publish its owned CIDR for downstream security-group rules."
+  }
+
+  assert {
     condition     = length(module.network.private_subnet_ids) == 2 && alltrue([for flag in values(module.network.private_subnet_public_ip_on_launch) : flag == false])
     error_message = "Every private network subnet must prohibit public IP assignment."
   }

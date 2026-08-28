@@ -31,14 +31,14 @@
 - Modify: `.github/workflows/terraform-eks-gpu-kueue-poc.yml`
 - Modify: `.github/workflows/terraform-tests.yaml`
 - Modify: `docs/practices/current-status.md`
-- Modify: `docs/project/BACKLOG.md`
+- Modify: `docs/solutions/eks-gpu-kueue-poc-runbook.md`
 - Modify: `providers/aws/app/api/tests/eksGpuKueuePocDocumentation.test.ts`
 
 **Interfaces:**
 - Consumes: current `validate`, `preflight`, `plan`, `apply`, and `stop` GPU workflow modes.
 - Produces: credential-free `source-validate` and protected `runtime-validate` modes with unambiguous evidence names.
 
-- [ ] **Step 1: Write the failing workflow-boundary test**
+- [x] **Step 1: Write the failing workflow-boundary test**
 
 Add assertions to the `eks_gpu_kueue_poc_workflow_boundary` job:
 
@@ -51,7 +51,7 @@ grep -q "inputs.mode == 'runtime-validate'" "$workflow"
 grep -A180 "inputs.mode == 'runtime-validate'" "$workflow" | grep -q 'aws eks update-kubeconfig'
 ```
 
-- [ ] **Step 2: Run the boundary test and verify failure**
+- [x] **Step 2: Run the boundary test and verify failure**
 
 Run:
 
@@ -61,7 +61,7 @@ grep -q -- '- source-validate' .github/workflows/terraform-eks-gpu-kueue-poc.yml
 
 Expected: exit 1 because the workflow still exposes only `validate`.
 
-- [ ] **Step 3: Split the workflow modes**
+- [x] **Step 3: Split the workflow modes**
 
 Change the dispatch choice to:
 
@@ -81,7 +81,7 @@ Route Terraform formatting, init with `-backend=false`, validate and test to
 to `runtime-validate`, `discover`, `preflight`, `plan`, `apply`, or `stop` as
 their existing contracts require.
 
-- [ ] **Step 4: Correct public status language**
+- [x] **Step 4: Correct public status language**
 
 Record these exact boundaries:
 
@@ -91,7 +91,7 @@ The earlier public EKS sandbox was destroyed and is not the private GPU target.
 AgentCore RAG is a separate managed-runtime path and is not hosted on EKS.
 ```
 
-- [ ] **Step 5: Run source and documentation tests**
+- [x] **Step 5: Run source and documentation tests**
 
 Run:
 
@@ -103,10 +103,10 @@ pnpm test
 Expected: all Node tests pass, including the updated workflow/documentation
 contract.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
-git add .github/workflows/terraform-eks-gpu-kueue-poc.yml .github/workflows/terraform-tests.yaml docs/practices/current-status.md docs/project/BACKLOG.md providers/aws/app/api/tests/eksGpuKueuePocDocumentation.test.ts
+git add .github/workflows/terraform-eks-gpu-kueue-poc.yml .github/workflows/terraform-tests.yaml docs/practices/current-status.md docs/solutions/eks-gpu-kueue-poc-runbook.md providers/aws/app/api/tests/eksGpuKueuePocDocumentation.test.ts
 git commit -m "ci: separate GPU source and runtime validation"
 ```
 
@@ -124,7 +124,7 @@ git commit -m "ci: separate GPU source and runtime validation"
 - Consumes: sensitive outputs from `eks-private-network/terraform.tfstate`.
 - Produces: EKS control plane and CPU nodes attached to reviewed subnet and security-group outputs without recreating network resources.
 
-- [ ] **Step 1: Write the failing Terraform contract**
+- [x] **Step 1: Write the failing Terraform contract**
 
 Replace assertions that reference `module.network` and `module.egress` with:
 
@@ -149,7 +149,7 @@ the sandbox composition:
 grep -q 'terraform_remote_state.*network' providers/aws/infra/terraform/envs/eks-private-sandbox/main.tf
 ```
 
-- [ ] **Step 2: Run Terraform test and verify failure**
+- [x] **Step 2: Run Terraform test and verify failure**
 
 Run:
 
@@ -161,7 +161,7 @@ terraform -chdir=providers/aws/infra/terraform/envs/eks-private-sandbox test
 Expected: FAIL because `network_state_consumed` and remote-state outputs do not
 exist.
 
-- [ ] **Step 3: Add the remote-state contract**
+- [x] **Step 3: Add the remote-state contract**
 
 Add variables:
 
@@ -214,7 +214,7 @@ output "network_state_consumed" {
 }
 ```
 
-- [ ] **Step 4: Wire protected environment values without publishing IDs**
+- [x] **Step 4: Wire protected environment values without publishing IDs**
 
 Set the workflow input from existing non-secret backend variables:
 
@@ -226,7 +226,7 @@ TF_VAR_network_state_region: ${{ vars.AWS_REGION }}
 
 Do not print `terraform_remote_state` output values to the summary or artifact.
 
-- [ ] **Step 5: Run Terraform and full API contract tests**
+- [x] **Step 5: Run Terraform and full API contract tests**
 
 Run:
 
@@ -239,7 +239,7 @@ cd providers/aws/app/api && pnpm test
 
 Expected: all commands exit 0.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add providers/aws/infra/terraform/envs/eks-private-sandbox .github/workflows/terraform-eks-private-sandbox.yml docs/solutions/eks-private-sandbox-runbook.md .github/workflows/terraform-tests.yaml

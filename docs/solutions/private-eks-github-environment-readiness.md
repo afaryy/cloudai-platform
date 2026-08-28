@@ -70,15 +70,12 @@ These are consumed by `.github/workflows/terraform-eks-private-sandbox.yml`:
 | Name | Classification | Purpose |
 | --- | --- | --- |
 | `PRIVATE_EKS_RUNNER_PROJECT_NAME` | variable | Exact CodeBuild project name used in the run-scoped runner label |
-| `PRIVATE_EKS_NETWORK_STATE_KEY` | variable | Reviewed network foundation state-key suffix |
 | `PRIVATE_EKS_RUNNER_FOUNDATION_READY` | variable | Must be exactly `true` after runner foundation validation |
 | `PRIVATE_EKS_RUNNER_READY` | variable | Must be exactly `true` after runner reachability validation |
 | `PRIVATE_EKS_ENDPOINT_POLICY_READY` | variable | Must be exactly `true` after endpoint-policy review |
 | `PRIVATE_EKS_BACKEND_READY` | variable | Must be exactly `true` after backend/lock review |
 | `PRIVATE_EKS_BOOTSTRAP_ROLE_READY` | variable | Must be exactly `true` for the separately reviewed bootstrap exception |
 | `PRIVATE_EKS_GITHUB_ACTIONS_PRINCIPAL_ARN` | variable | Approved OIDC principal ARN passed to the private EKS Terraform state |
-| `PRIVATE_EKS_DELIVERY_RUNNER_SECURITY_GROUP_ID` | variable | Reviewed runner security-group ID |
-| `PRIVATE_EKS_ARTIFACT_BUCKET_ARNS_JSON` | variable | Explicit JSON list of private S3 artifact bucket ARNs |
 | `PRIVATE_EKS_BUDGET_APPROVED` | variable | Must be exactly `true` before remote delivery |
 | `PRIVATE_EKS_MONTHLY_BUDGET_USD` | variable | Positive monthly budget value |
 

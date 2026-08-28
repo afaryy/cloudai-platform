@@ -57,7 +57,7 @@ The repository can now demonstrate:
 - **P5a AI-Assisted DevSecOps Boundary:** advisory AI use, human review, CI/security checks, and release evidence
 - **P5b AI-Assisted Review Evidence:** review summaries, threat-model checklists, CI failure summaries, and release-note drafts
 - **P6f AI Platform Security and Operations Controls:** identity, data protection, AI AppSec, delivery, operations, and FinOps
-- **YY-49 Private EKS Terraform baseline:** separate private-subnet worker target, endpoint-first egress, private-only API intent, and no-public-IP controls; source path only
+- **YY-49 Private EKS Terraform baseline:** separate private-subnet worker target that consumes one network-owned remote state for VPC, CIDR, subnets, endpoint-first egress boundaries, and shared security groups; private-only API intent and no-public-IP controls; source path only
 - **YY-50 Private EKS protected CI path:** VPC-connected CodeBuild runner contract, same-run plan preflight, exact endpoint checks, sanitized evidence, and fail-closed stop; runtime validation pending
 
 Private EKS, ARC and GPU source: source implemented; runtime validation pending.
@@ -97,7 +97,7 @@ It currently has six mock-first lanes:
 | P4e Helm-on-EKS validation workflow | Live sandbox validated | `.github/workflows/helm-eks-validation.yml` and `docs/solutions/ai-release-engineering-on-eks.md` |
 | P4f Helm release workflow | Live install, rollback, and uninstall validated | `.github/workflows/helm-eks-release.yml` and `docs/solutions/ai-release-engineering-on-eks.md` |
 | P4g Argo CD GitOps workflow | Live GitOps sync, health, status, cleanup, and destroy validated | `.github/workflows/argocd-eks-gitops.yml`, `argocd/applications/cloudai-api-sandbox.yaml`, and `docs/solutions/ai-release-engineering-on-eks.md` |
-| YY-49 private EKS Terraform baseline | Source implemented; runtime pending | `providers/aws/infra/terraform/envs/eks-private-sandbox/`, `providers/aws/infra/terraform/modules/private-egress/`, `providers/aws/infra/terraform/modules/private-network/`, and `docs/architecture/private-eks-reference-architecture.md` |
+| YY-49 private EKS Terraform baseline | Source implemented with a single private-network remote-state owner; runtime pending | `providers/aws/infra/terraform/envs/eks-private-sandbox/`, `providers/aws/infra/terraform/envs/eks-private-network/`, and `docs/architecture/private-eks-reference-architecture.md` |
 | YY-50 private EKS protected CI path | Source implemented; runtime pending | `.github/workflows/terraform-eks-private-sandbox.yml` and `docs/solutions/eks-private-sandbox-runbook.md` |
 | YY-51 private EKS network foundation | Source implemented; runtime pending | `providers/aws/infra/terraform/envs/eks-private-network/`, `.github/workflows/terraform-eks-private-network.yml`, and `docs/architecture/private-eks-reference-architecture.md` |
 | YY-52 VPC-connected CodeBuild runner foundation | Source implemented; runtime pending | `providers/aws/infra/terraform/modules/private-runner/`, `providers/aws/infra/terraform/envs/eks-private-runner/`, and `docs/solutions/eks-private-sandbox-runbook.md` |

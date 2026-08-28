@@ -71,11 +71,11 @@ jobs:
       TF_BACKEND_LOCK_TABLE: ${{ vars.TF_BACKEND_LOCK_TABLE }}
       TF_STATE_KEY_PREFIX: ${{ vars.TF_STATE_KEY_PREFIX }}
       TF_STATE_KEY: ${{ vars.TF_STATE_KEY_PREFIX }}/eks-private-sandbox/terraform.tfstate
+      TF_VAR_network_state_bucket: ${{ vars.TF_BACKEND_BUCKET }}
+      TF_VAR_network_state_key: ${{ vars.TF_STATE_KEY_PREFIX }}/eks-private-network/terraform.tfstate
+      TF_VAR_network_state_region: ${{ vars.AWS_REGION || 'ap-southeast-2' }}
       TF_VAR_github_actions_principal_arn: ${{ vars.PRIVATE_EKS_GITHUB_ACTIONS_PRINCIPAL_ARN }}
-      TF_VAR_delivery_runner_security_group_id: ${{ vars.PRIVATE_EKS_DELIVERY_RUNNER_SECURITY_GROUP_ID }}
-      TF_VAR_private_artifact_bucket_arns: ${{ vars.PRIVATE_EKS_ARTIFACT_BUCKET_ARNS_JSON }}
       PRIVATE_EKS_RUNNER_PROJECT_NAME: ${{ vars.PRIVATE_EKS_RUNNER_PROJECT_NAME }}
-      PRIVATE_EKS_NETWORK_STATE_KEY: ${{ vars.PRIVATE_EKS_NETWORK_STATE_KEY }}
       PRIVATE_EKS_RUNNER_FOUNDATION_READY: ${{ vars.PRIVATE_EKS_RUNNER_FOUNDATION_READY }}
       PRIVATE_EKS_BUDGET_APPROVED: ${{ vars.PRIVATE_EKS_BUDGET_APPROVED }}
       PRIVATE_EKS_MONTHLY_BUDGET_USD: ${{ vars.PRIVATE_EKS_MONTHLY_BUDGET_USD }}
@@ -96,7 +96,7 @@ jobs:
           echo "Remote operations require the private-eks environment and a VPC-connected self-hosted runner."
           echo "The existing public eks-sandbox is not read, changed, or destroyed."
           echo "GPU, Kueue, HyperPod, Slurm, and data-centre provisioning are outside this workflow."
-          echo "Network handoff state: ${PRIVATE_EKS_NETWORK_STATE_KEY:-unset}."
+          echo "The private EKS state consumes the reviewed private-network remote state; identifiers are not published."
 
       - name: Check protected private EKS inputs
         env:
@@ -104,7 +104,7 @@ jobs:
           CONFIRMATION: ${{ inputs.confirmation }}
         run: |
           missing=0
-          for name in AWS_ROLE_TO_ASSUME AWS_REGION TF_BACKEND_BUCKET TF_BACKEND_LOCK_TABLE TF_STATE_KEY_PREFIX TF_VAR_github_actions_principal_arn TF_VAR_delivery_runner_security_group_id TF_VAR_private_artifact_bucket_arns PRIVATE_EKS_RUNNER_PROJECT_NAME PRIVATE_EKS_NETWORK_STATE_KEY PRIVATE_EKS_RUNNER_FOUNDATION_READY PRIVATE_EKS_BUDGET_APPROVED PRIVATE_EKS_MONTHLY_BUDGET_USD PRIVATE_EKS_RUNNER_READY PRIVATE_EKS_ENDPOINT_POLICY_READY PRIVATE_EKS_BACKEND_READY PRIVATE_EKS_BOOTSTRAP_ROLE_READY; do
+          for name in AWS_ROLE_TO_ASSUME AWS_REGION TF_BACKEND_BUCKET TF_BACKEND_LOCK_TABLE TF_STATE_KEY_PREFIX TF_VAR_network_state_bucket TF_VAR_network_state_key TF_VAR_network_state_region TF_VAR_github_actions_principal_arn PRIVATE_EKS_RUNNER_PROJECT_NAME PRIVATE_EKS_RUNNER_FOUNDATION_READY PRIVATE_EKS_BUDGET_APPROVED PRIVATE_EKS_MONTHLY_BUDGET_USD PRIVATE_EKS_RUNNER_READY PRIVATE_EKS_ENDPOINT_POLICY_READY PRIVATE_EKS_BACKEND_READY PRIVATE_EKS_BOOTSTRAP_ROLE_READY; do
             if [ -z "${!name}" ]; then
               echo "::error::$name is required in the aws-private-eks environment."
               missing=1
@@ -124,8 +124,8 @@ jobs:
               missing=1
             fi
           done
-          if ! jq -e 'type == "array" and length > 0 and all(.[]; type == "string" and startswith("arn:aws:s3:::"))' <<<"$TF_VAR_private_artifact_bucket_arns" >/dev/null; then
-            echo "::error::PRIVATE_EKS_ARTIFACT_BUCKET_ARNS_JSON must be a non-empty JSON list of explicit S3 bucket ARNs."
+          if [ "$TF_VAR_network_state_key" != "${TF_STATE_KEY_PREFIX}/eks-private-network/terraform.tfstate" ]; then
+            echo "::error::Private EKS must consume the single reviewed private-network state key."
             missing=1
           fi
           if [ "$MODE" = "apply" ] && [ "$CONFIRMATION" != "I_UNDERSTAND_PRIVATE_EKS_APPLY" ]; then
@@ -177,15 +177,23 @@ jobs:
               echo "::error::Apply preflight could not prove a private-only EKS API endpoint."
               exit 1
             fi
-            if ! jq -e '[.resource_changes[]? | select(.type == "aws_subnet" and (.address | contains("private"))) | .change.after.map_public_ip_on_launch] | all(.[]; . == false)' /tmp/private-eks-apply-plan.json >/dev/null; then
-              echo "::error::Apply preflight could not prove private worker subnets have no public IPs."
+            if jq -e '[.resource_changes[]? | select(.type | test("^aws_(vpc|subnet|route_table|route|vpc_endpoint|nat_gateway)$"))] | length > 0' /tmp/private-eks-apply-plan.json >/dev/null; then
+              echo "::error::Private EKS state must not recreate network-foundation resources."
+              exit 1
+            fi
+            if ! jq -e '.planned_values.outputs.network_state_consumed.value == true' /tmp/private-eks-apply-plan.json >/dev/null; then
+              echo "::error::Apply preflight could not prove consumption of the reviewed private-network state."
+              exit 1
+            fi
+            if ! jq -e '(.planned_values.outputs.private_subnet_ids.value | length) == 2 and (.planned_values.outputs.private_subnet_ids.value | all(.[]; type == "string" and startswith("subnet-")))' /tmp/private-eks-apply-plan.json >/dev/null; then
+              echo "::error::Apply preflight could not prove the two private subnet inputs from network state."
               exit 1
             fi
             if jq -e '[.resource_changes[]? | select(.address | test("gpu|kueue|hyperpod|slurm"; "i"))] | length > 0' /tmp/private-eks-apply-plan.json >/dev/null; then
               echo "::error::GPU/Kueue/HyperPod/Slurm resources are outside this worker baseline."
               exit 1
             fi
-          printf '{"mode":"apply","plan_preflight_succeeded":true,"delete_actions":0,"eks_api_private_only":true,"private_subnets_no_public_ip":true,"runner_foundation_ready":true,"gpu_capacity_added":false,"raw_identifiers_published":false}\n' > /tmp/private-eks-preflight-evidence.json
+          printf '{"mode":"apply","plan_preflight_succeeded":true,"delete_actions":0,"network_state_consumed":true,"duplicate_network_resources":false,"eks_api_private_only":true,"runner_foundation_ready":true,"gpu_capacity_added":false,"raw_identifiers_published":false}\n' > /tmp/private-eks-preflight-evidence.json
           else
             terraform output -json > /tmp/private-eks-outputs.json
             vpc_id=$(jq -r '.vpc_id.value' /tmp/private-eks-outputs.json)
@@ -290,7 +298,7 @@ jobs:
         if: ${{ inputs.mode == 'stop' }}
         run: |
           state_resources=$(terraform state list 2>/dev/null || true)
-          if ! grep -Eq '(^|\.)aws_eks_cluster\.this$|(^|\.)aws_vpc\.this$' <<<"$state_resources"; then
+          if ! grep -Eq '(^|\.)aws_eks_cluster\.this$' <<<"$state_resources"; then
             echo "::error::Stop requires an existing private EKS state; it will not create a new environment."
             exit 1
           fi

@@ -336,7 +336,9 @@ jobs:
           grep -q 'PRIVATE_EKS_BUDGET_APPROVED' "$workflow"
           grep -q 'PRIVATE_EKS_MONTHLY_BUDGET_USD' "$workflow"
           grep -q 'PRIVATE_EKS_RUNNER_READY' "$workflow"
-          grep -q 'PRIVATE_EKS_NETWORK_STATE_KEY' "$workflow"
+          grep -q 'TF_VAR_network_state_bucket' "$workflow"
+          grep -q 'TF_VAR_network_state_key' "$workflow"
+          grep -q 'TF_VAR_network_state_region' "$workflow"
           grep -q 'runner_foundation_ready' "$workflow"
           grep -q 'PRIVATE_EKS_ENDPOINT_POLICY_READY' "$workflow"
           grep -q 'PRIVATE_EKS_BACKEND_READY' "$workflow"
@@ -352,6 +354,13 @@ jobs:
           ! grep -q 'terraform destroy' "$workflow"
           ! grep -q 'eks-sandbox/terraform.tfstate' "$workflow"
           ! grep -q 'gpu_instance_type' "$workflow"
+          composition=providers/aws/infra/terraform/envs/eks-private-sandbox/main.tf
+          variables=providers/aws/infra/terraform/envs/eks-private-sandbox/variables.tf
+          ! grep -q 'module "network"' "$composition"
+          ! grep -q 'module "egress"' "$composition"
+          grep -q 'data "terraform_remote_state" "network"' "$composition"
+          ! grep -q 'variable "delivery_runner_security_group_id"' "$variables"
+          ! grep -q 'variable "private_artifact_bucket_arns"' "$variables"
 
   eks_private_network_runner_workflow_boundary:
     name: Private network and runner workflow boundary

@@ -40,6 +40,16 @@ output "cluster_security_group_ids" {
   value       = var.cluster_security_group_ids
 }
 
+output "subnet_ids" {
+  description = "Subnet IDs configured for the cluster and managed node group."
+  value       = var.subnet_ids
+}
+
+output "node_security_group_ids" {
+  description = "Security group IDs configured for managed worker nodes."
+  value       = var.node_security_group_ids
+}
+
 output "github_actions_principal_arn" {
   description = "GitHub Actions principal ARN configured for sandbox Kubernetes API access."
   value       = var.github_actions_principal_arn

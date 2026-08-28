@@ -6,10 +6,13 @@ architecture described in `docs/architecture/private-eks-reference-architecture.
 It is intentionally separate from `envs/eks-sandbox`:
 
 - it uses a different cluster name and backend state key;
+- it consumes VPC, private subnet, worker security-group, and delivery-runner
+  security-group outputs from the separately managed `eks-private-network`
+  state instead of recreating them;
 - worker nodes run only in private subnets with `map_public_ip_on_launch = false`;
 - the EKS Kubernetes API is private-only;
 - AWS service access is endpoint-first;
-- NAT is disabled by default and requires a separate cost approval;
+- NAT and service endpoints remain owned by the private-network state;
 - GPU and Kueue are not included in this first worker baseline.
 
 The shared EKS module currently grants the GitHub provisioning principal a

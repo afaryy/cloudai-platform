@@ -10,10 +10,4 @@ locals {
     TeardownRequired = "true"
   })
 
-  node_role_arn = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${local.name_prefix}-node-role"
-
-  private_ecr_repository_arns = [
-    "arn:aws:ecr:${var.aws_region}:*:repository/${var.project_name}/*"
-  ]
-
 }
