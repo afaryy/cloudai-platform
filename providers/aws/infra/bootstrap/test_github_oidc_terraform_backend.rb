@@ -36,6 +36,20 @@ class GitHubOidcTerraformBackendTest < Minitest::Test
     assert_includes template, "BudgetGuardrailsRoleArn:"
   end
 
+  def test_includes_dedicated_private_eks_network_role
+    assert_includes template, "GitHubActionsPrivateEKSNetworkRole:"
+    assert_includes private_network_role, 'RoleName: !Sub "${GitHubRepo}-aws-private-eks-terraform"'
+    assert_includes private_network_role, 'token.actions.githubusercontent.com:sub: !Sub "repo:${GitHubOrg}/${GitHubRepo}:environment:aws-private-eks"'
+    assert_includes private_network_role, "PrivateEKSNetworkStateKey"
+    assert_includes private_network_role, "ec2:CreateVpc"
+    assert_includes private_network_role, "ec2:CreateVpcEndpoint"
+    assert_includes private_network_role, "ec2:CreateNatGateway"
+    refute_includes private_network_role, "eks:CreateCluster"
+    refute_includes private_network_role, "iam:PassRole"
+    assert_includes template, "PrivateEKSNetworkRoleArn:"
+    assert_includes template, "PrivateEKSNetworkStateKey:"
+  end
+
   def test_bootstrap_role_can_inspect_only_the_recovery_contract
     assert_includes bootstrap_stack_statement, "cloudformation:DescribeStackResources"
     assert_includes bootstrap_role_management_statement, "iam:ListAttachedRolePolicies"
@@ -43,6 +57,7 @@ class GitHubOidcTerraformBackendTest < Minitest::Test
     assert_includes bootstrap_role_management_statement, "iam:DeleteRole"
     assert_includes bootstrap_role_management_statement, "iam:DeleteRolePolicy"
     assert_includes bootstrap_role_management_statement, 'role/${GitHubRepo}-${GitHubEnvironment}-budget-guardrails'
+    assert_includes bootstrap_role_management_statement, 'role/${GitHubRepo}-aws-private-eks-terraform'
     refute_includes bootstrap_role_management_statement, "iam:DeleteUser"
     refute_includes bootstrap_role_management_statement, "iam:DeletePolicy"
   end
@@ -114,6 +129,10 @@ class GitHubOidcTerraformBackendTest < Minitest::Test
 
   def budget_role
     template.split("GitHubActionsBudgetGuardrailsRole:", 2).fetch(1, "").split("AgentCoreRagTerraformPolicy:", 2).first.to_s
+  end
+
+  def private_network_role
+    template.split("GitHubActionsPrivateEKSNetworkRole:", 2).fetch(1, "").split("AgentCoreRagTerraformPolicy:", 2).first.to_s
   end
 
   def bootstrap_role

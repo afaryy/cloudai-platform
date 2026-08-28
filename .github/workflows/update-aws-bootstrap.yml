@@ -49,6 +49,7 @@ jobs:
       AWS_OIDC_PROVIDER_ARN: ${{ vars.AWS_OIDC_PROVIDER_ARN }}
       TF_BACKEND_BUCKET: ${{ vars.TF_BACKEND_BUCKET }}
       TF_BACKEND_LOCK_TABLE: ${{ vars.TF_BACKEND_LOCK_TABLE }}
+      TF_STATE_KEY_PREFIX: ${{ vars.TF_STATE_KEY_PREFIX || 'cloudai-platform' }}
       CHANGE_SET_NAME: ${{ inputs.change_set_name }}
     steps:
       - name: Checkout
@@ -122,6 +123,7 @@ jobs:
             --parameters \
               "ParameterKey=BackendBucketName,ParameterValue=$TF_BACKEND_BUCKET,UsePreviousValue=false" \
               "ParameterKey=LockTableName,ParameterValue=$TF_BACKEND_LOCK_TABLE,UsePreviousValue=false" \
+              "ParameterKey=PrivateEKSNetworkStateKey,ParameterValue=${TF_STATE_KEY_PREFIX}/eks-private-network/terraform.tfstate,UsePreviousValue=false" \
               "ParameterKey=GitHubOrg,ParameterValue=afaryy,UsePreviousValue=false" \
               "ParameterKey=GitHubRepo,ParameterValue=cloudai-platform,UsePreviousValue=false" \
               "ParameterKey=GitHubEnvironment,ParameterValue=aws-sandbox,UsePreviousValue=false" \
