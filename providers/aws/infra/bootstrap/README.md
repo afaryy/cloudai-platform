@@ -10,6 +10,7 @@ The bootstrap layer exists because Terraform needs a backend before it can safel
 - DynamoDB table for Terraform state locking.
 - IAM role for GitHub Actions.
 - Separate IAM role for the protected private-EKS network foundation.
+- Separate IAM role for the VPC-connected CodeBuild runner Terraform state and lifecycle.
 - IAM policy scoped to the sandbox bootstrap and Terraform plan/apply needs.
 - Trust policy that uses an existing account-level GitHub Actions OIDC provider.
 
@@ -34,7 +35,7 @@ Replace `<ACCOUNT_ID>` only in your private local command or AWS console. Do not
    `AWS_ROLE_TO_ASSUME`.
 3. Use the protected `update-aws-bootstrap` GitHub Actions workflow to create
    a CloudFormation change set, review it, then explicitly apply it.
-4. Store the resulting Terraform role ARN as a GitHub environment variable or secret named `AWS_ROLE_TO_ASSUME` in the matching environment. The private-network role is emitted as `PrivateEKSNetworkRoleArn` and must only be stored in `aws-private-eks`.
+4. Store the resulting Terraform role ARN as a GitHub environment variable or secret named `AWS_ROLE_TO_ASSUME` in the matching environment. The private-network role is emitted as `PrivateEKSNetworkRoleArn`; the separate runner-state role is emitted as `PrivateEKSRunnerRoleArn`. Both belong only in `aws-private-eks`, under different variable names.
 5. Use the `aws-sandbox` GitHub environment for manual approval.
 6. Run Terraform validate/plan first.
 7. Run future apply, deploy, GitOps update, and teardown through GitHub Actions rather than laptop-local commands.
@@ -57,6 +58,13 @@ access only the exact `eks-private-network/terraform.tfstate` object and lock
 key, and manages only the EC2/VPC resources declared by the private-network
 Terraform environment. It has no EKS, Kubernetes, ARC, GPU, model invocation,
 or `iam:PassRole` permission.
+
+The private-runner Terraform role is a separate GitHub OIDC identity. It writes
+only `eks-private-runner/terraform.tfstate`, reads the private-network state,
+and manages the reviewed CodeBuild project/webhook, CodeBuild service role and
+policy, and CloudWatch log group. Its `iam:PassRole` permission is limited to
+the exact CodeBuild service role and to `codebuild.amazonaws.com`. It does not
+own network, EKS, ARC, GPU, or Kubernetes resources.
 
 For the P8b Bedrock IAM boundary, an `iam:CreatePolicy` or similar IAM lifecycle denial is remediated by updating this same bootstrap CloudFormation stack before rerunning the Bedrock workflow. The Bedrock statement is limited to roles and customer-managed policies named `cloudai-platform-bedrock-sandbox-*`; it does not grant Bedrock model invocation or `iam:PassRole`.
 
