@@ -16,19 +16,31 @@ variable "runner_project_name" {
   default     = "cloudai-platform-private-eks-runner"
 }
 
-variable "network_foundation_vpc_id" {
-  description = "VPC ID output from the independently managed private network state."
+variable "network_state_bucket" {
+  description = "S3 bucket containing the reviewed private-network state."
   type        = string
+
+  validation {
+    condition     = length(trimspace(var.network_state_bucket)) > 0
+    error_message = "network_state_bucket must not be empty."
+  }
 }
 
-variable "network_foundation_private_subnet_ids" {
-  description = "Private subnet IDs output from the independently managed private network state."
-  type        = list(string)
+variable "network_state_key" {
+  description = "State key owned by the private-network environment."
+  type        = string
+  default     = "cloudai-platform/eks-private-network/terraform.tfstate"
+
+  validation {
+    condition     = endswith(var.network_state_key, "/eks-private-network/terraform.tfstate")
+    error_message = "network_state_key must reference the isolated private-network state."
+  }
 }
 
-variable "network_foundation_runner_security_group_id" {
-  description = "Delivery-runner security group ID output from the private network state."
+variable "network_state_region" {
+  description = "AWS region containing the private-network state bucket."
   type        = string
+  default     = "ap-southeast-2"
 }
 
 variable "github_repository_url" {

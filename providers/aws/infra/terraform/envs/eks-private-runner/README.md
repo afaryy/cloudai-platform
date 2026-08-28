@@ -38,9 +38,16 @@ passed as a Terraform variable.
 Use the dedicated remote-state key
 `cloudai-platform/eks-private-runner/terraform.tfstate`, after the network
 foundation is ready and before private EKS lifecycle operations. The protected
-workflow must provide the network outputs as reviewed inputs. Runtime readiness
-still requires a protected same-run preflight; `runner_ready` is not proof that
-the CodeBuild webhook has executed a job.
+workflow supplies only the private-network backend location; Terraform reads the
+VPC, private subnet, and delivery-runner security-group outputs directly from
+that state. Operators must not copy those identifiers into GitHub variables.
+Runtime readiness still requires protected validation; `runner_ready` is not
+proof that the CodeBuild webhook has executed a job.
+
+The Terraform execution identity is the dedicated runner-state OIDC role named
+by `AWS_PRIVATE_EKS_RUNNER_ROLE_TO_ASSUME`. It is not the private-network role
+and is not the CodeBuild runtime service role. Until that dedicated role has
+been provisioned and reviewed, only `source-validate` is runnable.
 
 ## Evidence
 
