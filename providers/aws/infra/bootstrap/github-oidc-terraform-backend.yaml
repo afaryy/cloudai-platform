@@ -30,6 +30,10 @@ Parameters:
     Type: String
     Default: cost-guardrails/terraform.tfstate
     Description: Exact private Terraform state key permitted to the dedicated Budget Guardrails role.
+  PrivateEKSNetworkStateKey:
+    Type: String
+    Default: cloudai-platform/eks-private-network/terraform.tfstate
+    Description: Exact private Terraform state key permitted to the dedicated private-network role.
   AgentCoreRagNamePrefix:
     Type: String
     Default: cloudaiplatformagentcoreragsandbox
@@ -273,6 +277,105 @@ Resources:
                   - eks:UpdateNodegroupConfig
                   - eks:UpdateNodegroupVersion
                 Resource: "*"
+  GitHubActionsPrivateEKSNetworkRole:
+    Type: AWS::IAM::Role
+    DependsOn: GitHubActionsBootstrapRole
+    Properties:
+      RoleName: !Sub "${GitHubRepo}-aws-private-eks-terraform"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Federated: !Ref ExistingGitHubOidcProviderArn
+            Action: sts:AssumeRoleWithWebIdentity
+            Condition:
+              StringEquals:
+                token.actions.githubusercontent.com:aud: sts.amazonaws.com
+              StringLike:
+                token.actions.githubusercontent.com:sub: !Sub "repo:${GitHubOrg}/${GitHubRepo}:environment:aws-private-eks"
+      Policies:
+        - PolicyName: PrivateEKSNetworkTerraformPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Sid: TerraformBackendAccess
+                Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:PutObject
+                  - s3:DeleteObject
+                Resource:
+                  - !Sub "${TerraformStateBucket.Arn}/${PrivateEKSNetworkStateKey}"
+                  - !Sub "${TerraformStateBucket.Arn}/${PrivateEKSNetworkStateKey}.tflock"
+              - Sid: TerraformStateKeyListing
+                Effect: Allow
+                Action:
+                  - s3:ListBucket
+                Resource: !Sub "${TerraformStateBucket.Arn}"
+                Condition:
+                  StringLike:
+                    s3:prefix:
+                      - !Ref PrivateEKSNetworkStateKey
+                      - !Sub "${PrivateEKSNetworkStateKey}.tflock"
+              - Sid: TerraformLockAccess
+                Effect: Allow
+                Action:
+                  - dynamodb:GetItem
+                  - dynamodb:PutItem
+                  - dynamodb:DeleteItem
+                  - dynamodb:DescribeTable
+                Resource: !Sub "arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${LockTableName}"
+              - Sid: PrivateEKSNetworkReadAccess
+                Effect: Allow
+                Action:
+                  - ec2:Describe*
+                Resource: "*"
+              - Sid: PrivateEKSNetworkLifecycle
+                Effect: Allow
+                Action:
+                  - ec2:AllocateAddress
+                  - ec2:AssociateRouteTable
+                  - ec2:AttachInternetGateway
+                  - ec2:AuthorizeSecurityGroupEgress
+                  - ec2:AuthorizeSecurityGroupIngress
+                  - ec2:CreateInternetGateway
+                  - ec2:CreateNatGateway
+                  - ec2:CreateRoute
+                  - ec2:CreateRouteTable
+                  - ec2:CreateSecurityGroup
+                  - ec2:CreateSubnet
+                  - ec2:CreateTags
+                  - ec2:CreateVpc
+                  - ec2:CreateVpcEndpoint
+                  - ec2:DeleteInternetGateway
+                  - ec2:DeleteNatGateway
+                  - ec2:DeleteRoute
+                  - ec2:DeleteRouteTable
+                  - ec2:DeleteSecurityGroup
+                  - ec2:DeleteSubnet
+                  - ec2:DeleteTags
+                  - ec2:DeleteVpc
+                  - ec2:DeleteVpcEndpoints
+                  - ec2:DetachInternetGateway
+                  - ec2:DisassociateRouteTable
+                  - ec2:ModifyRouteTable
+                  - ec2:ModifySubnetAttribute
+                  - ec2:ModifyVpcAttribute
+                  - ec2:ModifyVpcEndpoint
+                  - ec2:ReleaseAddress
+                  - ec2:ReplaceRoute
+                  - ec2:RevokeSecurityGroupEgress
+                  - ec2:RevokeSecurityGroupIngress
+                Resource: "*"
+      Tags:
+        - Key: Project
+          Value: cloudai-platform
+        - Key: Environment
+          Value: aws-private-eks
+        - Key: ManagedBy
+          Value: cloudformation
+
   AgentCoreRagTerraformPolicy:
     Type: AWS::IAM::ManagedPolicy
     DependsOn: GitHubActionsBootstrapRole
@@ -726,6 +829,7 @@ Resources:
                 Resource:
                   - !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/${GitHubRepo}-${GitHubEnvironment}-terraform"
                   - !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/${GitHubRepo}-${GitHubEnvironment}-budget-guardrails"
+                  - !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/${GitHubRepo}-aws-private-eks-terraform"
                   - !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/${BootstrapRoleName}"
               - Sid: ManageOnlyAgentCoreRagManagedPolicies
                 Effect: Allow
@@ -763,6 +867,12 @@ Outputs:
   BudgetGuardrailsStateKey:
     Description: Fixed state key used only by the dedicated Budget Guardrails Terraform workflow.
     Value: !Ref BudgetGuardrailsStateKey
+  PrivateEKSNetworkRoleArn:
+    Description: Store privately as AWS_ROLE_TO_ASSUME in the aws-private-eks GitHub environment.
+    Value: !GetAtt GitHubActionsPrivateEKSNetworkRole.Arn
+  PrivateEKSNetworkStateKey:
+    Description: Fixed state key used only by the dedicated private-network Terraform workflow.
+    Value: !Ref PrivateEKSNetworkStateKey
   BootstrapRoleArn:
     Description: Store privately as AWS_BOOTSTRAP_ROLE_TO_ASSUME in the aws-sandbox GitHub environment.
     Value: !GetAtt GitHubActionsBootstrapRole.Arn
