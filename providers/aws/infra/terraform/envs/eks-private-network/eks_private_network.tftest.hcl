@@ -49,12 +49,27 @@ run "plans_endpoint_first_network_without_nat" {
 
   assert {
     condition     = length(var.endpoint_principal_arns) >= 3 && length(var.private_subnet_cidrs) == 2
-    error_message = "The network foundation must receive explicit runner, lifecycle, and node-role principals and two private subnets."
+    error_message = "The expanded network phase must receive explicit runner, lifecycle, and node-role principals and two private subnets."
   }
 
   assert {
     condition     = var.enable_nat_gateway == false && var.vpc_cidr != "0.0.0.0/0"
     error_message = "The default delivery runner path must not enable unrestricted Internet egress."
+  }
+}
+
+run "plans_bootstrap_network_with_one_verified_principal" {
+  command = plan
+
+  variables {
+    endpoint_principal_arns      = ["arn:aws:iam::123456789012:role/cloudai-platform-network-bootstrap"]
+    private_ecr_repository_arns  = ["arn:aws:ecr:ap-southeast-2:123456789012:repository/cloudai-platform/*"]
+    private_artifact_bucket_arns = ["arn:aws:s3:::cloudai-platform-private-artifacts"]
+  }
+
+  assert {
+    condition     = length(var.endpoint_principal_arns) == 1
+    error_message = "Bootstrap must accept exactly one explicit existing principal."
   }
 }
 

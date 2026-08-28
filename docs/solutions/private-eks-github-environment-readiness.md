@@ -54,7 +54,8 @@ These are consumed by `.github/workflows/terraform-eks-private-network.yml`:
 | `TF_BACKEND_BUCKET` | variable | Existing Terraform state bucket |
 | `TF_BACKEND_LOCK_TABLE` | variable | Existing Terraform lock table |
 | `TF_STATE_KEY_PREFIX` | variable | State namespace prefix |
-| `PRIVATE_EKS_ENDPOINT_PRINCIPAL_ARNS_JSON` | variable | Explicit IAM role ARNs allowed to use private endpoints; no wildcard principals |
+| `PRIVATE_EKS_ENDPOINT_PRINCIPAL_ARNS_JSON` | variable | Explicit IAM role ARNs allowed to use private endpoints; bootstrap uses one verified role, expanded uses at least three; no wildcard principals |
+| `PRIVATE_EKS_ENDPOINT_PRINCIPAL_PHASE` | variable | Must match the workflow input: `bootstrap` for one existing role, or `expanded` after runner and private-worker roles exist |
 | `PRIVATE_EKS_PRIVATE_ECR_REPOSITORY_ARNS_JSON` | variable | Non-empty JSON list of approved private ECR repository ARNs |
 | `PRIVATE_EKS_ARTIFACT_BUCKET_ARNS_JSON` | variable | Non-empty JSON list of approved S3 bucket ARNs |
 | `PRIVATE_EKS_ENABLE_NAT_GATEWAY` | variable | `false` by default; `true` only after a separate cost and egress decision |
@@ -111,6 +112,8 @@ Follow this order so a missing prerequisite fails before any AWS API call:
    credentials and confirms formatting, validation, tests, and input shape.
 4. Perform read-only discovery for approved endpoint principals, ECR/S3 ARNs,
    CodeBuild project naming, and the selected egress mode. Do not guess values.
+   At the first network phase, use only one verified existing role ARN;
+   future runner and node-role ARNs are not valid bootstrap inputs.
 5. Add the network variables and set the network readiness flags only after
    the values and monthly budget have been reviewed.
 6. Run private-network `plan`; inspect the plan for unexpected resources,
@@ -118,13 +121,16 @@ Follow this order so a missing prerequisite fails before any AWS API call:
 7. Obtain the separate exact confirmation
    `I_UNDERSTAND_PRIVATE_EKS_NETWORK_APPLY` only when the network plan is
    approved. The protected workflow performs its own fresh no-delete plan.
-8. After network foundation verification, configure the private-runner and
+8. After bootstrap network verification, configure the private-runner and
    private-EKS variables. The CodeBuild account-level GitHub source connection
    must be reviewed separately; no GitHub token is stored in Terraform.
-9. Run private-EKS `preflight` before `apply`. Preflight requires an existing
+9. Discover and review the actual delivery-runner and private-worker role ARNs,
+   update the endpoint principal list, select `expanded`, and run a new
+   endpoint-policy plan before private runtime use.
+10. Run private-EKS `preflight` before `apply`. Preflight requires an existing
    state and cluster and proves private-only API access, endpoint availability,
    and no public IPs on worker subnets.
-10. Only after the private worker baseline is healthy should ARC variables and
+11. Only after the private worker baseline is healthy should ARC variables and
     secrets be added. ARC `install` and `smoke` require the separate exact
     confirmation `I_UNDERSTAND_PRIVATE_EKS_ARC_APPLY`.
 
