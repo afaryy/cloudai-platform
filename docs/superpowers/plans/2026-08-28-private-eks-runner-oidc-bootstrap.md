@@ -274,6 +274,6 @@ git add docs/superpowers/plans/2026-08-28-private-eks-runner-oidc-bootstrap.md
 git commit -m "docs: record runner OIDC bootstrap verification"
 ```
 
-- [ ] **Step 6: Push and open a PR**
+- [x] **Step 6: Push and open a PR**
 
 Push `feature/yy-52-runner-oidc-bootstrap` and open a PR that states explicitly: source implemented, AWS apply pending, runner runtime validation pending.
