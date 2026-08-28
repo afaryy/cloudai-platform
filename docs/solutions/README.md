@@ -21,5 +21,6 @@ evidence, validation, trade-offs, and explicit limits.
   [data foundation](p8i-agentcore-rag-data-foundation.md),
   [key process record](p8i-agentcore-rag-key-process-record.md), and
   [POC runbook](agentcore-governed-rag-poc-runbook.md)
+- [Private EKS GitHub Environment Readiness](private-eks-github-environment-readiness.md)
 - [Solution Walkthrough](cloudai-platform-solution-walkthrough.md) and
   [Featured Solutions](featured-solutions.md)
