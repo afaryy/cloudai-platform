@@ -4,16 +4,17 @@ on:
   workflow_dispatch:
     inputs:
       mode:
-        description: "Bounded GPU POC operation; discover is read-only"
+        description: "Bounded GPU POC operation; source validation is credential-free and discovery is read-only"
         required: true
         default: "preflight"
         type: choice
         options:
+          - source-validate
           - discover
           - preflight
           - plan
           - apply
-          - validate
+          - runtime-validate
           - stop
       confirmation:
         description: "Exact confirmation phrase required for apply or stop"
@@ -73,7 +74,7 @@ jobs:
           echo "Apply sets desired GPU capacity to one; stop sets desired GPU capacity to zero."
 
       - name: Validate Terraform source without backend
-        if: ${{ inputs.mode == 'validate' }}
+        if: ${{ inputs.mode == 'source-validate' }}
         run: |
           terraform init -backend=false
           terraform fmt -check -recursive
@@ -81,7 +82,7 @@ jobs:
           terraform test
 
       - name: Check protected environment values
-        if: ${{ inputs.mode != 'validate' }}
+        if: ${{ inputs.mode != 'source-validate' }}
         env:
           MODE: ${{ inputs.mode }}
         run: |
@@ -137,7 +138,7 @@ jobs:
           fi
 
       - name: Configure AWS credentials through GitHub OIDC
-        if: ${{ inputs.mode != 'validate' }}
+        if: ${{ inputs.mode != 'source-validate' }}
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ env.AWS_ROLE_TO_ASSUME }}
@@ -320,7 +321,7 @@ jobs:
           retention-days: 7
 
       - name: Terraform init with isolated remote backend
-        if: ${{ inputs.mode != 'validate' && inputs.mode != 'discover' }}
+        if: ${{ inputs.mode != 'source-validate' && inputs.mode != 'discover' }}
         run: |
           terraform init \
             -backend-config="bucket=${TF_BACKEND_BUCKET}" \
@@ -434,7 +435,7 @@ jobs:
           retention-days: 7
 
       - name: Validate Kueue admission and synthetic CUDA completion
-        if: ${{ inputs.mode == 'validate' }}
+        if: ${{ inputs.mode == 'runtime-validate' }}
         working-directory: .
         env:
           KUBECONFIG: /tmp/eks-gpu-kueue-poc-kubeconfig
@@ -457,7 +458,7 @@ jobs:
           echo '{"one_ready_gpu_node":true,"one_allocatable_gpu":true,"kueue_quota_reserved":true,"kueue_admitted":true,"resource_flavor_checked":true,"synthetic_cuda_job_completed":true}' > /tmp/gpu-poc-validation-evidence.json
 
       - name: Upload sanitised validation evidence
-        if: ${{ inputs.mode == 'validate' }}
+        if: ${{ inputs.mode == 'runtime-validate' }}
         uses: actions/upload-artifact@v4
         with:
           name: eks-gpu-kueue-poc-validation-evidence

@@ -60,6 +60,10 @@ The repository can now demonstrate:
 - **YY-49 Private EKS Terraform baseline:** separate private-subnet worker target, endpoint-first egress, private-only API intent, and no-public-IP controls; source path only
 - **YY-50 Private EKS protected CI path:** VPC-connected CodeBuild runner contract, same-run plan preflight, exact endpoint checks, sanitized evidence, and fail-closed stop; runtime validation pending
 
+Private EKS, ARC and GPU source: source implemented; runtime validation pending.
+The earlier public EKS sandbox was destroyed and is not the private GPU target.
+AgentCore RAG is a separate managed-runtime path and is not hosted on EKS.
+
 **P6 AI Traffic Governance / AgentOps** is the control-plane evidence track.
 It currently has six mock-first lanes:
 

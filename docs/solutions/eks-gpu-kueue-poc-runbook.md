@@ -11,7 +11,7 @@ personal EKS sandbox when that cluster is `ACTIVE`. If the sandbox was
 previously destroyed, stop here: recover the baseline sandbox through its
 separately approved Terraform workflow before attempting this POC. The GPU
 workflow does not create a new EKS control plane. A separate private EKS target
-now exists for Enterprise AI/GPU architecture, but its ordinary private-worker
+now exists for AI/GPU workloads, but its ordinary private-worker
 bootstrap must pass before this GPU path is migrated or treated as runtime
 evidence.
 
@@ -48,13 +48,14 @@ No value above authorises a run by itself. A protected environment approval and 
 
 ## Operation sequence
 
-1. Run read-only `discover` first. When the existing EKS sandbox is `ACTIVE`, it identifies the cluster subnet IDs and Availability Zones, compares the approved candidate GPU offerings and quota, resolves an official CUDA image digest, and records the reviewed Kueue chart version. If the named sandbox is missing or not active, discovery records that fact and may report region-level offering evidence, but it must not invent subnet IDs or configure any GPU environment variable. Discovery does not initialise Terraform, enable capacity, or write GitHub environment variables.
-2. Review the private operator handoff from `discover`, then set the protected environment values explicitly. Do not copy subnet IDs or image digests into public notes.
-3. Run read-only `preflight`. It must confirm that the EKS sandbox is `ACTIVE`, the GPU quota and selected-type offering in every approved subnet Availability Zone are available, the CUDA image is immutable, and the budget-alert readiness flag is true.
-4. Run `plan`. Review the Terraform result without publishing plans, state, endpoints, account IDs, ARNs, kubeconfig, or raw cloud output.
-5. Run `apply` only after protected environment approval and `I_UNDERSTAND_EKS_GPU_KUEUE_POC_APPLY`. Apply temporarily sets dedicated GPU desired capacity to `1`; Kueue does not scale an EKS managed node group.
-6. Run `validate`. It must observe a Ready GPU node with exactly one allocatable GPU, Kueue quota reservation and admission, and Job completion within the five-minute deadline.
-7. Run `stop` only after protected environment approval and `I_UNDERSTAND_EKS_GPU_KUEUE_POC_STOP`. Stop sets only dedicated GPU desired capacity to `0`; it preserves the Terraform definition and state for a later approved demonstration.
+1. Run `source-validate` without AWS credentials. It initializes Terraform with `-backend=false`, checks formatting and validation, and runs the native Terraform tests. It cannot prepare kubeconfig or query the cluster.
+2. Run read-only `discover`. When the existing EKS sandbox is `ACTIVE`, it identifies the cluster subnet IDs and Availability Zones, compares the approved candidate GPU offerings and quota, resolves an official CUDA image digest, and records the reviewed Kueue chart version. If the named sandbox is missing or not active, discovery records that fact and may report region-level offering evidence, but it must not invent subnet IDs or configure any GPU environment variable. Discovery does not initialise Terraform, enable capacity, or write GitHub environment variables.
+3. Review the private operator handoff from `discover`, then set the protected environment values explicitly. Do not copy subnet IDs or image digests into public notes.
+4. Run read-only `preflight`. It must confirm that the EKS sandbox is `ACTIVE`, the GPU quota and selected-type offering in every approved subnet Availability Zone are available, the CUDA image is immutable, and the budget-alert readiness flag is true.
+5. Run `plan`. Review the Terraform result without publishing plans, state, endpoints, account IDs, ARNs, kubeconfig, or raw cloud output.
+6. Run `apply` only after protected environment approval and `I_UNDERSTAND_EKS_GPU_KUEUE_POC_APPLY`. Apply temporarily sets dedicated GPU desired capacity to `1`; Kueue does not scale an EKS managed node group.
+7. Run `runtime-validate` only through the protected environment with AWS credentials. It must observe a Ready GPU node with exactly one allocatable GPU, Kueue quota reservation and admission, and Job completion within the five-minute deadline.
+8. Run `stop` only after protected environment approval and `I_UNDERSTAND_EKS_GPU_KUEUE_POC_STOP`. Stop sets only dedicated GPU desired capacity to `0`; it preserves the Terraform definition and state for a later approved demonstration.
 
 If preflight, plan, admission, GPU allocation, or Job completion fails, do not retry by increasing quota, selecting another instance type, creating another node, or broadening permissions. Capture sanitised failure category evidence and stop for review.
 

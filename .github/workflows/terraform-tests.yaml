@@ -277,7 +277,8 @@ jobs:
           grep -q -- '- preflight' "$workflow"
           grep -q -- '- plan' "$workflow"
           grep -q -- '- apply' "$workflow"
-          grep -q -- '- validate' "$workflow"
+          grep -q -- '- source-validate' "$workflow"
+          grep -q -- '- runtime-validate' "$workflow"
           grep -q -- '- stop' "$workflow"
           grep -q -- '- discover' "$workflow"
           grep -q "inputs.mode == 'discover'" "$workflow"
@@ -296,7 +297,11 @@ jobs:
           grep -q 'QuotaReserved' "$workflow"
           grep -q 'gpu-poc-on-demand' "$workflow"
           grep -q 'raw Terraform output is not published' "$workflow"
-          grep -q 'inputs.mode != '\''validate'\''' "$workflow"
+          grep -q "inputs.mode == 'source-validate'" "$workflow"
+          grep -q "inputs.mode == 'runtime-validate'" "$workflow"
+          grep -q "inputs.mode != 'source-validate'" "$workflow"
+          ! grep -A80 "inputs.mode == 'source-validate'" "$workflow" | grep -q 'aws eks update-kubeconfig'
+          grep -A180 "inputs.mode == 'runtime-validate'" "$workflow" | grep -q 'aws eks update-kubeconfig'
           ! grep -q 'terraform destroy' "$workflow"
           grep -q 'aws ec2 describe-instance-type-offerings' "$workflow"
           grep -q 'auth.docker.io/token' "$workflow"
