@@ -10,9 +10,11 @@ ARC.
 As of 28 August 2026, the `aws-private-eks` Environment exists. Read-only API
 inspection confirms a required reviewer, disabled administrator bypass, and a
 `main` deployment branch policy. The shared backend/OIDC names are present,
-and the network bootstrap variables are configured. Private-runner, private-EKS, and ARC
-readiness variables and ARC secrets remain pending, so the runner, EKS, and ARC
-runtime paths remain blocked.
+and the network bootstrap variables are configured. The runner-role source
+contract is implemented; CloudFormation apply remains pending, and runner
+runtime validation remains pending. Private-runner, private-EKS, and ARC
+readiness variables and ARC secrets therefore remain pending, so the runner,
+EKS, and ARC runtime paths remain blocked.
 
 Variable presence is configuration evidence only. It does not prove that a
 value is correct, that the network state has the latest output contract, or
@@ -132,12 +134,14 @@ Follow this order so a missing prerequisite fails before any AWS API call:
    approved. The protected workflow performs its own fresh no-delete plan.
 8. Ensure the applied network state contains the current remote-output
    contract, including `vpc_cidr`, before any consumer state is planned.
-9. After bootstrap network verification, provision and review a dedicated
-   runner-state OIDC role. Configure `AWS_PRIVATE_EKS_RUNNER_ROLE_TO_ASSUME`
-   with that role; do not reuse or expand the network-state role. Then configure
-   the remaining private-runner and private-EKS variables. The CodeBuild
-   account-level GitHub source connection must be reviewed separately; no
-   GitHub token is stored in Terraform.
+9. After bootstrap network verification, review the dedicated runner-state OIDC
+   role in the bootstrap source, create and inspect a non-executing change set,
+   and obtain a separate apply approval. Only after apply should
+   `AWS_PRIVATE_EKS_RUNNER_ROLE_TO_ASSUME` be configured from
+   `PrivateEKSRunnerRoleArn`; do not reuse or expand the network-state role.
+   Then configure the remaining private-runner and private-EKS variables. The
+   CodeBuild account-level GitHub source connection must be reviewed separately;
+   no GitHub token is stored in Terraform.
 10. Discover and review the actual delivery-runner and private-worker role ARNs,
    update the endpoint principal list, select `expanded`, and run a new
    endpoint-policy plan before private runtime use.

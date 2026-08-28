@@ -124,6 +124,7 @@ jobs:
               "ParameterKey=BackendBucketName,ParameterValue=$TF_BACKEND_BUCKET,UsePreviousValue=false" \
               "ParameterKey=LockTableName,ParameterValue=$TF_BACKEND_LOCK_TABLE,UsePreviousValue=false" \
               "ParameterKey=PrivateEKSNetworkStateKey,ParameterValue=${TF_STATE_KEY_PREFIX}/eks-private-network/terraform.tfstate,UsePreviousValue=false" \
+              "ParameterKey=PrivateEKSRunnerStateKey,ParameterValue=${TF_STATE_KEY_PREFIX}/eks-private-runner/terraform.tfstate,UsePreviousValue=false" \
               "ParameterKey=GitHubOrg,ParameterValue=afaryy,UsePreviousValue=false" \
               "ParameterKey=GitHubRepo,ParameterValue=cloudai-platform,UsePreviousValue=false" \
               "ParameterKey=GitHubEnvironment,ParameterValue=aws-sandbox,UsePreviousValue=false" \
@@ -179,4 +180,24 @@ jobs:
             printf '%s\n' 'Add this exact value as the aws-sandbox Environment variable `AWS_BUDGET_GUARDRAILS_ROLE_TO_ASSUME`:'
             printf '%s\n' ''
             printf '`%s`\n' "$budget_guardrails_role_arn"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Publish private EKS runner role handoff
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.mode == 'apply' && success() }}
+        run: |
+          private_eks_runner_role_arn="$(aws cloudformation describe-stacks \
+            --stack-name "$AWS_BOOTSTRAP_STACK_NAME" \
+            --query "Stacks[0].Outputs[?OutputKey=='PrivateEKSRunnerRoleArn'].OutputValue | [0]" \
+            --output text)"
+          if [ -z "$private_eks_runner_role_arn" ] || [ "$private_eks_runner_role_arn" = "None" ]; then
+            echo "::error::Bootstrap stack did not return PrivateEKSRunnerRoleArn."
+            exit 1
+          fi
+          echo "::add-mask::$private_eks_runner_role_arn"
+          {
+            printf '%s\n' '## Private EKS runner Environment handoff'
+            printf '%s\n' ''
+            printf '%s\n' 'Add this exact value as the aws-private-eks Environment variable `AWS_PRIVATE_EKS_RUNNER_ROLE_TO_ASSUME`:'
+            printf '%s\n' ''
+            printf '`%s`\n' "$private_eks_runner_role_arn"
           } >> "$GITHUB_STEP_SUMMARY"

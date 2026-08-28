@@ -12,6 +12,8 @@ const environmentReadinessPath = resolve(repoRoot, "docs/solutions/private-eks-g
 const runnerMainPath = resolve(repoRoot, "providers/aws/infra/terraform/envs/eks-private-runner/main.tf");
 const runnerWorkflowPath = resolve(repoRoot, ".github/workflows/terraform-eks-private-runner.yml");
 const runnerRunbookPath = resolve(repoRoot, "docs/solutions/vpc-connected-runner-runbook.md");
+const bootstrapTemplatePath = resolve(repoRoot, "providers/aws/infra/bootstrap/github-oidc-terraform-backend.yaml");
+const bootstrapWorkflowPath = resolve(repoRoot, ".github/workflows/update-aws-bootstrap.yml");
 
 test("private EKS architecture preserves the public sandbox boundary", async () => {
   const architecture = await readFile(architecturePath, "utf8");
@@ -118,4 +120,22 @@ test("private runner consumes network state without overstating runtime readines
   assert.match(runnerRunbook, /runtime validation remains pending/i);
   assert.match(architecture, /protected runner lifecycle\s+workflow is source implemented/is);
   assert.match(runbook, /protected lifecycle workflow is source implemented/is);
+});
+
+test("private runner bootstrap documents the three-identity handoff without claiming runtime", async () => {
+  const [bootstrapTemplate, bootstrapWorkflow, runnerRunbook, readiness] = await Promise.all([
+    readFile(bootstrapTemplatePath, "utf8"),
+    readFile(bootstrapWorkflowPath, "utf8"),
+    readFile(runnerRunbookPath, "utf8"),
+    readFile(environmentReadinessPath, "utf8"),
+  ]);
+
+  assert.match(bootstrapTemplate, /GitHubActionsPrivateEKSRunnerRole/);
+  assert.match(bootstrapTemplate, /PrivateEKSRunnerRoleArn/);
+  assert.match(bootstrapWorkflow, /Publish private EKS runner role handoff/);
+  assert.match(bootstrapWorkflow, /AWS_PRIVATE_EKS_RUNNER_ROLE_TO_ASSUME/);
+  assert.match(runnerRunbook, /bootstrap source now defines identity 2/i);
+  assert.match(readiness, /runner-role source\s+contract is implemented/i);
+  assert.match(`${runnerRunbook}\n${readiness}`, /CloudFormation apply remains pending/i);
+  assert.match(`${runnerRunbook}\n${readiness}`, /runner\s+runtime validation remains pending/i);
 });

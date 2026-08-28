@@ -1,6 +1,10 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Description: Public-safe bootstrap example for cloudai-platform Terraform backend and GitHub Actions OIDC role.
 
+Metadata:
+  AWSToolsMetrics:
+    AWSAgentToolkit: aws-cloudformation@2
+
 Parameters:
   BackendBucketName:
     Type: String
@@ -34,6 +38,10 @@ Parameters:
     Type: String
     Default: cloudai-platform/eks-private-network/terraform.tfstate
     Description: Exact private Terraform state key permitted to the dedicated private-network role.
+  PrivateEKSRunnerStateKey:
+    Type: String
+    Default: cloudai-platform/eks-private-runner/terraform.tfstate
+    Description: Exact private Terraform state key permitted to the dedicated runner-state role.
   AgentCoreRagNamePrefix:
     Type: String
     Default: cloudaiplatformagentcoreragsandbox
@@ -366,6 +374,130 @@ Resources:
                   - ec2:ReplaceRoute
                   - ec2:RevokeSecurityGroupEgress
                   - ec2:RevokeSecurityGroupIngress
+                Resource: "*"
+      Tags:
+        - Key: Project
+          Value: cloudai-platform
+        - Key: Environment
+          Value: aws-private-eks
+        - Key: ManagedBy
+          Value: cloudformation
+
+  GitHubActionsPrivateEKSRunnerRole:
+    Type: AWS::IAM::Role
+    DependsOn: GitHubActionsBootstrapRole
+    Properties:
+      RoleName: !Sub "${GitHubRepo}-aws-private-eks-runner-terraform"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Federated: !Ref ExistingGitHubOidcProviderArn
+            Action: sts:AssumeRoleWithWebIdentity
+            Condition:
+              StringEquals:
+                token.actions.githubusercontent.com:aud: sts.amazonaws.com
+              StringLike:
+                token.actions.githubusercontent.com:sub: !Sub "repo:${GitHubOrg}/${GitHubRepo}:environment:aws-private-eks"
+      Policies:
+        - PolicyName: PrivateEKSRunnerTerraformPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Sid: PrivateEKSRunnerStateAccess
+                Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:PutObject
+                  - s3:DeleteObject
+                Resource:
+                  - !Sub "${TerraformStateBucket.Arn}/${PrivateEKSRunnerStateKey}"
+                  - !Sub "${TerraformStateBucket.Arn}/${PrivateEKSRunnerStateKey}.tflock"
+              - Sid: PrivateEKSNetworkStateReadOnly
+                Effect: Allow
+                Action:
+                  - s3:GetObject
+                Resource:
+                  - !Sub "${TerraformStateBucket.Arn}/${PrivateEKSNetworkStateKey}"
+              - Sid: PrivateEKSRunnerStateKeyListing
+                Effect: Allow
+                Action:
+                  - s3:ListBucket
+                Resource: !Sub "${TerraformStateBucket.Arn}"
+                Condition:
+                  StringLike:
+                    s3:prefix:
+                      - !Ref PrivateEKSRunnerStateKey
+                      - !Sub "${PrivateEKSRunnerStateKey}.tflock"
+                      - !Ref PrivateEKSNetworkStateKey
+                      - !Sub "${PrivateEKSNetworkStateKey}.tflock"
+              - Sid: PrivateEKSRunnerLockAccess
+                Effect: Allow
+                Action:
+                  - dynamodb:GetItem
+                  - dynamodb:PutItem
+                  - dynamodb:DeleteItem
+                  - dynamodb:DescribeTable
+                Resource: !Sub "arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${LockTableName}"
+              - Sid: ManageOnlyPrivateEKSRunnerCodeBuildProject
+                Effect: Allow
+                Action:
+                  - codebuild:BatchGetProjects
+                  - codebuild:CreateProject
+                  - codebuild:CreateWebhook
+                  - codebuild:UpdateProjectVisibility
+                Resource: !Sub "arn:${AWS::Partition}:codebuild:${AWS::Region}:${AWS::AccountId}:project/cloudai-platform-private-eks-runner"
+              - Sid: ManageOnlyPrivateEKSRunnerServiceRole
+                Effect: Allow
+                Action:
+                  - iam:AttachRolePolicy
+                  - iam:CreateRole
+                  - iam:DeleteRole
+                  - iam:DeleteRolePolicy
+                  - iam:DetachRolePolicy
+                  - iam:GetRole
+                  - iam:GetRolePolicy
+                  - iam:ListAttachedRolePolicies
+                  - iam:ListInstanceProfilesForRole
+                  - iam:ListRolePolicies
+                  - iam:ListRoleTags
+                  - iam:PutRolePolicy
+                  - iam:TagRole
+                  - iam:UntagRole
+                Resource: !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cloudai-platform-eks-private-runner-private-runner"
+              - Sid: ManageOnlyPrivateEKSRunnerServicePolicy
+                Effect: Allow
+                Action:
+                  - iam:CreatePolicy
+                  - iam:GetPolicy
+                  - iam:GetPolicyVersion
+                  - iam:ListPolicyTags
+                  - iam:TagPolicy
+                  - iam:UntagPolicy
+                Resource: !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:policy/cloudai-platform-eks-private-runner-private-runner"
+              - Sid: PassOnlyPrivateEKSRunnerServiceRole
+                Effect: Allow
+                Action:
+                  - iam:PassRole
+                Resource: !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cloudai-platform-eks-private-runner-private-runner"
+                Condition:
+                  StringEquals:
+                    iam:PassedToService: codebuild.amazonaws.com
+              - Sid: ManageOnlyPrivateEKSRunnerLogGroup
+                Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:ListTagsForResource
+                  - logs:PutRetentionPolicy
+                  - logs:TagLogGroup
+                  - logs:TagResource
+                  - logs:UntagResource
+                Resource: !Sub "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/cloudai-platform-private-eks-runner*"
+              - Sid: DescribeRunnerLogGroups
+                Effect: Allow
+                Action:
+                  - logs:DescribeLogGroups
                 Resource: "*"
       Tags:
         - Key: Project
@@ -829,6 +961,7 @@ Resources:
                   - !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/${GitHubRepo}-${GitHubEnvironment}-terraform"
                   - !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/${GitHubRepo}-${GitHubEnvironment}-budget-guardrails"
                   - !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/${GitHubRepo}-aws-private-eks-terraform"
+                  - !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/${GitHubRepo}-aws-private-eks-runner-terraform"
                   - !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/${BootstrapRoleName}"
               - Sid: ManageOnlyAgentCoreRagManagedPolicies
                 Effect: Allow
@@ -872,6 +1005,12 @@ Outputs:
   PrivateEKSNetworkStateKey:
     Description: Fixed state key used only by the dedicated private-network Terraform workflow.
     Value: !Ref PrivateEKSNetworkStateKey
+  PrivateEKSRunnerRoleArn:
+    Description: Store privately as AWS_PRIVATE_EKS_RUNNER_ROLE_TO_ASSUME in the aws-private-eks GitHub environment.
+    Value: !GetAtt GitHubActionsPrivateEKSRunnerRole.Arn
+  PrivateEKSRunnerStateKey:
+    Description: Fixed state key used only by the dedicated runner Terraform workflow.
+    Value: !Ref PrivateEKSRunnerStateKey
   BootstrapRoleArn:
     Description: Store privately as AWS_BOOTSTRAP_ROLE_TO_ASSUME in the aws-sandbox GitHub environment.
     Value: !GetAtt GitHubActionsBootstrapRole.Arn

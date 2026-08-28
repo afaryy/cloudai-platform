@@ -36,11 +36,12 @@ Three identities remain separate:
 3. The CodeBuild service role is assumed only by CodeBuild during ephemeral
    runner execution and has no Terraform backend ownership.
 
-The current CloudFormation bootstrap does not yet provision identity 2.
-`AWS_PRIVATE_EKS_RUNNER_ROLE_TO_ASSUME` must therefore remain unset until a
-separately reviewed least-privilege bootstrap change creates it. Reusing
-`AWS_ROLE_TO_ASSUME` would collapse the state and identity boundaries and is not
-an approved workaround.
+The bootstrap source now defines identity 2 with a reviewed state and service
+lifecycle boundary. CloudFormation apply remains pending, so
+`AWS_PRIVATE_EKS_RUNNER_ROLE_TO_ASSUME` must remain unset until a change set is
+reviewed, applied, and its output is stored in `aws-private-eks`. Runner runtime
+validation remains pending. Reusing `AWS_ROLE_TO_ASSUME` would collapse the
+state and identity boundaries and is not an approved workaround.
 
 ## State ownership
 
@@ -152,8 +153,9 @@ for downstream use.
 
 ## Safe next gate
 
-Before protected plan or apply, add the dedicated runner-state OIDC role to the
-bootstrap stack, review its exact state and AWS API permissions, apply that
-bootstrap change through the protected bootstrap workflow, and store its output
-as `AWS_PRIVATE_EKS_RUNNER_ROLE_TO_ASSUME`. No runtime claim is valid before
-that prerequisite is complete.
+Before protected runner plan or apply, review the dedicated runner-state OIDC
+role already defined in the bootstrap source, create a non-executing
+CloudFormation change set, and inspect its exact IAM change. Only after separate
+approval may that change set be applied and its output stored as
+`AWS_PRIVATE_EKS_RUNNER_ROLE_TO_ASSUME`. No runtime claim is valid before that
+prerequisite is complete.
