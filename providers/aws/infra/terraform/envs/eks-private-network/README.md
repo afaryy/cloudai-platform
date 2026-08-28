@@ -30,8 +30,10 @@ or state files in this directory.
 
 ## Required protected inputs
 
-- explicit IAM principal ARNs for endpoint policies, including the
-  deterministic private-EKS node-role ARN contract;
+- explicit IAM principal ARNs for endpoint policies. The protected workflow
+  uses a staged lifecycle: `bootstrap` accepts exactly one already-existing
+  role ARN, while `expanded` requires at least three explicit ARNs after the
+  delivery-runner and private-worker roles exist;
 - explicit private ECR repository ARNs or scoped ARN patterns;
 - explicit private S3 artifact bucket ARNs;
 - a separately approved budget before any apply;
@@ -45,3 +47,21 @@ this network foundation, but the workflow must not run `kubectl`, `helm`, or
 private Kubernetes API operations. After this state is ready, a CodeBuild-hosted
 ephemeral runner is validated against the VPC before private EKS lifecycle
 operations begin.
+
+## Endpoint-principal lifecycle
+
+The endpoint policy is deliberately configured in two explicit phases:
+
+1. **Bootstrap:** pass one verified, already-existing IAM role ARN so the
+   network foundation can be created without inventing future role names.
+   Bootstrap does not prove that the private runner or EKS worker can use the
+   endpoints.
+2. **Expanded:** after the dedicated delivery-runner and private-worker roles
+   have been created and reviewed, pass all actual role ARNs (at least three)
+   and run a new plan to update endpoint policies before private EKS runtime
+   operations.
+
+Terraform does not discover, synthesize, or predict future role ARNs. The
+workflow phase input must match the protected
+`PRIVATE_EKS_ENDPOINT_PRINCIPAL_PHASE` environment variable, preventing a
+plan from silently using the wrong lifecycle phase.
