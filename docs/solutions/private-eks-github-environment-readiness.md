@@ -7,11 +7,16 @@ ARC.
 
 ## Current discovery
 
-As of 28 August 2026, the repository has an `aws-sandbox` Environment but no
-`aws-private-eks` Environment. The private-network, private-runner,
-private-sandbox, and ARC workflows therefore remain source-implemented and
-runtime-pending. Do not dispatch a protected remote mode until the environment
-has been created and reviewed.
+As of 28 August 2026, the `aws-private-eks` Environment exists. Read-only API
+inspection confirms a required reviewer, disabled administrator bypass, and a
+`main` deployment branch policy. The shared backend/OIDC names are present,
+and the network bootstrap variables are configured. Private-runner, private-EKS, and ARC
+readiness variables and ARC secrets remain pending, so the runner, EKS, and ARC
+runtime paths remain blocked.
+
+Variable presence is configuration evidence only. It does not prove that a
+value is correct, that the network state has the latest output contract, or
+that any AWS resource or private Kubernetes path has passed runtime validation.
 
 The existing public `aws-sandbox` values are not automatically suitable for the
 private path. The private path must keep its own environment-level approvals,
@@ -19,15 +24,14 @@ state keys, runner project, endpoint-policy gates, and budget decision.
 
 ## Required protection model
 
-Create an Environment named exactly `aws-private-eks` in the repository's
+Maintain the Environment named exactly `aws-private-eks` in the repository's
 Settings → Environments page.
 
 Configure the following before adding runtime values:
 
-1. Add at least one required reviewer who can approve private-EKS changes.
-2. Restrict deployments to the reviewed delivery branch policy used for this
-   project (the default branch and the reviewed feature/PR path as appropriate
-   for the current change-control process).
+1. Retain at least one required reviewer who can approve private-EKS changes.
+2. Retain the reviewed `main` deployment branch policy; add a reviewed PR path
+   only when the change-control model explicitly requires it.
 3. Keep environment secrets unavailable to pull requests from forks.
 4. Do not add a bypass rule for the private-EKS environment.
 5. Keep production credentials, personal access tokens, kubeconfigs, private
@@ -102,7 +106,7 @@ runner identity are separate trust domains.
 
 Follow this order so a missing prerequisite fails before any AWS API call:
 
-1. Create `aws-private-eks` and configure its required reviewer and branch
+1. Create or confirm `aws-private-eks`, its required reviewer, and its branch
    policy.
 2. Add only the shared backend and OIDC values that have already been reviewed.
 3. Run the private-network workflow in `validate` mode. This mode uses no AWS
@@ -118,16 +122,19 @@ Follow this order so a missing prerequisite fails before any AWS API call:
 7. Obtain the separate exact confirmation
    `I_UNDERSTAND_PRIVATE_EKS_NETWORK_APPLY` only when the network plan is
    approved. The protected workflow performs its own fresh no-delete plan.
-8. After bootstrap network verification, configure the private-runner and
+8. Ensure the applied network state contains the current remote-output
+   contract, including `vpc_cidr`, before any consumer state is planned.
+9. After bootstrap network verification, configure the private-runner and
    private-EKS variables. The CodeBuild account-level GitHub source connection
    must be reviewed separately; no GitHub token is stored in Terraform.
-9. Discover and review the actual delivery-runner and private-worker role ARNs,
+10. Discover and review the actual delivery-runner and private-worker role ARNs,
    update the endpoint principal list, select `expanded`, and run a new
    endpoint-policy plan before private runtime use.
-10. Run private-EKS `preflight` before `apply`. Preflight requires an existing
-   state and cluster and proves private-only API access, endpoint availability,
-   and no public IPs on worker subnets.
-11. Only after the private worker baseline is healthy should ARC variables and
+11. For the first private-EKS deployment, review `plan`, then use `apply`; the
+    apply mode performs a fresh same-run plan preflight. Use standalone
+    `preflight` only when an existing state and cluster can be revalidated for
+    private-only API access, endpoints, and no-public-IP subnets.
+12. Only after the private worker baseline is healthy should ARC variables and
     secrets be added. ARC `install` and `smoke` require the separate exact
     confirmation `I_UNDERSTAND_PRIVATE_EKS_ARC_APPLY`.
 

@@ -17,6 +17,11 @@ workloads. It does not call the Kubernetes API. Its outputs are consumed by
 the VPC runner foundation and private EKS baseline through reviewed remote
 state or protected workflow handoff.
 
+The consumer contract exports the VPC ID, VPC CIDR, private subnet IDs,
+private route-table IDs, delivery-runner and worker security groups, endpoint
+identifiers, NAT category, and a sanitised readiness Boolean. Live identifiers
+remain sensitive and must not be copied into public evidence.
+
 ## State boundary
 
 Use the isolated key:

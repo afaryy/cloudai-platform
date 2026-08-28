@@ -115,12 +115,14 @@ The source-only foundation is split into three independently managed states:
 1. `eks-private-network` creates the VPC, private subnets, endpoint policy,
    route, and security-group boundary. It never calls the Kubernetes API.
 2. `eks-private-runner` creates the CodeBuild project, webhook, CloudWatch log
-   group, and least-privilege CodeBuild service role. It consumes reviewed IDs
-   from the network state and does not store GitHub tokens in Terraform.
+   group, and least-privilege CodeBuild service role. Its current source accepts
+   reviewed network-output inputs and does not store GitHub tokens in Terraform.
+   Direct remote-state consumption and the protected runner lifecycle workflow
+   remain the next implementation gate.
 3. `eks-private-sandbox` consumes the network state's VPC, VPC CIDR, private
-   subnets, worker security group, and delivery-runner security group. It creates only
-   the EKS/CPU-worker boundary and is routed to the run-scoped CodeBuild label
-   after the runner readiness gate.
+   subnets, worker security group, and delivery-runner security group. It
+   creates only the EKS/CPU-worker boundary and is routed to the run-scoped
+   CodeBuild label after the runner readiness gate.
 
 The ARC handoff is a separate post-bootstrap workflow. It is not a replacement
 for the network or recovery path and remains runtime-pending until the private
@@ -128,3 +130,22 @@ worker baseline has been validated.
 
 Do not add GPU, Kueue, HyperPod, Slurm, or real data-centre capacity until the
 ordinary private-worker validation is independently approved.
+
+## Remote-state migration gate
+
+The private-network state must be refreshed through its protected plan/apply
+path after the `vpc_cidr` output is introduced. A source-only code change does
+not populate that output in an already existing remote state. Before the first
+private-EKS remote plan:
+
+1. run and review the private-network protected plan;
+2. confirm it contains no unexpected resource or delete action;
+3. apply the reviewed network-state update through its exact confirmation;
+4. verify the sanitised network evidence; and
+5. only then let `eks-private-sandbox` read the remote outputs.
+
+For a first private-EKS deployment, run `plan` and then `apply`; the `apply`
+mode creates and checks a fresh same-run plan preflight before mutation. The
+standalone `preflight` mode requires an existing state and cluster and is for
+post-deployment revalidation, not a prerequisite that can run before the first
+apply.

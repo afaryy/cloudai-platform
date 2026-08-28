@@ -6,9 +6,9 @@ architecture described in `docs/architecture/private-eks-reference-architecture.
 It is intentionally separate from `envs/eks-sandbox`:
 
 - it uses a different cluster name and backend state key;
-- it consumes VPC, private subnet, worker security-group, and delivery-runner
-  security-group outputs from the separately managed `eks-private-network`
-  state instead of recreating them;
+- it consumes VPC, VPC CIDR, private subnet, worker security-group, and
+  delivery-runner security-group outputs from the separately managed
+  `eks-private-network` state instead of recreating them;
 - worker nodes run only in private subnets with `map_public_ip_on_launch = false`;
 - the EKS Kubernetes API is private-only;
 - AWS service access is endpoint-first;
