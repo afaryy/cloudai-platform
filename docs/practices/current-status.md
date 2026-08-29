@@ -57,6 +57,11 @@ The repository can now demonstrate:
   IAM Gateway/Runtime target, and confirmation-gated CI ingestion/invocation
   controls deployed; direct Bedrock preflight, Gateway end-to-end evidence, and
   bounded CloudWatch observability are complete; teardown remains separately gated
+- **Framework-neutral agent evaluation telemetry:** locally contract-tested
+  OpenTelemetry GenAI and OpenInference normalization, fixed synthetic prompts,
+  expected tool trajectories, strict deterministic dimensions, and a
+  metadata-only required CI artifact; the local gate does not call AWS and the
+  protected provider-parity lane remains pending
 - **P5a AI-Assisted DevSecOps Boundary:** advisory AI use, human review, CI/security checks, and release evidence
 - **P5b AI-Assisted Review Evidence:** review summaries, threat-model checklists, CI failure summaries, and release-note drafts
 - **P6f AI Platform Security and Operations Controls:** identity, data protection, AI AppSec, delivery, operations, and FinOps
@@ -117,6 +122,7 @@ It currently has six mock-first lanes:
 | P8h AgentCore knowledge-lookup readiness | Complete static gateway-first reference architecture; no AgentCore resource or call | `docs/solutions/p8h-agentcore-knowledge-lookup-readiness.md` |
 | P8i AgentCore synthetic contract pack | Complete local synthetic contract evidence; provider-neutral pack remains separate from the live AWS validation | `shared/schemas/agentcore-readiness/`, `shared/examples/agentcore-readiness/`, `providers/aws/app/api/tests/agentcoreReadinessContracts.test.ts`, and `docs/solutions/p8i-agentcore-synthetic-contract-pack.md` |
 | AgentCore governed RAG POC | Synthetic data foundation, arm64 Runtime, IAM Gateway/Runtime target, direct Bedrock preflight, Gateway end-to-end evidence, and bounded CloudWatch observability complete through protected CI; teardown remains separately gated | `providers/aws/app/agentcore-rag-runtime/`, `providers/aws/agentcore/`, `.github/workflows/terraform-agentcore-rag-sandbox.yml`, `providers/aws/infra/bootstrap/github-oidc-terraform-backend.yaml`, `docs/solutions/p8i-agentcore-rag-data-foundation.md`, `docs/solutions/p8i-agentcore-rag-key-process-record.md`, and `docs/solutions/agentcore-governed-rag-poc-runbook.md` |
+| Framework-neutral agent evaluation telemetry | Locally contract-tested with synthetic OpenTelemetry GenAI and OpenInference fixtures; required CI gate does not call AWS; protected provider-parity lane pending | `shared/schemas/agent-evaluation-telemetry/`, `shared/examples/agent-evaluation-telemetry/`, `providers/aws/app/api/src/evals/agentEvaluationTelemetryNormalizer.ts`, `providers/aws/app/api/src/evals/agentEvaluationTelemetryGate.ts`, and `docs/solutions/agent-evaluation-telemetry-runbook.md` |
 | P5a AI-assisted DevSecOps boundary | Complete | `docs/practices/ai-assisted-devsecops-pattern.md` and `.github/workflows/ai-assisted-devsecops.yml` |
 | P5b AI-assisted review evidence | Complete | `docs/evidence/ai-assisted-review-evidence.md`, `shared/schemas/ai-assisted-devsecops/`, and `shared/examples/ai-assisted-devsecops/` |
 | P6d control-plane evidence map | Complete | `docs/evidence/control-plane-evidence-map.md`, `shared/schemas/control-plane-evidence/`, and `shared/examples/control-plane-evidence/` |

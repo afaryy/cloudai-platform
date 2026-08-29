@@ -10,6 +10,7 @@
     "dev": "tsc -p tsconfig.json && node dist/src/server.js",
     "start": "node dist/src/server.js",
     "test": "tsc -p tsconfig.json && node --test \"dist/tests/**/*.test.js\"",
+    "agent-eval:gate": "pnpm run build && node dist/src/scripts/runAgentEvaluationTelemetryGate.js",
     "bedrock:smoke": "pnpm run build && node dist/src/scripts/bedrockAdapterSmoke.js"
   },
   "devDependencies": {

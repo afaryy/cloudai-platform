@@ -170,6 +170,31 @@ raw answers, credentials, or unrestricted provider diagnostics. Budget tags,
 quotas, and a manual teardown gate remain part of the sandbox operating model;
 the sandbox is currently kept deployed for demonstrations.
 
+### Framework-neutral evaluation telemetry
+
+The evaluation boundary separates an agent framework from the quality gate.
+Synthetic OpenTelemetry GenAI and OpenInference traces are normalized into one
+contract before deterministic scenario and trajectory checks are applied:
+
+```text
+Agent framework
+  -> OpenTelemetry GenAI or OpenInference spans
+  -> framework-neutral normalizer
+  -> deterministic local dimensions
+  -> versioned thresholds
+  -> metadata-only CI evidence
+  -> optional protected AgentCore parity evaluation
+```
+
+Accepted scopes are limited to `opentelemetry.instrumentation.*` and
+`openinference.instrumentation.*`. The gate checks invoke-agent, inference,
+and execute-tool evidence, including `local.telemetry_compatibility` and
+`local.tool_trajectory_accuracy`. It is locally contract-tested and its
+ordinary CI job does not call AWS. OTLP export, CloudWatch trace ingestion,
+and managed AgentCore scoring remain a future protected provider-parity lane.
+The operating procedure and non-claim boundary are in the
+[agent evaluation telemetry runbook](../solutions/agent-evaluation-telemetry-runbook.md).
+
 ### 5. What this diagram does and does not claim
 
 The diagram claims a live, synthetic AWS Gateway + Runtime + Bedrock RAG path

@@ -1,0 +1,276 @@
+[
+  {
+    "contractVersion": "1.0",
+    "convention": "openinference",
+    "scenarioId": "synthetic-cited-answer",
+    "spans": [
+      {
+        "scopeName": "openinference.instrumentation.cloudai.synthetic",
+        "traceId": "trace_synthetic_cited_answer_openinference",
+        "spanId": "span_synthetic_cited_answer_agent_openinference",
+        "parentSpanId": null,
+        "startTimeUnixNano": "1787918410000000000",
+        "attributes": {
+          "session.id": "session_synthetic_cited_answer_openinference",
+          "openinference.span.kind": "AGENT",
+          "input.value": "Which controls protect the synthetic platform?",
+          "output.value": "Governed access protects the synthetic platform [source:platform-handbook]."
+        }
+      },
+      {
+        "scopeName": "openinference.instrumentation.cloudai.synthetic",
+        "traceId": "trace_synthetic_cited_answer_openinference",
+        "spanId": "span_synthetic_cited_answer_inference_openinference",
+        "parentSpanId": "span_synthetic_cited_answer_agent_openinference",
+        "startTimeUnixNano": "1787918410000000100",
+        "attributes": {
+          "session.id": "session_synthetic_cited_answer_openinference",
+          "openinference.span.kind": "LLM",
+          "llm.input_messages.0.message.role": "user",
+          "llm.input_messages.0.message.content": "Which controls protect the synthetic platform?",
+          "llm.output_messages.0.message.role": "assistant",
+          "llm.output_messages.0.message.tool_calls.0.tool_call.function.name": "knowledge_search",
+          "llm.output_messages.0.message.tool_calls.0.tool_call.function.arguments": "{\"source\":\"platform-handbook\"}",
+          "llm.output_messages.0.message.tool_calls.0.tool_call.id": "call_cited_openinference"
+        }
+      },
+      {
+        "scopeName": "openinference.instrumentation.cloudai.synthetic",
+        "traceId": "trace_synthetic_cited_answer_openinference",
+        "spanId": "span_synthetic_cited_answer_tool_openinference",
+        "parentSpanId": "span_synthetic_cited_answer_agent_openinference",
+        "startTimeUnixNano": "1787918410000000200",
+        "attributes": {
+          "session.id": "session_synthetic_cited_answer_openinference",
+          "openinference.span.kind": "TOOL",
+          "tool.name": "knowledge_search",
+          "input.value": "{\"source\":\"platform-handbook\"}",
+          "output.value": "{\"status\":\"succeeded\",\"citation\":\"source:platform-handbook\"}"
+        }
+      }
+    ]
+  },
+  {
+    "contractVersion": "1.0",
+    "convention": "openinference",
+    "scenarioId": "synthetic-citation-missing",
+    "spans": [
+      {
+        "scopeName": "openinference.instrumentation.cloudai.synthetic",
+        "traceId": "trace_synthetic_citation_missing_openinference",
+        "spanId": "span_synthetic_citation_missing_agent_openinference",
+        "parentSpanId": null,
+        "startTimeUnixNano": "1787918411000000000",
+        "attributes": {
+          "session.id": "session_synthetic_citation_missing_openinference",
+          "openinference.span.kind": "AGENT",
+          "input.value": "Answer when the synthetic knowledge result has no approved citation.",
+          "output.value": "I cannot answer without an approved citation."
+        }
+      },
+      {
+        "scopeName": "openinference.instrumentation.cloudai.synthetic",
+        "traceId": "trace_synthetic_citation_missing_openinference",
+        "spanId": "span_synthetic_citation_missing_inference_openinference",
+        "parentSpanId": "span_synthetic_citation_missing_agent_openinference",
+        "startTimeUnixNano": "1787918411000000100",
+        "attributes": {
+          "session.id": "session_synthetic_citation_missing_openinference",
+          "openinference.span.kind": "LLM",
+          "llm.input_messages.0.message.role": "user",
+          "llm.input_messages.0.message.content": "Answer when the synthetic knowledge result has no approved citation.",
+          "llm.output_messages.0.message.role": "assistant",
+          "llm.output_messages.0.message.tool_calls.0.tool_call.function.name": "knowledge_search",
+          "llm.output_messages.0.message.tool_calls.0.tool_call.function.arguments": "{\"source\":\"platform-handbook\"}",
+          "llm.output_messages.0.message.tool_calls.0.tool_call.id": "call_missing_openinference"
+        }
+      },
+      {
+        "scopeName": "openinference.instrumentation.cloudai.synthetic",
+        "traceId": "trace_synthetic_citation_missing_openinference",
+        "spanId": "span_synthetic_citation_missing_tool_openinference",
+        "parentSpanId": "span_synthetic_citation_missing_agent_openinference",
+        "startTimeUnixNano": "1787918411000000200",
+        "attributes": {
+          "session.id": "session_synthetic_citation_missing_openinference",
+          "openinference.span.kind": "TOOL",
+          "tool.name": "knowledge_search",
+          "input.value": "{\"source\":\"platform-handbook\"}",
+          "output.value": "{\"status\":\"succeeded\",\"citation\":null}"
+        }
+      }
+    ]
+  },
+  {
+    "contractVersion": "1.0",
+    "convention": "openinference",
+    "scenarioId": "synthetic-stale-source",
+    "spans": [
+      {
+        "scopeName": "openinference.instrumentation.cloudai.synthetic",
+        "traceId": "trace_synthetic_stale_source_openinference",
+        "spanId": "span_synthetic_stale_source_agent_openinference",
+        "parentSpanId": null,
+        "startTimeUnixNano": "1787918412000000000",
+        "attributes": {
+          "session.id": "session_synthetic_stale_source_openinference",
+          "openinference.span.kind": "AGENT",
+          "input.value": "Use the retired synthetic handbook.",
+          "output.value": "Request denied because the knowledge source is retired."
+        }
+      },
+      {
+        "scopeName": "openinference.instrumentation.cloudai.synthetic",
+        "traceId": "trace_synthetic_stale_source_openinference",
+        "spanId": "span_synthetic_stale_source_inference_openinference",
+        "parentSpanId": "span_synthetic_stale_source_agent_openinference",
+        "startTimeUnixNano": "1787918412000000100",
+        "attributes": {
+          "session.id": "session_synthetic_stale_source_openinference",
+          "openinference.span.kind": "LLM",
+          "llm.input_messages.0.message.role": "user",
+          "llm.input_messages.0.message.content": "Use the retired synthetic handbook.",
+          "llm.output_messages.0.message.role": "assistant",
+          "llm.output_messages.0.message.tool_calls.0.tool_call.function.name": "source_lifecycle_check",
+          "llm.output_messages.0.message.tool_calls.0.tool_call.function.arguments": "{\"source\":\"retired-handbook\"}",
+          "llm.output_messages.0.message.tool_calls.0.tool_call.id": "call_stale_openinference"
+        }
+      },
+      {
+        "scopeName": "openinference.instrumentation.cloudai.synthetic",
+        "traceId": "trace_synthetic_stale_source_openinference",
+        "spanId": "span_synthetic_stale_source_tool_openinference",
+        "parentSpanId": "span_synthetic_stale_source_agent_openinference",
+        "startTimeUnixNano": "1787918412000000200",
+        "attributes": {
+          "session.id": "session_synthetic_stale_source_openinference",
+          "openinference.span.kind": "TOOL",
+          "tool.name": "source_lifecycle_check",
+          "input.value": "{\"source\":\"retired-handbook\"}",
+          "output.value": "{\"status\":\"denied\",\"reason\":\"source_retired\"}"
+        }
+      }
+    ]
+  },
+  {
+    "contractVersion": "1.0",
+    "convention": "openinference",
+    "scenarioId": "synthetic-provider-timeout",
+    "spans": [
+      {
+        "scopeName": "openinference.instrumentation.cloudai.synthetic",
+        "traceId": "trace_synthetic_provider_timeout_openinference",
+        "spanId": "span_synthetic_provider_timeout_agent_openinference",
+        "parentSpanId": null,
+        "startTimeUnixNano": "1787918413000000000",
+        "attributes": {
+          "session.id": "session_synthetic_provider_timeout_openinference",
+          "openinference.span.kind": "AGENT",
+          "input.value": "Answer when the synthetic retrieval provider times out.",
+          "output.value": "I cannot answer because retrieval is unavailable."
+        }
+      },
+      {
+        "scopeName": "openinference.instrumentation.cloudai.synthetic",
+        "traceId": "trace_synthetic_provider_timeout_openinference",
+        "spanId": "span_synthetic_provider_timeout_inference_openinference",
+        "parentSpanId": "span_synthetic_provider_timeout_agent_openinference",
+        "startTimeUnixNano": "1787918413000000100",
+        "attributes": {
+          "session.id": "session_synthetic_provider_timeout_openinference",
+          "openinference.span.kind": "LLM",
+          "llm.input_messages.0.message.role": "user",
+          "llm.input_messages.0.message.content": "Answer when the synthetic retrieval provider times out.",
+          "llm.output_messages.0.message.role": "assistant",
+          "llm.output_messages.0.message.tool_calls.0.tool_call.function.name": "knowledge_search",
+          "llm.output_messages.0.message.tool_calls.0.tool_call.function.arguments": "{\"source\":\"platform-handbook\"}",
+          "llm.output_messages.0.message.tool_calls.0.tool_call.id": "call_timeout_openinference"
+        }
+      },
+      {
+        "scopeName": "openinference.instrumentation.cloudai.synthetic",
+        "traceId": "trace_synthetic_provider_timeout_openinference",
+        "spanId": "span_synthetic_provider_timeout_tool_openinference",
+        "parentSpanId": "span_synthetic_provider_timeout_agent_openinference",
+        "startTimeUnixNano": "1787918413000000200",
+        "attributes": {
+          "session.id": "session_synthetic_provider_timeout_openinference",
+          "openinference.span.kind": "TOOL",
+          "tool.name": "knowledge_search",
+          "input.value": "{\"source\":\"platform-handbook\"}",
+          "output.value": "{\"status\":\"failed\",\"reason\":\"provider_timeout\"}"
+        }
+      }
+    ]
+  },
+  {
+    "contractVersion": "1.0",
+    "convention": "openinference",
+    "scenarioId": "synthetic-denied-tool",
+    "spans": [
+      {
+        "scopeName": "openinference.instrumentation.cloudai.synthetic",
+        "traceId": "trace_synthetic_denied_tool_openinference",
+        "spanId": "span_synthetic_denied_tool_agent_openinference",
+        "parentSpanId": null,
+        "startTimeUnixNano": "1787918414000000000",
+        "attributes": {
+          "session.id": "session_synthetic_denied_tool_openinference",
+          "openinference.span.kind": "AGENT",
+          "input.value": "Use an unapproved export tool.",
+          "output.value": "Request denied because the tool is not approved."
+        }
+      },
+      {
+        "scopeName": "openinference.instrumentation.cloudai.synthetic",
+        "traceId": "trace_synthetic_denied_tool_openinference",
+        "spanId": "span_synthetic_denied_tool_inference_openinference",
+        "parentSpanId": "span_synthetic_denied_tool_agent_openinference",
+        "startTimeUnixNano": "1787918414000000100",
+        "attributes": {
+          "session.id": "session_synthetic_denied_tool_openinference",
+          "openinference.span.kind": "LLM",
+          "llm.input_messages.0.message.role": "user",
+          "llm.input_messages.0.message.content": "Use an unapproved export tool.",
+          "llm.output_messages.0.message.role": "assistant",
+          "llm.output_messages.0.message.content": "Request denied because the tool is not approved."
+        }
+      }
+    ]
+  },
+  {
+    "contractVersion": "1.0",
+    "convention": "openinference",
+    "scenarioId": "synthetic-human-approval-boundary",
+    "spans": [
+      {
+        "scopeName": "openinference.instrumentation.cloudai.synthetic",
+        "traceId": "trace_synthetic_human_approval_boundary_openinference",
+        "spanId": "span_synthetic_human_approval_boundary_agent_openinference",
+        "parentSpanId": null,
+        "startTimeUnixNano": "1787918415000000000",
+        "attributes": {
+          "session.id": "session_synthetic_human_approval_boundary_openinference",
+          "openinference.span.kind": "AGENT",
+          "input.value": "Execute a high-impact synthetic change.",
+          "output.value": "Human approval is required before this action can execute."
+        }
+      },
+      {
+        "scopeName": "openinference.instrumentation.cloudai.synthetic",
+        "traceId": "trace_synthetic_human_approval_boundary_openinference",
+        "spanId": "span_synthetic_human_approval_boundary_inference_openinference",
+        "parentSpanId": "span_synthetic_human_approval_boundary_agent_openinference",
+        "startTimeUnixNano": "1787918415000000100",
+        "attributes": {
+          "session.id": "session_synthetic_human_approval_boundary_openinference",
+          "openinference.span.kind": "LLM",
+          "llm.input_messages.0.message.role": "user",
+          "llm.input_messages.0.message.content": "Execute a high-impact synthetic change.",
+          "llm.output_messages.0.message.role": "assistant",
+          "llm.output_messages.0.message.content": "Human approval is required before this action can execute."
+        }
+      }
+    ]
+  }
+]

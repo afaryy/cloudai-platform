@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Framework-neutral agent evaluation telemetry fixture",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contractVersion", "convention", "scenarioId", "spans"],
+  "properties": {
+    "contractVersion": { "const": "1.0" },
+    "convention": { "enum": ["otel-genai", "openinference"] },
+    "scenarioId": { "type": "string", "pattern": "^synthetic-[a-z0-9-]+$" },
+    "spans": {
+      "type": "array",
+      "minItems": 2,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["scopeName", "traceId", "spanId", "parentSpanId", "startTimeUnixNano", "attributes"],
+        "properties": {
+          "scopeName": { "type": "string", "minLength": 1 },
+          "traceId": { "type": "string", "pattern": "^trace_[a-z0-9_]+$" },
+          "spanId": { "type": "string", "pattern": "^span_[a-z0-9_]+$" },
+          "parentSpanId": {
+            "anyOf": [
+              { "type": "string", "pattern": "^span_[a-z0-9_]+$" },
+              { "type": "null" }
+            ]
+          },
+          "startTimeUnixNano": { "type": "string", "pattern": "^[0-9]+$" },
+          "attributes": {
+            "type": "object",
+            "minProperties": 2,
+            "additionalProperties": {
+              "anyOf": [
+                { "type": "string" },
+                { "type": "number" },
+                { "type": "boolean" }
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+}

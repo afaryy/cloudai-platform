@@ -158,6 +158,24 @@ two deliberately remain AgentOps contract evidence: the current deployed POC
 does not execute tools or make approval decisions. All five are synthetic,
 repeatable, metadata-safe, and suitable for future provider comparisons.
 
+## Framework-neutral evaluation telemetry gate
+
+The behavioural pack is now executable through a framework-neutral local gate.
+The gate models all six fixed scenarios—the five failure or escalation cases
+above plus the successful cited-answer baseline—using equivalent
+OpenTelemetry GenAI and OpenInference fixtures. Recognized instrumentation
+scopes, `session.id`, invoke-agent spans, inference spans, and execute-tool
+correlation are normalized before deterministic scores are applied.
+
+The `strict-v1` profile requires `1.0` for telemetry compatibility, trace
+completeness, tool-trajectory accuracy, behavioural outcome, and goal success.
+The pull-request job runs without AWS credentials, does not call AWS, and
+retains only a metadata-safe report. This work is locally contract-tested; it
+does not prove OTLP delivery, CloudWatch trace ingestion, AgentCore managed
+evaluation, or production agent quality. Those remain a separately approved
+protected provider-parity lane described in the
+[evaluation telemetry runbook](./agent-evaluation-telemetry-runbook.md).
+
 ## Current next work
 
 1. Keep the sandbox deployed for interview demonstrations while monitoring cost and quotas.
