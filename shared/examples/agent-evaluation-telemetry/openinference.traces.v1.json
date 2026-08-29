@@ -44,7 +44,6 @@
           "session.id": "session_synthetic_cited_answer_openinference",
           "openinference.span.kind": "TOOL",
           "tool.name": "knowledge_search",
-          "tool.call.id": "call_cited_openinference",
           "input.value": "{\"source\":\"platform-handbook\"}",
           "output.value": "{\"status\":\"succeeded\",\"citation\":\"source:platform-handbook\"}"
         }
@@ -96,7 +95,6 @@
           "session.id": "session_synthetic_citation_missing_openinference",
           "openinference.span.kind": "TOOL",
           "tool.name": "knowledge_search",
-          "tool.call.id": "call_missing_openinference",
           "input.value": "{\"source\":\"platform-handbook\"}",
           "output.value": "{\"status\":\"succeeded\",\"citation\":null}"
         }
@@ -148,7 +146,6 @@
           "session.id": "session_synthetic_stale_source_openinference",
           "openinference.span.kind": "TOOL",
           "tool.name": "source_lifecycle_check",
-          "tool.call.id": "call_stale_openinference",
           "input.value": "{\"source\":\"retired-handbook\"}",
           "output.value": "{\"status\":\"denied\",\"reason\":\"source_retired\"}"
         }
@@ -200,7 +197,6 @@
           "session.id": "session_synthetic_provider_timeout_openinference",
           "openinference.span.kind": "TOOL",
           "tool.name": "knowledge_search",
-          "tool.call.id": "call_timeout_openinference",
           "input.value": "{\"source\":\"platform-handbook\"}",
           "output.value": "{\"status\":\"failed\",\"reason\":\"provider_timeout\"}"
         }
