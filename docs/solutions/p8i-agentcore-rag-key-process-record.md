@@ -181,10 +181,10 @@ It exists beside the Runtime path so reviewed direct spans can be assessed
 before Runtime ingestion. Any resulting evidence would be `provider-direct`,
 not `local-contract`; provider validation is pending. Stage B
 Runtime-to-CloudWatch evaluation would produce `provider-runtime` evidence,
-but it is not implemented by this change. Managed scores supplement the
-deterministic controls and never authorize IAM, tool execution, deployment,
-remediation, rollback, or deletion. The protected workflow requires an exact
-confirmation and evaluate-only identity, but this PR authorizes neither role
+but it is not implemented by this change. Managed scores supplement deterministic
+controls. They never authorize IAM, admission or approval, tool execution,
+deployment, remediation, rollback, or deletion. The protected
+workflow requires an exact confirmation and evaluate-only identity, but this PR authorizes neither role
 apply nor the first AWS run. The operator procedure is the
 [evaluation telemetry runbook](./agent-evaluation-telemetry-runbook.md).
 

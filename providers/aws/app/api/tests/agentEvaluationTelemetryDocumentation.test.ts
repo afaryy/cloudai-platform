@@ -37,6 +37,23 @@ test("agent evaluation telemetry documentation records standards, scores, and ev
   }
 });
 
+test("managed-score boundaries reserve admission and approval for deterministic controls", async () => {
+  const scoreBoundaryDocuments = [
+    "docs/solutions/agent-evaluation-telemetry-runbook.md",
+    "docs/architecture/agentcore-governed-rag-poc.md",
+    "docs/solutions/p8i-agentcore-rag-key-process-record.md"
+  ];
+
+  for (const path of scoreBoundaryDocuments) {
+    const document = await readFile(resolve(ROOT, path), "utf8");
+    assert.match(
+      document,
+      /Managed scores supplement\s+deterministic\s+controls[\s\S]{0,120}never authorize IAM,\s+admission or approval,\s+tool execution,\s+deployment,\s+remediation,\s+rollback,\s+or\s+deletion/i,
+      `${path} must reserve admission and approval for deterministic controls`
+    );
+  }
+});
+
 test("current status does not overstate the local agent evaluation evidence", async () => {
   const currentStatus = await readFile(
     resolve(ROOT, "docs/practices/current-status.md"),

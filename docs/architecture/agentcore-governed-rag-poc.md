@@ -197,9 +197,10 @@ and metadata boundary can be checked without claiming that the Runtime emits
 or CloudWatch receives them. Stage B Runtime-to-CloudWatch evidence is the
 future `provider-runtime` lane and is not implemented.
 
-Managed scores supplement deterministic controls; they never authorize IAM,
-tool execution, deployment, remediation, rollback, or deletion. No provider,
-runtime, or production evaluation has been validated. The operating procedure
+Managed scores supplement deterministic controls. They never authorize IAM,
+admission or approval, tool execution, deployment, remediation, rollback, or
+deletion. No provider, runtime, or production evaluation has been validated.
+The operating procedure
 and non-claim boundary are in the
 [agent evaluation telemetry runbook](../solutions/agent-evaluation-telemetry-runbook.md).
 

@@ -157,8 +157,8 @@ has not been provider validated. `provider-runtime` is reserved for a future
 Stage B Runtime-to-CloudWatch path and has not been implemented or validated.
 
 Managed scores supplement deterministic controls. They never authorize IAM,
-tool execution, deployment, remediation, rollback, or deletion. No evidence
-lane proves provider, runtime, or production validation.
+admission or approval, tool execution, deployment, remediation, rollback, or
+deletion. No evidence lane proves provider, runtime, or production validation.
 
 ## Cloud-free validation
 
