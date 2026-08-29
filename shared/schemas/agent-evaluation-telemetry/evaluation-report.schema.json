@@ -31,10 +31,29 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["scenarioId", "convention", "status", "scores"],
+        "required": [
+          "contractVersion",
+          "thresholdVersion",
+          "evidenceLevel",
+          "scenarioId",
+          "convention",
+          "sessionId",
+          "traceIds",
+          "status",
+          "scores"
+        ],
         "properties": {
+          "contractVersion": { "const": "1.0" },
+          "thresholdVersion": { "const": "1.0" },
+          "evidenceLevel": { "const": "local-contract" },
           "scenarioId": { "type": "string" },
           "convention": { "enum": ["otel-genai", "openinference"] },
+          "sessionId": { "type": "string", "pattern": "^session_synthetic_[a-z0-9_]+$" },
+          "traceIds": {
+            "type": "array",
+            "minItems": 1,
+            "items": { "type": "string", "pattern": "^trace_synthetic_[a-z0-9_]+$" }
+          },
           "status": { "enum": ["passed", "failed"] },
           "scores": {
             "type": "array",
