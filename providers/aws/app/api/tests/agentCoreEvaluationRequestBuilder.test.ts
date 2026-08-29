@@ -32,6 +32,27 @@ test("builds equivalent deterministic direct-span requests for both cited-answer
     "Builtin.GoalSuccessRate"
   ]);
   assert.deepEqual(summarizeSemantics(otelRequests), summarizeSemantics(openInferenceRequests));
+  assert.deepEqual(extractProviderVisibleSemantics(otelRequests[0]!), {
+    prompt: "Which controls protect the synthetic platform?",
+    finalResponse: "Governed access protects the synthetic platform [source:platform-handbook].",
+    toolName: "knowledge_search",
+    toolArguments: "{\"source\":\"platform-handbook\"}",
+    toolResult: "{\"status\":\"succeeded\",\"citation\":\"source:platform-handbook\"}"
+  });
+  assert.deepEqual(
+    extractProviderVisibleSemantics(otelRequests[0]!),
+    extractProviderVisibleSemantics(openInferenceRequests[0]!)
+  );
+
+  const otelAgent = (otelRequests[0]!.evaluationInput.sessionSpans as ProviderSpan[])
+    .find((span) => span.name === "invoke-agent")!;
+  assert.equal(otelAgent.attributes["gen_ai.task.input"], "Which controls protect the synthetic platform?");
+  assert.equal(
+    otelAgent.attributes["gen_ai.task.output"],
+    "Governed access protects the synthetic platform [source:platform-handbook]."
+  );
+  assert.equal("gen_ai.input.messages" in otelAgent.attributes, false);
+  assert.equal("gen_ai.output.messages" in otelAgent.attributes, false);
 
   for (const [fixture, requests] of [[otel, otelRequests], [openInference, openInferenceRequests]] as const) {
     const spans = requests[0]!.evaluationInput.sessionSpans as ProviderSpan[];
@@ -74,22 +95,47 @@ test("uses evaluator-specific direct-span targets and reference contexts", async
   assert.deepEqual(toolSelection!.evaluationTarget, { spanIds: [generatedToolSpanId] });
   assert.equal(goalSuccess!.evaluationTarget, undefined);
 
-  const correctnessReference = correctness!.evaluationReferenceInputs[0]!;
-  const toolReference = toolSelection!.evaluationReferenceInputs[0]!;
-  const goalReference = goalSuccess!.evaluationReferenceInputs[0]!;
+  const correctnessReference = correctness!.evaluationReferenceInputs![0]!;
+  const goalReference = goalSuccess!.evaluationReferenceInputs![0]!;
   assert.deepEqual(correctnessReference.expectedResponse, { text: scenario.expectedResponse });
-  assert.deepEqual(toolReference.expectedTrajectory, { toolNames: ["knowledge_search"] });
+  assert.equal(toolSelection!.evaluationReferenceInputs, undefined);
   assert.deepEqual(goalReference.assertions, [
     { text: "The final answer cites the approved synthetic source." }
   ]);
   assert.deepEqual(correctnessReference.context, { spanContext: { sessionId, traceId: generatedTraceId } });
-  assert.deepEqual(toolReference.context, {
-    spanContext: { sessionId, traceId: generatedTraceId, spanId: generatedToolSpanId }
-  });
   assert.deepEqual(goalReference.context, { spanContext: { sessionId } });
   assert.deepEqual(Object.keys(correctnessReference).sort(), ["context", "expectedResponse"]);
-  assert.deepEqual(Object.keys(toolReference).sort(), ["context", "expectedTrajectory"]);
   assert.deepEqual(Object.keys(goalReference).sort(), ["assertions", "context"]);
+});
+
+test("rejects malformed or ambiguous reviewed GenAI agent messages", async () => {
+  const { otel, scenario, policy } = await loadInputs();
+
+  const malformed = structuredClone(otel);
+  malformed.spans[0]!.attributes["gen_ai.input.messages"] = "not-json";
+  assertBuilderError(
+    () => buildProviderEvaluationRequests(malformed, scenario, policy),
+    "provider_attribute_not_allowed"
+  );
+
+  const ambiguous = structuredClone(otel);
+  ambiguous.spans[0]!.attributes["gen_ai.output.messages"] = JSON.stringify([
+    { role: "assistant", parts: [{ type: "text", content: "first" }] },
+    { role: "assistant", parts: [{ type: "text", content: "second" }] }
+  ]);
+  assertBuilderError(
+    () => buildProviderEvaluationRequests(ambiguous, scenario, policy),
+    "provider_attribute_not_allowed"
+  );
+
+  const nonText = structuredClone(otel);
+  nonText.spans[0]!.attributes["gen_ai.output.messages"] = JSON.stringify([
+    { role: "assistant", parts: [{ type: "tool_call", content: "not-final-text" }] }
+  ]);
+  assertBuilderError(
+    () => buildProviderEvaluationRequests(nonText, scenario, policy),
+    "provider_attribute_not_allowed"
+  );
 });
 
 test("rejects inputs that are outside the reviewed provider request boundary", async () => {
@@ -191,8 +237,32 @@ function summarizeSemantics(requests: ProviderEvaluationRequest[]) {
         ? "tool"
         : "session",
     spanNames: (request.evaluationInput.sessionSpans as ProviderSpan[]).map((span) => span.name),
-    referenceFields: Object.keys(request.evaluationReferenceInputs[0]!).filter((key) => key !== "context").sort()
+    referenceFields: request.evaluationReferenceInputs
+      ? Object.keys(request.evaluationReferenceInputs[0]!).filter((key) => key !== "context").sort()
+      : []
   }));
+}
+
+function extractProviderVisibleSemantics(request: ProviderEvaluationRequest) {
+  const spans = request.evaluationInput.sessionSpans as ProviderSpan[];
+  const agent = spans.find((span) => span.name === "invoke-agent")!;
+  const tool = spans.find((span) => span.name === "execute-tool")!;
+  if ("gen_ai.operation.name" in agent.attributes) {
+    return {
+      prompt: agent.attributes["gen_ai.task.input"],
+      finalResponse: agent.attributes["gen_ai.task.output"],
+      toolName: tool.attributes["gen_ai.tool.name"],
+      toolArguments: tool.attributes["gen_ai.tool.call.arguments"],
+      toolResult: tool.attributes["gen_ai.tool.call.result"]
+    };
+  }
+  return {
+    prompt: agent.attributes["input.value"],
+    finalResponse: agent.attributes["output.value"],
+    toolName: tool.attributes["tool.name"],
+    toolArguments: tool.attributes["input.value"],
+    toolResult: tool.attributes["output.value"]
+  };
 }
 
 async function loadInputs(): Promise<{

@@ -254,10 +254,29 @@ function passingResponse(request: ProviderEvaluationRequest): ProviderEvaluation
       evaluatorId: request.evaluatorId,
       value: 0.9,
       label: "pass",
-      context: structuredClone(request.evaluationReferenceInputs[0]!.context),
+      context: { spanContext: expectedResultContext(request) },
       tokenUsage: { inputTokens: 10, outputTokens: 2, totalTokens: 12 }
     }]
   };
+}
+
+function expectedResultContext(request: ProviderEvaluationRequest) {
+  const spans = request.evaluationInput.sessionSpans as Array<{
+    traceId: string;
+    spanId: string;
+    attributes: Record<string, unknown>;
+  }>;
+  const sessionId = spans[0]!.attributes["session.id"] as string;
+  if (request.evaluatorId === "Builtin.GoalSuccessRate") return { sessionId };
+  if (request.evaluatorId === "Builtin.Correctness") {
+    return { sessionId, traceId: request.evaluationTarget && "traceIds" in request.evaluationTarget
+      ? request.evaluationTarget.traceIds[0]!
+      : "missing" };
+  }
+  const spanId = request.evaluationTarget && "spanIds" in request.evaluationTarget
+    ? request.evaluationTarget.spanIds[0]!
+    : "missing";
+  return { sessionId, traceId: spans.find((span) => span.spanId === spanId)!.traceId, spanId };
 }
 
 function conventionFor(request: ProviderEvaluationRequest): string {

@@ -10,7 +10,7 @@ export function createAwsAgentCoreEvaluateClient(region: string): AgentCoreEvalu
   const client = new BedrockAgentCoreClient({ region, maxAttempts: 2 });
   return {
     async evaluate(request) {
-      const input: EvaluateCommandInput = request as EvaluateCommandInput;
+      const input: EvaluateCommandInput = request;
       return client.send(new EvaluateCommand(input));
     }
   };

@@ -15,6 +15,7 @@
 - Stage A accepts only `synthetic-cited-answer`; all six scenarios under both conventions remain covered by the existing local `strict-v1` gate.
 - Supported conventions are exactly `otel-genai` and `openinference` with scopes under `opentelemetry.instrumentation.*` and `openinference.instrumentation.*` respectively.
 - Evaluators are exactly `Builtin.Correctness`, `Builtin.ToolSelectionAccuracy`, and `Builtin.GoalSuccessRate`.
+- The fixed managed profile does not measure trajectory parity: `Builtin.ToolSelectionAccuracy` uses only the targeted tool span. Adding a `Builtin.Trajectory*` evaluator requires a new reviewed policy and call budget.
 - Threshold profile `provider-parity-v1` requires every evaluator score to be at least `0.70` and each cross-convention absolute delta to be at most `0.20`.
 - A direct run makes exactly six serial `Evaluate` calls and has a hard maximum of six; evaluator IDs and thresholds are code-owned, not workflow inputs.
 - The exact direct-run phrase is `I_UNDERSTAND_AGENTCORE_EVALUATION_PROVIDER_PARITY`.
@@ -216,15 +217,18 @@ export type ProviderParityPolicy = {
   maximumProviderCalls: 6;
 };
 
+export type ProviderDocument = null | boolean | number | string | ProviderDocument[] | {
+  [key: string]: ProviderDocument;
+};
+
 export type ProviderEvaluationRequest = {
   evaluatorId: ProviderEvaluatorId;
-  evaluationInput: { sessionSpans: Record<string, unknown>[] };
+  evaluationInput: { sessionSpans: Array<{ [key: string]: ProviderDocument }> };
   evaluationTarget?: { traceIds: string[] } | { spanIds: string[] };
-  evaluationReferenceInputs: Array<{
+  evaluationReferenceInputs?: Array<{
     context: { spanContext: { sessionId: string; traceId?: string; spanId?: string } };
     expectedResponse?: { text: string };
     assertions?: Array<{ text: string }>;
-    expectedTrajectory?: { toolNames: string[] };
   }>;
 };
 
@@ -342,13 +346,16 @@ assert.deepEqual(correctness.evaluationTarget, { traceIds: [generatedTraceId] })
 assert.deepEqual(toolSelection.evaluationTarget, { spanIds: [generatedToolSpanId] });
 assert.equal(goalSuccess.evaluationTarget, undefined);
 assert.deepEqual(reference.expectedResponse, { text: scenario.expectedResponse });
-assert.deepEqual(reference.expectedTrajectory, { toolNames: ["knowledge_search"] });
+assert.equal(toolSelection.evaluationReferenceInputs, undefined);
 assert.deepEqual(reference.assertions, [
   { text: "The final answer cites the approved synthetic source." }
 ]);
 ```
 
-Verify trace-level context includes session and trace, tool-level context includes session/trace/span, and session-level context includes only session.
+Verify the Correctness reference context includes session and trace, the
+ToolSelectionAccuracy result context is derived independently from the targeted
+tool span as session/trace/span, and the GoalSuccessRate reference context
+includes only session.
 
 - [ ] **Step 3: Write failing rejection tests**
 
@@ -412,7 +419,15 @@ Use convention-specific sets containing only the keys already present in the cit
 }
 ```
 
-Preserve the fixture's single reviewed `session.id` as `preservedSessionId`. Preserve GenAI/OpenInference message and tool fields in memory because the managed evaluators require them, but do not expose the returned documents from the CLI or artifact layer.
+Preserve the fixture's single reviewed `session.id` as `preservedSessionId`.
+For the OpenTelemetry invoke-agent span, strictly extract the one reviewed user
+text and one reviewed assistant text from `gen_ai.input.messages` and
+`gen_ai.output.messages`, then emit them as provider-readable
+`gen_ai.task.input` and `gen_ai.task.output` strings. Reject malformed,
+ambiguous, non-text, empty, or unreviewed wrappers. Preserve the documented
+inference and tool fields. OpenInference keeps its documented agent, inference,
+and tool fields. Do not expose the returned documents from the CLI or artifact
+layer.
 
 Map the local assertion code through one fixed source constant:
 
@@ -426,7 +441,11 @@ Do not send the internal assertion token `citation-present` as natural-language 
 
 - [ ] **Step 7: Implement the fixed three-request matrix**
 
-Build requests in this exact order: Correctness, ToolSelectionAccuracy, GoalSuccessRate. The first targets the generated trace, the second targets the generated tool span, and the third has no explicit target because AgentCore accepts one session per evaluation. Construct `evaluationReferenceInputs` with the exact context union and only the fields relevant to that evaluator.
+Build requests in this exact order: Correctness, ToolSelectionAccuracy,
+GoalSuccessRate. Correctness targets the generated trace and supplies only one
+trace-scoped `expectedResponse`. ToolSelectionAccuracy targets the generated
+tool span and omits `evaluationReferenceInputs`. GoalSuccessRate has no explicit
+target and supplies only one session-scoped `assertions` reference.
 
 - [ ] **Step 8: Run tests and commit**
 
@@ -504,7 +523,12 @@ export class ProviderParityError extends Error {
 }
 ```
 
-`sanitizeProviderResult` validates one expected context and returns only the `ProviderParityResult` fields. It must never retain the raw response, `errorMessage`, `explanation`, evaluator ARN/name, or request.
+`sanitizeProviderResult` derives the expected result context from the actual
+session spans and target rather than requiring a reference input. It validates
+session/trace/span for the tool-level result even though the tool evaluator has
+no reference input, enforces each evaluator's exact supported reference shape,
+and returns only the `ProviderParityResult` fields. It must never retain the raw
+response, `errorMessage`, `explanation`, evaluator ARN/name, or request.
 
 - [ ] **Step 6: Implement report aggregation and parity comparison**
 

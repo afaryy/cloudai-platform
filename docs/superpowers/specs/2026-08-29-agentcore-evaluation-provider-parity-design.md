@@ -32,8 +32,8 @@ request path or conflating managed model scores with authorization decisions.
    OpenInference.
 2. Convert the repository fixtures into the documented AgentCore
    `sessionSpans` request shape.
-3. Run only a fixed allowlist of built-in evaluators with expected response and
-   tool-trajectory reference inputs.
+3. Run only a fixed allowlist of built-in evaluators with evaluator-specific
+   expected-response or assertion references where those evaluators support them.
 4. Fail closed on missing, malformed, partial, below-threshold, or materially
    divergent results.
 5. Retain a metadata-only provider-parity artifact.
@@ -52,6 +52,9 @@ request path or conflating managed model scores with authorization decisions.
 - Runtime, Gateway, Knowledge Base, model, prompt, or tool changes in Stage A.
 - Treating an evaluation score as an IAM, admission, approval, or execution
   decision.
+- Claiming managed trajectory parity from `Builtin.ToolSelectionAccuracy`;
+  adding a `Builtin.Trajectory*` evaluator requires a new reviewed policy and
+  call budget.
 - Claiming OTLP export, CloudWatch ingestion, or production agent quality from
   Stage A.
 
@@ -80,6 +83,8 @@ References:
 - [AWS SDK for JavaScript EvaluateCommand](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/client/bedrock-agentcore/command/EvaluateCommand/)
 - [Getting started with on-demand evaluation](https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/getting-started-on-demand.html)
 - [Understanding evaluation input spans](https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/understanding-input-spans.html)
+- [Generic framework span mapping](https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/supported-frameworks-generic.html)
+- [Ground-truth inputs by evaluator](https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/ground-truth-evaluations.html)
 
 ## Chosen Architecture
 
@@ -139,7 +144,8 @@ The smaller provider set is deliberate:
 
 - it proves generic framework routing;
 - it contains one invoke-agent, inference, and execute-tool path;
-- it supports expected response and expected trajectory references;
+- it supports the fixed correctness response and goal-success assertion
+  references, plus a tool-span target for tool-selection scoring;
 - it caps cost and makes provider differences easier to diagnose;
 - it avoids treating an expensive managed evaluator as a duplicate of every
   deterministic local assertion.
@@ -154,8 +160,8 @@ Each convention is evaluated with exactly three built-in evaluators:
 | Evaluator | Level | Reference or target |
 | --- | --- | --- |
 | `Builtin.Correctness` | Trace | Fixed expected response and the generated trace ID. |
-| `Builtin.ToolSelectionAccuracy` | Tool call | Fixed expected trajectory and generated tool span ID. |
-| `Builtin.GoalSuccessRate` | Session | Fixed expected response, assertions, and expected trajectory. |
+| `Builtin.ToolSelectionAccuracy` | Tool call | Generated tool span ID only; no unsupported ground-truth reference. |
+| `Builtin.GoalSuccessRate` | Session | One fixed session-scoped assertion. |
 
 The result is six managed `Evaluate` calls: two conventions multiplied by
 three evaluators. Evaluator IDs are code-owned and cannot be supplied through a
@@ -190,7 +196,9 @@ TypeScript builder will:
 4. map the generic wrapper to the AWS JSON document shape;
 5. generate deterministic valid OpenTelemetry trace and span identifiers from
    the scenario and convention using SHA-256-derived lowercase hexadecimal IDs;
-6. preserve the supported instrumentation scope and `session.id`;
+6. preserve the supported instrumentation scope and `session.id`, and translate
+   the reviewed OpenTelemetry invoke-agent prompt/final-response wrappers to
+   clean `gen_ai.task.input` and `gen_ai.task.output` string attributes;
 7. build evaluator-specific target and reference inputs;
 8. reject unknown attributes that are not part of the reviewed compatibility
    subset;
@@ -198,8 +206,8 @@ TypeScript builder will:
 
 Synthetic prompt, response, tool arguments, and tool result content are sent to
 the managed evaluator because those fields are required to score correctness,
-trajectory, and goal completion. They are public synthetic data and must never
-be copied into the evidence artifact.
+tool selection, and goal completion. They are public synthetic data and must
+never be copied into the evidence artifact.
 
 ### Provider client boundary
 
@@ -353,8 +361,11 @@ All implementation follows test-first development.
 - both conventions create semantically equivalent evaluator inputs;
 - deterministic generated IDs have valid widths and do not collide;
 - only the cited-answer synthetic fixture is accepted;
-- expected response, assertions, and tool trajectory are included in the
-  in-memory provider request;
+- the OpenTelemetry provider span exposes clean `gen_ai.task.input` and
+  `gen_ai.task.output` strings while the OpenInference provider span exposes
+  semantically equal `input.value` and `output.value` strings;
+- Correctness includes only `expectedResponse`, ToolSelectionAccuracy omits
+  reference inputs, and GoalSuccessRate includes only `assertions`;
 - evaluator levels select the correct trace, span, or session target;
 - unknown scope, missing session, missing span role, or unknown attribute fails;
 - six and only six provider calls are built;

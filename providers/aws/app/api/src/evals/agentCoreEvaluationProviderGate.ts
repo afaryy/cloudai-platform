@@ -65,11 +65,11 @@ export function sanitizeProviderResult(
 
   const evaluatorId = pair.request.evaluatorId;
   if (!isEvaluatorId(evaluatorId)) throw new ProviderParityError("provider_evaluator_unexpected");
-  if (!hasExpectedRequestShape(pair.request, evaluatorId)) {
+  const expectedContext = deriveProviderResultContext(pair.request);
+  if (!hasExpectedRequestShape(pair.request, evaluatorId, expectedContext)) {
     throw new ProviderParityError("provider_context_mismatch");
   }
   const level = levelFor(evaluatorId);
-  const expectedContext = expectedContextFor(pair.request);
   if (!isRecord(pair.response)) throw new ProviderParityError("provider_result_missing");
   const evaluationResults = pair.response.evaluationResults;
   if (!Array.isArray(evaluationResults) || evaluationResults.length === 0) {
@@ -206,41 +206,96 @@ function validatePolicy(policy: ProviderParityPolicy): void {
   }
 }
 
-function expectedContextFor(request: ProviderEvaluationRequest): { sessionId: string; traceId?: string; spanId?: string } {
-  const references = request.evaluationReferenceInputs;
-  if (!Array.isArray(references) || references.length !== 1) {
+export function deriveProviderResultContext(
+  request: ProviderEvaluationRequest
+): { sessionId: string; traceId?: string; spanId?: string } {
+  if (!isRecord(request.evaluationInput) || !Array.isArray(request.evaluationInput.sessionSpans) ||
+    request.evaluationInput.sessionSpans.length === 0) {
     throw new ProviderParityError("provider_context_mismatch");
   }
-  const spanContext = references[0]?.context?.spanContext;
-  if (!spanContext || typeof spanContext.sessionId !== "string" || spanContext.sessionId.length === 0 ||
-    (spanContext.traceId !== undefined && typeof spanContext.traceId !== "string") ||
-    (spanContext.spanId !== undefined && typeof spanContext.spanId !== "string")) {
-    throw new ProviderParityError("provider_context_mismatch");
+
+  const spans = request.evaluationInput.sessionSpans.map((span) => providerSpanContext(span));
+  const sessionIds = new Set(spans.map((span) => span.sessionId));
+  if (sessionIds.size !== 1) throw new ProviderParityError("provider_context_mismatch");
+  const sessionId = spans[0]!.sessionId;
+
+  switch (request.evaluatorId) {
+    case "Builtin.Correctness": {
+      const traceId = singleTargetId(request.evaluationTarget, "traceIds");
+      if (!spans.some((span) => span.traceId === traceId)) {
+        throw new ProviderParityError("provider_context_mismatch");
+      }
+      return { sessionId, traceId };
+    }
+    case "Builtin.ToolSelectionAccuracy": {
+      const spanId = singleTargetId(request.evaluationTarget, "spanIds");
+      const matches = spans.filter((span) => span.spanId === spanId);
+      if (matches.length !== 1) throw new ProviderParityError("provider_context_mismatch");
+      return { sessionId, traceId: matches[0]!.traceId, spanId };
+    }
+    case "Builtin.GoalSuccessRate":
+      if (request.evaluationTarget !== undefined) throw new ProviderParityError("provider_context_mismatch");
+      return { sessionId };
+    default:
+      throw new ProviderParityError("provider_evaluator_unexpected");
   }
-  return {
-    sessionId: spanContext.sessionId,
-    ...(spanContext.traceId === undefined ? {} : { traceId: spanContext.traceId }),
-    ...(spanContext.spanId === undefined ? {} : { spanId: spanContext.spanId })
-  };
 }
 
-function hasExpectedRequestShape(request: ProviderEvaluationRequest, evaluatorId: ProviderEvaluatorId): boolean {
-  if (!isRecord(request.evaluationInput) || !Array.isArray(request.evaluationInput.sessionSpans) ||
-    !Array.isArray(request.evaluationReferenceInputs) || request.evaluationReferenceInputs.length !== 1) {
-    return false;
-  }
-  const reference = request.evaluationReferenceInputs[0];
-  if (!isRecord(reference) || !isRecord(reference.context) || !isRecord(reference.context.spanContext)) return false;
-
+function hasExpectedRequestShape(
+  request: ProviderEvaluationRequest,
+  evaluatorId: ProviderEvaluatorId,
+  expectedContext: { sessionId: string; traceId?: string; spanId?: string }
+): boolean {
   const target = request.evaluationTarget;
   switch (evaluatorId) {
     case "Builtin.Correctness":
-      return isProviderTarget(target, "traceIds");
+      return isProviderTarget(target, "traceIds") &&
+        hasExactReference(request.evaluationReferenceInputs, "expectedResponse", expectedContext);
     case "Builtin.ToolSelectionAccuracy":
-      return isProviderTarget(target, "spanIds");
+      return isProviderTarget(target, "spanIds") && request.evaluationReferenceInputs === undefined;
     case "Builtin.GoalSuccessRate":
-      return target === undefined;
+      return target === undefined &&
+        hasExactReference(request.evaluationReferenceInputs, "assertions", expectedContext);
   }
+}
+
+function hasExactReference(
+  references: ProviderEvaluationRequest["evaluationReferenceInputs"],
+  field: "expectedResponse" | "assertions",
+  expectedContext: { sessionId: string; traceId?: string; spanId?: string }
+): boolean {
+  if (!Array.isArray(references) || references.length !== 1 || !isRecord(references[0]) ||
+    !hasOnlyKeys(references[0], ["context", field]) || !sameContext(references[0].context, expectedContext)) {
+    return false;
+  }
+  if (field === "expectedResponse") {
+    return isTextContent(references[0].expectedResponse);
+  }
+  return Array.isArray(references[0].assertions) && references[0].assertions.length === 1 &&
+    isTextContent(references[0].assertions[0]);
+}
+
+function isTextContent(value: unknown): boolean {
+  return isRecord(value) && hasOnlyKeys(value, ["text"]) &&
+    typeof value.text === "string" && value.text.length > 0;
+}
+
+function providerSpanContext(span: unknown): { sessionId: string; traceId: string; spanId: string } {
+  if (!isRecord(span) || typeof span.traceId !== "string" || span.traceId.length === 0 ||
+    typeof span.spanId !== "string" || span.spanId.length === 0 || !isRecord(span.attributes) ||
+    typeof span.attributes["session.id"] !== "string" || span.attributes["session.id"].length === 0) {
+    throw new ProviderParityError("provider_context_mismatch");
+  }
+  return {
+    sessionId: span.attributes["session.id"],
+    traceId: span.traceId,
+    spanId: span.spanId
+  };
+}
+
+function singleTargetId(target: unknown, key: "traceIds" | "spanIds"): string {
+  if (!isProviderTarget(target, key)) throw new ProviderParityError("provider_context_mismatch");
+  return (target as Record<"traceIds" | "spanIds", string[]>)[key][0]!;
 }
 
 function isProviderTarget(target: unknown, key: "traceIds" | "spanIds"): boolean {

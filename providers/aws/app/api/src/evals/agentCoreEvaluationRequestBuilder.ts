@@ -2,6 +2,8 @@ import { createHash } from "node:crypto";
 
 import {
   ProviderParityError,
+  type ProviderDocument,
+  type ProviderDocumentObject,
   type ProviderEvaluationRequest,
   type ProviderParityPolicy
 } from "./agentCoreEvaluationProviderTypes.js";
@@ -104,11 +106,7 @@ export function buildProviderEvaluationRequests(
     {
       evaluatorId: "Builtin.ToolSelectionAccuracy",
       evaluationInput: { sessionSpans },
-      evaluationTarget: { spanIds: [toolSpanId] },
-      evaluationReferenceInputs: [{
-        context: { spanContext: { sessionId: reviewed.sessionId, traceId: ids.traceId, spanId: toolSpanId } },
-        expectedTrajectory: { toolNames: [scenario.expectedToolTrajectory[0]!.name] }
-      }]
+      evaluationTarget: { spanIds: [toolSpanId] }
     },
     {
       evaluatorId: "Builtin.GoalSuccessRate",
@@ -252,7 +250,7 @@ function mapSpan(
   source: EvaluationTelemetrySpan,
   sessionId: string,
   ids: DerivedProviderIds
-): Record<string, unknown> {
+): ProviderDocumentObject {
   const role = classifySpanFromKnownSource(source);
   const parentSpanId = source.parentSpanId === null ? undefined : ids.spanIds[source.parentSpanId];
   return {
@@ -263,7 +261,7 @@ function mapSpan(
     kind: 1,
     startTimeUnixNano: source.startTimeUnixNano,
     endTimeUnixNano: (BigInt(source.startTimeUnixNano) + 1n).toString(),
-    attributes: { ...source.attributes, "session.id": sessionId },
+    attributes: mapAttributes(source, role, sessionId),
     scope: { name: source.scopeName, version: "1.0.0" },
     resource: {
       attributes: {
@@ -273,6 +271,61 @@ function mapSpan(
     },
     status: { code: 1 }
   };
+}
+
+function mapAttributes(
+  source: EvaluationTelemetrySpan,
+  role: SpanRole,
+  sessionId: string
+): ProviderDocumentObject {
+  if (role !== "invoke-agent" || source.attributes["gen_ai.operation.name"] !== "invoke_agent") {
+    return { ...copyProviderDocument(source.attributes), "session.id": sessionId };
+  }
+
+  const prompt = extractSingleTextMessage(source.attributes["gen_ai.input.messages"], "user");
+  const finalResponse = extractSingleTextMessage(source.attributes["gen_ai.output.messages"], "assistant");
+  return {
+    "session.id": sessionId,
+    "gen_ai.operation.name": "invoke_agent",
+    "gen_ai.task.input": prompt,
+    "gen_ai.task.output": finalResponse
+  };
+}
+
+function copyProviderDocument(value: Record<string, unknown>): ProviderDocumentObject {
+  const copied: ProviderDocumentObject = {};
+  for (const [key, candidate] of Object.entries(value)) {
+    if (!isProviderDocument(candidate)) throw new ProviderParityError("provider_attribute_not_allowed");
+    copied[key] = candidate;
+  }
+  return copied;
+}
+
+function isProviderDocument(value: unknown): value is ProviderDocument {
+  if (value === null || typeof value === "string" || typeof value === "boolean") return true;
+  if (typeof value === "number") return Number.isFinite(value);
+  if (Array.isArray(value)) return value.every(isProviderDocument);
+  return isRecord(value) && Object.values(value).every(isProviderDocument);
+}
+
+function extractSingleTextMessage(value: unknown, expectedRole: "user" | "assistant"): string {
+  if (typeof value !== "string") throw new ProviderParityError("provider_attribute_not_allowed");
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(value) as unknown;
+  } catch {
+    throw new ProviderParityError("provider_attribute_not_allowed");
+  }
+  if (!Array.isArray(parsed) || parsed.length !== 1 || !isRecord(parsed[0]) ||
+    !hasOnlyKeys(parsed[0], ["role", "parts"]) || parsed[0].role !== expectedRole ||
+    !Array.isArray(parsed[0].parts) || parsed[0].parts.length !== 1 || !isRecord(parsed[0].parts[0]) ||
+    !hasOnlyKeys(parsed[0].parts[0], ["type", "content"]) || parsed[0].parts[0].type !== "text" ||
+    typeof parsed[0].parts[0].content !== "string" || parsed[0].parts[0].content.length === 0 ||
+    parsed[0].parts[0].content.trim() !== parsed[0].parts[0].content) {
+    throw new ProviderParityError("provider_attribute_not_allowed");
+  }
+  return parsed[0].parts[0].content;
 }
 
 function classifySpanFromKnownSource(source: EvaluationTelemetrySpan): SpanRole {
@@ -291,6 +344,12 @@ function hexId(width: 16 | 32, ...parts: string[]): string {
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function hasOnlyKeys(value: Record<string, unknown>, keys: string[]): boolean {
+  const actual = Object.keys(value).sort();
+  const expected = [...keys].sort();
+  return actual.length === expected.length && actual.every((key, index) => key === expected[index]);
 }
 
 function sameStrings(actual: string[], expected: readonly string[]): boolean {

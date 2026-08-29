@@ -6,6 +6,7 @@ import { createAwsAgentCoreEvaluateClient } from "../clients/agentCoreEvaluation
 import {
   assertProviderParityGate,
   buildProviderParityReport,
+  deriveProviderResultContext,
   sanitizeProviderResult,
   type ProviderEvaluationPair
 } from "../evals/agentCoreEvaluationProviderGate.js";
@@ -303,7 +304,7 @@ function deterministicValidationClient(): AgentCoreEvaluateClient {
           evaluatorId: request.evaluatorId,
           value: 0.9,
           label: "validated",
-          context: request.evaluationReferenceInputs[0]!.context,
+          context: { spanContext: deriveProviderResultContext(request) },
           tokenUsage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 }
         }]
       };

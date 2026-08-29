@@ -197,6 +197,11 @@ and metadata boundary can be checked without claiming that the Runtime emits
 or CloudWatch receives them. Stage B Runtime-to-CloudWatch evidence is the
 future `provider-runtime` lane and is not implemented.
 
+Within Stage A, Correctness uses a trace-scoped expected response,
+ToolSelectionAccuracy uses only a targeted tool span, and GoalSuccessRate uses
+a session-scoped assertion. Managed trajectory parity is outside this fixed
+profile and would require a separately reviewed `Builtin.Trajectory*` policy.
+
 Managed scores supplement deterministic controls. They never authorize IAM,
 admission or approval, tool execution, deployment, remediation, rollback, or
 deletion. No provider, runtime, or production evaluation has been validated.

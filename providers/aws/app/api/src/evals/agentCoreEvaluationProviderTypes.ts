@@ -55,15 +55,24 @@ export type ProviderParityPolicy = {
   maximumProviderCalls: 6;
 };
 
+export type ProviderDocument =
+  | null
+  | boolean
+  | number
+  | string
+  | ProviderDocument[]
+  | { [key: string]: ProviderDocument };
+
+export type ProviderDocumentObject = { [key: string]: ProviderDocument };
+
 export type ProviderEvaluationRequest = {
   evaluatorId: ProviderEvaluatorId;
-  evaluationInput: { sessionSpans: Record<string, unknown>[] };
+  evaluationInput: { sessionSpans: ProviderDocumentObject[] };
   evaluationTarget?: { traceIds: string[] } | { spanIds: string[] };
-  evaluationReferenceInputs: Array<{
+  evaluationReferenceInputs?: Array<{
     context: { spanContext: { sessionId: string; traceId?: string; spanId?: string } };
     expectedResponse?: { text: string };
     assertions?: Array<{ text: string }>;
-    expectedTrajectory?: { toolNames: string[] };
   }>;
 };
 

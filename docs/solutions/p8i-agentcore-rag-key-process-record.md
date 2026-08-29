@@ -188,6 +188,13 @@ workflow requires an exact confirmation and evaluate-only identity, but this PR 
 apply nor the first AWS run. The operator procedure is the
 [evaluation telemetry runbook](./agent-evaluation-telemetry-runbook.md).
 
+The reviewed provider profile uses only evaluator-supported inputs:
+Correctness gets one trace-scoped expected response, ToolSelectionAccuracy gets
+the targeted tool span without a ground-truth reference, and GoalSuccessRate
+gets one session-scoped assertion. Trajectory parity remains in the local
+deterministic gate; a managed trajectory evaluator would require a new policy
+and call budget.
+
 ## Current next work
 
 1. Keep the sandbox deployed for interview demonstrations while monitoring cost and quotas.

@@ -381,6 +381,31 @@ test("rejects malformed provider pair records with bounded errors", () => {
   }), "provider_context_mismatch");
 });
 
+test("derives tool result context from the targeted session span without reference input", () => {
+  const pair = makePair("otel-genai", "Builtin.ToolSelectionAccuracy", 0.90);
+  assert.equal(pair.request.evaluationReferenceInputs, undefined);
+  assert.doesNotThrow(() => sanitizeProviderResult(pair, POLICY));
+
+  pair.response.evaluationResults![0]!.context!.spanContext!.traceId = "wrong-trace";
+  assertProviderError(() => sanitizeProviderResult(pair, POLICY), "provider_context_mismatch");
+});
+
+test("rejects evaluator reference fields outside the fixed provider profile", () => {
+  const tool = makePair("otel-genai", "Builtin.ToolSelectionAccuracy", 0.90);
+  tool.request.evaluationReferenceInputs = [{
+    context: { spanContext: { sessionId: "synthetic-session", traceId: "trace-id", spanId: "tool-span-id" } }
+  }];
+  assertProviderError(() => sanitizeProviderResult(tool, POLICY), "provider_context_mismatch");
+
+  const correctness = makePair("otel-genai", "Builtin.Correctness", 0.90);
+  delete correctness.request.evaluationReferenceInputs;
+  assertProviderError(() => sanitizeProviderResult(correctness, POLICY), "provider_context_mismatch");
+
+  const goal = makePair("otel-genai", "Builtin.GoalSuccessRate", 0.90);
+  goal.request.evaluationReferenceInputs![0]!.expectedResponse = { text: "unsupported for fixed goal evaluator" };
+  assertProviderError(() => sanitizeProviderResult(goal, POLICY), "provider_context_mismatch");
+});
+
 function buildPassingReport() {
   return buildProviderParityReport({
     pairs: [
@@ -406,21 +431,40 @@ function makePair(
 ): ProviderEvaluationPair {
   const request: ProviderEvaluationRequest = {
     evaluatorId,
-    evaluationInput: { sessionSpans: [] },
+    evaluationInput: {
+      sessionSpans: [
+        {
+          traceId: "trace-id",
+          spanId: "agent-span-id",
+          attributes: { "session.id": "synthetic-session" }
+        },
+        {
+          traceId: "trace-id",
+          spanId: "tool-span-id",
+          attributes: { "session.id": "synthetic-session" }
+        }
+      ]
+    },
     ...(evaluatorId === "Builtin.Correctness"
       ? { evaluationTarget: { traceIds: ["trace-id"] } }
       : evaluatorId === "Builtin.ToolSelectionAccuracy"
         ? { evaluationTarget: { spanIds: ["tool-span-id"] } }
         : {}),
-    evaluationReferenceInputs: [{
-      context: {
-        spanContext: {
-          sessionId: "synthetic-session",
-          ...(evaluatorId === "Builtin.GoalSuccessRate" ? {} : { traceId: "trace-id" }),
-          ...(evaluatorId === "Builtin.ToolSelectionAccuracy" ? { spanId: "tool-span-id" } : {})
-        }
-      }
-    }]
+    ...(evaluatorId === "Builtin.ToolSelectionAccuracy"
+      ? {}
+      : {
+          evaluationReferenceInputs: [{
+            context: {
+              spanContext: {
+                sessionId: "synthetic-session",
+                ...(evaluatorId === "Builtin.Correctness" ? { traceId: "trace-id" } : {})
+              }
+            },
+            ...(evaluatorId === "Builtin.Correctness"
+              ? { expectedResponse: { text: "expected synthetic response" } }
+              : { assertions: [{ text: "expected synthetic outcome" }] })
+          }]
+        })
   };
   const rawProviderResult = {
     evaluatorId,
@@ -429,7 +473,13 @@ function makePair(
     explanation: "provider explanation: Which controls were selected",
     errorMessage: "provider diagnostic: do not expose",
     ignoredReferenceInputFields: [],
-    context: structuredClone(request.evaluationReferenceInputs[0]!.context),
+    context: {
+      spanContext: {
+        sessionId: "synthetic-session",
+        ...(evaluatorId === "Builtin.GoalSuccessRate" ? {} : { traceId: "trace-id" }),
+        ...(evaluatorId === "Builtin.ToolSelectionAccuracy" ? { spanId: "tool-span-id" } : {})
+      }
+    },
     tokenUsage: { inputTokens: 11, outputTokens: 7, totalTokens: 18 },
     evaluatorArn: "arn:aws:bedrock-agentcore:ap-southeast-2:123:evaluator/example"
   };

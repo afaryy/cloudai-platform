@@ -156,6 +156,17 @@ execution would produce separately labelled `provider-direct` evidence. It
 has not been provider validated. `provider-runtime` is reserved for a future
 Stage B Runtime-to-CloudWatch path and has not been implemented or validated.
 
+The Stage A ground-truth contract is evaluator-specific: Correctness receives
+one trace-scoped `expectedResponse`, ToolSelectionAccuracy receives only the
+targeted tool span and no reference input, and GoalSuccessRate receives one
+session-scoped `assertions` reference. For generic OpenTelemetry input, the
+invoke-agent prompt and final response are emitted as clean
+`gen_ai.task.input` and `gen_ai.task.output` strings; inference and tool spans
+retain their documented fields. The fixed managed profile does not measure
+trajectory parity. That remains a deterministic local dimension; adding a
+managed `Builtin.Trajectory*` evaluator requires a new reviewed policy and call
+budget.
+
 Managed scores supplement deterministic controls. They never authorize IAM,
 admission or approval, tool execution, deployment, remediation, rollback, or
 deletion. No evidence lane proves provider, runtime, or production validation.
