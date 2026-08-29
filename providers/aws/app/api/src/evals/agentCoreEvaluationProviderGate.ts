@@ -39,10 +39,6 @@ const REPORT_KEYS = [
 const DURATION_BUCKETS = new Set(["under-1m", "under-5m", "under-15m", "15m-or-more"]);
 const SAFE_PROVIDER_LABEL = "provider_result";
 
-type ProviderResultContext = {
-  spanContext?: { sessionId?: string; traceId?: string; spanId?: string };
-};
-
 export type ProviderEvaluationPair = {
   convention: EvaluationConvention;
   request: ProviderEvaluationRequest;
@@ -65,19 +61,25 @@ export function sanitizeProviderResult(
   validatePolicy(policy);
   if (!isRecord(pair)) throw new ProviderParityError("provider_result_coverage_invalid");
   if (!isConvention(pair.convention)) throw new ProviderParityError("provider_result_coverage_invalid");
+  if (!isRecord(pair.request)) throw new ProviderParityError("provider_context_mismatch");
 
-  const evaluatorId = pair.request?.evaluatorId;
+  const evaluatorId = pair.request.evaluatorId;
   if (!isEvaluatorId(evaluatorId)) throw new ProviderParityError("provider_evaluator_unexpected");
+  if (!hasExpectedRequestShape(pair.request, evaluatorId)) {
+    throw new ProviderParityError("provider_context_mismatch");
+  }
   const level = levelFor(evaluatorId);
   const expectedContext = expectedContextFor(pair.request);
-  const evaluationResults = pair.response?.evaluationResults;
+  if (!isRecord(pair.response)) throw new ProviderParityError("provider_result_missing");
+  const evaluationResults = pair.response.evaluationResults;
   if (!Array.isArray(evaluationResults) || evaluationResults.length === 0) {
     throw new ProviderParityError("provider_result_missing");
   }
   if (evaluationResults.length !== 1) throw new ProviderParityError("provider_result_duplicate");
 
   const raw = evaluationResults[0];
-  if (!raw || raw.evaluatorId !== evaluatorId) throw new ProviderParityError("provider_evaluator_unexpected");
+  if (!isRecord(raw)) throw new ProviderParityError("provider_result_missing");
+  if (raw.evaluatorId !== evaluatorId) throw new ProviderParityError("provider_evaluator_unexpected");
   if (raw.errorCode !== undefined) throw new ProviderParityError("provider_result_failed");
   if (raw.ignoredReferenceInputFields !== undefined &&
     (!Array.isArray(raw.ignoredReferenceInputFields) || raw.ignoredReferenceInputFields.length !== 0)) {
@@ -222,6 +224,31 @@ function expectedContextFor(request: ProviderEvaluationRequest): { sessionId: st
   };
 }
 
+function hasExpectedRequestShape(request: ProviderEvaluationRequest, evaluatorId: ProviderEvaluatorId): boolean {
+  if (!isRecord(request.evaluationInput) || !Array.isArray(request.evaluationInput.sessionSpans) ||
+    !Array.isArray(request.evaluationReferenceInputs) || request.evaluationReferenceInputs.length !== 1) {
+    return false;
+  }
+  const reference = request.evaluationReferenceInputs[0];
+  if (!isRecord(reference) || !isRecord(reference.context) || !isRecord(reference.context.spanContext)) return false;
+
+  const target = request.evaluationTarget;
+  switch (evaluatorId) {
+    case "Builtin.Correctness":
+      return isProviderTarget(target, "traceIds");
+    case "Builtin.ToolSelectionAccuracy":
+      return isProviderTarget(target, "spanIds");
+    case "Builtin.GoalSuccessRate":
+      return target === undefined;
+  }
+}
+
+function isProviderTarget(target: unknown, key: "traceIds" | "spanIds"): boolean {
+  return isRecord(target) && hasOnlyKeys(target, [key]) &&
+    Array.isArray(target[key]) && target[key].length === 1 &&
+    target[key].every((value) => typeof value === "string" && value.length > 0);
+}
+
 function assertResultCoverage(results: ProviderParityResult[]): void {
   const keys = new Set<string>();
   for (const result of results) {
@@ -282,11 +309,12 @@ function levelFor(evaluatorId: ProviderEvaluatorId): ProviderEvaluationLevel {
 }
 
 function sameContext(
-  actual: ProviderResultContext | undefined,
+  actual: unknown,
   expected: { sessionId: string; traceId?: string; spanId?: string }
 ): boolean {
-  const spanContext = actual?.spanContext;
-  if (!spanContext || typeof spanContext.sessionId !== "string") return false;
+  if (!isRecord(actual) || !isRecord(actual.spanContext)) return false;
+  const spanContext = actual.spanContext;
+  if (typeof spanContext.sessionId !== "string") return false;
   const actualKeys = Object.keys(spanContext).sort();
   const expectedKeys = Object.keys(expected).sort();
   return actualKeys.length === expectedKeys.length && actualKeys.every((key, index) => key === expectedKeys[index]) &&

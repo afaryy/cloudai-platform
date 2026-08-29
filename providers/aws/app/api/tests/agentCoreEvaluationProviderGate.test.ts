@@ -357,6 +357,30 @@ test("uses a bounded error for an invalid report-builder input", () => {
   );
 });
 
+test("rejects malformed provider pair records with bounded errors", () => {
+  const nullPair = makeConventionPairs("otel-genai", [0.90, 0.85, 0.80]);
+  nullPair[0] = null as never;
+  assertProviderError(() => buildProviderParityReport({
+    pairs: [...nullPair, ...makeConventionPairs("openinference", [0.88, 0.82, 0.78])],
+    policy: POLICY,
+    generatedAt: "2026-08-29T00:00:00.000Z",
+    sourceCommit: "a".repeat(40),
+    githubRunId: "123456",
+    durationBucket: "under-1m"
+  }), "provider_result_coverage_invalid");
+
+  const malformedTarget = makeConventionPairs("otel-genai", [0.90, 0.85, 0.80]);
+  malformedTarget[0]!.request.evaluationTarget = { traceIds: "not-an-array" } as never;
+  assertProviderError(() => buildProviderParityReport({
+    pairs: [...malformedTarget, ...makeConventionPairs("openinference", [0.88, 0.82, 0.78])],
+    policy: POLICY,
+    generatedAt: "2026-08-29T00:00:00.000Z",
+    sourceCommit: "a".repeat(40),
+    githubRunId: "123456",
+    durationBucket: "under-1m"
+  }), "provider_context_mismatch");
+});
+
 function buildPassingReport() {
   return buildProviderParityReport({
     pairs: [
