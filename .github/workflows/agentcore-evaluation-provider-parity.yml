@@ -1,0 +1,137 @@
+name: AgentCore evaluation provider parity
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        type: choice
+        options: [validate, direct-spans]
+        default: validate
+      confirmation:
+        type: string
+        required: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cloudai-agentcore-evaluation-provider-parity
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    if: ${{ inputs.mode == 'validate' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11.7.0
+
+      - name: Install API dependencies
+        working-directory: providers/aws/app/api
+        run: pnpm install --frozen-lockfile
+
+      - name: Test API contracts
+        working-directory: providers/aws/app/api
+        run: pnpm test
+
+      - name: Validate provider parity contracts
+        working-directory: providers/aws/app/api
+        run: pnpm agentcore-eval:provider-parity -- --mode validate
+
+  direct-spans:
+    if: ${{ inputs.mode == 'direct-spans' }}
+    runs-on: ubuntu-latest
+    environment: aws-sandbox
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      CONFIRMATION: ${{ inputs.confirmation }}
+      AGENTCORE_EVALUATION_READY: ${{ vars.AGENTCORE_EVALUATION_READY }}
+      AGENTCORE_EVALUATION_MAX_CALLS: ${{ vars.AGENTCORE_EVALUATION_MAX_CALLS }}
+      AWS_AGENTCORE_EVALUATION_ROLE_TO_ASSUME: ${{ vars.AWS_AGENTCORE_EVALUATION_ROLE_TO_ASSUME || secrets.AWS_AGENTCORE_EVALUATION_ROLE_TO_ASSUME }}
+      AWS_REGION: ${{ vars.AWS_REGION || 'ap-southeast-2' }}
+      PROVIDER_PARITY_MODE: direct-spans
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Preflight protected direct evaluation
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$CONFIRMATION" == "I_UNDERSTAND_AGENTCORE_EVALUATION_PROVIDER_PARITY" ]] || {
+            echo "exact confirmation is required" >&2
+            exit 1
+          }
+          [[ "$AGENTCORE_EVALUATION_READY" == "true" ]] || {
+            echo "evaluation readiness is not enabled" >&2
+            exit 1
+          }
+          [[ "$AGENTCORE_EVALUATION_MAX_CALLS" == "6" ]] || {
+            echo "the direct evaluation call cap must be six" >&2
+            exit 1
+          }
+          [[ "$AWS_REGION" == "ap-southeast-2" ]] || {
+            echo "the protected evaluation region must be ap-southeast-2" >&2
+            exit 1
+          }
+          [[ -n "$AWS_AGENTCORE_EVALUATION_ROLE_TO_ASSUME" ]] || {
+            echo "the protected evaluation role is required" >&2
+            exit 1
+          }
+          [[ "$GITHUB_REF" == "refs/heads/main" ]] || {
+            echo "the protected evaluation must run from main" >&2
+            exit 1
+          }
+          [[ "$GITHUB_SHA" =~ ^[0-9a-f]{40}$ ]] || {
+            echo "the protected evaluation requires a full lowercase commit SHA" >&2
+            exit 1
+          }
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11.7.0
+
+      - name: Install API dependencies
+        working-directory: providers/aws/app/api
+        run: pnpm install --frozen-lockfile
+
+      - name: Test API contracts
+        working-directory: providers/aws/app/api
+        run: pnpm test
+
+      - name: Configure protected AWS role
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.AWS_AGENTCORE_EVALUATION_ROLE_TO_ASSUME }}
+          aws-region: ${{ env.AWS_REGION }}
+          mask-aws-account-id: true
+
+      - name: Run direct provider parity evaluation
+        working-directory: providers/aws/app/api
+        run: pnpm agentcore-eval:provider-parity -- --mode direct-spans --output "$RUNNER_TEMP/provider-direct-evaluation-report.json"
+
+      - name: Upload sanitized provider parity report
+        uses: actions/upload-artifact@v4
+        with:
+          name: provider-direct-evaluation-report
+          path: ${{ runner.temp }}/provider-direct-evaluation-report.json
+          if-no-files-found: error
+          retention-days: 7
