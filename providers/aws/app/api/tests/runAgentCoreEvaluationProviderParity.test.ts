@@ -5,6 +5,7 @@ import { resolve } from "node:path";
 import test from "node:test";
 
 import {
+  parseProviderParityArguments,
   runProviderParityEvaluation,
   validateProviderParityEnvironment,
   type ProviderParityRunOptions
@@ -33,9 +34,19 @@ test("rejects every invalid direct-mode preflight before constructing the client
   t.after(() => rm(temporaryDirectory, { recursive: true, force: true }));
   const base = directOptions(resolve(temporaryDirectory, "report.json"));
   const wrongPolicyPath = resolve(temporaryDirectory, "wrong-policy.json");
+  const malformedScenarioPath = resolve(temporaryDirectory, "malformed-scenarios.json");
+  const malformedFixturePath = resolve(temporaryDirectory, "malformed-fixtures.json");
   const policy = JSON.parse(await readFile(base.policyPath, "utf8")) as Record<string, unknown>;
   policy.maximumProviderCalls = 5;
   await writeFile(wrongPolicyPath, JSON.stringify(policy), "utf8");
+  const scenarios = JSON.parse(await readFile(base.scenarioPath, "utf8")) as Array<Record<string, unknown>>;
+  const matchingScenario = scenarios.find((scenario) => scenario.scenarioId === "synthetic-cited-answer")!;
+  delete matchingScenario.expectedToolTrajectory;
+  await writeFile(malformedScenarioPath, JSON.stringify(scenarios), "utf8");
+  const fixtures = JSON.parse(await readFile(base.fixturePaths[0], "utf8")) as Array<Record<string, unknown>>;
+  const matchingFixture = fixtures.find((fixture) => fixture.scenarioId === "synthetic-cited-answer")!;
+  delete matchingFixture.spans;
+  await writeFile(malformedFixturePath, JSON.stringify(fixtures), "utf8");
 
   const cases: Array<{
     name: string;
@@ -53,6 +64,8 @@ test("rejects every invalid direct-mode preflight before constructing the client
     { name: "scenario file is missing", mutate: (options) => { options.scenarioPath = resolve(temporaryDirectory, "missing-scenarios.json"); }, code: "provider_input_file_invalid" },
     { name: "first fixture file is missing", mutate: (options) => { options.fixturePaths[0] = resolve(temporaryDirectory, "missing-fixture.json"); }, code: "provider_input_file_invalid" },
     { name: "policy file is missing", mutate: (options) => { options.policyPath = resolve(temporaryDirectory, "missing-policy.json"); }, code: "provider_input_file_invalid" },
+    { name: "matching scenario has a malformed shape", mutate: (options) => { options.scenarioPath = malformedScenarioPath; }, code: "provider_input_file_invalid" },
+    { name: "matching fixture has a malformed shape", mutate: (options) => { options.fixturePaths[0] = malformedFixturePath; }, code: "provider_input_file_invalid" },
     { name: "policy maximum is not six", mutate: (options) => { options.policyPath = wrongPolicyPath; }, code: "provider_call_count_invalid" }
   ];
 
@@ -69,6 +82,21 @@ test("rejects every invalid direct-mode preflight before constructing the client
       name
     );
     assert.equal(factoryCalls, 0, `${name}: client factory was called`);
+  }
+});
+
+test("CLI parser strips only one leading package-manager separator", () => {
+  assert.deepEqual(parseProviderParityArguments(["--", "--mode", "validate"]), { mode: "validate" });
+
+  for (const arguments_ of [
+    ["--mode", "--", "validate"],
+    ["--", "--", "--mode", "validate"],
+    ["--", "--mode", "validate", "--"]
+  ]) {
+    assert.throws(
+      () => parseProviderParityArguments(arguments_),
+      (error: unknown) => error instanceof ProviderParityError && error.code === "provider_policy_invalid"
+    );
   }
 });
 

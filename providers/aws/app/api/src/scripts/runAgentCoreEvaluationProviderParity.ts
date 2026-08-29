@@ -103,7 +103,13 @@ export async function runProviderParityEvaluation(
   }
 
   const { scenario, fixtures, policy } = await loadReviewedInputs(options);
-  const requests = fixtures.flatMap((fixture) => buildProviderEvaluationRequests(fixture, scenario, policy));
+  let requests: ProviderEvaluationRequest[];
+  try {
+    requests = fixtures.flatMap((fixture) => buildProviderEvaluationRequests(fixture, scenario, policy));
+  } catch (error: unknown) {
+    if (error instanceof ProviderParityError) throw error;
+    throw new ProviderParityError("provider_input_file_invalid");
+  }
   if (requests.length !== CALL_BUDGET) {
     throw new ProviderParityError("provider_call_count_invalid");
   }
@@ -242,7 +248,7 @@ async function readJson(filePath: string): Promise<unknown> {
 type ParsedCli = { mode: ProviderParityMode; outputPath?: string };
 
 export function parseProviderParityArguments(arguments_: string[]): ParsedCli {
-  const argumentsWithoutSeparator = arguments_.filter((argument) => argument !== "--");
+  const argumentsWithoutSeparator = arguments_[0] === "--" ? arguments_.slice(1) : arguments_;
   if (argumentsWithoutSeparator.length === 2 && argumentsWithoutSeparator[0] === "--mode" &&
     argumentsWithoutSeparator[1] === "validate") {
     return { mode: "validate" };
