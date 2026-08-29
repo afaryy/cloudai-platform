@@ -255,12 +255,16 @@ export function parseProviderParityArguments(arguments_: string[]): ParsedCli {
   }
   if (argumentsWithoutSeparator.length === 4 && argumentsWithoutSeparator[0] === "--mode" &&
     argumentsWithoutSeparator[1] === "direct-spans" && argumentsWithoutSeparator[2] === "--output" &&
-    argumentsWithoutSeparator[3]) {
+    isCliValue(argumentsWithoutSeparator[3])) {
     return { mode: "direct-spans", outputPath: resolve(argumentsWithoutSeparator[3]) };
   }
   throw new ProviderParityError(argumentsWithoutSeparator[1] === "direct-spans"
     ? "provider_output_path_required"
     : "provider_policy_invalid");
+}
+
+function isCliValue(value: string | undefined): value is string {
+  return typeof value === "string" && value.length > 0 && !value.startsWith("-");
 }
 
 async function main(): Promise<void> {

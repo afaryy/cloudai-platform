@@ -85,17 +85,23 @@ test("rejects every invalid direct-mode preflight before constructing the client
   }
 });
 
-test("CLI parser strips only one leading package-manager separator", () => {
+test("CLI parser accepts only exact grammar with non-option values", () => {
   assert.deepEqual(parseProviderParityArguments(["--", "--mode", "validate"]), { mode: "validate" });
 
-  for (const arguments_ of [
-    ["--mode", "--", "validate"],
-    ["--", "--", "--mode", "validate"],
-    ["--", "--mode", "validate", "--"]
+  for (const { arguments_, code } of [
+    { arguments_: ["--mode", "--", "validate"], code: "provider_policy_invalid" },
+    { arguments_: ["--", "--", "--mode", "validate"], code: "provider_policy_invalid" },
+    { arguments_: ["--", "--mode", "validate", "--"], code: "provider_policy_invalid" },
+    { arguments_: ["--mode", "direct-spans", "--output", ""], code: "provider_output_path_required" },
+    { arguments_: ["--mode", "direct-spans", "--output", "--"], code: "provider_output_path_required" },
+    { arguments_: ["--mode", "direct-spans", "--output", "--mode"], code: "provider_output_path_required" },
+    { arguments_: ["--mode", "direct-spans", "--output", "-relative.json"], code: "provider_output_path_required" },
+    { arguments_: ["--mode", "--output"], code: "provider_policy_invalid" },
+    { arguments_: ["--mode", "--"], code: "provider_policy_invalid" }
   ]) {
     assert.throws(
       () => parseProviderParityArguments(arguments_),
-      (error: unknown) => error instanceof ProviderParityError && error.code === "provider_policy_invalid"
+      (error: unknown) => error instanceof ProviderParityError && error.code === code
     );
   }
 });
