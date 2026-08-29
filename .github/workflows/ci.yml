@@ -46,6 +46,18 @@ jobs:
         working-directory: providers/aws/app/api
         run: pnpm test
 
+      - name: Run framework-neutral agent evaluation quality gate
+        working-directory: providers/aws/app/api
+        run: pnpm agent-eval:gate -- --output "$RUNNER_TEMP/agent-evaluation-report.json"
+
+      - name: Upload metadata-only agent evaluation report
+        uses: actions/upload-artifact@v4
+        with:
+          name: agent-evaluation-report
+          path: ${{ runner.temp }}/agent-evaluation-report.json
+          if-no-files-found: error
+          retention-days: 7
+
   agentcore-rag-runtime:
     runs-on: ubuntu-latest
     steps:
