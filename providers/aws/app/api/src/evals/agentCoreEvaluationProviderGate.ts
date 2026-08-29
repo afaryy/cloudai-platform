@@ -30,6 +30,15 @@ const PARITY_KEYS = [
   "evaluatorId", "otelGenaiScore", "openInferenceScore", "absoluteDelta", "maximumDelta", "passed"
 ];
 
+const REPORT_KEYS = [
+  "contractVersion", "thresholdVersion", "evidenceLevel", "generatedAt", "sourceCommit", "githubRunId",
+  "regionLabel", "scenarioId", "status", "providerCallCount", "durationBucket", "aggregateTokenUsage",
+  "results", "parity"
+];
+
+const DURATION_BUCKETS = new Set(["under-1m", "under-5m", "under-15m", "15m-or-more"]);
+const SAFE_PROVIDER_LABEL = "provider_result";
+
 type ProviderResultContext = {
   spanContext?: { sessionId?: string; traceId?: string; spanId?: string };
 };
@@ -76,7 +85,7 @@ export function sanitizeProviderResult(
   }
   if (!isScore(raw.value)) throw new ProviderParityError("provider_score_invalid");
   if (!sameContext(raw.context, expectedContext)) throw new ProviderParityError("provider_context_mismatch");
-  if (!isLabel(raw.label)) throw new ProviderParityError("provider_label_invalid");
+  if (!isProviderLabel(raw.label)) throw new ProviderParityError("provider_label_invalid");
   if (!isTokenUsage(raw.tokenUsage)) throw new ProviderParityError("provider_token_usage_invalid");
 
   const threshold = policy.evaluatorThresholds[evaluatorId];
@@ -87,7 +96,7 @@ export function sanitizeProviderResult(
     evaluatorId,
     level,
     score: raw.value,
-    label: raw.label,
+    label: SAFE_PROVIDER_LABEL,
     threshold,
     passed: true,
     reasonCode: "passed",
@@ -100,6 +109,7 @@ export function sanitizeProviderResult(
 }
 
 export function buildProviderParityReport(input: ProviderParityReportInput): ProviderParityReport {
+  if (!isRecord(input)) throw new ProviderParityError("provider_policy_invalid");
   validatePolicy(input.policy);
   if (!Array.isArray(input.pairs) || input.pairs.length !== 6) {
     throw new ProviderParityError("provider_call_count_invalid");
@@ -123,7 +133,7 @@ export function buildProviderParityReport(input: ProviderParityReportInput): Pro
     };
   });
 
-  return {
+  const report: ProviderParityReport = {
     contractVersion: "1.0",
     thresholdVersion: "1.0",
     evidenceLevel: "provider-direct",
@@ -139,10 +149,13 @@ export function buildProviderParityReport(input: ProviderParityReportInput): Pro
     results,
     parity
   };
+  assertReportEnvelope(report);
+  return report;
 }
 
 export function assertProviderParityGate(report: ProviderParityReport): void {
-  if (!report || report.providerCallCount !== 6 || !Array.isArray(report.results) || report.results.length !== 6) {
+  assertReportEnvelope(report);
+  if (report.providerCallCount !== 6 || !Array.isArray(report.results) || report.results.length !== 6) {
     throw new ProviderParityError("provider_call_count_invalid");
   }
 
@@ -228,9 +241,11 @@ function assertReportResult(result: ProviderParityResult): void {
     throw new ProviderParityError("provider_result_coverage_invalid");
   }
   if (!isScore(result.score)) throw new ProviderParityError("provider_score_invalid");
-  if (result.threshold !== 0.70 || !isLabel(result.label) || result.reasonCode !== "passed") {
+  if (result.threshold !== 0.70) {
     throw new ProviderParityError("provider_score_below_threshold");
   }
+  if (result.label !== SAFE_PROVIDER_LABEL) throw new ProviderParityError("provider_label_invalid");
+  if (result.reasonCode !== "passed") throw new ProviderParityError("provider_result_coverage_invalid");
   if (!isTokenUsage(result.tokenUsage)) throw new ProviderParityError("provider_token_usage_invalid");
   if (result.score < result.threshold || result.passed !== true) {
     throw new ProviderParityError("provider_score_below_threshold");
@@ -292,8 +307,43 @@ function isSafeTokenCount(value: unknown): value is number {
   return typeof value === "number" && Number.isSafeInteger(value) && value >= 0;
 }
 
-function isLabel(value: unknown): value is string {
-  return typeof value === "string" && value.length > 0 && value.length <= 80 && /^[a-z0-9_]+$/.test(value);
+function assertReportEnvelope(report: unknown): asserts report is ProviderParityReport {
+  if (!isRecord(report) || !hasOnlyKeys(report, REPORT_KEYS)) {
+    throw new ProviderParityError("provider_result_coverage_invalid");
+  }
+  if (report.contractVersion !== "1.0" || report.thresholdVersion !== "1.0" ||
+    report.evidenceLevel !== "provider-direct" || report.scenarioId !== "synthetic-cited-answer") {
+    throw new ProviderParityError("provider_policy_invalid");
+  }
+  if (!isIsoDateTime(report.generatedAt) || !isGithubRunId(report.githubRunId) ||
+    !isDurationBucket(report.durationBucket) || (report.status !== "passed" && report.status !== "failed")) {
+    throw new ProviderParityError("provider_result_coverage_invalid");
+  }
+  if (!isSourceCommit(report.sourceCommit)) throw new ProviderParityError("provider_source_commit_invalid");
+  if (report.regionLabel !== "ap-southeast-2") throw new ProviderParityError("provider_region_invalid");
+  if (!isTokenUsage(report.aggregateTokenUsage)) throw new ProviderParityError("provider_token_usage_invalid");
+}
+
+function isProviderLabel(value: unknown): value is string {
+  return typeof value === "string" && value.length > 0 && value.length <= 80 && /^[\x20-\x7e]+$/.test(value);
+}
+
+function isIsoDateTime(value: unknown): value is string {
+  if (typeof value !== "string") return false;
+  const timestamp = new Date(value);
+  return Number.isFinite(timestamp.getTime()) && timestamp.toISOString() === value;
+}
+
+function isSourceCommit(value: unknown): value is string {
+  return typeof value === "string" && /^[0-9a-f]{40}$/.test(value);
+}
+
+function isGithubRunId(value: unknown): value is string {
+  return typeof value === "string" && /^[0-9]+$/.test(value);
+}
+
+function isDurationBucket(value: unknown): value is ProviderParityReport["durationBucket"] {
+  return typeof value === "string" && DURATION_BUCKETS.has(value);
 }
 
 function checkedSum(left: number, right: number): number {

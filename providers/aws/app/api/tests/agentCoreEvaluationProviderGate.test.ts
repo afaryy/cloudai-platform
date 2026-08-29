@@ -234,6 +234,129 @@ test("revalidates report rows instead of trusting passed fields or status", () =
   assertProviderError(() => assertProviderParityGate(wrongCount), "provider_call_count_invalid");
 });
 
+test("maps all printable provider labels to a code-owned evidence label", () => {
+  const ordinary = makePair("otel-genai", "Builtin.Correctness", 0.90);
+  ordinary.response.evaluationResults![0]!.label = "Passed with citation";
+  const sensitive = makePair("openinference", "Builtin.Correctness", 0.90);
+  sensitive.response.evaluationResults![0]!.label = "123456789012";
+
+  const ordinaryResult = sanitizeProviderResult(ordinary, POLICY);
+  const sensitiveResult = sanitizeProviderResult(sensitive, POLICY);
+  assert.equal(ordinaryResult.label, "provider_result");
+  assert.equal(sensitiveResult.label, "provider_result");
+  const serialized = JSON.stringify([ordinaryResult, sensitiveResult]);
+  assert.equal(serialized.includes("Passed with citation"), false);
+  assert.equal(serialized.includes("123456789012"), false);
+});
+
+test("rejects malformed top-level evidence and unknown fields", () => {
+  const cases: Array<{
+    name: string;
+    mutate: (report: ReturnType<typeof buildPassingReport> & Record<string, unknown>) => void;
+    code: ProviderParityError["code"];
+  }> = [
+    {
+      name: "contract version",
+      mutate: (report) => { report.contractVersion = "2.0" as never; },
+      code: "provider_policy_invalid"
+    },
+    {
+      name: "threshold version",
+      mutate: (report) => { report.thresholdVersion = "2.0" as never; },
+      code: "provider_policy_invalid"
+    },
+    {
+      name: "evidence level",
+      mutate: (report) => { report.evidenceLevel = "local" as never; },
+      code: "provider_policy_invalid"
+    },
+    {
+      name: "invalid timestamp",
+      mutate: (report) => { report.generatedAt = "not-a-timestamp"; },
+      code: "provider_result_coverage_invalid"
+    },
+    {
+      name: "invalid source commit",
+      mutate: (report) => { report.sourceCommit = "a".repeat(39); },
+      code: "provider_source_commit_invalid"
+    },
+    {
+      name: "invalid GitHub run ID",
+      mutate: (report) => { report.githubRunId = "run-123"; },
+      code: "provider_result_coverage_invalid"
+    },
+    {
+      name: "region",
+      mutate: (report) => { report.regionLabel = "us-east-1" as never; },
+      code: "provider_region_invalid"
+    },
+    {
+      name: "scenario",
+      mutate: (report) => { report.scenarioId = "other" as never; },
+      code: "provider_policy_invalid"
+    },
+    {
+      name: "duration bucket",
+      mutate: (report) => { report.durationBucket = "forever" as never; },
+      code: "provider_result_coverage_invalid"
+    },
+    {
+      name: "unknown provider response field",
+      mutate: (report) => { report.providerResponse = { explanation: "do not retain" }; },
+      code: "provider_result_coverage_invalid"
+    }
+  ];
+
+  for (const { name, mutate, code } of cases) {
+    const report = buildPassingReport() as ReturnType<typeof buildPassingReport> & Record<string, unknown>;
+    mutate(report);
+    assertProviderError(() => assertProviderParityGate(report), code, name);
+  }
+});
+
+test("rejects malformed aggregate, result, and parity data without trusting stored flags", () => {
+  const aggregateUnknown = buildPassingReport() as ReturnType<typeof buildPassingReport> & {
+    aggregateTokenUsage: Record<string, unknown>;
+  };
+  aggregateUnknown.aggregateTokenUsage.unexpected = "secret";
+  assertProviderError(() => assertProviderParityGate(aggregateUnknown), "provider_token_usage_invalid");
+
+  const aggregateMismatch = buildPassingReport();
+  aggregateMismatch.aggregateTokenUsage.totalTokens += 1;
+  assertProviderError(() => assertProviderParityGate(aggregateMismatch), "provider_token_usage_invalid");
+
+  const badResultScore = buildPassingReport();
+  badResultScore.results[0]!.score = Number.NaN;
+  assertProviderError(() => assertProviderParityGate(badResultScore), "provider_score_invalid");
+
+  const unknownParity = buildPassingReport();
+  unknownParity.parity[0]!.evaluatorId = "Builtin.Unknown" as never;
+  assertProviderError(() => assertProviderParityGate(unknownParity), "provider_result_coverage_invalid");
+
+  const duplicateParity = buildPassingReport();
+  duplicateParity.parity[1]!.evaluatorId = duplicateParity.parity[0]!.evaluatorId;
+  assertProviderError(() => assertProviderParityGate(duplicateParity), "provider_result_coverage_invalid");
+
+  const badParityScore = buildPassingReport();
+  badParityScore.parity[0]!.otelGenaiScore = Number.NaN;
+  assertProviderError(() => assertProviderParityGate(badParityScore), "provider_parity_delta_exceeded");
+
+  const parityPassedMismatch = buildPassingReport();
+  parityPassedMismatch.parity[0]!.passed = false;
+  assertProviderError(() => assertProviderParityGate(parityPassedMismatch), "provider_parity_delta_exceeded");
+
+  const statusMismatch = buildPassingReport();
+  statusMismatch.status = "failed";
+  assertProviderError(() => assertProviderParityGate(statusMismatch), "provider_parity_delta_exceeded");
+});
+
+test("uses a bounded error for an invalid report-builder input", () => {
+  assertProviderError(
+    () => buildProviderParityReport(null as never),
+    "provider_policy_invalid"
+  );
+});
+
 function buildPassingReport() {
   return buildProviderParityReport({
     pairs: [
