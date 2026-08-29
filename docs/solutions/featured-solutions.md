@@ -316,6 +316,13 @@ The [POC runbook](./agentcore-governed-rag-poc-runbook.md) records the protected
 
 The local contract suite covers admission, direct-runtime bypass denial, disabled and retired-source behavior, insufficient evidence, prompt-attack-shaped blocking, sanitized provider failures, and confirmation gates. Protected CI also validated the synthetic Knowledge Base ingestion path, IAM-authenticated Gateway path, and bounded CloudWatch observability.
 
+The separate [framework-neutral agent evaluation telemetry gate](./agent-evaluation-telemetry-runbook.md)
+adds locally contract-tested OpenTelemetry GenAI and OpenInference
+normalization, fixed prompts, expected tool trajectories, strict versioned
+thresholds, and metadata-only pull-request evidence. Its required CI path does
+not call AWS. AgentCore managed evaluation remains an optional protected
+provider-parity lane rather than a current runtime claim.
+
 ### Key trade-offs
 
 - Synthetic content and read-only retrieval provide reproducible, public-safe evidence but do not represent customer-data quality or production answer accuracy.

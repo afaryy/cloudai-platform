@@ -194,6 +194,33 @@ The evals check:
 
 This is a lightweight mock-mode evaluation pattern. It is not a model judge, benchmark suite, or provider-hosted evaluation service.
 
+## Framework-Neutral Agent Evaluation Telemetry
+
+The package also contains a locally contract-tested quality gate for synthetic
+agent traces. It accepts OpenTelemetry GenAI scopes under
+`opentelemetry.instrumentation.*` and OpenInference scopes under
+`openinference.instrumentation.*`, normalizes both conventions, and evaluates
+the same fixed prompts and tool trajectories against versioned thresholds.
+
+The five deterministic dimensions are `local.telemetry_compatibility`,
+`local.trace_completeness`, `local.tool_trajectory_accuracy`,
+`local.behavioural_outcome`, and `local.goal_success`. Every `strict-v1`
+threshold is `1.0`, and a missing, malformed, unknown, unsafe, or
+below-threshold result fails closed.
+
+Run the gate from the repository root:
+
+```bash
+corepack pnpm@11.7.0 --dir providers/aws/app/api agent-eval:gate -- \
+  --output /tmp/agent-evaluation-report.json
+```
+
+The required CI path does not call AWS and emits only a metadata-safe local
+contract report. OTLP export, CloudWatch ingestion, and AgentCore managed
+evaluation belong to a separately approved protected provider-parity lane.
+See the [agent evaluation telemetry runbook](../../../../docs/solutions/agent-evaluation-telemetry-runbook.md)
+for the evidence and non-claim boundary.
+
 ## Chat Response
 
 The response includes synthetic text plus metadata that later phases can use for cost, audit, and observability patterns.
