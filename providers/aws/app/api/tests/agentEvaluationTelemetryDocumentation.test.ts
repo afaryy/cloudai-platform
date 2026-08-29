@@ -9,6 +9,8 @@ test("agent evaluation telemetry documentation records standards, scores, and ev
   const documentation = (await Promise.all([
     "docs/solutions/agent-evaluation-telemetry-runbook.md",
     "docs/architecture/agentcore-governed-rag-poc.md",
+    "docs/solutions/p8i-agentcore-rag-key-process-record.md",
+    "docs/practices/current-status.md",
     "providers/aws/app/api/README.md"
   ].map((path) => readFile(resolve(ROOT, path), "utf8")))).join("\n");
 
@@ -21,7 +23,15 @@ test("agent evaluation telemetry documentation records standards, scores, and ev
     "local.tool_trajectory_accuracy",
     "locally contract-tested",
     "protected provider-parity lane",
-    "does not call AWS"
+    "does not call AWS",
+    "provider-parity-v1",
+    "provider-direct",
+    "I_UNDERSTAND_AGENTCORE_EVALUATION_PROVIDER_PARITY",
+    "AWS_AGENTCORE_EVALUATION_ROLE_TO_ASSUME",
+    "AGENTCORE_EVALUATION_MAX_CALLS=6",
+    "Builtin.ToolSelectionAccuracy",
+    "Stage B",
+    "Runtime-to-CloudWatch"
   ]) {
     assert.match(documentation, new RegExp(escapeRegExp(required), "i"));
   }
@@ -34,13 +44,16 @@ test("current status does not overstate the local agent evaluation evidence", as
   );
   const telemetryRow = currentStatus
     .split("\n")
-    .find((line) => line.includes("Framework-neutral agent evaluation telemetry"));
+    .find((line) => line.startsWith("| Framework-neutral agent evaluation telemetry |"));
 
   assert.ok(telemetryRow, "current status must include the telemetry gate");
   assert.doesNotMatch(telemetryRow, /live validated/i);
   assert.doesNotMatch(telemetryRow, /managed evaluation/i);
+  assert.doesNotMatch(telemetryRow, /provider validated/i);
+  assert.doesNotMatch(telemetryRow, /runtime validated/i);
   assert.doesNotMatch(telemetryRow, /production evaluation/i);
-  assert.match(telemetryRow, /locally contract-tested/i);
+  assert.match(telemetryRow, /source implemented/i);
+  assert.match(telemetryRow, /provider validation pending/i);
 });
 
 function escapeRegExp(value: string): string {
