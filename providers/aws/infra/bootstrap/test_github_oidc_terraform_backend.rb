@@ -36,6 +36,24 @@ class GitHubOidcTerraformBackendTest < Minitest::Test
     assert_includes template, "BudgetGuardrailsRoleArn:"
   end
 
+  def test_includes_dedicated_agentcore_evaluation_role
+    assert_includes template, "GitHubActionsAgentCoreEvaluationRole:"
+    assert_includes agentcore_evaluation_role,
+      'RoleName: !Sub "${GitHubRepo}-${GitHubEnvironment}-agentcore-evaluation"'
+    assert_includes agentcore_evaluation_role,
+      'token.actions.githubusercontent.com:sub: !Sub "repo:${GitHubOrg}/${GitHubRepo}:environment:${GitHubEnvironment}"'
+    assert_includes agentcore_evaluation_role, "bedrock-agentcore:Evaluate"
+    assert_includes template, "AgentCoreEvaluationRoleArn:"
+  end
+
+  def test_agentcore_evaluation_role_cannot_mutate_or_invoke_other_services
+    %w[
+      bedrock-agentcore:CreateEvaluator bedrock-agentcore:UpdateEvaluator
+      bedrock-agentcore:DeleteEvaluator bedrock-agentcore:InvokeAgentRuntime
+      logs:StartQuery cloudwatch:GetMetricData iam:PassRole s3:GetObject
+    ].each { |action| refute_includes agentcore_evaluation_role, action }
+  end
+
   def test_includes_dedicated_private_eks_network_role
     assert_includes template, "GitHubActionsPrivateEKSNetworkRole:"
     assert_includes private_network_role, 'RoleName: !Sub "${GitHubRepo}-aws-private-eks-terraform"'
@@ -57,7 +75,9 @@ class GitHubOidcTerraformBackendTest < Minitest::Test
     assert_includes bootstrap_role_management_statement, "iam:DeleteRole"
     assert_includes bootstrap_role_management_statement, "iam:DeleteRolePolicy"
     assert_includes bootstrap_role_management_statement, 'role/${GitHubRepo}-${GitHubEnvironment}-budget-guardrails'
+    assert_includes bootstrap_role_management_statement, 'role/${GitHubRepo}-${GitHubEnvironment}-agentcore-evaluation'
     assert_includes bootstrap_role_management_statement, 'role/${GitHubRepo}-aws-private-eks-terraform'
+    refute_includes bootstrap_role_management_statement, "role/*"
     refute_includes bootstrap_role_management_statement, "iam:DeleteUser"
     refute_includes bootstrap_role_management_statement, "iam:DeletePolicy"
   end
@@ -131,8 +151,22 @@ class GitHubOidcTerraformBackendTest < Minitest::Test
     template.split("GitHubActionsBudgetGuardrailsRole:", 2).fetch(1, "").split("AgentCoreRagTerraformPolicy:", 2).first.to_s
   end
 
+  def agentcore_evaluation_role
+    template
+      .split("GitHubActionsAgentCoreEvaluationRole:", 2)
+      .fetch(1, "")
+      .split(/\n\s{2}[A-Z][A-Za-z0-9]+:/, 2)
+      .first
+      .to_s
+  end
+
   def private_network_role
-    template.split("GitHubActionsPrivateEKSNetworkRole:", 2).fetch(1, "").split("AgentCoreRagTerraformPolicy:", 2).first.to_s
+    template
+      .split("GitHubActionsPrivateEKSNetworkRole:", 2)
+      .fetch(1, "")
+      .split(/\n\s{2}[A-Z][A-Za-z0-9]+:/, 2)
+      .first
+      .to_s
   end
 
   def bootstrap_role
