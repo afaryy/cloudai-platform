@@ -1,0 +1,12 @@
+{
+  "contractVersion": "1.0",
+  "profileId": "provider-parity-v1",
+  "scenarioId": "synthetic-cited-answer",
+  "evaluatorThresholds": {
+    "Builtin.Correctness": 0.7,
+    "Builtin.ToolSelectionAccuracy": 0.7,
+    "Builtin.GoalSuccessRate": 0.7
+  },
+  "maximumParityDelta": 0.2,
+  "maximumProviderCalls": 6
+}
