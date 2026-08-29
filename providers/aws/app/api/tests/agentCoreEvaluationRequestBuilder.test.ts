@@ -40,7 +40,8 @@ test("builds equivalent deterministic direct-span requests for both cited-answer
     assert.deepEqual(Object.values(ids.spanIds).sort(), [...new Set(Object.values(ids.spanIds))].sort());
 
     const spanIds = new Set(spans.map((span) => span.spanId));
-    for (const span of spans) {
+    for (const [index, span] of spans.entries()) {
+      const source = fixture.spans[index]!;
       assert.match(span.traceId, /^[0-9a-f]{32}$/);
       assert.match(span.spanId, /^[0-9a-f]{16}$/);
       if (span.parentSpanId) assert.ok(spanIds.has(span.parentSpanId));
@@ -48,6 +49,15 @@ test("builds equivalent deterministic direct-span requests for both cited-answer
       assert.ok(span.scope.name.startsWith(fixture.convention === "otel-genai"
         ? "opentelemetry.instrumentation."
         : "openinference.instrumentation."));
+      assert.equal(span.scope.version, "1.0.0");
+      assert.deepEqual(span.resource, {
+        attributes: {
+          "service.name": "cloudai-provider-parity-synthetic",
+          "cloudai.data.scope": "synthetic-only"
+        }
+      });
+      assert.deepEqual(span.status, { code: 1 });
+      assert.equal(span.endTimeUnixNano, (BigInt(source.startTimeUnixNano) + 1n).toString());
     }
   }
 });
@@ -110,6 +120,29 @@ test("rejects inputs that are outside the reviewed provider request boundary", a
   assertBuilderError(() => buildProviderEvaluationRequests(unknownAttributeFixture, scenario, policy), "provider_attribute_not_allowed");
 });
 
+test("rejects missing reviewed GenAI and OpenInference message and tool attributes", async () => {
+  const { otel, openInference, scenario, policy } = await loadInputs();
+  const missingOtelMessage = structuredClone(otel);
+  delete missingOtelMessage.spans[0]!.attributes["gen_ai.input.messages"];
+  assertBuilderError(() => buildProviderEvaluationRequests(
+    missingOtelMessage, scenario, policy), "provider_attribute_not_allowed");
+
+  const missingOtelTool = structuredClone(otel);
+  delete missingOtelTool.spans[2]!.attributes["gen_ai.tool.call.result"];
+  assertBuilderError(() => buildProviderEvaluationRequests(
+    missingOtelTool, scenario, policy), "provider_attribute_not_allowed");
+
+  const missingOpenInferenceMessage = structuredClone(openInference);
+  delete missingOpenInferenceMessage.spans[0]!.attributes["output.value"];
+  assertBuilderError(() => buildProviderEvaluationRequests(
+    missingOpenInferenceMessage, scenario, policy), "provider_attribute_not_allowed");
+
+  const missingOpenInferenceTool = structuredClone(openInference);
+  delete missingOpenInferenceTool.spans[2]!.attributes["tool.name"];
+  assertBuilderError(() => buildProviderEvaluationRequests(
+    missingOpenInferenceTool, scenario, policy), "provider_attribute_not_allowed");
+});
+
 test("rejects mutable policy and scenario values that would change the fixed request matrix", async () => {
   const { otel, scenario, policy } = await loadInputs();
   const fourthEvaluatorPolicy = structuredClone(policy) as ProviderParityPolicy & {
@@ -142,7 +175,11 @@ type ProviderSpan = {
   parentSpanId?: string;
   name: string;
   attributes: Record<string, unknown>;
-  scope: { name: string };
+  startTimeUnixNano: string;
+  endTimeUnixNano: string;
+  scope: { name: string; version: string };
+  resource: { attributes: Record<string, string> };
+  status: { code: number };
 };
 
 function summarizeSemantics(requests: ProviderEvaluationRequest[]) {

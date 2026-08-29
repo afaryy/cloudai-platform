@@ -214,7 +214,8 @@ function validateAttributes(
   span: EvaluationTelemetrySpan
 ): void {
   const allowed = ATTRIBUTE_ALLOWLISTS[convention][role];
-  if (Object.keys(span.attributes).some((key) => !allowed.has(key))) {
+  if (Object.keys(span.attributes).some((key) => !allowed.has(key)) ||
+    [...allowed].some((key) => !(key in span.attributes))) {
     throw new ProviderParityError("provider_attribute_not_allowed");
   }
 }
