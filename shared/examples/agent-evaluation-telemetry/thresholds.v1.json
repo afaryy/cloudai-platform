@@ -1,0 +1,11 @@
+{
+  "contractVersion": "1.0",
+  "profileId": "strict-v1",
+  "minimumScores": {
+    "telemetry_compatibility": 1,
+    "trace_completeness": 1,
+    "tool_trajectory_accuracy": 1,
+    "behavioural_outcome": 1,
+    "goal_success": 1
+  }
+}

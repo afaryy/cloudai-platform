@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Agent evaluation threshold policy",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contractVersion", "profileId", "minimumScores"],
+  "properties": {
+    "contractVersion": { "const": "1.0" },
+    "profileId": { "const": "strict-v1" },
+    "minimumScores": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "telemetry_compatibility",
+        "trace_completeness",
+        "tool_trajectory_accuracy",
+        "behavioural_outcome",
+        "goal_success"
+      ],
+      "properties": {
+        "telemetry_compatibility": { "type": "number", "minimum": 0, "maximum": 1 },
+        "trace_completeness": { "type": "number", "minimum": 0, "maximum": 1 },
+        "tool_trajectory_accuracy": { "type": "number", "minimum": 0, "maximum": 1 },
+        "behavioural_outcome": { "type": "number", "minimum": 0, "maximum": 1 },
+        "goal_success": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    }
+  }
+}

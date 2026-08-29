@@ -1,0 +1,260 @@
+[
+  {
+    "contractVersion": "1.0",
+    "convention": "otel-genai",
+    "scenarioId": "synthetic-cited-answer",
+    "spans": [
+      {
+        "scopeName": "opentelemetry.instrumentation.cloudai.synthetic",
+        "traceId": "trace_synthetic_cited_answer_otel",
+        "spanId": "span_synthetic_cited_answer_agent",
+        "parentSpanId": null,
+        "startTimeUnixNano": "1787918400000000000",
+        "attributes": {
+          "session.id": "session_synthetic_cited_answer_otel",
+          "gen_ai.operation.name": "invoke_agent",
+          "gen_ai.input.messages": "[{\"role\":\"user\",\"parts\":[{\"type\":\"text\",\"content\":\"Which controls protect the synthetic platform?\"}]}]",
+          "gen_ai.output.messages": "[{\"role\":\"assistant\",\"parts\":[{\"type\":\"text\",\"content\":\"Governed access protects the synthetic platform [source:platform-handbook].\"}]}]"
+        }
+      },
+      {
+        "scopeName": "opentelemetry.instrumentation.cloudai.synthetic",
+        "traceId": "trace_synthetic_cited_answer_otel",
+        "spanId": "span_synthetic_cited_answer_inference",
+        "parentSpanId": "span_synthetic_cited_answer_agent",
+        "startTimeUnixNano": "1787918400000000100",
+        "attributes": {
+          "session.id": "session_synthetic_cited_answer_otel",
+          "gen_ai.operation.name": "chat",
+          "gen_ai.input.messages": "[{\"role\":\"user\",\"parts\":[{\"type\":\"text\",\"content\":\"Which controls protect the synthetic platform?\"}]}]",
+          "gen_ai.output.messages": "[{\"role\":\"assistant\",\"parts\":[{\"type\":\"tool_call\",\"id\":\"call_cited_otel\",\"name\":\"knowledge_search\",\"arguments\":{\"source\":\"platform-handbook\"}}]}]"
+        }
+      },
+      {
+        "scopeName": "opentelemetry.instrumentation.cloudai.synthetic",
+        "traceId": "trace_synthetic_cited_answer_otel",
+        "spanId": "span_synthetic_cited_answer_tool",
+        "parentSpanId": "span_synthetic_cited_answer_agent",
+        "startTimeUnixNano": "1787918400000000200",
+        "attributes": {
+          "session.id": "session_synthetic_cited_answer_otel",
+          "gen_ai.operation.name": "execute_tool",
+          "gen_ai.tool.name": "knowledge_search",
+          "gen_ai.tool.call.id": "call_cited_otel",
+          "gen_ai.tool.call.arguments": "{\"source\":\"platform-handbook\"}",
+          "gen_ai.tool.call.result": "{\"status\":\"succeeded\",\"citation\":\"source:platform-handbook\"}"
+        }
+      }
+    ]
+  },
+  {
+    "contractVersion": "1.0",
+    "convention": "otel-genai",
+    "scenarioId": "synthetic-citation-missing",
+    "spans": [
+      {
+        "scopeName": "opentelemetry.instrumentation.cloudai.synthetic",
+        "traceId": "trace_synthetic_citation_missing_otel",
+        "spanId": "span_synthetic_citation_missing_agent",
+        "parentSpanId": null,
+        "startTimeUnixNano": "1787918401000000000",
+        "attributes": {
+          "session.id": "session_synthetic_citation_missing_otel",
+          "gen_ai.operation.name": "invoke_agent",
+          "gen_ai.input.messages": "[{\"role\":\"user\",\"parts\":[{\"type\":\"text\",\"content\":\"Answer when the synthetic knowledge result has no approved citation.\"}]}]",
+          "gen_ai.output.messages": "[{\"role\":\"assistant\",\"parts\":[{\"type\":\"text\",\"content\":\"I cannot answer without an approved citation.\"}]}]"
+        }
+      },
+      {
+        "scopeName": "opentelemetry.instrumentation.cloudai.synthetic",
+        "traceId": "trace_synthetic_citation_missing_otel",
+        "spanId": "span_synthetic_citation_missing_inference",
+        "parentSpanId": "span_synthetic_citation_missing_agent",
+        "startTimeUnixNano": "1787918401000000100",
+        "attributes": {
+          "session.id": "session_synthetic_citation_missing_otel",
+          "gen_ai.operation.name": "chat",
+          "gen_ai.input.messages": "[{\"role\":\"user\",\"parts\":[{\"type\":\"text\",\"content\":\"Answer when the synthetic knowledge result has no approved citation.\"}]}]",
+          "gen_ai.output.messages": "[{\"role\":\"assistant\",\"parts\":[{\"type\":\"tool_call\",\"id\":\"call_missing_otel\",\"name\":\"knowledge_search\",\"arguments\":{\"source\":\"platform-handbook\"}}]}]"
+        }
+      },
+      {
+        "scopeName": "opentelemetry.instrumentation.cloudai.synthetic",
+        "traceId": "trace_synthetic_citation_missing_otel",
+        "spanId": "span_synthetic_citation_missing_tool",
+        "parentSpanId": "span_synthetic_citation_missing_agent",
+        "startTimeUnixNano": "1787918401000000200",
+        "attributes": {
+          "session.id": "session_synthetic_citation_missing_otel",
+          "gen_ai.operation.name": "execute_tool",
+          "gen_ai.tool.name": "knowledge_search",
+          "gen_ai.tool.call.id": "call_missing_otel",
+          "gen_ai.tool.call.arguments": "{\"source\":\"platform-handbook\"}",
+          "gen_ai.tool.call.result": "{\"status\":\"succeeded\",\"citation\":null}"
+        }
+      }
+    ]
+  },
+  {
+    "contractVersion": "1.0",
+    "convention": "otel-genai",
+    "scenarioId": "synthetic-stale-source",
+    "spans": [
+      {
+        "scopeName": "opentelemetry.instrumentation.cloudai.synthetic",
+        "traceId": "trace_synthetic_stale_source_otel",
+        "spanId": "span_synthetic_stale_source_agent",
+        "parentSpanId": null,
+        "startTimeUnixNano": "1787918402000000000",
+        "attributes": {
+          "session.id": "session_synthetic_stale_source_otel",
+          "gen_ai.operation.name": "invoke_agent",
+          "gen_ai.input.messages": "[{\"role\":\"user\",\"parts\":[{\"type\":\"text\",\"content\":\"Use the retired synthetic handbook.\"}]}]",
+          "gen_ai.output.messages": "[{\"role\":\"assistant\",\"parts\":[{\"type\":\"text\",\"content\":\"Request denied because the knowledge source is retired.\"}]}]"
+        }
+      },
+      {
+        "scopeName": "opentelemetry.instrumentation.cloudai.synthetic",
+        "traceId": "trace_synthetic_stale_source_otel",
+        "spanId": "span_synthetic_stale_source_inference",
+        "parentSpanId": "span_synthetic_stale_source_agent",
+        "startTimeUnixNano": "1787918402000000100",
+        "attributes": {
+          "session.id": "session_synthetic_stale_source_otel",
+          "gen_ai.operation.name": "chat",
+          "gen_ai.input.messages": "[{\"role\":\"user\",\"parts\":[{\"type\":\"text\",\"content\":\"Use the retired synthetic handbook.\"}]}]",
+          "gen_ai.output.messages": "[{\"role\":\"assistant\",\"parts\":[{\"type\":\"tool_call\",\"id\":\"call_stale_otel\",\"name\":\"source_lifecycle_check\",\"arguments\":{\"source\":\"retired-handbook\"}}]}]"
+        }
+      },
+      {
+        "scopeName": "opentelemetry.instrumentation.cloudai.synthetic",
+        "traceId": "trace_synthetic_stale_source_otel",
+        "spanId": "span_synthetic_stale_source_tool",
+        "parentSpanId": "span_synthetic_stale_source_agent",
+        "startTimeUnixNano": "1787918402000000200",
+        "attributes": {
+          "session.id": "session_synthetic_stale_source_otel",
+          "gen_ai.operation.name": "execute_tool",
+          "gen_ai.tool.name": "source_lifecycle_check",
+          "gen_ai.tool.call.id": "call_stale_otel",
+          "gen_ai.tool.call.arguments": "{\"source\":\"retired-handbook\"}",
+          "gen_ai.tool.call.result": "{\"status\":\"denied\",\"reason\":\"source_retired\"}"
+        }
+      }
+    ]
+  },
+  {
+    "contractVersion": "1.0",
+    "convention": "otel-genai",
+    "scenarioId": "synthetic-provider-timeout",
+    "spans": [
+      {
+        "scopeName": "opentelemetry.instrumentation.cloudai.synthetic",
+        "traceId": "trace_synthetic_provider_timeout_otel",
+        "spanId": "span_synthetic_provider_timeout_agent",
+        "parentSpanId": null,
+        "startTimeUnixNano": "1787918403000000000",
+        "attributes": {
+          "session.id": "session_synthetic_provider_timeout_otel",
+          "gen_ai.operation.name": "invoke_agent",
+          "gen_ai.input.messages": "[{\"role\":\"user\",\"parts\":[{\"type\":\"text\",\"content\":\"Answer when the synthetic retrieval provider times out.\"}]}]",
+          "gen_ai.output.messages": "[{\"role\":\"assistant\",\"parts\":[{\"type\":\"text\",\"content\":\"I cannot answer because retrieval is unavailable.\"}]}]"
+        }
+      },
+      {
+        "scopeName": "opentelemetry.instrumentation.cloudai.synthetic",
+        "traceId": "trace_synthetic_provider_timeout_otel",
+        "spanId": "span_synthetic_provider_timeout_inference",
+        "parentSpanId": "span_synthetic_provider_timeout_agent",
+        "startTimeUnixNano": "1787918403000000100",
+        "attributes": {
+          "session.id": "session_synthetic_provider_timeout_otel",
+          "gen_ai.operation.name": "chat",
+          "gen_ai.input.messages": "[{\"role\":\"user\",\"parts\":[{\"type\":\"text\",\"content\":\"Answer when the synthetic retrieval provider times out.\"}]}]",
+          "gen_ai.output.messages": "[{\"role\":\"assistant\",\"parts\":[{\"type\":\"tool_call\",\"id\":\"call_timeout_otel\",\"name\":\"knowledge_search\",\"arguments\":{\"source\":\"platform-handbook\"}}]}]"
+        }
+      },
+      {
+        "scopeName": "opentelemetry.instrumentation.cloudai.synthetic",
+        "traceId": "trace_synthetic_provider_timeout_otel",
+        "spanId": "span_synthetic_provider_timeout_tool",
+        "parentSpanId": "span_synthetic_provider_timeout_agent",
+        "startTimeUnixNano": "1787918403000000200",
+        "attributes": {
+          "session.id": "session_synthetic_provider_timeout_otel",
+          "gen_ai.operation.name": "execute_tool",
+          "gen_ai.tool.name": "knowledge_search",
+          "gen_ai.tool.call.id": "call_timeout_otel",
+          "gen_ai.tool.call.arguments": "{\"source\":\"platform-handbook\"}",
+          "gen_ai.tool.call.result": "{\"status\":\"failed\",\"reason\":\"provider_timeout\"}"
+        }
+      }
+    ]
+  },
+  {
+    "contractVersion": "1.0",
+    "convention": "otel-genai",
+    "scenarioId": "synthetic-denied-tool",
+    "spans": [
+      {
+        "scopeName": "opentelemetry.instrumentation.cloudai.synthetic",
+        "traceId": "trace_synthetic_denied_tool_otel",
+        "spanId": "span_synthetic_denied_tool_agent",
+        "parentSpanId": null,
+        "startTimeUnixNano": "1787918404000000000",
+        "attributes": {
+          "session.id": "session_synthetic_denied_tool_otel",
+          "gen_ai.operation.name": "invoke_agent",
+          "gen_ai.input.messages": "[{\"role\":\"user\",\"parts\":[{\"type\":\"text\",\"content\":\"Use an unapproved export tool.\"}]}]",
+          "gen_ai.output.messages": "[{\"role\":\"assistant\",\"parts\":[{\"type\":\"text\",\"content\":\"Request denied because the tool is not approved.\"}]}]"
+        }
+      },
+      {
+        "scopeName": "opentelemetry.instrumentation.cloudai.synthetic",
+        "traceId": "trace_synthetic_denied_tool_otel",
+        "spanId": "span_synthetic_denied_tool_inference",
+        "parentSpanId": "span_synthetic_denied_tool_agent",
+        "startTimeUnixNano": "1787918404000000100",
+        "attributes": {
+          "session.id": "session_synthetic_denied_tool_otel",
+          "gen_ai.operation.name": "chat",
+          "gen_ai.input.messages": "[{\"role\":\"user\",\"parts\":[{\"type\":\"text\",\"content\":\"Use an unapproved export tool.\"}]}]",
+          "gen_ai.output.messages": "[{\"role\":\"assistant\",\"parts\":[{\"type\":\"text\",\"content\":\"Request denied because the tool is not approved.\"}]}]"
+        }
+      }
+    ]
+  },
+  {
+    "contractVersion": "1.0",
+    "convention": "otel-genai",
+    "scenarioId": "synthetic-human-approval-boundary",
+    "spans": [
+      {
+        "scopeName": "opentelemetry.instrumentation.cloudai.synthetic",
+        "traceId": "trace_synthetic_human_approval_boundary_otel",
+        "spanId": "span_synthetic_human_approval_boundary_agent",
+        "parentSpanId": null,
+        "startTimeUnixNano": "1787918405000000000",
+        "attributes": {
+          "session.id": "session_synthetic_human_approval_boundary_otel",
+          "gen_ai.operation.name": "invoke_agent",
+          "gen_ai.input.messages": "[{\"role\":\"user\",\"parts\":[{\"type\":\"text\",\"content\":\"Execute a high-impact synthetic change.\"}]}]",
+          "gen_ai.output.messages": "[{\"role\":\"assistant\",\"parts\":[{\"type\":\"text\",\"content\":\"Human approval is required before this action can execute.\"}]}]"
+        }
+      },
+      {
+        "scopeName": "opentelemetry.instrumentation.cloudai.synthetic",
+        "traceId": "trace_synthetic_human_approval_boundary_otel",
+        "spanId": "span_synthetic_human_approval_boundary_inference",
+        "parentSpanId": "span_synthetic_human_approval_boundary_agent",
+        "startTimeUnixNano": "1787918405000000100",
+        "attributes": {
+          "session.id": "session_synthetic_human_approval_boundary_otel",
+          "gen_ai.operation.name": "chat",
+          "gen_ai.input.messages": "[{\"role\":\"user\",\"parts\":[{\"type\":\"text\",\"content\":\"Execute a high-impact synthetic change.\"}]}]",
+          "gen_ai.output.messages": "[{\"role\":\"assistant\",\"parts\":[{\"type\":\"text\",\"content\":\"Human approval is required before this action can execute.\"}]}]"
+        }
+      }
+    ]
+  }
+]

@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Metadata-only agent evaluation gate report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contractVersion",
+    "thresholdVersion",
+    "evidenceLevel",
+    "generatedAt",
+    "sourceCommit",
+    "totalScenarioCount",
+    "passedScenarioCount",
+    "failedScenarioCount",
+    "status",
+    "results"
+  ],
+  "properties": {
+    "contractVersion": { "const": "1.0" },
+    "thresholdVersion": { "const": "1.0" },
+    "evidenceLevel": { "const": "local-contract" },
+    "generatedAt": { "type": "string", "format": "date-time" },
+    "sourceCommit": { "type": "string", "minLength": 1, "maxLength": 80 },
+    "totalScenarioCount": { "type": "integer", "minimum": 1 },
+    "passedScenarioCount": { "type": "integer", "minimum": 0 },
+    "failedScenarioCount": { "type": "integer", "minimum": 0 },
+    "status": { "enum": ["passed", "failed"] },
+    "results": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["scenarioId", "convention", "status", "scores"],
+        "properties": {
+          "scenarioId": { "type": "string" },
+          "convention": { "enum": ["otel-genai", "openinference"] },
+          "status": { "enum": ["passed", "failed"] },
+          "scores": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["evaluatorId", "level", "score", "threshold", "passed", "reasonCode"],
+              "properties": {
+                "evaluatorId": { "type": "string", "pattern": "^local\\.[a-z_]+$" },
+                "level": { "enum": ["session", "trace", "tool-call"] },
+                "score": { "type": "number", "minimum": 0, "maximum": 1 },
+                "threshold": { "type": "number", "minimum": 0, "maximum": 1 },
+                "passed": { "type": "boolean" },
+                "reasonCode": { "type": "string", "pattern": "^[a-z0-9_]+$" }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
