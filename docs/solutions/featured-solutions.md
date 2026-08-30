@@ -50,11 +50,11 @@ It is not a production gateway, persistent audit service, enterprise model catal
 
 ### Scope
 
-The [AI Workload Operating Contract](../practices/ai-workload-operating-contract.md) defines a shared operating model for service inference, batch processing, fine-tuning, and future distributed training. It makes ownership, identity, access, capacity, cost, approval, evidence, and shutdown expectations explicit.
+The [AI Workload Operating Contract](../practices/ai-workload-operating-contract.md) defines a shared operating model for service inference, batch processing, fine-tuning, and future distributed training. It makes ownership, identity, access, capacity, cost, approval, supplier evidence, applicable infrastructure sustainability/location evidence, and shutdown expectations explicit.
 
 ### What this demonstrates
 
-How the existing CloudAI control-plane patterns can extend into a vendor-neutral AI Factory practice track without changing the portfolio's mock-first operating boundary.
+How the existing CloudAI control-plane patterns can extend into a vendor-neutral AI Factory practice track while distinguishing current requirements, announced policy directions, planned standards, and watch items without changing the portfolio's mock-first operating boundary.
 
 ### What it does not claim
 

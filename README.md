@@ -112,7 +112,11 @@ not a deployed GPU runtime. The
 AgentCore sandbox does not claim a production or autonomous agent platform.
 The [AI Workload Operating Contract](docs/practices/ai-workload-operating-contract.md)
 defines this as a future/design practice track within the portfolio: it does
-not add a scheduler, GPU cluster, or cloud runtime by default.
+not add a scheduler, GPU cluster, or cloud runtime by default. It now also
+records applicability-led energy, water, land-use, location, supplier, and
+external-requirement evidence so future capacity decisions can respond to
+current procurement signals and planned infrastructure standards without
+claiming that those standards are already in force.
 
 ## Run Locally in Mock Mode
 

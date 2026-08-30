@@ -157,6 +157,35 @@ AI data-centre readiness review should treat power, cooling, fibre, storage,
 accelerator supply, and compliance as external dependencies of the compute
 platform.
 
+### National infrastructure and facility readiness
+
+On 26 August 2026, Australia's National Cabinet agreed that large data centres
+have material energy, water, and land-use impacts. It also agreed to develop
+nationally consistent mandatory standards in these areas, with Commonwealth
+legislation intended for early 2027. This is a confirmed policy and regulatory
+direction, not a statement that the future legislation, thresholds, or detailed
+standards are already in force. See the [official National Cabinet communique](https://www.pm.gov.au/media/meeting-national-cabinet-26-august-26).
+
+The platform should therefore make facility and location evidence an explicit
+input when a workload depends on large dedicated or supplier-operated capacity.
+Managed-model consumption and small cloud sandboxes should first record whether
+this gate is applicable; they must not inherit facility-level requirements by
+assumption.
+
+| Readiness concern | Minimum assessment evidence | Decision supported |
+| --- | --- | --- |
+| Applicability and jurisdiction | Capacity type, site/operator, location, scale threshold when published, and accountable assessor | Apply the correct current requirement without treating a future proposal as enacted law. |
+| Energy and grid impact | Power source and capacity, expected peak/base demand, demand flexibility, efficiency measure, expansion assumption, and grid-constraint evidence | Approve, condition, relocate, defer, or right-size the capacity plan. |
+| Water and cooling | Cooling design, water source and intensity where available, local scarcity, heat-rejection trade-off, and degraded-mode plan | Identify water, thermal, resilience, and energy trade-offs before site or supplier commitment. |
+| Land and location | Planning status, land-use impact, fibre and grid proximity, natural-hazard exposure, sovereignty/data-residency need, and community dependency | Select a location whose operational and approval boundaries are understood. |
+| Sustainability and reporting | Named owner, measurement method, evidence period, supplier assumptions, and review cadence | Keep energy, water, emissions, and utilisation claims attributable and reviewable. |
+| Regulatory readiness | Current obligations, announced or planned requirements, evidence owner, last review date, and change trigger | Distinguish enforceable controls from watch items and update the architecture when requirements mature. |
+
+The assessment is fail-closed for a material facility or dedicated-capacity
+commitment when applicability, ownership, or required evidence is unknown. A
+missing future metric whose definition has not yet been published is recorded
+as a watch item rather than invented locally.
+
 ## Observability model
 
 GPU telemetry must connect hardware health to workload outcomes. A dashboard
@@ -249,6 +278,8 @@ The readiness gate must verify more than capacity:
 | Operations | No telemetry, alert owner, SLO, or incident path |
 | Recovery | No checkpoint, retry, rollback, pause, or teardown plan |
 | Governance | No human approval for high-risk data, training, or customer impact |
+| Facility and location | Material dedicated capacity has no applicability decision, accountable assessor, or required energy, water, land-use, and location evidence |
+| Supplier | A material external dependency has no named owner, evidence basis, lifecycle boundary, or reassessment trigger |
 
 Preemption is a design choice, not an outage. Batch and training workloads
 should be checkpointable and restartable. Interactive inference should have a
@@ -266,7 +297,8 @@ boundaries.
 | FinOps | AI FinOps principles and bounded cost metadata | Create a synthetic GPU-hour/queue/cost allocation example |
 | Scheduling | Conceptual placement and queue boundaries plus a Kueue source contract | Compare Kubernetes scheduler, Kueue, and managed task governance |
 | Accelerated runtime | Source implementation is not a deployed GPU runtime | Review one small, time-boxed sandbox only after budget and teardown approval |
-| Data-centre readiness | AI Factory infrastructure lens and public research | Add power, cooling, storage, fabric, sovereignty, and capacity checklist |
+| Data-centre readiness | National infrastructure direction translated into an applicability-led energy, water, land-use, location, and regulatory-readiness contract | Add evidence fixtures only after detailed standards or a bounded supplier assessment provides stable fields |
+| Supplier readiness | Workload contract defines security, governance, risk, compliance, operational, sustainability, and exit evidence | Create a synthetic supplier assessment without representing program participation or external assurance |
 
 ## Explicit non-goals
 
@@ -287,3 +319,5 @@ boundaries.
 - [HyperPod usage reporting for cost attribution](https://docs.aws.amazon.com/sagemaker/latest/dg/sagemaker-hyperpod-usage-reporting.html)
 - [NVIDIA DCGM Exporter installation](https://docs.nvidia.com/datacenter/dcgm/latest/installation/install-dcgm-exporter.html)
 - [NVIDIA DCGM Exporter metrics](https://docs.nvidia.com/datacenter/dcgm/latest/reference/dcgm-exporter-metrics.html)
+- [National Cabinet communique, 26 August 2026](https://www.pm.gov.au/media/meeting-national-cabinet-26-august-26)
+- [National AI Centre: Buy Australian AI Partnership Program](https://www.ai.gov.au/buy-australian-ai-partnership-program)
