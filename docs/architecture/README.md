@@ -16,7 +16,9 @@ provider boundaries, and future capacity design.
   future capacity and accelerator context.
 - [AI Factory, GPU, and AI Data-Centre Workload Readiness](ai-factory-gpu-workload-readiness.md) —
   workload profiles, accelerator placement, GPU observability, FinOps,
-  resilience, and safe future-sandbox gates; no GPU deployment.
+  resilience, supplier evidence, and applicability-led energy, water,
+  land-use, location, and regulatory-readiness gates; no GPU or data-centre
+  deployment.
 - [AI Factory Workload Placement Comparison](ai-factory-workload-placement-comparison.md) —
   design-only routing criteria and correlation-first evidence chain for
   Kubernetes, queue governance, managed training, future HPC, and managed

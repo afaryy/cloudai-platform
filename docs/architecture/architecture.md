@@ -22,7 +22,7 @@ flowchart TB
   policy["Governance, Responsible AI,<br/>and data policy"]
 
   subgraph platform["Shared CloudAI Platform"]
-    foundations["Secure cloud<br/>foundations"]
+    foundations["Secure cloud and<br/>infrastructure foundations"]
     access["Governed model, agent,<br/>and data access"]
     delivery["Delivery and<br/>operations controls"]
     capacity["Optional AI Factory<br/>and capacity extension"]
@@ -57,7 +57,7 @@ deployment diagram.
 | Governance | What is allowed, what risk applies, and what evidence is required? |
 | Data and knowledge | Which information may be used, retained, retrieved, or shared? |
 | AI platform | How do workloads access shared models, agents, tools, and knowledge safely? |
-| Cloud foundations | Under what identity, network, encryption, policy, and runtime boundary does it operate? |
+| Cloud and infrastructure foundations | Under what identity, network, encryption, policy, runtime, capacity, location, and resource boundary does it operate? |
 | Delivery and operations | How is it released, evaluated, observed, cost-managed, supported, and retired? |
 
 ## 3. CloudAI Platform Reference Architecture
@@ -78,7 +78,7 @@ flowchart TB
   integration["7. Application and<br/>enterprise-system integration"]
   delivery["8. Infrastructure as code, CI/CD,<br/>testing, release, and rollback"]
   operations["9. Evaluation, observability,<br/>audit evidence, and AI FinOps"]
-  lifecycle["10. Resilience, capacity, support,<br/>retirement, and improvement"]
+  lifecycle["10. Resilience, capacity, location,<br/>sustainability, support, retirement,<br/>and improvement"]
 
   intake --> risk --> data --> foundation --> model --> traffic --> integration
   integration --> delivery --> operations --> lifecycle
@@ -96,8 +96,8 @@ flowchart TB
 | Governance | 2. Governance, risk, Responsible AI, and approval |
 | Data and knowledge | 3. Data, knowledge, classification, and lifecycle |
 | AI platform | 5. Governed model and provider access; 6. Agent, tool, retrieval, workflow, and egress governance; 7. Application and enterprise-system integration |
-| Cloud foundations | 4. Identity, network, encryption, secrets, and policy |
-| Delivery and operations | 8. Delivery engineering; 9. Evaluation, observability, audit evidence, and AI FinOps; 10. Resilience, capacity, support, retirement, and improvement |
+| Cloud and infrastructure foundations | 4. Identity, network, encryption, secrets, and policy; applicable location and physical-resource boundaries |
+| Delivery and operations | 8. Delivery engineering; 9. Evaluation, observability, audit evidence, and AI FinOps; 10. Resilience, capacity, location, sustainability, support, retirement, and improvement |
 
 The six layers and the ten domains are complementary. The former describes the
 enterprise capability model; the latter describes the CloudAI platform
@@ -162,7 +162,7 @@ is intentionally bounded and should be read with its stated evidence boundary.
 | Private EKS target | [Private EKS reference architecture](./private-eks-reference-architecture.md) and [protected delivery runbook](../solutions/eks-private-sandbox-runbook.md): one network state supplies reviewed inputs to separate runner and EKS states through a protected CI path; runtime worker/bootstrap validation is pending. |
 | Bounded provider access | [P8 Bedrock sandbox design](../solutions/p8-real-bedrock-sandbox-design.md) and the [Bounded Bedrock Sandbox case study](../solutions/featured-solutions.md#bounded-bedrock-sandbox): bounded synthetic sandbox validation, not a persistent Bedrock application. |
 | Agent runtime extension | [AgentCore Governed RAG POC](./agentcore-governed-rag-poc.md) and [P8i data foundation](../solutions/p8i-agentcore-rag-data-foundation.md): deployed synthetic AWS sandbox with protected ingestion, direct Bedrock preflight, and Gateway end-to-end evidence; no production claim. |
-| AI Factory and accelerated capacity | [AI Factory infrastructure lens](./ai-factory-infrastructure-lens.md), [AI Workload Operating Contract](../practices/ai-workload-operating-contract.md), and [GPU workload readiness](./ai-factory-gpu-workload-readiness.md): design context for LLMOps, workload profiles, placement, scheduling, capacity, observability, FinOps, and accelerator patterns; no GPU, training, fine-tuning, or high-scale serving implementation. |
+| AI Factory and accelerated capacity | [AI Factory infrastructure lens](./ai-factory-infrastructure-lens.md), [AI Workload Operating Contract](../practices/ai-workload-operating-contract.md), and [GPU workload readiness](./ai-factory-gpu-workload-readiness.md): design context for LLMOps, workload profiles, placement, scheduling, capacity, location, sustainability, supplier evidence, observability, FinOps, and accelerator patterns; no GPU, training, fine-tuning, high-scale serving, or data-centre implementation. |
 | Multi-cloud mappings | [AWS](./aws-reference-architecture.md), [Azure](./azure-reference-architecture.md), and [GCP](./gcp-reference-architecture.md) mappings: AWS-first implementation context with Azure/GCP reference mappings, not provider parity claims. |
 
 ## 6. Current Implementation and Evidence Status

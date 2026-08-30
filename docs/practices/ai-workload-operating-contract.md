@@ -17,12 +17,73 @@ Every workload should declare the following before it is eligible to proceed.
 | Identity and accountability | Workload ID, class, purpose, owner, environment, workload identity, escalation contact, and shutdown owner. |
 | Access and data | Approved model, capability, tool scope, data classification, allowed data sources, and egress boundary. |
 | Supply chain | Approved image, model, framework, dependency provenance, lifecycle state, and required evaluation evidence. |
+| External dependency and supplier | Applicability decision plus supplier owner, service boundary, evidence basis, assurance date, material subcontractors, reassessment trigger, portability, and exit path when an external dependency is material. |
 | Capacity and cost | Required capacity, quota, budget boundary, allocation dimensions, and stop condition. |
+| Location and sustainability | Applicability decision plus required energy, water, land-use, location, and reporting evidence for material dedicated or supplier-operated capacity. |
 | Approval and delivery | Human approval requirement, release gate, change owner, and rollback path. |
 | Operation and evidence | Telemetry requirements, trace/evidence IDs, policy verdicts, health signals, and retention boundary. |
 | Closure | Pause, rollback, retirement, cleanup, output retention, and owner confirmation. |
 
-Missing owner, identity, approval, required evidence, or profile-specific readiness is fail-closed: the workload is not eligible to proceed. Telemetry/export failure is recorded as an operating gap and must not create a false healthy decision.
+Missing owner, identity, approval, required evidence, supplier-applicability
+decision, or profile-specific readiness is fail-closed: the workload is not eligible to
+proceed. Telemetry/export failure is recorded as an operating gap and must not
+create a false healthy decision. Location and sustainability fields are
+required only after an explicit applicability decision; a small sandbox must
+not claim large-facility assurance, and a material dedicated-capacity decision
+must not bypass it.
+
+## Supplier and Procurement Readiness
+
+The National AI Centre's Buy Australian AI Partnership Program is a current
+public signal that AI suppliers seeking large-organisation opportunities need
+evidence across security, governance, risk, compliance, procurement, and
+commercial readiness. The program is not a certification, regulation, or proof
+that a supplier satisfies this contract. Its first cohort focuses on financial
+services, runs from October to November 2026, and closes expressions of interest
+on 24 September 2026. See the [official program page](https://www.ai.gov.au/buy-australian-ai-partnership-program).
+
+A platform or workload owner should evaluate a material supplier through one
+evidence record rather than distribute the decision across disconnected
+questionnaires.
+
+| Evidence family | Minimum questions | Example evidence |
+| --- | --- | --- |
+| Security and privacy | Which identities, data, networks, administrators, subprocessors, and incident paths are in scope? | Architecture boundary, access model, encryption statement, incident process, recent assurance report. |
+| AI governance | Who owns intended use, model/tool changes, evaluation, human oversight, and prohibited use? | Responsible-AI policy, model/service card, evaluation summary, change and escalation process. |
+| Risk and compliance | Which obligations and risk classifications apply, and how are exceptions accepted and reviewed? | Control mapping, risk register, legal/compliance review, exception owner and expiry. |
+| Data, model, and tool lifecycle | Where are inputs, outputs, embeddings, logs, models, and tool calls stored, retained, reused, and deleted? | Data-flow record, retention/deletion evidence, lineage, residency statement, tool-access contract. |
+| Operations and resilience | How are availability, capacity, observability, support, incident response, recovery, and dependency concentration managed? | SLO/SLA, support model, continuity test, status history, telemetry and escalation evidence. |
+| Sustainability and location | Does the service depend on material dedicated capacity, and what energy, water, land-use, location, and reporting evidence is available? | Applicability decision, site/operator evidence, measurement method, reporting period, regulatory review. |
+| Commercial lifecycle and exit | How are usage, cost, licensing, portability, termination, data return/deletion, and replacement handled? | Pricing boundary, usage report, exit plan, export format, deletion confirmation requirement. |
+
+The assessment records one of three outcomes:
+
+- **eligible** — required evidence is current, owned, and accepted;
+- **conditional** — a named owner has accepted bounded gaps with an expiry and
+  compensating control;
+- **not eligible** — a material evidence or control gap remains unresolved.
+
+Each outcome records scope, assessor, approver, evidence date, next-review date,
+and the workload or platform decision it authorises. Marketing claims or an
+application to an external program are not substitutes for evidence.
+
+## Requirement Status and Change Control
+
+Every external requirement in an architecture or supplier assessment should
+carry a status so that the platform neither ignores a credible direction nor
+claims that future obligations already apply.
+
+| Status | Meaning | Permitted use |
+| --- | --- | --- |
+| Current requirement | An applicable law, contract, policy, or approved internal control is in force. | Enforce it and retain the required evidence. |
+| Announced policy direction | A responsible authority has announced an intended direction without final operative detail. | Assess readiness, assign an owner, and avoid claiming legal compliance. |
+| Planned legislation or standard | Legislation or a standard is intended but not yet enacted or final. | Track scope and likely evidence fields; do not invent thresholds. |
+| Watch item | A program, market signal, proposal, or practice may influence later decisions. | Monitor with a review date; do not treat it as mandatory. |
+
+As at 30 August 2026, the nationally consistent large-data-centre standards
+described by National Cabinet are a planned regulatory direction with
+Commonwealth legislation intended for early 2027. They are not recorded here
+as enacted detailed standards. See the [official National Cabinet communique](https://www.pm.gov.au/media/meeting-national-cabinet-26-august-26).
 
 ## Service Inference
 
