@@ -8,9 +8,8 @@ conventions or OpenInference attributes, but both paths are normalized into
 the same versioned evaluation contract before a pull request can pass.
 
 The ordinary CI gate is deterministic, synthetic-only, and provider-neutral.
-It does not call AWS. A protected provider-parity lane may later compare the
-same scenarios with Amazon Bedrock AgentCore Evaluations, but that is a
-separate, manually approved evidence level.
+It does not call AWS. The protected provider-parity lane is Stage A source
+only; provider validation is pending. This runbook is its only operator guide.
 
 ## Telemetry Compatibility Contract
 
@@ -32,8 +31,7 @@ Agent framework
   -> framework-neutral normalizer
   -> deterministic local dimensions
   -> versioned thresholds
-  -> metadata-only CI evidence
-  -> optional protected AgentCore parity evaluation
+  -> metadata-only `local-contract` evidence
 ```
 
 ## Fixed Inputs
@@ -136,39 +134,110 @@ Forbidden artifact fields:
 6. Keep the metadata-only report contract and existing thresholds intact.
 7. Run the complete API tests and the standalone gate.
 
-## Protected Provider-Parity Lane
+## Evidence lanes and current boundary
 
-A future protected provider-parity lane may run the same synthetic cases with
-Amazon Bedrock AgentCore on-demand evaluation. It must remain optional and
-must not weaken the required local gate. Before it runs, require GitHub OIDC,
-an approved environment, a cost limit, an exact confirmation phrase, and a
-reviewed cleanup boundary.
+```text
+Lane 1: local CI
+  synthetic fixtures -> deterministic gate -> local-contract evidence
 
-That lane must also:
+Lane 2: Stage A, protected direct spans
+  fixed synthetic spans -> AgentCore Evaluate -> provider-direct evidence
 
-- emit supported OpenTelemetry GenAI or OpenInference instrumentation scopes;
-- preserve `session.id` across runtime and evaluation telemetry;
-- emit invoke-agent, inference, and execute-tool spans;
-- enable only the minimum synthetic message content required for response
-  evaluation;
-- wait for CloudWatch trace ingestion before requesting on-demand evaluation;
-- use fixed prompts, expected tool trajectories, and versioned score
-  thresholds;
-- publish a separately labelled provider-parity artifact with the same
-  metadata restrictions;
-- avoid representing a provider score as an authorization decision.
+Lane 3: Stage B, future Runtime-to-CloudWatch
+  Runtime -> ADOT -> CloudWatch -> AgentCore Evaluate -> provider-runtime evidence
+  Stage B: not implemented by this change
+```
 
-The framework-neutral gate is locally contract-tested against synthetic
-OpenTelemetry GenAI and OpenInference fixtures. It does not prove OTLP export,
-CloudWatch ingestion, AgentCore managed evaluation, or production agent
-quality. Those require a separately approved provider-parity run.
+`local-contract` is the existing cloud-free, deterministic evidence. Stage A
+is source implemented only: its `provider-parity-v1` policy creates six direct
+requests using the fixed cited-answer scenario, two conventions, and three
+evaluators, including `Builtin.ToolSelectionAccuracy`. A successful protected
+execution would produce separately labelled `provider-direct` evidence. It
+has not been provider validated. `provider-runtime` is reserved for a future
+Stage B Runtime-to-CloudWatch path and has not been implemented or validated.
 
-## Evidence Classification
+The Stage A ground-truth contract is evaluator-specific: Correctness receives
+one trace-scoped `expectedResponse`, ToolSelectionAccuracy receives only the
+targeted tool span and no reference input, and GoalSuccessRate receives one
+session-scoped `assertions` reference. For generic OpenTelemetry input, the
+invoke-agent prompt and final response are emitted as clean
+`gen_ai.task.input` and `gen_ai.task.output` strings; inference and tool spans
+retain their documented fields. The fixed managed profile does not measure
+trajectory parity. That remains a deterministic local dimension; adding a
+managed `Builtin.Trajectory*` evaluator requires a new reviewed policy and call
+budget.
+
+Managed scores supplement deterministic controls. They never authorize IAM,
+admission or approval, tool execution, deployment, remediation, rollback, or
+deletion. No evidence lane proves provider, runtime, or production validation.
+
+## Cloud-free validation
+
+Run the source and contract validation from the repository root:
+
+```bash
+corepack pnpm@11.7.0 --dir providers/aws/app/api agentcore-eval:provider-parity -- \
+  --mode validate
+```
+
+This command uses deterministic local fakes, makes no AWS call, assumes no
+role, creates no provider artifact, and produces no `provider-direct` claim.
+
+## Protected Stage A direct-span preflight
+
+Stage A is a manual GitHub Actions workflow-dispatch lane. It is
+synthetic-only, evaluate-only, and bounded to six calls. Before a separately
+approved run, an operator must verify all of the following in the protected
+environment and workflow UI:
+
+1. Protected-environment approval is present and the selected revision is the
+   current `main` revision with a full commit identifier.
+2. The fixed scenario is `synthetic-cited-answer`; no prompt, response,
+   fixture, evaluator, threshold, or policy is substituted.
+3. The `provider-parity-v1` evaluator matrix is exactly `Builtin.Correctness`,
+   `Builtin.ToolSelectionAccuracy`, and `Builtin.GoalSuccessRate` for each of
+   the two approved telemetry conventions.
+4. The exact call budget is `AGENTCORE_EVALUATION_MAX_CALLS=6`; no retry,
+   expansion, or additional scenario is permitted.
+5. The workflow-dispatch confirmation is exactly
+   `I_UNDERSTAND_AGENTCORE_EVALUATION_PROVIDER_PARITY`.
+
+Protected environment settings are named here by purpose only. Do not place
+their values, role identifiers, endpoints, credentials, or account details in
+this runbook, an issue, or an artifact:
+
+| Setting | Safe purpose |
+| --- | --- |
+| `AGENTCORE_EVALUATION_READY` | Enables the protected evaluate-only lane after environment approval. |
+| `AGENTCORE_EVALUATION_MAX_CALLS` | Locks the reviewed direct-evaluation budget to six calls. |
+| `AWS_AGENTCORE_EVALUATION_ROLE_TO_ASSUME` | Supplies the dedicated evaluate-only role to the protected OIDC workflow. |
+| `AWS_REGION` | Selects the reviewed protected evaluation region. |
+
+This PR authorizes neither a role apply nor the first AWS run. Do not invoke
+the direct lane from a laptop or add a local AWS command to this guide.
+
+## Stage A artifacts and bounded failure handling
+
+The only publishable Stage A artifact is a sanitized `provider-direct` report.
+Allowed fields are the policy/contract version, evidence level, source commit,
+workflow run identifier, synthetic scenario and convention identifiers,
+evaluator IDs, bounded scores and thresholds, pass/fail status, reason codes,
+and a duration bucket. Forbidden fields are raw prompts, responses, message
+content, tool arguments, tool results, retrieved content, provider response
+payloads, credentials, secrets, account identifiers, role identifiers, ARNs,
+and endpoints.
+
+On a preflight, request, validation, or artifact failure, stop after the
+bounded runner outcome. Inspect only its bounded reason code and the
+workflow's sanitized status. Do not paste raw provider output into issues,
+notes, logs, or commits; do not retry beyond the six-call budget; and do not
+turn a score into an authorization or remediation action. Escalate any future
+role change, AWS run, or Stage B work through a separately reviewed change.
+
+## Evidence classification
 
 | Evidence | Current state | Claim allowed |
 | --- | --- | --- |
-| Local normalization and deterministic gate | Complete | Locally contract-tested across two telemetry conventions. |
-| Pull-request quality gate | Implemented | CI enforces fixed synthetic scenarios without AWS access. |
-| OTLP export and CloudWatch ingestion | Pending | No provider telemetry-delivery claim. |
-| AgentCore managed evaluation | Pending | No managed evaluator or provider-score claim. |
-| Production agent quality | Out of scope | No production-quality or safety-effectiveness claim. |
+| `local-contract` deterministic gate | Complete | Locally contract-tested across two telemetry conventions without AWS access. |
+| Stage A `provider-direct` | Source implemented; provider validation pending | No provider-validation claim until a separately approved protected run. |
+| Stage B `provider-runtime` | Not implemented | No Runtime-to-CloudWatch, provider, runtime, or production-evaluation claim. |

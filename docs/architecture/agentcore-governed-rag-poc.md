@@ -174,25 +174,39 @@ the sandbox is currently kept deployed for demonstrations.
 
 The evaluation boundary separates an agent framework from the quality gate.
 Synthetic OpenTelemetry GenAI and OpenInference traces are normalized into one
-contract before deterministic scenario and trajectory checks are applied:
+contract before deterministic scenario and trajectory checks are applied. The
+direct evaluation path is beside, not inside, the deployed Runtime and
+CloudWatch path:
 
 ```text
-Agent framework
-  -> OpenTelemetry GenAI or OpenInference spans
-  -> framework-neutral normalizer
-  -> deterministic local dimensions
-  -> versioned thresholds
-  -> metadata-only CI evidence
-  -> optional protected AgentCore parity evaluation
+local fixtures -> direct sessionSpans -> AgentCore Evaluate -> provider-direct evidence
+
+Gateway -> Runtime -> ADOT -> CloudWatch -> AgentCore Evaluate -> provider-runtime evidence
+                                Stage B: not implemented by this change
 ```
 
 Accepted scopes are limited to `opentelemetry.instrumentation.*` and
 `openinference.instrumentation.*`. The gate checks invoke-agent, inference,
 and execute-tool evidence, including `local.telemetry_compatibility` and
-`local.tool_trajectory_accuracy`. It is locally contract-tested and its
-ordinary CI job does not call AWS. OTLP export, CloudWatch trace ingestion,
-and managed AgentCore scoring remain a future protected provider-parity lane.
-The operating procedure and non-claim boundary are in the
+`local.tool_trajectory_accuracy`. `local-contract` evidence is locally
+contract-tested and its ordinary CI job does not call AWS. Stage A source
+implements the `provider-parity-v1` fixed, six-call direct-spans request matrix
+for future `provider-direct` evidence; provider validation is pending. It
+precedes Runtime ingestion so the reviewed spans, scenario, evaluator matrix,
+and metadata boundary can be checked without claiming that the Runtime emits
+or CloudWatch receives them. Stage B Runtime-to-CloudWatch evidence is the
+future `provider-runtime` lane and is not implemented.
+
+Within Stage A, Correctness uses a trace-scoped expected response,
+ToolSelectionAccuracy uses only a targeted tool span, and GoalSuccessRate uses
+a session-scoped assertion. Managed trajectory parity is outside this fixed
+profile and would require a separately reviewed `Builtin.Trajectory*` policy.
+
+Managed scores supplement deterministic controls. They never authorize IAM,
+admission or approval, tool execution, deployment, remediation, rollback, or
+deletion. No provider, runtime, or production evaluation has been validated.
+The operating procedure
+and non-claim boundary are in the
 [agent evaluation telemetry runbook](../solutions/agent-evaluation-telemetry-runbook.md).
 
 ### 5. What this diagram does and does not claim

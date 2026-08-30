@@ -163,6 +163,26 @@ jobs:
             --query 'Stacks[0].{StackStatus:StackStatus,LastUpdatedTime:LastUpdatedTime}' \
             --output json
 
+      - name: Publish AgentCore evaluation role handoff
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.mode == 'apply' && success() }}
+        run: |
+          agentcore_evaluation_role_arn="$(aws cloudformation describe-stacks \
+            --stack-name "$AWS_BOOTSTRAP_STACK_NAME" \
+            --query "Stacks[0].Outputs[?OutputKey=='AgentCoreEvaluationRoleArn'].OutputValue | [0]" \
+            --output text)"
+          if [ -z "$agentcore_evaluation_role_arn" ] || [ "$agentcore_evaluation_role_arn" = "None" ]; then
+            echo "::error::Bootstrap stack did not return AgentCoreEvaluationRoleArn."
+            exit 1
+          fi
+          echo "::add-mask::$agentcore_evaluation_role_arn"
+          {
+            printf '%s\n' '## AgentCore evaluation Environment handoff'
+            printf '%s\n' ''
+            printf '%s\n' 'Add this exact masked value as the protected aws-sandbox Environment setting `AWS_AGENTCORE_EVALUATION_ROLE_TO_ASSUME`:'
+            printf '%s\n' ''
+            printf '`%s`\n' "$agentcore_evaluation_role_arn"
+          } >> "$GITHUB_STEP_SUMMARY"
+
       - name: Publish Budget Guardrails role handoff
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.mode == 'apply' && success() }}
         run: |

@@ -9,6 +9,7 @@ The bootstrap layer exists because Terraform needs a backend before it can safel
 - S3 bucket for Terraform state.
 - DynamoDB table for Terraform state locking.
 - IAM role for GitHub Actions.
+- Separate evaluate-only IAM role for AgentCore provider-parity evidence.
 - Separate IAM role for the protected private-EKS network foundation.
 - Separate IAM role for the VPC-connected CodeBuild runner Terraform state and lifecycle.
 - IAM policy scoped to the sandbox bootstrap and Terraform plan/apply needs.
@@ -35,7 +36,7 @@ Replace `<ACCOUNT_ID>` only in your private local command or AWS console. Do not
    `AWS_ROLE_TO_ASSUME`.
 3. Use the protected `update-aws-bootstrap` GitHub Actions workflow to create
    a CloudFormation change set, review it, then explicitly apply it.
-4. Store the resulting Terraform role ARN as a GitHub environment variable or secret named `AWS_ROLE_TO_ASSUME` in the matching environment. The private-network role is emitted as `PrivateEKSNetworkRoleArn`; the separate runner-state role is emitted as `PrivateEKSRunnerRoleArn`. Both belong only in `aws-private-eks`, under different variable names.
+4. Store the resulting Terraform role ARN as a GitHub environment variable or secret named `AWS_ROLE_TO_ASSUME` in the matching environment. The evaluate-only role is emitted as `AgentCoreEvaluationRoleArn` and belongs only in protected `aws-sandbox` as `AWS_AGENTCORE_EVALUATION_ROLE_TO_ASSUME`. The private-network role is emitted as `PrivateEKSNetworkRoleArn`; the separate runner-state role is emitted as `PrivateEKSRunnerRoleArn`. Both belong only in `aws-private-eks`, under different variable names.
 5. Use the `aws-sandbox` GitHub environment for manual approval.
 6. Run Terraform validate/plan first.
 7. Run future apply, deploy, GitOps update, and teardown through GitHub Actions rather than laptop-local commands.
@@ -76,6 +77,18 @@ CloudFormation template is the only supported place to evolve these Terraform
 execution permissions. It does not grant general IAM administration, model
 invocation, Knowledge Base reads, browser access, or autonomous write actions.
 
+The AgentCore evaluation role is deliberately separate from the Terraform,
+Runtime, and bootstrap execution identities. It trusts only the existing
+account-level GitHub OIDC provider with the `sts.amazonaws.com` audience and
+the protected `aws-sandbox` GitHub Environment subject. Its only data-plane
+permission is `bedrock-agentcore:Evaluate`: it cannot create, update, or delete
+evaluators; invoke an AgentCore Runtime; query CloudWatch or logs; pass an IAM
+role; read S3; or call another service. `Resource: "*"` is the reviewed,
+isolated exception because this project has no proven evaluator ARN scope for
+the current data-plane action. The compensating controls are a fixed evaluator
+allowlist, a six-call cap, and a protected, manually dispatched, main-only
+evaluation workflow.
+
 ## CI/CD-Only Bootstrap Updates
 
 Use `.github/workflows/update-aws-bootstrap.yml` for every update to the
@@ -90,6 +103,7 @@ Configure these values in the protected `aws-sandbox` GitHub Environment:
 | `AWS_BOOTSTRAP_ROLE_TO_ASSUME` | Separate GitHub OIDC trust-root role that may update the existing bootstrap stack. |
 | `AWS_BOOTSTRAP_STACK_NAME` | Existing CloudFormation stack name; this workflow updates, never creates, the stack. |
 | `AWS_OIDC_PROVIDER_ARN` | Existing account-level GitHub Actions OIDC provider ARN. |
+| `AWS_AGENTCORE_EVALUATION_ROLE_TO_ASSUME` | Dedicated evaluate-only role output copied into this protected Environment after the separately confirmed bootstrap apply. |
 | `TF_BACKEND_BUCKET` | Existing Terraform state bucket name, passed back to the bootstrap stack as a private parameter. |
 | `TF_BACKEND_LOCK_TABLE` | Existing Terraform lock-table name, passed back to the bootstrap stack as a private parameter. |
 
@@ -111,9 +125,18 @@ Execution order:
 3. Run it with `mode=apply`, supply that exact reviewed change-set name, and
    enter `I_UNDERSTAND_AWS_BOOTSTRAP_APPLY`. GitHub Environment approval still
    applies.
-4. Run `terraform-agentcore-rag-sandbox` with `mode=bootstrap-plan`.
-5. Review the Terraform plan, then run `bootstrap-apply` with
+4. After a successful apply, copy the masked `AgentCoreEvaluationRoleArn`
+   handoff into the protected `aws-sandbox` Environment setting
+   `AWS_AGENTCORE_EVALUATION_ROLE_TO_ASSUME`. The workflow fails this handoff
+   if the stack output is absent and does not print the ARN to normal logs.
+5. Run `terraform-agentcore-rag-sandbox` with `mode=bootstrap-plan`.
+6. Review the Terraform plan, then run `bootstrap-apply` with
    `I_UNDERSTAND_AGENTCORE_RAG_BOOTSTRAP_APPLY`.
+
+Merging this source does not create the role or change any protected GitHub
+Environment setting. The role is created only after the cloud-free validation,
+change-set plan, human review, and separately confirmed apply sequence above;
+the protected setting handoff remains a distinct manual action.
 
 No AWS Console inline-policy attachment and no laptop-local AWS deployment is
 part of this path.

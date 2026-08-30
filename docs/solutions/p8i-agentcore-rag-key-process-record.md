@@ -172,9 +172,28 @@ completeness, tool-trajectory accuracy, behavioural outcome, and goal success.
 The pull-request job runs without AWS credentials, does not call AWS, and
 retains only a metadata-safe report. This work is locally contract-tested; it
 does not prove OTLP delivery, CloudWatch trace ingestion, AgentCore managed
-evaluation, or production agent quality. Those remain a separately approved
-protected provider-parity lane described in the
+evaluation, or production agent quality.
+
+Stage A source now defines a `provider-parity-v1` direct-spans request matrix:
+the fixed cited-answer scenario, two telemetry conventions, and three managed
+evaluators, including `Builtin.ToolSelectionAccuracy`, for six bounded calls.
+It exists beside the Runtime path so reviewed direct spans can be assessed
+before Runtime ingestion. Any resulting evidence would be `provider-direct`,
+not `local-contract`; provider validation is pending. Stage B
+Runtime-to-CloudWatch evaluation would produce `provider-runtime` evidence,
+but it is not implemented by this change. Managed scores supplement deterministic
+controls. They never authorize IAM, admission or approval, tool execution,
+deployment, remediation, rollback, or deletion. The protected
+workflow requires an exact confirmation and evaluate-only identity, but this PR authorizes neither role
+apply nor the first AWS run. The operator procedure is the
 [evaluation telemetry runbook](./agent-evaluation-telemetry-runbook.md).
+
+The reviewed provider profile uses only evaluator-supported inputs:
+Correctness gets one trace-scoped expected response, ToolSelectionAccuracy gets
+the targeted tool span without a ground-truth reference, and GoalSuccessRate
+gets one session-scoped assertion. Trajectory parity remains in the local
+deterministic gate; a managed trajectory evaluator would require a new policy
+and call budget.
 
 ## Current next work
 

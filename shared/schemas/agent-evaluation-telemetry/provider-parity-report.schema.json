@@ -1,0 +1,120 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Metadata-only provider parity evaluation report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contractVersion",
+    "thresholdVersion",
+    "evidenceLevel",
+    "generatedAt",
+    "sourceCommit",
+    "githubRunId",
+    "regionLabel",
+    "scenarioId",
+    "status",
+    "providerCallCount",
+    "durationBucket",
+    "aggregateTokenUsage",
+    "results",
+    "parity"
+  ],
+  "properties": {
+    "contractVersion": { "const": "1.0" },
+    "thresholdVersion": { "const": "1.0" },
+    "evidenceLevel": { "const": "provider-direct" },
+    "generatedAt": { "type": "string", "format": "date-time" },
+    "sourceCommit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+    "githubRunId": { "type": "string", "pattern": "^[0-9]+$" },
+    "regionLabel": { "const": "ap-southeast-2" },
+    "scenarioId": { "const": "synthetic-cited-answer" },
+    "status": { "enum": ["passed", "failed"] },
+    "providerCallCount": { "const": 6 },
+    "durationBucket": {
+      "enum": ["under-1m", "under-5m", "under-15m", "15m-or-more"]
+    },
+    "aggregateTokenUsage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["inputTokens", "outputTokens", "totalTokens"],
+      "properties": {
+        "inputTokens": { "type": "integer", "minimum": 0 },
+        "outputTokens": { "type": "integer", "minimum": 0 },
+        "totalTokens": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "results": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "convention",
+          "evaluatorId",
+          "level",
+          "score",
+          "label",
+          "threshold",
+          "passed",
+          "reasonCode",
+          "tokenUsage"
+        ],
+        "properties": {
+          "convention": { "enum": ["otel-genai", "openinference"] },
+          "evaluatorId": {
+            "enum": [
+              "Builtin.Correctness",
+              "Builtin.ToolSelectionAccuracy",
+              "Builtin.GoalSuccessRate"
+            ]
+          },
+          "level": { "enum": ["trace", "tool-call", "session"] },
+          "score": { "type": "number", "minimum": 0, "maximum": 1 },
+          "label": { "type": "string", "pattern": "^[a-z0-9_]+$" },
+          "threshold": { "type": "number", "minimum": 0, "maximum": 1 },
+          "passed": { "type": "boolean" },
+          "reasonCode": { "type": "string", "pattern": "^[a-z0-9_]+$" },
+          "tokenUsage": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["inputTokens", "outputTokens", "totalTokens"],
+            "properties": {
+              "inputTokens": { "type": "integer", "minimum": 0 },
+              "outputTokens": { "type": "integer", "minimum": 0 },
+              "totalTokens": { "type": "integer", "minimum": 0 }
+            }
+          }
+        }
+      }
+    },
+    "parity": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "evaluatorId",
+          "otelGenaiScore",
+          "openInferenceScore",
+          "absoluteDelta",
+          "maximumDelta",
+          "passed"
+        ],
+        "properties": {
+          "evaluatorId": {
+            "enum": [
+              "Builtin.Correctness",
+              "Builtin.ToolSelectionAccuracy",
+              "Builtin.GoalSuccessRate"
+            ]
+          },
+          "otelGenaiScore": { "type": "number", "minimum": 0, "maximum": 1 },
+          "openInferenceScore": { "type": "number", "minimum": 0, "maximum": 1 },
+          "absoluteDelta": { "type": "number", "minimum": 0, "maximum": 1 },
+          "maximumDelta": { "type": "number", "minimum": 0, "maximum": 1 },
+          "passed": { "type": "boolean" }
+        }
+      }
+    }
+  }
+}

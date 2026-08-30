@@ -11,6 +11,7 @@
     "start": "node dist/src/server.js",
     "test": "tsc -p tsconfig.json && node --test \"dist/tests/**/*.test.js\"",
     "agent-eval:gate": "pnpm run build && node dist/src/scripts/runAgentEvaluationTelemetryGate.js",
+    "agentcore-eval:provider-parity": "pnpm run build && node dist/src/scripts/runAgentCoreEvaluationProviderParity.js",
     "bedrock:smoke": "pnpm run build && node dist/src/scripts/bedrockAdapterSmoke.js"
   },
   "devDependencies": {
@@ -18,6 +19,7 @@
     "typescript": "^5.8.0"
   },
   "dependencies": {
+    "@aws-sdk/client-bedrock-agentcore": "3.1120.0",
     "@aws-sdk/client-bedrock-runtime": "^3.1090.0",
     "prom-client": "15.1.3"
   }

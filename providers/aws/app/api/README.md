@@ -215,11 +215,21 @@ corepack pnpm@11.7.0 --dir providers/aws/app/api agent-eval:gate -- \
   --output /tmp/agent-evaluation-report.json
 ```
 
-The required CI path does not call AWS and emits only a metadata-safe local
-contract report. OTLP export, CloudWatch ingestion, and AgentCore managed
-evaluation belong to a separately approved protected provider-parity lane.
-See the [agent evaluation telemetry runbook](../../../../docs/solutions/agent-evaluation-telemetry-runbook.md)
-for the evidence and non-claim boundary.
+The required CI path does not call AWS and emits only a metadata-safe
+`local-contract` report. The only provider-parity command documented for local
+use is validation of the reviewed source contract:
+
+```bash
+corepack pnpm@11.7.0 --dir providers/aws/app/api agentcore-eval:provider-parity -- \
+  --mode validate
+```
+
+It uses local deterministic fakes and makes no AWS call. Stage A
+`provider-direct` evidence and the future Stage B `provider-runtime`
+Runtime-to-CloudWatch path are not provider, runtime, or production validated.
+Protected execution is manual and is documented only in the
+[agent evaluation telemetry runbook](../../../../docs/solutions/agent-evaluation-telemetry-runbook.md);
+this README intentionally provides no laptop-local AWS invocation.
 
 ## Chat Response
 

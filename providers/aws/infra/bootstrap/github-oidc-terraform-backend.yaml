@@ -900,6 +900,39 @@ Resources:
         - Key: ManagedBy
           Value: cloudformation
 
+  GitHubActionsAgentCoreEvaluationRole:
+    Type: AWS::IAM::Role
+    DependsOn: GitHubActionsBootstrapRole
+    Properties:
+      RoleName: !Sub "${GitHubRepo}-${GitHubEnvironment}-agentcore-evaluation"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Federated: !Ref ExistingGitHubOidcProviderArn
+            Action: sts:AssumeRoleWithWebIdentity
+            Condition:
+              StringEquals:
+                token.actions.githubusercontent.com:aud: sts.amazonaws.com
+              StringLike:
+                token.actions.githubusercontent.com:sub: !Sub "repo:${GitHubOrg}/${GitHubRepo}:environment:${GitHubEnvironment}"
+      Policies:
+        - PolicyName: AgentCoreEvaluationDataPlanePolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Sid: EvaluateOnlySyntheticProviderParity
+                Effect: Allow
+                Action:
+                  - bedrock-agentcore:Evaluate
+                Resource: "*"
+      Tags:
+        - { Key: Project, Value: cloudai-platform }
+        - { Key: Environment, Value: aws-sandbox }
+        - { Key: ManagedBy, Value: cloudformation }
+        - { Key: DataScope, Value: synthetic-only }
+
   GitHubActionsBootstrapRole:
     Type: AWS::IAM::Role
     Properties:
@@ -960,6 +993,7 @@ Resources:
                 Resource:
                   - !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/${GitHubRepo}-${GitHubEnvironment}-terraform"
                   - !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/${GitHubRepo}-${GitHubEnvironment}-budget-guardrails"
+                  - !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/${GitHubRepo}-${GitHubEnvironment}-agentcore-evaluation"
                   - !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/${GitHubRepo}-aws-private-eks-terraform"
                   - !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/${GitHubRepo}-aws-private-eks-runner-terraform"
                   - !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/${BootstrapRoleName}"
@@ -996,6 +1030,9 @@ Outputs:
   BudgetGuardrailsRoleArn:
     Description: Store as AWS_BUDGET_GUARDRAILS_ROLE_TO_ASSUME in the aws-sandbox GitHub environment.
     Value: !GetAtt GitHubActionsBudgetGuardrailsRole.Arn
+  AgentCoreEvaluationRoleArn:
+    Description: Store as AWS_AGENTCORE_EVALUATION_ROLE_TO_ASSUME in the aws-sandbox GitHub environment.
+    Value: !GetAtt GitHubActionsAgentCoreEvaluationRole.Arn
   BudgetGuardrailsStateKey:
     Description: Fixed state key used only by the dedicated Budget Guardrails Terraform workflow.
     Value: !Ref BudgetGuardrailsStateKey
