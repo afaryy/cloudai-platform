@@ -1,0 +1,133 @@
+# Synthetic AI Supplier Readiness Gate
+
+## Status and Boundary
+
+This repository implements a local, deterministic, metadata-only readiness gate
+for two synthetic supplier classes:
+
+- managed AI services; and
+- dedicated AI capacity.
+
+The gate validates a closed assessment contract, checks evidence applicability
+and completeness, evaluates current external requirements, and emits one of
+three decisions: `eligible`, `conditional`, or `not-eligible`.
+
+It does not contact a supplier, approve a procurement, certify a control,
+perform legal or regulatory due diligence, retrieve evidence, or call a cloud
+provider. The examples use generic identifiers and synthetic metadata only.
+
+## Why This Gate Exists
+
+Supplier decisions can become fragmented across security questionnaires,
+architecture reviews, commercial assessments, sustainability records, and
+future-policy trackers. This gate turns those inputs into one reproducible
+decision boundary without pretending that a deterministic evaluator replaces
+human assurance.
+
+```text
+Supplier scope
+  -> closed assessment schema
+  -> evidence-family completeness and applicability
+  -> current-requirement checks
+  -> deterministic readiness decision
+  -> human review, remediation, or rejection
+```
+
+The schema owns the shape of accepted metadata. The evaluator owns the decision
+logic. Human owners remain accountable for the accuracy and acceptance of the
+referenced evidence.
+
+## Required Evidence Families
+
+Every assessment contains exactly one record for each family below. A family
+may be marked `not-applicable`, but the applicability decision must be explicit
+and consistent with its evidence status.
+
+| Evidence family | Readiness concern |
+| --- | --- |
+| `security-privacy` | Identity, data, network, encryption, subprocessors, and incident boundaries. |
+| `ai-governance` | Intended use, model/tool change, evaluation, human oversight, and prohibited-use ownership. |
+| `risk-compliance` | Applicable obligations, risk classification, exceptions, approvals, and review dates. |
+| `data-model-tool-lifecycle` | Input, output, embedding, log, model, and tool retention, reuse, lineage, and deletion. |
+| `operations-resilience` | Availability, capacity, observability, recovery, support, and dependency concentration. |
+| `commercial-exit` | Usage, cost, licensing, portability, termination, return, deletion, and replacement. |
+| `sustainability-location` | Applicability-led energy, water, land-use, location, reporting, and regulatory-readiness evidence. |
+
+Raw reports, questionnaires, contracts, prompts, credentials, or provider
+payloads do not belong in the decision record. The contract stores metadata and
+URI evidence references only.
+
+## Deterministic Decision Rules
+
+Rules are evaluated in fail-closed priority order.
+
+| Outcome | Reason code | Condition |
+| --- | --- | --- |
+| `not-eligible` | `required-evidence-family-missing` | A required family is absent. |
+| `not-eligible` | `evidence-applicability-conflict` | Applicability and evidence status disagree. |
+| `not-eligible` | `critical-evidence-missing` | Applicable critical evidence is missing. |
+| `not-eligible` | `evidence-missing` | Any other applicable evidence is missing. |
+| `not-eligible` | `conditional-boundary-incomplete` | Conditional evidence lacks an owner, due date, or compensating control. |
+| `not-eligible` | `current-requirement-unmet` | An applicable current requirement is recorded as a gap or tracking item. |
+| `conditional` | `bounded-remediation-required` | Evidence is conditional and has a complete remediation boundary. |
+| `eligible` | `evidence-complete` | Required evidence is complete or explicitly not applicable, and current requirements are met. |
+
+`Eligible` means the synthetic record passed this contract. It is not a
+production approval, procurement decision, supplier endorsement, or statement
+of legal compliance.
+
+## External Requirement Status
+
+The gate separates current obligations from direction signals so that it can
+respond to change without prematurely claiming enforcement:
+
+- `current-requirement` gaps fail closed;
+- `announced-policy-direction` is tracked with an owner and review date;
+- `planned-legislation-or-standard` is tracked without inventing thresholds;
+- `watch-item` records a review trigger without making the item mandatory.
+
+The assessment schema requires an owner and review date for every external
+requirement. Announced, planned, and watch items therefore remain visible, but
+they do not automatically block a supplier solely because they are future
+signals.
+
+## Synthetic Scenarios
+
+| Scenario | Expected decision | Purpose |
+| --- | --- | --- |
+| Managed AI service | `eligible` | Demonstrates complete evidence with location/sustainability explicitly not applicable to the scoped service. |
+| Dedicated AI capacity | `conditional` | Demonstrates a bounded sustainability/location gap with an owner, expiry, and compensating control. |
+| Missing critical evidence | `not-eligible` | Demonstrates fail-closed handling when required security/privacy evidence is absent. |
+
+The stored decisions are replayed through the real evaluator during tests. A
+fixture that no longer reproduces its recorded decision fails the contract
+suite.
+
+## Implementation Evidence
+
+| Artifact | Location |
+| --- | --- |
+| Assessment schema | `shared/schemas/ai-supplier-readiness/supplier-assessment.schema.json` |
+| Decision schema | `shared/schemas/ai-supplier-readiness/supplier-readiness-decision.schema.json` |
+| Synthetic fixtures | `shared/examples/ai-supplier-readiness/` |
+| Deterministic evaluator | `providers/aws/app/api/src/governance/supplierReadinessEvaluator.ts` |
+| Behaviour tests | `providers/aws/app/api/tests/supplierReadinessEvaluator.test.ts` |
+| Schema and replay tests | `providers/aws/app/api/tests/supplierReadinessContracts.test.ts` |
+
+Run the local validation with:
+
+```bash
+corepack pnpm@11.7.0 --dir providers/aws/app/api test
+```
+
+## Relationship to the Workload Operating Contract
+
+The [AI Workload Operating Contract](./ai-workload-operating-contract.md)
+defines the broader workload admission and operating model. This gate implements
+one narrow dependency decision inside that model: whether supplier evidence is
+complete enough to proceed, requires bounded remediation, or must fail closed.
+
+Future provider integration must remain a separate reviewed change. It would
+need evidence ingestion boundaries, identity and access controls, freshness and
+revocation handling, human approval ownership, audit retention, and tests that
+preserve the deterministic decision contract.

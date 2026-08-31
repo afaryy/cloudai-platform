@@ -1,0 +1,120 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cloudai-platform.example/schemas/ai-supplier-readiness/supplier-assessment.schema.json",
+  "title": "Synthetic AI supplier readiness assessment",
+  "description": "Closed, metadata-only evidence contract for a synthetic AI supplier or dedicated-capacity readiness decision.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "assessmentId",
+    "supplierClass",
+    "scope",
+    "assessedAt",
+    "reviewBy",
+    "evidenceFamilies",
+    "externalRequirements",
+    "evidenceReferences"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "1.0" },
+    "assessmentId": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]{2,80}$"
+    },
+    "supplierClass": {
+      "type": "string",
+      "enum": ["managed-ai-service", "dedicated-ai-capacity"]
+    },
+    "scope": { "type": "string", "minLength": 1, "maxLength": 240 },
+    "assessedAt": { "type": "string", "format": "date-time" },
+    "reviewBy": { "type": "string", "format": "date-time" },
+    "evidenceFamilies": {
+      "type": "array",
+      "minItems": 7,
+      "maxItems": 7,
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["family", "applicability", "status", "critical", "summary"],
+        "properties": {
+          "family": {
+            "type": "string",
+            "enum": [
+              "security-privacy",
+              "ai-governance",
+              "risk-compliance",
+              "data-model-tool-lifecycle",
+              "operations-resilience",
+              "commercial-exit",
+              "sustainability-location"
+            ]
+          },
+          "applicability": {
+            "type": "string",
+            "enum": ["applicable", "not-applicable"]
+          },
+          "status": {
+            "type": "string",
+            "enum": ["complete", "conditional", "missing", "not-applicable"]
+          },
+          "critical": { "type": "boolean" },
+          "summary": { "type": "string", "minLength": 1, "maxLength": 240 },
+          "remediation": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["owner", "dueAt", "compensatingControls"],
+            "properties": {
+              "owner": { "type": "string", "minLength": 1, "maxLength": 120 },
+              "dueAt": { "type": "string", "format": "date-time" },
+              "compensatingControls": {
+                "type": "array",
+                "minItems": 1,
+                "uniqueItems": true,
+                "items": { "type": "string", "minLength": 1, "maxLength": 160 }
+              }
+            }
+          }
+        }
+      }
+    },
+    "externalRequirements": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["requirementId", "status", "assessment", "owner", "reviewBy"],
+        "properties": {
+          "requirementId": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9-]{2,100}$"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "current-requirement",
+              "announced-policy-direction",
+              "planned-legislation-or-standard",
+              "watch-item"
+            ]
+          },
+          "assessment": {
+            "type": "string",
+            "enum": ["met", "gap", "tracking", "not-applicable"]
+          },
+          "owner": { "type": "string", "minLength": 1, "maxLength": 120 },
+          "reviewBy": { "type": "string", "format": "date-time" }
+        }
+      }
+    },
+    "evidenceReferences": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "format": "uri" }
+    }
+  }
+}

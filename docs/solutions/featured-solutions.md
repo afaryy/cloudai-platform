@@ -43,22 +43,22 @@ How a platform engineer can put contracts, policy checks, usage metadata, and a 
 
 It is not a production gateway, persistent audit service, enterprise model catalogue, or unrestricted agent runtime.
 
-## AI Workload Operating Contract
+## AI Workload Operating Contract and Supplier Readiness Gate
 
-- **Status:** Design / future reference
+- **Status:** Workload contract is design/future reference; synthetic supplier gate is locally implemented
 - **Engineering focus:** AI Factory and AI data-centre workload readiness
 
 ### Scope
 
-The [AI Workload Operating Contract](../practices/ai-workload-operating-contract.md) defines a shared operating model for service inference, batch processing, fine-tuning, and future distributed training. It makes ownership, identity, access, capacity, cost, approval, supplier evidence, applicable infrastructure sustainability/location evidence, and shutdown expectations explicit.
+The [AI Workload Operating Contract](../practices/ai-workload-operating-contract.md) defines a shared operating model for service inference, batch processing, fine-tuning, and future distributed training. It makes ownership, identity, access, capacity, cost, approval, supplier evidence, applicable infrastructure sustainability/location evidence, and shutdown expectations explicit. The [Synthetic AI Supplier Readiness Gate](../practices/ai-supplier-readiness-gate.md) implements one bounded slice using closed schemas, deterministic decisions, and generic managed-service and dedicated-capacity scenarios.
 
 ### What this demonstrates
 
-How the existing CloudAI control-plane patterns can extend into a vendor-neutral AI Factory practice track while distinguishing current requirements, announced policy directions, planned standards, and watch items without changing the portfolio's mock-first operating boundary.
+How the existing CloudAI control-plane patterns can extend into a vendor-neutral AI Factory practice track while distinguishing current requirements, announced policy directions, planned standards, and watch items. The gate also demonstrates fail-closed handling of missing evidence and incomplete conditional remediation without changing the portfolio's mock-first operating boundary.
 
 ### What it does not claim
 
-It does not implement a GPU cluster, Slurm deployment, distributed training job, Prometheus/Grafana stack, or production AI data centre.
+It does not implement a GPU cluster, Slurm deployment, distributed training job, Prometheus/Grafana stack, production AI data centre, supplier integration, procurement approval, or regulatory certification.
 
 ## Bounded EKS GPU + Kueue POC
 

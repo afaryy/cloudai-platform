@@ -67,6 +67,12 @@ Each outcome records scope, assessor, approver, evidence date, next-review date,
 and the workload or platform decision it authorises. Marketing claims or an
 application to an external program are not substitutes for evidence.
 
+The [Synthetic AI Supplier Readiness Gate](./ai-supplier-readiness-gate.md)
+implements this three-outcome model as a local, deterministic, metadata-only
+contract for synthetic managed-service and dedicated-capacity assessments. It
+does not replace human assurance, procurement approval, certification, or legal
+and regulatory review.
+
 ## Requirement Status and Change Control
 
 Every external requirement in an architecture or supplier assessment should
