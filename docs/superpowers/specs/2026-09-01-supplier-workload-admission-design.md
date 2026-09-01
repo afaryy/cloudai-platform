@@ -160,6 +160,7 @@ Create a closed discriminated decision contract. Every outcome contains:
 schemaVersion
 admissionDecisionId
 workloadId
+supplierDependencyApplicability: applicable | not-applicable
 decision: admitted | denied
 reasonCodes[]
 supplierReasonCodes[]
@@ -182,6 +183,10 @@ but may be empty when no supplier evaluation result applies.
 ```
 
 No random identifier or wall clock is permitted.
+
+`evaluatedAt` preserves the caller-supplied string so an invalid input can
+still produce a bounded `admission-time-invalid` decision without inventing a
+timestamp. Every other decision path requires it to be a valid date-time.
 
 ## 5. Evaluator Interface
 
