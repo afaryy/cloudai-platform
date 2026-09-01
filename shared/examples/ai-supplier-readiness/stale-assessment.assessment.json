@@ -1,0 +1,22 @@
+{
+  "schemaVersion": "1.0",
+  "assessmentId": "synthetic-stale-assessment",
+  "supplierClass": "managed-ai-service",
+  "scope": "Synthetic managed AI service whose assessment review boundary has expired",
+  "assessedAt": "2026-08-01T00:00:00.000Z",
+  "reviewBy": "2026-08-31T00:30:00.000Z",
+  "evidenceFamilies": [
+    { "family": "security-privacy", "applicability": "applicable", "status": "complete", "critical": true, "summary": "Synthetic security and privacy evidence is complete.", "evidenceState": "current", "observedAt": "2026-08-01T00:00:00.000Z", "validUntil": "2026-12-31T00:00:00.000Z" },
+    { "family": "ai-governance", "applicability": "applicable", "status": "complete", "critical": true, "summary": "Synthetic AI governance evidence is complete.", "evidenceState": "current", "observedAt": "2026-08-01T00:00:00.000Z", "validUntil": "2026-12-31T00:00:00.000Z" },
+    { "family": "risk-compliance", "applicability": "applicable", "status": "complete", "critical": true, "summary": "Synthetic risk and compliance evidence is complete.", "evidenceState": "current", "observedAt": "2026-08-01T00:00:00.000Z", "validUntil": "2026-12-31T00:00:00.000Z" },
+    { "family": "data-model-tool-lifecycle", "applicability": "applicable", "status": "complete", "critical": true, "summary": "Synthetic data, model, and tool lifecycle evidence is complete.", "evidenceState": "current", "observedAt": "2026-08-01T00:00:00.000Z", "validUntil": "2026-12-31T00:00:00.000Z" },
+    { "family": "operations-resilience", "applicability": "applicable", "status": "complete", "critical": true, "summary": "Synthetic operations and resilience evidence is complete.", "evidenceState": "current", "observedAt": "2026-08-01T00:00:00.000Z", "validUntil": "2026-12-31T00:00:00.000Z" },
+    { "family": "commercial-exit", "applicability": "applicable", "status": "complete", "critical": true, "summary": "Synthetic commercial and exit evidence is complete.", "evidenceState": "current", "observedAt": "2026-08-01T00:00:00.000Z", "validUntil": "2026-12-31T00:00:00.000Z" },
+    { "family": "sustainability-location", "applicability": "not-applicable", "status": "not-applicable", "critical": false, "summary": "Dedicated capacity is outside this synthetic assessment.", "evidenceState": "current", "observedAt": "2026-08-01T00:00:00.000Z", "validUntil": "2026-12-31T00:00:00.000Z" }
+  ],
+  "externalRequirements": [
+    { "requirementId": "synthetic-current-security-control", "status": "current-requirement", "assessment": "met", "owner": "platform-governance-reviewer", "reviewBy": "2026-10-31T00:00:00.000Z" }
+  ],
+  "evidenceReferences": ["https://example.com/cloudai-platform/supplier-evidence/stale-assessment"],
+  "reassessmentTriggers": ["supplier-service-change", "model-or-tool-change", "data-or-subprocessor-change", "location-or-capacity-change", "control-or-assurance-change", "contract-or-regulatory-change"]
+}

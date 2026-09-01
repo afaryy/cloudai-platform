@@ -1,6 +1,28 @@
 export type SupplierEvidenceStatus = "complete" | "conditional" | "missing" | "not-applicable";
 export type SupplierEvidenceApplicability = "applicable" | "not-applicable";
+export type SupplierEvidenceState = "current" | "revoked";
 export type SupplierReadinessDecision = "eligible" | "conditional" | "not-eligible";
+export type SupplierReassessmentTrigger =
+  | "supplier-service-change"
+  | "model-or-tool-change"
+  | "data-or-subprocessor-change"
+  | "location-or-capacity-change"
+  | "control-or-assurance-change"
+  | "contract-or-regulatory-change";
+export type SupplierReadinessReasonCode =
+  | "evidence-complete"
+  | "bounded-remediation-required"
+  | "required-evidence-family-missing"
+  | "evidence-applicability-conflict"
+  | "time-boundary-invalid"
+  | "evidence-revoked"
+  | "assessment-review-expired"
+  | "evidence-expired"
+  | "critical-evidence-missing"
+  | "evidence-missing"
+  | "conditional-boundary-incomplete"
+  | "conditional-remediation-expired"
+  | "current-requirement-unmet";
 export type ExternalRequirementStatus =
   | "current-requirement"
   | "announced-policy-direction"
@@ -14,6 +36,9 @@ export interface SupplierEvidenceFamily {
   status: SupplierEvidenceStatus;
   critical: boolean;
   summary: string;
+  evidenceState: SupplierEvidenceState;
+  observedAt: string;
+  validUntil: string;
   remediation?: {
     owner: string;
     dueAt: string;
@@ -39,13 +64,14 @@ export interface SupplierAssessment {
   evidenceFamilies: SupplierEvidenceFamily[];
   externalRequirements: SupplierExternalRequirement[];
   evidenceReferences: string[];
+  reassessmentTriggers: SupplierReassessmentTrigger[];
 }
 
 export interface SupplierAssessmentDecision {
   schemaVersion: "1.0";
   assessmentId: string;
   decision: SupplierReadinessDecision;
-  reasonCodes: string[];
+  reasonCodes: SupplierReadinessReasonCode[];
   evaluatedAt: string;
   reviewBy: string;
   evidenceReferences: string[];
@@ -79,6 +105,30 @@ export function evaluateSupplierReadiness(
     return decision(assessment, evaluatedAt, "not-eligible", "evidence-applicability-conflict");
   }
 
+  const evaluatedTimestamp = parseTimestamp(evaluatedAt);
+  if (evaluatedTimestamp === undefined || hasInvalidTemporalBoundary(assessment, evaluatedTimestamp)) {
+    return decision(assessment, evaluatedAt, "not-eligible", "time-boundary-invalid");
+  }
+
+  const applicableEvidenceRevoked = assessment.evidenceFamilies.some(
+    (evidence) => evidence.applicability === "applicable" && evidence.evidenceState === "revoked"
+  );
+  if (applicableEvidenceRevoked) {
+    return decision(assessment, evaluatedAt, "not-eligible", "evidence-revoked");
+  }
+
+  if (evaluatedTimestamp > parseTimestamp(assessment.reviewBy)!) {
+    return decision(assessment, evaluatedAt, "not-eligible", "assessment-review-expired");
+  }
+
+  const applicableEvidenceExpired = assessment.evidenceFamilies.some(
+    (evidence) =>
+      evidence.applicability === "applicable" && evaluatedTimestamp > parseTimestamp(evidence.validUntil)!
+  );
+  if (applicableEvidenceExpired) {
+    return decision(assessment, evaluatedAt, "not-eligible", "evidence-expired");
+  }
+
   const criticalEvidenceMissing = assessment.evidenceFamilies.some(
     (evidence) => evidence.applicability === "applicable" && evidence.critical && evidence.status === "missing"
   );
@@ -105,6 +155,16 @@ export function evaluateSupplierReadiness(
     return decision(assessment, evaluatedAt, "not-eligible", "conditional-boundary-incomplete");
   }
 
+  const conditionalRemediationExpired = assessment.evidenceFamilies.some(
+    (evidence) =>
+      evidence.applicability === "applicable" &&
+      evidence.status === "conditional" &&
+      evaluatedTimestamp > parseTimestamp(evidence.remediation!.dueAt)!
+  );
+  if (conditionalRemediationExpired) {
+    return decision(assessment, evaluatedAt, "not-eligible", "conditional-remediation-expired");
+  }
+
   const currentRequirementUnmet = assessment.externalRequirements.some(
     (requirement) =>
       requirement.status === "current-requirement" &&
@@ -129,7 +189,7 @@ function decision(
   assessment: SupplierAssessment,
   evaluatedAt: string,
   outcome: SupplierReadinessDecision,
-  reasonCode: string
+  reasonCode: SupplierReadinessReasonCode
 ): SupplierAssessmentDecision {
   return {
     schemaVersion: "1.0",
@@ -140,4 +200,46 @@ function decision(
     reviewBy: assessment.reviewBy,
     evidenceReferences: [...assessment.evidenceReferences]
   };
+}
+
+function hasInvalidTemporalBoundary(assessment: SupplierAssessment, evaluatedTimestamp: number): boolean {
+  const assessedTimestamp = parseTimestamp(assessment.assessedAt);
+  const reviewTimestamp = parseTimestamp(assessment.reviewBy);
+  if (
+    assessedTimestamp === undefined ||
+    reviewTimestamp === undefined ||
+    assessedTimestamp > evaluatedTimestamp ||
+    reviewTimestamp < assessedTimestamp
+  ) {
+    return true;
+  }
+
+  for (const evidence of assessment.evidenceFamilies) {
+    const observedTimestamp = parseTimestamp(evidence.observedAt);
+    const validUntilTimestamp = parseTimestamp(evidence.validUntil);
+    if (
+      observedTimestamp === undefined ||
+      validUntilTimestamp === undefined ||
+      observedTimestamp > evaluatedTimestamp ||
+      validUntilTimestamp < observedTimestamp
+    ) {
+      return true;
+    }
+
+    if (evidence.remediation) {
+      const dueTimestamp = parseTimestamp(evidence.remediation.dueAt);
+      if (dueTimestamp === undefined || dueTimestamp < assessedTimestamp) {
+        return true;
+      }
+    }
+  }
+
+  return assessment.externalRequirements.some(
+    (requirement) => parseTimestamp(requirement.reviewBy) === undefined
+  );
+}
+
+function parseTimestamp(value: string): number | undefined {
+  const timestamp = Date.parse(value);
+  return Number.isFinite(timestamp) ? timestamp : undefined;
 }

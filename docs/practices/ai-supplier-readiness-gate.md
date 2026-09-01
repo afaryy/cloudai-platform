@@ -8,9 +8,10 @@ for two synthetic supplier classes:
 - managed AI services; and
 - dedicated AI capacity.
 
-The gate validates a closed assessment contract, checks evidence applicability
-and completeness, evaluates current external requirements, and emits one of
-three decisions: `eligible`, `conditional`, or `not-eligible`.
+The gate validates a closed assessment contract, checks evidence applicability,
+freshness, revocation, and completeness, evaluates current external
+requirements, and emits one of three decisions: `eligible`, `conditional`, or
+`not-eligible`.
 
 It does not contact a supplier, approve a procurement, certify a control,
 perform legal or regulatory due diligence, retrieve evidence, or call a cloud
@@ -27,7 +28,8 @@ human assurance.
 ```text
 Supplier scope
   -> closed assessment schema
-  -> evidence-family completeness and applicability
+  -> explicit evaluation time and temporal-boundary validation
+  -> evidence-family freshness, revocation, completeness, and applicability
   -> current-requirement checks
   -> deterministic readiness decision
   -> human review, remediation, or rejection
@@ -57,6 +59,17 @@ Raw reports, questionnaires, contracts, prompts, credentials, or provider
 payloads do not belong in the decision record. The contract stores metadata and
 URI evidence references only.
 
+Each evidence-family record also carries `evidenceState`, `observedAt`, and
+`validUntil`. Every assessment carries an explicit `assessedAt`, `reviewBy`, and
+structured `reassessmentTriggers` list. The evaluator receives `evaluatedAt` as
+an input; it never reads the wall clock, so stored decisions remain deterministic
+and replayable.
+
+The trigger list names changes that require human-owned reassessment: supplier
+service, model or tool, data or subprocessor, location or capacity, control or
+assurance, and contract or regulatory change. Trigger metadata does not poll a
+supplier, retrieve evidence, or automatically approve or revoke a decision.
+
 ## Deterministic Decision Rules
 
 Rules are evaluated in fail-closed priority order.
@@ -65,9 +78,14 @@ Rules are evaluated in fail-closed priority order.
 | --- | --- | --- |
 | `not-eligible` | `required-evidence-family-missing` | A required family is absent. |
 | `not-eligible` | `evidence-applicability-conflict` | Applicability and evidence status disagree. |
+| `not-eligible` | `time-boundary-invalid` | Required timestamps are invalid, contradictory, or later than the explicit evaluation time. |
+| `not-eligible` | `evidence-revoked` | Applicable evidence is explicitly revoked. |
+| `not-eligible` | `assessment-review-expired` | The assessment review boundary is earlier than the explicit evaluation time. |
+| `not-eligible` | `evidence-expired` | Applicable evidence is beyond its validity boundary. |
 | `not-eligible` | `critical-evidence-missing` | Applicable critical evidence is missing. |
 | `not-eligible` | `evidence-missing` | Any other applicable evidence is missing. |
 | `not-eligible` | `conditional-boundary-incomplete` | Conditional evidence lacks an owner, due date, or compensating control. |
+| `not-eligible` | `conditional-remediation-expired` | A complete conditional remediation boundary exists, but its due date has passed. |
 | `not-eligible` | `current-requirement-unmet` | An applicable current requirement is recorded as a gap or tracking item. |
 | `conditional` | `bounded-remediation-required` | Evidence is conditional and has a complete remediation boundary. |
 | `eligible` | `evidence-complete` | Required evidence is complete or explicitly not applicable, and current requirements are met. |
@@ -98,6 +116,9 @@ signals.
 | Managed AI service | `eligible` | Demonstrates complete evidence with location/sustainability explicitly not applicable to the scoped service. |
 | Dedicated AI capacity | `conditional` | Demonstrates a bounded sustainability/location gap with an owner, expiry, and compensating control. |
 | Missing critical evidence | `not-eligible` | Demonstrates fail-closed handling when required security/privacy evidence is absent. |
+| Stale assessment | `not-eligible` | Demonstrates that an otherwise complete assessment cannot be reused after its review boundary. |
+| Expired remediation | `not-eligible` | Demonstrates that a conditional outcome becomes unavailable after its remediation due date. |
+| Revoked evidence | `not-eligible` | Demonstrates immediate fail-closed handling for revoked applicable evidence. |
 
 The stored decisions are replayed through the real evaluator during tests. A
 fixture that no longer reproduces its recorded decision fails the contract
@@ -127,7 +148,8 @@ defines the broader workload admission and operating model. This gate implements
 one narrow dependency decision inside that model: whether supplier evidence is
 complete enough to proceed, requires bounded remediation, or must fail closed.
 
-Future provider integration must remain a separate reviewed change. It would
-need evidence ingestion boundaries, identity and access controls, freshness and
-revocation handling, human approval ownership, audit retention, and tests that
-preserve the deterministic decision contract.
+Future provider integration must remain a separate reviewed change. The local
+contract now defines freshness, revocation, expiry, and reassessment semantics,
+but a provider integration would still need evidence-ingestion boundaries,
+identity and access controls, human approval ownership, audit retention, and
+tests that preserve the deterministic decision contract.
