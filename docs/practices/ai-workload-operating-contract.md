@@ -73,6 +73,13 @@ contract for synthetic managed-service and dedicated-capacity assessments. It
 does not replace human assurance, procurement approval, certification, or legal
 and regulatory review.
 
+The local gate also records evidence observation and validity boundaries,
+explicit revocation state, assessment review expiry, remediation due dates, and
+structured reassessment triggers. All comparisons use a supplied evaluation
+timestamp rather than the wall clock. A trigger indicates that a human-owned
+reassessment is required; it does not automatically retrieve evidence or change
+a supplier decision.
+
 ## Requirement Status and Change Control
 
 Every external requirement in an architecture or supplier assessment should

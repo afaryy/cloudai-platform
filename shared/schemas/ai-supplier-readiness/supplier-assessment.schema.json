@@ -14,7 +14,8 @@
     "reviewBy",
     "evidenceFamilies",
     "externalRequirements",
-    "evidenceReferences"
+    "evidenceReferences",
+    "reassessmentTriggers"
   ],
   "properties": {
     "schemaVersion": { "const": "1.0" },
@@ -37,7 +38,16 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["family", "applicability", "status", "critical", "summary"],
+        "required": [
+          "family",
+          "applicability",
+          "status",
+          "critical",
+          "summary",
+          "evidenceState",
+          "observedAt",
+          "validUntil"
+        ],
         "properties": {
           "family": {
             "type": "string",
@@ -61,6 +71,12 @@
           },
           "critical": { "type": "boolean" },
           "summary": { "type": "string", "minLength": 1, "maxLength": 240 },
+          "evidenceState": {
+            "type": "string",
+            "enum": ["current", "revoked"]
+          },
+          "observedAt": { "type": "string", "format": "date-time" },
+          "validUntil": { "type": "string", "format": "date-time" },
           "remediation": {
             "type": "object",
             "additionalProperties": false,
@@ -115,6 +131,22 @@
       "minItems": 1,
       "uniqueItems": true,
       "items": { "type": "string", "format": "uri" }
+    },
+    "reassessmentTriggers": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": [
+          "supplier-service-change",
+          "model-or-tool-change",
+          "data-or-subprocessor-change",
+          "location-or-capacity-change",
+          "control-or-assurance-change",
+          "contract-or-regulatory-change"
+        ]
+      }
     }
   }
 }

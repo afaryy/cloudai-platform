@@ -36,9 +36,14 @@
           "bounded-remediation-required",
           "required-evidence-family-missing",
           "evidence-applicability-conflict",
+          "time-boundary-invalid",
+          "evidence-revoked",
+          "assessment-review-expired",
+          "evidence-expired",
           "critical-evidence-missing",
           "evidence-missing",
           "conditional-boundary-incomplete",
+          "conditional-remediation-expired",
           "current-requirement-unmet"
         ]
       }

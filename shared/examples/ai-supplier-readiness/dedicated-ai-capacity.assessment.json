@@ -6,18 +6,21 @@
   "assessedAt": "2026-08-31T00:00:00.000Z",
   "reviewBy": "2026-10-15T00:00:00.000Z",
   "evidenceFamilies": [
-    { "family": "security-privacy", "applicability": "applicable", "status": "complete", "critical": true, "summary": "Synthetic identity, network, encryption, privacy, and incident evidence is complete." },
-    { "family": "ai-governance", "applicability": "applicable", "status": "complete", "critical": true, "summary": "Synthetic workload purpose, evaluation, oversight, and change evidence is complete." },
-    { "family": "risk-compliance", "applicability": "applicable", "status": "complete", "critical": true, "summary": "Synthetic risk ownership, control mapping, and exception evidence is complete." },
-    { "family": "data-model-tool-lifecycle", "applicability": "applicable", "status": "complete", "critical": true, "summary": "Synthetic data, model, artifact, checkpoint, and deletion evidence is complete." },
-    { "family": "operations-resilience", "applicability": "applicable", "status": "complete", "critical": true, "summary": "Synthetic capacity, telemetry, recovery, support, and concentration evidence is complete." },
-    { "family": "commercial-exit", "applicability": "applicable", "status": "complete", "critical": true, "summary": "Synthetic reservation, pricing, portability, termination, and exit evidence is complete." },
+    { "family": "security-privacy", "applicability": "applicable", "status": "complete", "critical": true, "summary": "Synthetic identity, network, encryption, privacy, and incident evidence is complete.", "evidenceState": "current", "observedAt": "2026-08-01T00:00:00.000Z", "validUntil": "2026-12-31T00:00:00.000Z" },
+    { "family": "ai-governance", "applicability": "applicable", "status": "complete", "critical": true, "summary": "Synthetic workload purpose, evaluation, oversight, and change evidence is complete.", "evidenceState": "current", "observedAt": "2026-08-01T00:00:00.000Z", "validUntil": "2026-12-31T00:00:00.000Z" },
+    { "family": "risk-compliance", "applicability": "applicable", "status": "complete", "critical": true, "summary": "Synthetic risk ownership, control mapping, and exception evidence is complete.", "evidenceState": "current", "observedAt": "2026-08-01T00:00:00.000Z", "validUntil": "2026-12-31T00:00:00.000Z" },
+    { "family": "data-model-tool-lifecycle", "applicability": "applicable", "status": "complete", "critical": true, "summary": "Synthetic data, model, artifact, checkpoint, and deletion evidence is complete.", "evidenceState": "current", "observedAt": "2026-08-01T00:00:00.000Z", "validUntil": "2026-12-31T00:00:00.000Z" },
+    { "family": "operations-resilience", "applicability": "applicable", "status": "complete", "critical": true, "summary": "Synthetic capacity, telemetry, recovery, support, and concentration evidence is complete.", "evidenceState": "current", "observedAt": "2026-08-01T00:00:00.000Z", "validUntil": "2026-12-31T00:00:00.000Z" },
+    { "family": "commercial-exit", "applicability": "applicable", "status": "complete", "critical": true, "summary": "Synthetic reservation, pricing, portability, termination, and exit evidence is complete.", "evidenceState": "current", "observedAt": "2026-08-01T00:00:00.000Z", "validUntil": "2026-12-31T00:00:00.000Z" },
     {
       "family": "sustainability-location",
       "applicability": "applicable",
       "status": "conditional",
       "critical": true,
       "summary": "Synthetic energy, water, land-use, location, and measurement evidence requires bounded review before commitment.",
+      "evidenceState": "current",
+      "observedAt": "2026-08-01T00:00:00.000Z",
+      "validUntil": "2026-12-31T00:00:00.000Z",
       "remediation": {
         "owner": "platform-sustainability-reviewer",
         "dueAt": "2026-10-15T00:00:00.000Z",
@@ -31,5 +34,13 @@
     { "requirementId": "synthetic-large-data-centre-standard", "status": "planned-legislation-or-standard", "assessment": "tracking", "owner": "platform-governance-reviewer", "reviewBy": "2026-10-31T00:00:00.000Z" },
     { "requirementId": "synthetic-procurement-benchmark", "status": "watch-item", "assessment": "tracking", "owner": "platform-procurement-reviewer", "reviewBy": "2026-09-24T00:00:00.000Z" }
   ],
-  "evidenceReferences": ["https://example.com/cloudai-platform/supplier-evidence/dedicated-ai-capacity"]
+  "evidenceReferences": ["https://example.com/cloudai-platform/supplier-evidence/dedicated-ai-capacity"],
+  "reassessmentTriggers": [
+    "supplier-service-change",
+    "model-or-tool-change",
+    "data-or-subprocessor-change",
+    "location-or-capacity-change",
+    "control-or-assurance-change",
+    "contract-or-regulatory-change"
+  ]
 }

@@ -9,8 +9,44 @@ const EXAMPLE_DIR = resolve(process.cwd(), "../../../../shared/examples/ai-suppl
 const SCENARIOS = [
   "managed-ai-service",
   "dedicated-ai-capacity",
-  "missing-critical-evidence"
+  "missing-critical-evidence",
+  "stale-assessment",
+  "expired-remediation",
+  "revoked-evidence"
 ] as const;
+
+const REASSESSMENT_TRIGGERS = [
+  "supplier-service-change",
+  "model-or-tool-change",
+  "data-or-subprocessor-change",
+  "location-or-capacity-change",
+  "control-or-assurance-change",
+  "contract-or-regulatory-change"
+] as const;
+
+test("supplier readiness schemas make freshness, revocation, and reassessment explicit", async () => {
+  const assessmentSchema = await readJson("supplier-assessment.schema.json", SCHEMA_DIR);
+  const decisionSchema = await readJson("supplier-readiness-decision.schema.json", SCHEMA_DIR);
+  const evidenceSchema = assessmentSchema.properties.evidenceFamilies.items;
+
+  assert.ok(assessmentSchema.required.includes("reassessmentTriggers"));
+  assert.deepEqual(assessmentSchema.properties.reassessmentTriggers.items.enum, REASSESSMENT_TRIGGERS);
+  assert.ok(evidenceSchema.required.includes("evidenceState"));
+  assert.ok(evidenceSchema.required.includes("observedAt"));
+  assert.ok(evidenceSchema.required.includes("validUntil"));
+  assert.deepEqual(evidenceSchema.properties.evidenceState.enum, ["current", "revoked"]);
+
+  const reasonCodes = decisionSchema.properties.reasonCodes.items.enum;
+  for (const reasonCode of [
+    "time-boundary-invalid",
+    "evidence-revoked",
+    "assessment-review-expired",
+    "evidence-expired",
+    "conditional-remediation-expired"
+  ]) {
+    assert.ok(reasonCodes.includes(reasonCode), `decision schema missing reason code: ${reasonCode}`);
+  }
+});
 
 test("synthetic supplier assessments match closed metadata-only schemas", async () => {
   const assessmentSchema = await readJson("supplier-assessment.schema.json", SCHEMA_DIR);
@@ -31,7 +67,10 @@ test("recorded supplier decisions are reproducible through the deterministic eva
   const expectedOutcomes = {
     "managed-ai-service": "eligible",
     "dedicated-ai-capacity": "conditional",
-    "missing-critical-evidence": "not-eligible"
+    "missing-critical-evidence": "not-eligible",
+    "stale-assessment": "not-eligible",
+    "expired-remediation": "not-eligible",
+    "revoked-evidence": "not-eligible"
   } as const;
 
   for (const scenario of SCENARIOS) {
@@ -95,6 +134,9 @@ function assertMatchesSchema(value: unknown, schema: any, path = "$"): void {
   if (schema.type === "string") {
     assert.ok(typeof value === "string", `${path} must be a string`);
     if (schema.minLength !== undefined) assert.ok(value.length >= schema.minLength, `${path} is too short`);
+    if (schema.format === "date-time") {
+      assert.ok(Number.isFinite(Date.parse(value)), `${path} must be a valid date-time`);
+    }
   }
   if (schema.type === "boolean") assert.equal(typeof value, "boolean", `${path} must be a boolean`);
 }

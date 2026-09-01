@@ -114,10 +114,11 @@ The [AI Workload Operating Contract](docs/practices/ai-workload-operating-contra
 defines the wider future/design practice track and does not add a scheduler,
 GPU cluster, or cloud runtime by default. Its supplier-evidence boundary now has
 a [local synthetic readiness gate](docs/practices/ai-supplier-readiness-gate.md)
-with closed schemas, deterministic fail-closed decisions, and three generic
-scenarios. It remains metadata-only and does not claim supplier assurance,
-procurement approval, external program participation, provider integration, or
-that planned infrastructure standards are already in force.
+with closed schemas, deterministic fail-closed decisions, and six generic
+scenarios covering positive, conditional, missing-evidence, freshness, expiry,
+and revocation paths. It remains metadata-only and does not claim supplier
+assurance, procurement approval, external program participation, provider
+integration, or that planned infrastructure standards are already in force.
 
 ## Run Locally in Mock Mode
 

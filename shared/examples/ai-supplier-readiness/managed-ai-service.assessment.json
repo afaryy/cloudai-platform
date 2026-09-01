@@ -6,17 +6,25 @@
   "assessedAt": "2026-08-31T00:00:00.000Z",
   "reviewBy": "2026-11-30T00:00:00.000Z",
   "evidenceFamilies": [
-    { "family": "security-privacy", "applicability": "applicable", "status": "complete", "critical": true, "summary": "Synthetic identity, network, encryption, privacy, and incident evidence is complete." },
-    { "family": "ai-governance", "applicability": "applicable", "status": "complete", "critical": true, "summary": "Synthetic intended-use, evaluation, change, oversight, and escalation evidence is complete." },
-    { "family": "risk-compliance", "applicability": "applicable", "status": "complete", "critical": true, "summary": "Synthetic risk ownership, control mapping, and exception evidence is complete." },
-    { "family": "data-model-tool-lifecycle", "applicability": "applicable", "status": "complete", "critical": true, "summary": "Synthetic retention, deletion, lineage, residency, and tool-boundary evidence is complete." },
-    { "family": "operations-resilience", "applicability": "applicable", "status": "complete", "critical": true, "summary": "Synthetic SLO, telemetry, support, recovery, and dependency evidence is complete." },
-    { "family": "commercial-exit", "applicability": "applicable", "status": "complete", "critical": true, "summary": "Synthetic cost, portability, termination, export, and deletion evidence is complete." },
-    { "family": "sustainability-location", "applicability": "not-applicable", "status": "not-applicable", "critical": false, "summary": "No material dedicated facility or capacity commitment is in scope for this synthetic assessment." }
+    { "family": "security-privacy", "applicability": "applicable", "status": "complete", "critical": true, "summary": "Synthetic identity, network, encryption, privacy, and incident evidence is complete.", "evidenceState": "current", "observedAt": "2026-08-01T00:00:00.000Z", "validUntil": "2026-12-31T00:00:00.000Z" },
+    { "family": "ai-governance", "applicability": "applicable", "status": "complete", "critical": true, "summary": "Synthetic intended-use, evaluation, change, oversight, and escalation evidence is complete.", "evidenceState": "current", "observedAt": "2026-08-01T00:00:00.000Z", "validUntil": "2026-12-31T00:00:00.000Z" },
+    { "family": "risk-compliance", "applicability": "applicable", "status": "complete", "critical": true, "summary": "Synthetic risk ownership, control mapping, and exception evidence is complete.", "evidenceState": "current", "observedAt": "2026-08-01T00:00:00.000Z", "validUntil": "2026-12-31T00:00:00.000Z" },
+    { "family": "data-model-tool-lifecycle", "applicability": "applicable", "status": "complete", "critical": true, "summary": "Synthetic retention, deletion, lineage, residency, and tool-boundary evidence is complete.", "evidenceState": "current", "observedAt": "2026-08-01T00:00:00.000Z", "validUntil": "2026-12-31T00:00:00.000Z" },
+    { "family": "operations-resilience", "applicability": "applicable", "status": "complete", "critical": true, "summary": "Synthetic SLO, telemetry, support, recovery, and dependency evidence is complete.", "evidenceState": "current", "observedAt": "2026-08-01T00:00:00.000Z", "validUntil": "2026-12-31T00:00:00.000Z" },
+    { "family": "commercial-exit", "applicability": "applicable", "status": "complete", "critical": true, "summary": "Synthetic cost, portability, termination, export, and deletion evidence is complete.", "evidenceState": "current", "observedAt": "2026-08-01T00:00:00.000Z", "validUntil": "2026-12-31T00:00:00.000Z" },
+    { "family": "sustainability-location", "applicability": "not-applicable", "status": "not-applicable", "critical": false, "summary": "No material dedicated facility or capacity commitment is in scope for this synthetic assessment.", "evidenceState": "current", "observedAt": "2026-08-01T00:00:00.000Z", "validUntil": "2026-12-31T00:00:00.000Z" }
   ],
   "externalRequirements": [
     { "requirementId": "synthetic-current-security-control", "status": "current-requirement", "assessment": "met", "owner": "platform-governance-reviewer", "reviewBy": "2026-10-31T00:00:00.000Z" },
     { "requirementId": "synthetic-future-infrastructure-standard", "status": "planned-legislation-or-standard", "assessment": "tracking", "owner": "platform-governance-reviewer", "reviewBy": "2026-10-31T00:00:00.000Z" }
   ],
-  "evidenceReferences": ["https://example.com/cloudai-platform/supplier-evidence/managed-ai-service"]
+  "evidenceReferences": ["https://example.com/cloudai-platform/supplier-evidence/managed-ai-service"],
+  "reassessmentTriggers": [
+    "supplier-service-change",
+    "model-or-tool-change",
+    "data-or-subprocessor-change",
+    "location-or-capacity-change",
+    "control-or-assurance-change",
+    "contract-or-regulatory-change"
+  ]
 }
