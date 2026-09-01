@@ -13,6 +13,7 @@ solution.
   and [Operations Runbook](operations-runbook.md)
 - [Responsible AI Checklist](responsible-ai-checklist.md) and
   [Secure AI Enablement](secure-ai-enablement.md)
-- [AI Workload Operating Contract](ai-workload-operating-contract.md)
+- [AI Workload Operating Contract](ai-workload-operating-contract.md) and
+  [Synthetic AI Supplier Readiness Gate](ai-supplier-readiness-gate.md)
 - [Agent Behavioural Reliability Gate](agent-behavioural-reliability-gate.md)
 - [Current Status](current-status.md) and [Demo Script](demo-script.md)

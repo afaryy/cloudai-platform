@@ -101,6 +101,9 @@ implementation record and deferred scope.
   evidence across access, safety, RAG, and review controls.
 - [AI platform security and operations controls](../practices/ai-platform-security-operations-controls.md)
   — identity, data protection, AppSec, delivery, operations, and FinOps.
+- [Synthetic AI supplier readiness gate](../practices/ai-supplier-readiness-gate.md)
+  — closed metadata contracts, deterministic `eligible` / `conditional` /
+  `not-eligible` decisions, synthetic scenarios, and fail-closed evidence checks.
 - [Observability](../practices/observability.md), [operations runbook](../practices/operations-runbook.md),
   and [AI FinOps](../practices/ai-finops.md) — telemetry, operational review, and
   cost-awareness patterns.
@@ -127,6 +130,9 @@ implementation record and deferred scope.
   documentation-first, vendor-neutral workload readiness model for service,
   batch, fine-tuning, and future distributed-training profiles, including
   supplier/procurement evidence and external-requirement status control.
+- [Synthetic AI supplier readiness gate](../practices/ai-supplier-readiness-gate.md) —
+  locally implemented, provider-neutral evaluation of synthetic managed AI
+  service and dedicated-capacity evidence; no supplier or provider integration.
 
 ## Demonstration and Portfolio Navigation
 

@@ -63,11 +63,14 @@ The repository can now demonstrate:
   evaluation is not implemented. `local-contract` remains the only validated
   evidence; future `provider-direct` and `provider-runtime` evidence are not
   provider, runtime, or production validation.
-- **AI infrastructure and supplier readiness:** design-only operating-contract
-  extension for supplier evidence plus applicability-led energy, water,
-  land-use, location, sustainability, and external-requirement status. It does
-  not claim enacted future standards, supplier assurance, program
-  participation, or a deployed data centre.
+- **AI infrastructure and supplier readiness:** the workload operating contract
+  remains a design/future practice, while a local deterministic supplier gate
+  now validates closed metadata contracts for synthetic managed AI services and
+  dedicated AI capacity. It returns `eligible`, `conditional`, or
+  `not-eligible`; missing evidence, incomplete remediation, and unmet current
+  requirements fail closed. It does not claim supplier assurance, procurement
+  approval, enacted future standards, program participation, provider
+  integration, or a deployed data centre.
 - **P5a AI-Assisted DevSecOps Boundary:** advisory AI use, human review, CI/security checks, and release evidence
 - **P5b AI-Assisted Review Evidence:** review summaries, threat-model checklists, CI failure summaries, and release-note drafts
 - **P6f AI Platform Security and Operations Controls:** identity, data protection, AI AppSec, delivery, operations, and FinOps
@@ -129,7 +132,8 @@ It currently has six mock-first lanes:
 | P8i AgentCore synthetic contract pack | Complete local synthetic contract evidence; provider-neutral pack remains separate from the live AWS validation | `shared/schemas/agentcore-readiness/`, `shared/examples/agentcore-readiness/`, `providers/aws/app/api/tests/agentcoreReadinessContracts.test.ts`, and `docs/solutions/p8i-agentcore-synthetic-contract-pack.md` |
 | AgentCore governed RAG POC | Synthetic data foundation, arm64 Runtime, IAM Gateway/Runtime target, direct Bedrock preflight, Gateway end-to-end evidence, and bounded CloudWatch observability complete through protected CI; teardown remains separately gated | `providers/aws/app/agentcore-rag-runtime/`, `providers/aws/agentcore/`, `.github/workflows/terraform-agentcore-rag-sandbox.yml`, `providers/aws/infra/bootstrap/github-oidc-terraform-backend.yaml`, `docs/solutions/p8i-agentcore-rag-data-foundation.md`, `docs/solutions/p8i-agentcore-rag-key-process-record.md`, and `docs/solutions/agentcore-governed-rag-poc-runbook.md` |
 | Framework-neutral agent evaluation telemetry | Stage A source implemented; provider validation pending. The protected lane is manual, synthetic-only, evaluate-only, and bounded to six calls. Stage B Runtime-to-CloudWatch evaluation is not implemented. | `shared/schemas/agent-evaluation-telemetry/`, `shared/examples/agent-evaluation-telemetry/`, `providers/aws/app/api/src/evals/agentEvaluationTelemetryNormalizer.ts`, `providers/aws/app/api/src/evals/agentEvaluationTelemetryGate.ts`, `providers/aws/app/api/src/evals/agentCoreEvaluationProviderGate.ts`, `.github/workflows/agentcore-evaluation-provider-parity.yml`, and `docs/solutions/agent-evaluation-telemetry-runbook.md` |
-| AI infrastructure and supplier readiness | Design-only contract extension; no data-centre deployment, regulatory compliance, supplier assurance, or program participation claimed | `docs/architecture/ai-factory-gpu-workload-readiness.md` and `docs/practices/ai-workload-operating-contract.md` |
+| AI workload operating contract | Design/future reference; no data-centre deployment or GPU runtime claimed | `docs/architecture/ai-factory-gpu-workload-readiness.md` and `docs/practices/ai-workload-operating-contract.md` |
+| Synthetic AI supplier readiness gate | Local deterministic metadata gate implemented with three schema-validated scenarios and fail-closed evidence checks; no supplier assurance, procurement approval, provider integration, regulatory compliance, or program participation claimed | `docs/practices/ai-supplier-readiness-gate.md`, `shared/schemas/ai-supplier-readiness/`, `shared/examples/ai-supplier-readiness/`, `providers/aws/app/api/src/governance/supplierReadinessEvaluator.ts`, and supplier-readiness API tests |
 | P5a AI-assisted DevSecOps boundary | Complete | `docs/practices/ai-assisted-devsecops-pattern.md` and `.github/workflows/ai-assisted-devsecops.yml` |
 | P5b AI-assisted review evidence | Complete | `docs/evidence/ai-assisted-review-evidence.md`, `shared/schemas/ai-assisted-devsecops/`, and `shared/examples/ai-assisted-devsecops/` |
 | P6d control-plane evidence map | Complete | `docs/evidence/control-plane-evidence-map.md`, `shared/schemas/control-plane-evidence/`, and `shared/examples/control-plane-evidence/` |
