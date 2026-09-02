@@ -1,0 +1,126 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cloudai-platform.example/schemas/ai-workload-admission/workload-supplier-admission-decision.schema.json",
+  "title": "Workload supplier admission decision",
+  "description": "Closed, metadata-only decision correlating a workload with its supplier readiness boundary.",
+  "oneOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "admissionDecisionId",
+        "workloadId",
+        "supplierDependencyApplicability",
+        "decision",
+        "reasonCodes",
+        "supplierReasonCodes",
+        "evaluatedAt",
+        "supplierAssessmentId",
+        "supplierDecisionId",
+        "evidenceReferences"
+      ],
+      "properties": {
+        "schemaVersion": { "const": "1.0" },
+        "admissionDecisionId": { "type": "string", "minLength": 1, "maxLength": 360 },
+        "workloadId": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]{2,62}$" },
+        "supplierDependencyApplicability": { "const": "applicable" },
+        "decision": { "enum": ["admitted", "denied"] },
+        "reasonCodes": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "admission-time-invalid",
+              "supplier-dependency-not-applicable",
+              "supplier-assessment-missing",
+              "supplier-decision-missing",
+              "supplier-reference-mismatch",
+              "supplier-decision-replay-mismatch",
+              "supplier-decision-not-eligible",
+              "supplier-decision-eligible",
+              "conditional-acceptance-unexpected",
+              "conditional-acceptance-missing",
+              "conditional-acceptance-mismatch",
+              "conditional-acceptance-boundary-invalid",
+              "conditional-acceptance-revoked",
+              "conditional-acceptance-expired",
+              "conditional-supplier-decision-accepted"
+            ]
+          }
+        },
+        "supplierReasonCodes": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "evidence-complete",
+              "bounded-remediation-required",
+              "required-evidence-family-missing",
+              "evidence-applicability-conflict",
+              "time-boundary-invalid",
+              "evidence-revoked",
+              "assessment-review-expired",
+              "evidence-expired",
+              "critical-evidence-missing",
+              "evidence-missing",
+              "conditional-boundary-incomplete",
+              "conditional-remediation-expired",
+              "current-requirement-unmet"
+            ]
+          }
+        },
+        "evaluatedAt": { "type": "string", "minLength": 1 },
+        "supplierAssessmentId": { "type": "string", "minLength": 3, "maxLength": 80 },
+        "supplierDecisionId": { "type": "string", "minLength": 3, "maxLength": 180 },
+        "conditionalAcceptanceId": { "type": "string", "minLength": 3, "maxLength": 220 },
+        "evidenceReferences": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "format": "uri" }
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "admissionDecisionId",
+        "workloadId",
+        "supplierDependencyApplicability",
+        "decision",
+        "reasonCodes",
+        "supplierReasonCodes",
+        "evaluatedAt",
+        "evidenceReferences"
+      ],
+      "properties": {
+        "schemaVersion": { "const": "1.0" },
+        "admissionDecisionId": { "type": "string", "minLength": 1, "maxLength": 360 },
+        "workloadId": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]{2,62}$" },
+        "supplierDependencyApplicability": { "const": "not-applicable" },
+        "decision": { "enum": ["admitted", "denied"] },
+        "reasonCodes": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "admission-time-invalid",
+              "supplier-dependency-not-applicable",
+              "supplier-reference-mismatch",
+              "conditional-acceptance-unexpected"
+            ]
+          }
+        },
+        "supplierReasonCodes": { "type": "array", "maxItems": 0 },
+        "evaluatedAt": { "type": "string", "minLength": 1 },
+        "evidenceReferences": { "type": "array", "maxItems": 0 }
+      }
+    }
+  ]
+}
