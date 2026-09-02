@@ -1,0 +1,62 @@
+{
+  "schemaVersion": "1.1",
+  "workloadId": "synthetic-revoked-dependency-workload",
+  "profile": "agent-rag-inference",
+  "purpose": "Prove that revoked supplier evidence fails closed before workload execution",
+  "owner": {
+    "team": "cloud-ai-platform",
+    "service": "supplier-admission-sandbox",
+    "shutdownOwner": "platform-operations"
+  },
+  "dataClassification": "synthetic-public",
+  "runtime": {
+    "type": "kubernetes-gpu",
+    "imagePolicy": "approved-digest-only",
+    "modelPolicy": "approved-model-version-only"
+  },
+  "capacity": {
+    "acceleratorClass": "gpu",
+    "minAccelerators": 0,
+    "maxAccelerators": 2,
+    "queuePolicy": "autoscale"
+  },
+  "supplierDependency": {
+    "applicability": "applicable",
+    "assessmentId": "synthetic-revoked-evidence",
+    "decisionId": "synthetic-revoked-evidence:2026-08-31T01:00:00.000Z",
+    "expectedSupplierClass": "managed-ai-service",
+    "expectedScope": "Synthetic managed AI service with revoked applicable evidence"
+  },
+  "admission": {
+    "resourceFlavor": "gpu-standard-latency",
+    "clusterQueue": "shared-inference",
+    "localQueue": "agent-rag",
+    "cohort": "interactive-services",
+    "borrowingLimit": 0,
+    "admissionChecks": [
+      "budget-approved",
+      "image-approved",
+      "data-boundary-approved",
+      "human-approved"
+    ],
+    "topologyIntent": "none",
+    "gangScheduling": false,
+    "maxQueueWaitSeconds": 120,
+    "retryPolicy": {
+      "maxAttempts": 2,
+      "backoffSeconds": 5
+    },
+    "preemptionPolicy": "never"
+  },
+  "controls": {
+    "budgetStopRequired": true,
+    "teardownPlanRequired": true,
+    "telemetryRequired": true,
+    "checkpointRequired": false,
+    "requiresHumanApproval": true
+  },
+  "evidence": {
+    "mode": "metadata-only",
+    "signals": ["latency", "error-rate", "gpu-hours", "queue-time", "cost-estimate"]
+  }
+}

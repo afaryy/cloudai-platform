@@ -45,6 +45,19 @@
       "evidencePath": "shared/examples/ai-assisted-devsecops/ai-review-summary.mock.json"
     }
   ],
+  "workloadDependencyCorrelation": {
+    "workloadId": "synthetic-agent-rag-inference",
+    "supplierAssessmentId": "synthetic-managed-ai-service",
+    "supplierDecisionId": "synthetic-managed-ai-service:2026-08-31T01:00:00.000Z",
+    "admissionDecisionId": "synthetic-agent-rag-inference:synthetic-managed-ai-service:2026-08-31T01:00:00.000Z:2026-09-01T00:00:00.000Z",
+    "evaluatedAt": "2026-09-01T00:00:00.000Z",
+    "evidencePaths": [
+      "shared/examples/ai-workload-readiness/agent-rag-inference.synthetic.json",
+      "shared/examples/ai-supplier-readiness/managed-ai-service.assessment.json",
+      "shared/examples/ai-supplier-readiness/managed-ai-service.decision.json",
+      "shared/examples/ai-workload-admission/managed-ai-service.admission.json"
+    ]
+  },
   "audit": {
     "traceId": "trace_p6d_control_plane_evidence_map_0001",
     "recordedAt": "2026-07-11T00:00:00.000Z",

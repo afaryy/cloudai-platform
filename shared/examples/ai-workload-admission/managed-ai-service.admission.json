@@ -1,0 +1,13 @@
+{
+  "schemaVersion": "1.0",
+  "admissionDecisionId": "synthetic-agent-rag-inference:synthetic-managed-ai-service:2026-08-31T01:00:00.000Z:2026-09-01T00:00:00.000Z",
+  "workloadId": "synthetic-agent-rag-inference",
+  "supplierDependencyApplicability": "applicable",
+  "decision": "admitted",
+  "reasonCodes": ["supplier-decision-eligible"],
+  "supplierReasonCodes": ["evidence-complete"],
+  "evaluatedAt": "2026-09-01T00:00:00.000Z",
+  "supplierAssessmentId": "synthetic-managed-ai-service",
+  "supplierDecisionId": "synthetic-managed-ai-service:2026-08-31T01:00:00.000Z",
+  "evidenceReferences": ["https://example.com/cloudai-platform/supplier-evidence/managed-ai-service"]
+}

@@ -5,6 +5,7 @@ import { resolve } from "node:path";
 
 const EXAMPLE_DIR = resolve(process.cwd(), "../../../../shared/examples/control-plane-evidence");
 const SCHEMA_DIR = resolve(process.cwd(), "../../../../shared/schemas/control-plane-evidence");
+const REPOSITORY_ROOT = resolve(process.cwd(), "../../../..");
 
 test("control-plane evidence map links all current synthetic governance lanes", async () => {
   const schema = await readJson("evidence-map.schema.json", SCHEMA_DIR);
@@ -20,6 +21,25 @@ test("control-plane evidence map links all current synthetic governance lanes", 
     "ai-assisted-review-evidence"
   ]);
   assert.deepEqual(fixture.evidenceLanes.map((lane: any) => lane.source), ["P6a", "P6b", "P6c", "P2", "P5b"]);
+  assert.equal(fixture.evidenceLanes.length, 5);
+
+  assert.ok(schema.required.includes("workloadDependencyCorrelation"));
+  const correlation = fixture.workloadDependencyCorrelation;
+  assert.equal(correlation.workloadId, "synthetic-agent-rag-inference");
+  assert.equal(correlation.supplierAssessmentId, "synthetic-managed-ai-service");
+  assert.equal(
+    correlation.supplierDecisionId,
+    "synthetic-managed-ai-service:2026-08-31T01:00:00.000Z"
+  );
+  assert.ok(
+    correlation.evidencePaths.includes(
+      "shared/examples/ai-workload-admission/managed-ai-service.admission.json"
+    )
+  );
+  for (const evidencePath of correlation.evidencePaths) {
+    JSON.parse(await readFile(resolve(REPOSITORY_ROOT, evidencePath), "utf8"));
+  }
+
   assert.equal(fixture.boundaries.containsSensitiveData, false);
   assert.equal(fixture.boundaries.containsPromptTranscript, false);
   assert.equal(fixture.boundaries.executesRuntimeAction, false);

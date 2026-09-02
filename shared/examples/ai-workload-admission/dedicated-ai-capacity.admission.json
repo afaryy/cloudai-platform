@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "1.0",
+  "admissionDecisionId": "synthetic-fine-tuning-adapter:synthetic-dedicated-ai-capacity:2026-08-31T01:00:00.000Z:2026-09-01T00:00:00.000Z",
+  "workloadId": "synthetic-fine-tuning-adapter",
+  "supplierDependencyApplicability": "applicable",
+  "decision": "admitted",
+  "reasonCodes": ["conditional-supplier-decision-accepted"],
+  "supplierReasonCodes": ["bounded-remediation-required"],
+  "evaluatedAt": "2026-09-01T00:00:00.000Z",
+  "supplierAssessmentId": "synthetic-dedicated-ai-capacity",
+  "supplierDecisionId": "synthetic-dedicated-ai-capacity:2026-08-31T01:00:00.000Z",
+  "conditionalAcceptanceId": "synthetic-dedicated-ai-capacity:2026-08-31T01:00:00.000Z:conditional-acceptance",
+  "evidenceReferences": [
+    "https://example.com/cloudai-platform/supplier-evidence/dedicated-ai-capacity",
+    "https://example.com/cloudai-platform/supplier-acceptance/dedicated-ai-capacity"
+  ]
+}
