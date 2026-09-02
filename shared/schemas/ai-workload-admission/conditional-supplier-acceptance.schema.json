@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cloudai-platform.example/schemas/ai-workload-admission/conditional-supplier-acceptance.schema.json",
+  "title": "Conditional supplier acceptance",
+  "description": "Bounded, metadata-only human acceptance of exact conditional supplier evidence families.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "acceptanceId",
+    "assessmentId",
+    "decisionId",
+    "acceptanceState",
+    "acceptedEvidenceFamilies",
+    "acceptedByRole",
+    "acceptedAt",
+    "validUntil",
+    "evidenceReferences"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "1.0" },
+    "acceptanceId": { "type": "string", "minLength": 3, "maxLength": 220 },
+    "assessmentId": { "type": "string", "minLength": 3, "maxLength": 80 },
+    "decisionId": { "type": "string", "minLength": 3, "maxLength": 180 },
+    "acceptanceState": { "enum": ["accepted", "revoked"] },
+    "acceptedEvidenceFamilies": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1, "maxLength": 80 }
+    },
+    "acceptedByRole": { "type": "string", "minLength": 3, "maxLength": 120 },
+    "acceptedAt": { "type": "string", "format": "date-time" },
+    "validUntil": { "type": "string", "format": "date-time" },
+    "evidenceReferences": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "format": "uri" }
+    }
+  }
+}
