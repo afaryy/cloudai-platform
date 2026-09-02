@@ -2,9 +2,10 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
-import type {
-  SupplierAssessment,
-  SupplierAssessmentDecision
+import {
+  evaluateSupplierReadiness,
+  type SupplierAssessment,
+  type SupplierAssessmentDecision
 } from "../src/governance/supplierReadinessEvaluator.js";
 import {
   evaluateWorkloadSupplierAdmission,
@@ -208,6 +209,194 @@ test("eligible supplier paths reject conditional acceptance data", async () => {
   }
 });
 
+test("a current conditional decision is admitted with exact bounded acceptance", async () => {
+  const { workload, assessment, decision, acceptance } = await dedicatedInputs();
+  const result = evaluateWorkloadSupplierAdmission({
+    workloadProfile: workload,
+    supplierAssessment: assessment,
+    recordedSupplierDecision: decision,
+    conditionalAcceptance: acceptance,
+    evaluatedAt: "2026-09-01T00:00:00.000Z"
+  });
+
+  assertDecision(result, "admitted", "conditional-supplier-decision-accepted");
+  assert.deepEqual(result.supplierReasonCodes, ["bounded-remediation-required"]);
+  assert.equal(
+    "conditionalAcceptanceId" in result ? result.conditionalAcceptanceId : undefined,
+    "synthetic-dedicated-ai-capacity:2026-08-31T01:00:00.000Z:conditional-acceptance"
+  );
+  assert.deepEqual(result.evidenceReferences, [
+    "https://example.com/cloudai-platform/supplier-evidence/dedicated-ai-capacity",
+    "https://example.com/cloudai-platform/supplier-acceptance/dedicated-ai-capacity"
+  ]);
+});
+
+test("a conditional dependency requires both an acceptance ID and acceptance object", async () => {
+  const { workload, assessment, decision, acceptance } = await dedicatedInputs();
+  const dependency = applicableDependency(workload);
+  const { conditionalAcceptanceId: _omitted, ...withoutAcceptanceId } = dependency;
+
+  for (const current of [
+    { workload, conditionalAcceptance: undefined },
+    {
+      workload: { ...workload, supplierDependency: withoutAcceptanceId },
+      conditionalAcceptance: acceptance
+    }
+  ]) {
+    assertDecision(
+      evaluateWorkloadSupplierAdmission({
+        workloadProfile: current.workload,
+        supplierAssessment: assessment,
+        recordedSupplierDecision: decision,
+        conditionalAcceptance: current.conditionalAcceptance,
+        evaluatedAt: "2026-09-01T00:00:00.000Z"
+      }),
+      "denied",
+      "conditional-acceptance-missing"
+    );
+  }
+});
+
+test("conditional acceptance identity and evidence-family coverage must match exactly", async () => {
+  const { workload, assessment, decision, acceptance } = await dedicatedInputs();
+  const cases: ConditionalSupplierAcceptance[] = [
+    { ...acceptance, acceptanceId: `${acceptance.acceptanceId}-other` },
+    { ...acceptance, assessmentId: "synthetic-other-assessment" },
+    { ...acceptance, decisionId: "synthetic-other-decision" },
+    { ...acceptance, acceptedEvidenceFamilies: [] },
+    { ...acceptance, acceptedEvidenceFamilies: ["sustainability-location", "operations-resilience"] }
+  ];
+
+  for (const current of cases) {
+    assertDecision(
+      evaluateWorkloadSupplierAdmission({
+        workloadProfile: workload,
+        supplierAssessment: assessment,
+        recordedSupplierDecision: decision,
+        conditionalAcceptance: current,
+        evaluatedAt: "2026-09-01T00:00:00.000Z"
+      }),
+      "denied",
+      "conditional-acceptance-mismatch"
+    );
+  }
+});
+
+test("conditional acceptance timestamps must be parseable and internally ordered", async () => {
+  const { workload, assessment, decision, acceptance } = await dedicatedInputs();
+  const cases: ConditionalSupplierAcceptance[] = [
+    { ...acceptance, acceptedAt: "not-a-time" },
+    { ...acceptance, validUntil: "not-a-time" },
+    { ...acceptance, acceptedAt: "2026-08-31T00:30:00.000Z" },
+    { ...acceptance, acceptedAt: "2026-09-01T00:00:01.000Z" },
+    {
+      ...acceptance,
+      acceptedAt: "2026-09-01T00:00:00.000Z",
+      validUntil: "2026-08-31T23:59:59.000Z"
+    }
+  ];
+
+  for (const current of cases) {
+    assertDecision(
+      evaluateWorkloadSupplierAdmission({
+        workloadProfile: workload,
+        supplierAssessment: assessment,
+        recordedSupplierDecision: decision,
+        conditionalAcceptance: current,
+        evaluatedAt: "2026-09-01T00:00:00.000Z"
+      }),
+      "denied",
+      "conditional-acceptance-boundary-invalid"
+    );
+  }
+});
+
+test("conditional acceptance cannot extend beyond review or remediation boundaries", async () => {
+  const base = await dedicatedInputs();
+  const reviewBoundAssessment = {
+    ...base.assessment,
+    reviewBy: "2026-10-10T00:00:00.000Z"
+  };
+  const remediationBoundAssessment = {
+    ...base.assessment,
+    reviewBy: "2026-10-31T00:00:00.000Z"
+  };
+  const cases = [
+    {
+      assessment: reviewBoundAssessment,
+      decision: evaluateSupplierReadiness(reviewBoundAssessment, base.decision.evaluatedAt),
+      acceptance: { ...base.acceptance, validUntil: "2026-10-11T00:00:00.000Z" }
+    },
+    {
+      assessment: remediationBoundAssessment,
+      decision: evaluateSupplierReadiness(remediationBoundAssessment, base.decision.evaluatedAt),
+      acceptance: { ...base.acceptance, validUntil: "2026-10-16T00:00:00.000Z" }
+    }
+  ];
+
+  for (const current of cases) {
+    assertDecision(
+      evaluateWorkloadSupplierAdmission({
+        workloadProfile: base.workload,
+        supplierAssessment: current.assessment,
+        recordedSupplierDecision: current.decision,
+        conditionalAcceptance: current.acceptance,
+        evaluatedAt: "2026-09-01T00:00:00.000Z"
+      }),
+      "denied",
+      "conditional-acceptance-boundary-invalid"
+    );
+  }
+});
+
+test("revocation takes precedence over acceptance expiry", async () => {
+  const { workload, assessment, decision, acceptance } = await dedicatedInputs();
+  const result = evaluateWorkloadSupplierAdmission({
+    workloadProfile: workload,
+    supplierAssessment: assessment,
+    recordedSupplierDecision: decision,
+    conditionalAcceptance: {
+      ...acceptance,
+      acceptanceState: "revoked",
+      validUntil: "2026-08-31T23:00:00.000Z"
+    },
+    evaluatedAt: "2026-09-01T00:00:00.000Z"
+  });
+
+  assertDecision(result, "denied", "conditional-acceptance-revoked");
+});
+
+test("an expired conditional acceptance denies an otherwise-current supplier decision", async () => {
+  const { workload, assessment, decision, acceptance } = await dedicatedInputs();
+  const result = evaluateWorkloadSupplierAdmission({
+    workloadProfile: workload,
+    supplierAssessment: assessment,
+    recordedSupplierDecision: decision,
+    conditionalAcceptance: { ...acceptance, validUntil: "2026-08-31T23:00:00.000Z" },
+    evaluatedAt: "2026-09-01T00:00:00.000Z"
+  });
+
+  assertDecision(result, "denied", "conditional-acceptance-expired");
+});
+
+test("equality at every conditional time boundary remains valid", async () => {
+  const { workload, assessment, decision, acceptance } = await dedicatedInputs();
+  const boundaryAcceptance = {
+    ...acceptance,
+    acceptedAt: decision.evaluatedAt,
+    validUntil: "2026-10-15T00:00:00.000Z"
+  };
+  const result = evaluateWorkloadSupplierAdmission({
+    workloadProfile: workload,
+    supplierAssessment: assessment,
+    recordedSupplierDecision: decision,
+    conditionalAcceptance: boundaryAcceptance,
+    evaluatedAt: "2026-10-15T00:00:00.000Z"
+  });
+
+  assertDecision(result, "admitted", "conditional-supplier-decision-accepted");
+});
+
 async function managedInputs(): Promise<{
   workload: SupplierAwareWorkloadProfile;
   assessment: SupplierAssessment;
@@ -217,6 +406,23 @@ async function managedInputs(): Promise<{
     workload: await readJson("agent-rag-inference.synthetic.json", WORKLOAD_EXAMPLES),
     assessment: await readJson("managed-ai-service.assessment.json", SUPPLIER_EXAMPLES),
     decision: await readJson("managed-ai-service.decision.json", SUPPLIER_EXAMPLES)
+  };
+}
+
+async function dedicatedInputs(): Promise<{
+  workload: SupplierAwareWorkloadProfile;
+  assessment: SupplierAssessment;
+  decision: SupplierAssessmentDecision;
+  acceptance: ConditionalSupplierAcceptance;
+}> {
+  return {
+    workload: await readJson("fine-tuning.synthetic.json", WORKLOAD_EXAMPLES),
+    assessment: await readJson("dedicated-ai-capacity.assessment.json", SUPPLIER_EXAMPLES),
+    decision: await readJson("dedicated-ai-capacity.decision.json", SUPPLIER_EXAMPLES),
+    acceptance: await readJson(
+      "dedicated-ai-capacity.acceptance.json",
+      resolve(process.cwd(), "../../../../shared/examples/ai-workload-admission")
+    )
   };
 }
 

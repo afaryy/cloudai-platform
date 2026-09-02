@@ -163,12 +163,82 @@ export function evaluateWorkloadSupplierAdmission(input: {
     );
   }
 
+  const acceptance = input.conditionalAcceptance;
+  const expectedConditionalFamilies = assessment.evidenceFamilies
+    .filter((item) => item.applicability === "applicable" && item.status === "conditional")
+    .map((item) => item.family)
+    .sort();
+  const acceptedFamilies = [...acceptance.acceptedEvidenceFamilies].sort();
+  if (
+    dependency.conditionalAcceptanceId !== acceptance.acceptanceId ||
+    acceptance.assessmentId !== assessment.assessmentId ||
+    acceptance.decisionId !== recordedDecision.decisionId ||
+    !sameOrderedValues(expectedConditionalFamilies, acceptedFamilies)
+  ) {
+    return result(
+      input,
+      "denied",
+      "conditional-acceptance-mismatch",
+      currentDecision.reasonCodes,
+      currentDecision.evidenceReferences
+    );
+  }
+
+  const recordedDecisionTimestamp = parseTimestamp(recordedDecision.evaluatedAt);
+  const acceptedTimestamp = parseTimestamp(acceptance.acceptedAt);
+  const acceptanceExpiryTimestamp = parseTimestamp(acceptance.validUntil);
+  const assessmentReviewTimestamp = parseTimestamp(assessment.reviewBy);
+  const conditionalRemediationTimestamps = assessment.evidenceFamilies
+    .filter((item) => item.applicability === "applicable" && item.status === "conditional")
+    .map((item) => parseTimestamp(item.remediation?.dueAt ?? ""));
+  if (
+    recordedDecisionTimestamp === undefined ||
+    acceptedTimestamp === undefined ||
+    acceptanceExpiryTimestamp === undefined ||
+    assessmentReviewTimestamp === undefined ||
+    conditionalRemediationTimestamps.some((value) => value === undefined) ||
+    acceptedTimestamp < recordedDecisionTimestamp ||
+    acceptedTimestamp > evaluatedTimestamp ||
+    acceptedTimestamp > acceptanceExpiryTimestamp ||
+    acceptanceExpiryTimestamp > assessmentReviewTimestamp ||
+    conditionalRemediationTimestamps.some((value) => acceptanceExpiryTimestamp > value!)
+  ) {
+    return result(
+      input,
+      "denied",
+      "conditional-acceptance-boundary-invalid",
+      currentDecision.reasonCodes,
+      currentDecision.evidenceReferences
+    );
+  }
+
+  if (acceptance.acceptanceState === "revoked") {
+    return result(
+      input,
+      "denied",
+      "conditional-acceptance-revoked",
+      currentDecision.reasonCodes,
+      currentDecision.evidenceReferences
+    );
+  }
+
+  if (evaluatedTimestamp > acceptanceExpiryTimestamp) {
+    return result(
+      input,
+      "denied",
+      "conditional-acceptance-expired",
+      currentDecision.reasonCodes,
+      currentDecision.evidenceReferences
+    );
+  }
+
   return result(
     input,
-    "denied",
-    "conditional-acceptance-mismatch",
+    "admitted",
+    "conditional-supplier-decision-accepted",
     currentDecision.reasonCodes,
-    currentDecision.evidenceReferences
+    mergeUnique(currentDecision.evidenceReferences, acceptance.evidenceReferences),
+    acceptance.acceptanceId
   );
 }
 
@@ -180,7 +250,8 @@ function result(
   decision: "admitted" | "denied",
   reasonCode: WorkloadSupplierAdmissionReasonCode,
   supplierReasonCodes: SupplierReadinessReasonCode[] = [],
-  evidenceReferences: string[] = []
+  evidenceReferences: string[] = [],
+  conditionalAcceptanceId?: string
 ): WorkloadSupplierAdmissionDecision {
   const dependency = input.workloadProfile.supplierDependency;
   const supplierDecisionId = dependency.applicability === "applicable" ? dependency.decisionId : "not-applicable";
@@ -199,12 +270,16 @@ function result(
     return { ...common, supplierDependencyApplicability: "not-applicable" };
   }
 
-  return {
+  const applicableResult: WorkloadSupplierAdmissionDecision = {
     ...common,
     supplierDependencyApplicability: "applicable",
     supplierAssessmentId: dependency.assessmentId,
     supplierDecisionId: dependency.decisionId
   };
+  if (conditionalAcceptanceId) {
+    applicableResult.conditionalAcceptanceId = conditionalAcceptanceId;
+  }
+  return applicableResult;
 }
 
 function sameSupplierDecision(
@@ -226,6 +301,10 @@ function sameSupplierDecision(
 
 function sameOrderedValues<T>(left: T[], right: T[]): boolean {
   return left.length === right.length && left.every((value, index) => value === right[index]);
+}
+
+function mergeUnique(left: string[], right: string[]): string[] {
+  return [...new Set([...left, ...right])];
 }
 
 function parseTimestamp(value: string): number | undefined {
