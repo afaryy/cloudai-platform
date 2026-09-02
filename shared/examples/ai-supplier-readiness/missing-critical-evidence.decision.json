@@ -1,6 +1,8 @@
 {
-  "schemaVersion": "1.0",
+  "schemaVersion": "1.1",
+  "decisionId": "synthetic-missing-critical-evidence:2026-08-31T01:00:00.000Z",
   "assessmentId": "synthetic-missing-critical-evidence",
+  "scope": "Synthetic managed AI service with an unresolved critical evidence gap",
   "decision": "not-eligible",
   "reasonCodes": ["critical-evidence-missing"],
   "evaluatedAt": "2026-08-31T01:00:00.000Z",

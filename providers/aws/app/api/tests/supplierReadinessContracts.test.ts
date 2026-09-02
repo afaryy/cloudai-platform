@@ -35,6 +35,9 @@ test("supplier readiness schemas make freshness, revocation, and reassessment ex
   assert.ok(evidenceSchema.required.includes("observedAt"));
   assert.ok(evidenceSchema.required.includes("validUntil"));
   assert.deepEqual(evidenceSchema.properties.evidenceState.enum, ["current", "revoked"]);
+  assert.equal(decisionSchema.properties.schemaVersion.const, "1.1");
+  assert.ok(decisionSchema.required.includes("decisionId"));
+  assert.ok(decisionSchema.required.includes("scope"));
 
   const reasonCodes = decisionSchema.properties.reasonCodes.items.enum;
   for (const reasonCode of [
@@ -59,6 +62,8 @@ test("synthetic supplier assessments match closed metadata-only schemas", async 
     assertMatchesSchema(assessment, assessmentSchema);
     assertMatchesSchema(decision, decisionSchema);
     assert.equal(assessment.assessmentId, decision.assessmentId);
+    assert.equal(decision.decisionId, `${decision.assessmentId}:${decision.evaluatedAt}`);
+    assert.equal(decision.scope, assessment.scope);
     assert.ok(assessment.evidenceReferences.every((reference: string) => reference.startsWith("https://example.com/")));
   }
 });
