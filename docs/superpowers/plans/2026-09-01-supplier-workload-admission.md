@@ -886,36 +886,9 @@ git commit -m "test: record supplier-aware admission evidence"
 
 **Interfaces:**
 - Consumes: all Task 1-6 public contracts, evaluator behavior, fixtures, and validation evidence.
-- Produces: exact public claims, explicit non-claims, and a private implementation/debugging record.
+- Produces: exact public claims, explicit non-claims, and a private implementation/debugging record. Human-facing prose is reviewed directly; tests exercise schemas, evaluator behavior, fixture replay, evidence-path resolution, and Markdown link resolution rather than matching wording.
 
-- [ ] **Step 1: Write failing documentation assertions**
-
-Extend `supplierWorkloadAdmissionContracts.test.ts` to load the five public documents and require these phrases or equivalent exact headings:
-
-```ts
-assert.match(workloadDoc, /supplier-aware workload admission/i);
-assert.match(workloadDoc, /replay/i);
-assert.match(workloadDoc, /conditional acceptance/i);
-assert.match(supplierDoc, /downstream workload admission/i);
-assert.match(evidenceDoc, /workloadDependencyCorrelation/);
-assert.match(statusDoc, /Supplier-aware workload admission/);
-assert.match(readme, /supplier-aware admission/i);
-```
-
-Also assert that the public description contains `synthetic`, `metadata-only`, and no runtime-authority claim.
-
-- [ ] **Step 2: Run the contract test and verify RED**
-
-Working directory: `providers/aws/app/api`
-
-```bash
-corepack pnpm@11.7.0 run build
-node --test dist/tests/supplierWorkloadAdmissionContracts.test.js
-```
-
-Expected: FAIL because the public docs do not yet describe the implemented YY-64 path.
-
-- [ ] **Step 3: Update public documentation**
+- [ ] **Step 1: Update public documentation**
 
 Document this exact flow:
 
@@ -929,9 +902,9 @@ workload dependency declaration
   -> control-plane evidence correlation
 ```
 
-State explicitly that it is local and synthetic, does not retrieve evidence, and does not approve procurement, call a provider, schedule a workload, grant Kubernetes/GPU access, or execute runtime actions. Update current status from a standalone supplier readiness gate to an implemented local supplier-aware workload admission consumer while retaining provider integration and YY-65 human-owned adapter as deferred.
+State explicitly that it is local and synthetic, does not retrieve evidence, and does not approve procurement, call a provider, schedule a workload, grant Kubernetes/GPU access, or execute runtime actions. Update current status from a standalone supplier readiness gate to an implemented local supplier-aware workload admission consumer while retaining provider integration and YY-65 human-owned adapter as deferred. Review the rendered diff directly; do not add tests that merely grep human prose.
 
-- [ ] **Step 4: Create the private process record**
+- [ ] **Step 2: Create the private process record**
 
 Create the private note at the absolute path above with these headings:
 
@@ -953,7 +926,7 @@ Create the private note at the absolute path above with these headings:
 
 Record actual commit IDs, observed failing messages, passing test counts, and any debugging decisions. Do not place credentials, account IDs, real supplier details, or raw evidence in the note. Do not stage `_private/`.
 
-- [ ] **Step 5: Run documentation tests and all required local regression suites**
+- [ ] **Step 3: Run all required local regression suites**
 
 Working directory: `providers/aws/app/api`
 
@@ -973,7 +946,7 @@ corepack pnpm@11.7.0 run test
 
 Expected: AgentCore Runtime build and observability contract tests PASS without provider calls.
 
-- [ ] **Step 6: Validate JSON, Markdown links, and diff hygiene**
+- [ ] **Step 4: Validate JSON, Markdown links, and diff hygiene**
 
 From repository root:
 
@@ -987,14 +960,14 @@ git status --short
 
 Expected: Argo CD static contracts pass; GPU quota parser regressions pass; every JSON file parses; Markdown link tests are already green within the API suite; `git diff --check` emits no output; status lists only intended YY-64 public files and never `_private/` or `.pnpm-store/`.
 
-- [ ] **Step 7: Commit Task 7**
+- [ ] **Step 5: Commit Task 7**
 
 ```bash
-git add docs/practices/ai-workload-operating-contract.md docs/practices/ai-supplier-readiness-gate.md docs/evidence/control-plane-evidence-map.md docs/practices/current-status.md README.md providers/aws/app/api/tests/supplierWorkloadAdmissionContracts.test.ts
+git add docs/practices/ai-workload-operating-contract.md docs/practices/ai-supplier-readiness-gate.md docs/evidence/control-plane-evidence-map.md docs/practices/current-status.md README.md
 git commit -m "docs: publish supplier-aware admission boundary"
 ```
 
-- [ ] **Step 8: Push and prepare the review gate**
+- [ ] **Step 6: Push and prepare the review gate**
 
 Create `/tmp/yy-64-pr-body.md` with `apply_patch` using this exact review summary:
 
