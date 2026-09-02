@@ -2,7 +2,7 @@
 
 ## Purpose and Boundary
 
-The AI Workload Operating Contract is a documentation-first, vendor-neutral model for deciding whether an AI workload is ready to run and how it must be operated, evidenced, paused, and retired. It is one AI Factory / AI data-centre readiness practice track within the broader Cloud & AI Platform Engineering portfolio.
+The AI Workload Operating Contract is a vendor-neutral model for deciding whether an AI workload is ready to run and how it must be operated, evidenced, paused, and retired. Its wider operating model remains documentation-first, while its supplier-dependency admission boundary now has a local, deterministic, synthetic implementation. It is one AI Factory / AI data-centre readiness practice track within the broader Cloud & AI Platform Engineering portfolio.
 
 It does not add a scheduler, GPU cluster, or cloud runtime. It does not claim a production AI data centre, GPU workload, model training service, Slurm deployment, Prometheus deployment, or provider telemetry integration. AWS remains the first implementation context; Azure and GCP remain future mappings.
 
@@ -80,6 +80,36 @@ timestamp rather than the wall clock. A trigger indicates that a human-owned
 reassessment is required; it does not automatically retrieve evidence or change
 a supplier decision.
 
+## Implemented Supplier-Aware Admission Boundary
+
+Every workload profile now declares a closed `supplierDependency` as either
+`applicable` or explicitly `not-applicable`. An applicable dependency names the
+expected assessment, recorded decision, supplier class, and scope. The local
+admission evaluator then applies this sequence:
+
+```text
+workload dependency declaration
+  -> recorded supplier decision replay
+  -> supplier re-evaluation at admission time
+  -> exact ID / class / scope correlation
+  -> eligible, bounded conditional acceptance, or fail-closed denial
+  -> metadata-only admission decision
+  -> control-plane evidence correlation
+```
+
+An eligible supplier result may admit the contract. A conditional result also
+requires a separate acceptance record tied to the exact decision, conditional
+evidence families, reviewer role, and validity boundary. Missing, stale,
+revoked, expired, mismatched, or replay-inconsistent inputs fail closed. The
+three stored scenarios demonstrate eligible managed-service admission,
+conditionally accepted dedicated capacity, and denial after evidence
+revocation.
+
+This implementation is local and synthetic. It does not retrieve supplier
+evidence, approve procurement, call a provider, schedule a workload, grant
+Kubernetes or GPU access, or execute a runtime action. `admitted` means only
+that the metadata contract passed at the caller-supplied evaluation time.
+
 ## Requirement Status and Change Control
 
 Every external requirement in an architecture or supplier assessment should
@@ -124,11 +154,12 @@ This profile is an architecture practice aid only. It does not deploy Slurm, Kub
 
 ```text
 Workload proposal
-  -> profile-specific readiness checks
+  -> profile and supplier-dependency declaration
+  -> deterministic supplier replay and admission-time evaluation
   -> owner + identity + data-boundary validation
   -> capacity / quota / cost gate
-  -> approval or release gate
-  -> permitted execution
+  -> human and release gates
+  -> separate runtime-authorisation boundary
   -> telemetry and evidence
   -> pause, rollback, retirement, or shutdown
 ```

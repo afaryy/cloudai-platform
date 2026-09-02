@@ -112,13 +112,17 @@ not a deployed GPU runtime. The
 AgentCore sandbox does not claim a production or autonomous agent platform.
 The [AI Workload Operating Contract](docs/practices/ai-workload-operating-contract.md)
 defines the wider future/design practice track and does not add a scheduler,
-GPU cluster, or cloud runtime by default. Its supplier-evidence boundary now has
-a [local synthetic readiness gate](docs/practices/ai-supplier-readiness-gate.md)
+GPU cluster, or cloud runtime by default. Its supplier-evidence boundary has a
+[local synthetic readiness gate](docs/practices/ai-supplier-readiness-gate.md)
 with closed schemas, deterministic fail-closed decisions, and six generic
 scenarios covering positive, conditional, missing-evidence, freshness, expiry,
-and revocation paths. It remains metadata-only and does not claim supplier
-assurance, procurement approval, external program participation, provider
-integration, or that planned infrastructure standards are already in force.
+and revocation paths. A downstream local admission consumer now binds workload
+profiles to those decisions, replays recorded outcomes, re-evaluates them at an
+explicit admission time, requires exact bounded acceptance for conditional
+dependencies, and records workload-to-supplier evidence correlation. This path
+remains synthetic and metadata-only: it does not retrieve evidence, approve
+procurement, call a provider, schedule a workload, grant Kubernetes/GPU access,
+or execute a runtime action.
 
 ## Run Locally in Mock Mode
 
