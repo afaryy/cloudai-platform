@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "1.0",
+  "schemaVersion": "1.1",
   "workloadId": "synthetic-agent-rag-inference",
   "profile": "agent-rag-inference",
   "purpose": "Bounded synthetic retrieval-assisted response generation",
@@ -19,6 +19,13 @@
     "minAccelerators": 0,
     "maxAccelerators": 2,
     "queuePolicy": "autoscale"
+  },
+  "supplierDependency": {
+    "applicability": "applicable",
+    "assessmentId": "synthetic-managed-ai-service",
+    "decisionId": "synthetic-managed-ai-service:2026-08-31T01:00:00.000Z",
+    "expectedSupplierClass": "managed-ai-service",
+    "expectedScope": "Synthetic managed model and retrieval service boundary"
   },
   "admission": {
     "resourceFlavor": "gpu-standard-latency",

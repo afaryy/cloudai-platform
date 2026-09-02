@@ -13,12 +13,13 @@
     "dataClassification",
     "runtime",
     "capacity",
+    "supplierDependency",
     "admission",
     "controls",
     "evidence"
   ],
   "properties": {
-    "schemaVersion": { "const": "1.0" },
+    "schemaVersion": { "const": "1.1" },
     "workloadId": {
       "type": "string",
       "pattern": "^[a-z0-9][a-z0-9-]{2,62}$"
@@ -75,6 +76,40 @@
           "enum": ["reserved", "autoscale", "preemptible", "borrowed"]
         }
       }
+    },
+    "supplierDependency": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "applicability",
+            "assessmentId",
+            "decisionId",
+            "expectedSupplierClass",
+            "expectedScope"
+          ],
+          "properties": {
+            "applicability": { "const": "applicable" },
+            "assessmentId": { "type": "string", "minLength": 3, "maxLength": 80 },
+            "decisionId": { "type": "string", "minLength": 3, "maxLength": 180 },
+            "expectedSupplierClass": {
+              "enum": ["managed-ai-service", "dedicated-ai-capacity"]
+            },
+            "expectedScope": { "type": "string", "minLength": 1, "maxLength": 240 },
+            "conditionalAcceptanceId": { "type": "string", "minLength": 3, "maxLength": 220 }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["applicability", "reason"],
+          "properties": {
+            "applicability": { "const": "not-applicable" },
+            "reason": { "type": "string", "minLength": 10, "maxLength": 240 }
+          }
+        }
+      ]
     },
     "admission": {
       "description": "Design-only shared-capacity admission intent, aligned to Kueue concepts without declaring live Kubernetes resources.",

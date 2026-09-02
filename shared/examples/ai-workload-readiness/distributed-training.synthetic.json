@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "1.0",
+  "schemaVersion": "1.1",
   "workloadId": "synthetic-distributed-training",
   "profile": "distributed-training",
   "purpose": "Validate a topology-aware multi-node training contract with synthetic data.",
@@ -19,6 +19,14 @@
     "minAccelerators": 8,
     "maxAccelerators": 32,
     "queuePolicy": "reserved"
+  },
+  "supplierDependency": {
+    "applicability": "applicable",
+    "assessmentId": "synthetic-dedicated-ai-capacity",
+    "decisionId": "synthetic-dedicated-ai-capacity:2026-08-31T01:00:00.000Z",
+    "expectedSupplierClass": "dedicated-ai-capacity",
+    "expectedScope": "Synthetic dedicated accelerated-capacity and facility dependency boundary",
+    "conditionalAcceptanceId": "synthetic-dedicated-ai-capacity:2026-08-31T01:00:00.000Z:conditional-acceptance"
   },
   "admission": {
     "resourceFlavor": "gpu-training-topology",
