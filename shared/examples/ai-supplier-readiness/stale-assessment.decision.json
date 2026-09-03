@@ -1,6 +1,8 @@
 {
-  "schemaVersion": "1.0",
+  "schemaVersion": "1.1",
+  "decisionId": "synthetic-stale-assessment:2026-08-31T01:00:00.000Z",
   "assessmentId": "synthetic-stale-assessment",
+  "scope": "Synthetic managed AI service whose assessment review boundary has expired",
   "decision": "not-eligible",
   "reasonCodes": ["assessment-review-expired"],
   "evaluatedAt": "2026-08-31T01:00:00.000Z",

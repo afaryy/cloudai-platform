@@ -1,6 +1,8 @@
 {
-  "schemaVersion": "1.0",
+  "schemaVersion": "1.1",
+  "decisionId": "synthetic-dedicated-ai-capacity:2026-08-31T01:00:00.000Z",
   "assessmentId": "synthetic-dedicated-ai-capacity",
+  "scope": "Synthetic dedicated accelerated-capacity and facility dependency boundary",
   "decision": "conditional",
   "reasonCodes": ["bounded-remediation-required"],
   "evaluatedAt": "2026-08-31T01:00:00.000Z",

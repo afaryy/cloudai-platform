@@ -68,8 +68,10 @@ export interface SupplierAssessment {
 }
 
 export interface SupplierAssessmentDecision {
-  schemaVersion: "1.0";
+  schemaVersion: "1.1";
+  decisionId: string;
   assessmentId: string;
+  scope: string;
   decision: SupplierReadinessDecision;
   reasonCodes: SupplierReadinessReasonCode[];
   evaluatedAt: string;
@@ -192,8 +194,10 @@ function decision(
   reasonCode: SupplierReadinessReasonCode
 ): SupplierAssessmentDecision {
   return {
-    schemaVersion: "1.0",
+    schemaVersion: "1.1",
+    decisionId: `${assessment.assessmentId}:${evaluatedAt}`,
     assessmentId: assessment.assessmentId,
+    scope: assessment.scope,
     decision: outcome,
     reasonCodes: [reasonCode],
     evaluatedAt,

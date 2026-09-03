@@ -1,11 +1,11 @@
 {
   "schemaVersion": "1.1",
-  "workloadId": "synthetic-agent-rag-inference",
+  "workloadId": "synthetic-revoked-dependency-workload",
   "profile": "agent-rag-inference",
-  "purpose": "Bounded synthetic retrieval-assisted response generation",
+  "purpose": "Prove that revoked supplier evidence fails closed before workload execution",
   "owner": {
     "team": "cloud-ai-platform",
-    "service": "agentcore-rag-sandbox",
+    "service": "supplier-admission-sandbox",
     "shutdownOwner": "platform-operations"
   },
   "dataClassification": "synthetic-public",
@@ -22,10 +22,10 @@
   },
   "supplierDependency": {
     "applicability": "applicable",
-    "assessmentId": "synthetic-managed-ai-service",
-    "decisionId": "synthetic-managed-ai-service:2026-08-31T01:00:00.000Z",
+    "assessmentId": "synthetic-revoked-evidence",
+    "decisionId": "synthetic-revoked-evidence:2026-08-31T01:00:00.000Z",
     "expectedSupplierClass": "managed-ai-service",
-    "expectedScope": "Synthetic managed model and retrieval service boundary"
+    "expectedScope": "Synthetic managed AI service with revoked applicable evidence"
   },
   "admission": {
     "resourceFlavor": "gpu-standard-latency",

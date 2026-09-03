@@ -13,6 +13,11 @@ freshness, revocation, and completeness, evaluates current external
 requirements, and emits one of three decisions: `eligible`, `conditional`, or
 `not-eligible`.
 
+A separate local workload-admission evaluator now consumes those decisions. It
+replays the recorded decision, re-evaluates the unchanged assessment at the
+requested admission time, correlates exact IDs, class, and scope, and produces
+a metadata-only `admitted` or `denied` decision.
+
 It does not contact a supplier, approve a procurement, certify a control,
 perform legal or regulatory due diligence, retrieve evidence, or call a cloud
 provider. The examples use generic identifiers and synthetic metadata only.
@@ -32,7 +37,10 @@ Supplier scope
   -> evidence-family freshness, revocation, completeness, and applicability
   -> current-requirement checks
   -> deterministic readiness decision
-  -> human review, remediation, or rejection
+  -> workload dependency correlation and decision replay
+  -> admission-time re-evaluation
+  -> eligible, bounded conditional acceptance, or fail-closed denial
+  -> metadata-only workload admission evidence
 ```
 
 The schema owns the shape of accepted metadata. The evaluator owns the decision
@@ -124,6 +132,26 @@ The stored decisions are replayed through the real evaluator during tests. A
 fixture that no longer reproduces its recorded decision fails the contract
 suite.
 
+## Downstream Workload Admission Consumer
+
+Supplier decision version `1.1` carries a deterministic `decisionId` and copied
+scope. Workload profile version `1.1` references that identity and declares the
+expected supplier class and scope. The downstream evaluator trusts neither the
+workload reference nor the stored outcome alone: it replays the recorded
+supplier decision and then evaluates the assessment again at the explicit
+workload admission time.
+
+Conditional supplier outcomes require a distinct, bounded acceptance record.
+The acceptance must match the assessment, decision, workload reference, and
+exact set of conditional evidence families. It must be current, not revoked,
+and no broader or longer-lived than the assessment review and remediation
+boundaries. An eligible decision carrying unexpected acceptance data is also
+rejected.
+
+This consumer is local and synthetic. It does not fetch an evidence URI,
+contact a supplier or provider, approve procurement, schedule a workload, or
+grant runtime authority.
+
 ## Implementation Evidence
 
 | Artifact | Location |
@@ -134,6 +162,10 @@ suite.
 | Deterministic evaluator | `providers/aws/app/api/src/governance/supplierReadinessEvaluator.ts` |
 | Behaviour tests | `providers/aws/app/api/tests/supplierReadinessEvaluator.test.ts` |
 | Schema and replay tests | `providers/aws/app/api/tests/supplierReadinessContracts.test.ts` |
+| Workload dependency schema and fixtures | `shared/schemas/ai-workload-readiness/` and `shared/examples/ai-workload-readiness/` |
+| Conditional acceptance and admission contracts | `shared/schemas/ai-workload-admission/` and `shared/examples/ai-workload-admission/` |
+| Supplier-aware admission evaluator | `providers/aws/app/api/src/governance/supplierWorkloadAdmissionEvaluator.ts` |
+| Admission behaviour and replay tests | `providers/aws/app/api/tests/supplierWorkloadAdmissionEvaluator.test.ts` and `providers/aws/app/api/tests/supplierWorkloadAdmissionContracts.test.ts` |
 
 Run the local validation with:
 
@@ -145,11 +177,11 @@ corepack pnpm@11.7.0 --dir providers/aws/app/api test
 
 The [AI Workload Operating Contract](./ai-workload-operating-contract.md)
 defines the broader workload admission and operating model. This gate implements
-one narrow dependency decision inside that model: whether supplier evidence is
-complete enough to proceed, requires bounded remediation, or must fail closed.
+one dependency decision inside that model and now feeds the implemented local
+supplier-aware admission consumer described above.
 
 Future provider integration must remain a separate reviewed change. The local
-contract now defines freshness, revocation, expiry, and reassessment semantics,
-but a provider integration would still need evidence-ingestion boundaries,
+contract defines freshness, revocation, expiry, reassessment, replay, and
+workload-correlation semantics, but a provider integration would still need evidence-ingestion boundaries,
 identity and access controls, human approval ownership, audit retention, and
 tests that preserve the deterministic decision contract.

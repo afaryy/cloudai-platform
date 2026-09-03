@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
+import { assertMatchesSchema } from "./helpers/schemaAssertion.js";
 
 const SCHEMA_DIR = resolve(process.cwd(), "../../../../shared/schemas/ai-workload-readiness");
 const EXAMPLE_DIR = resolve(process.cwd(), "../../../../shared/examples/ai-workload-readiness");
@@ -17,6 +18,7 @@ test("GPU workload profile schema requires an accountable, bounded workload cont
     "dataClassification",
     "runtime",
     "capacity",
+    "supplierDependency",
     "admission",
     "controls",
     "evidence"
@@ -29,6 +31,9 @@ test("GPU workload profile schema requires an accountable, bounded workload cont
     "distributed-training",
     "embeddings-rag-indexing"
   ]);
+  assert.equal(schema.properties.schemaVersion.const, "1.1");
+  assert.ok(schema.required.includes("supplierDependency"));
+  assert.equal(schema.properties.supplierDependency.oneOf.length, 2);
   assert.equal(schema.properties.controls.properties.budgetStopRequired.const, true);
   assert.equal(schema.properties.controls.properties.teardownPlanRequired.const, true);
   assert.equal(schema.properties.evidence.properties.mode.const, "metadata-only");
@@ -81,6 +86,19 @@ test("all synthetic workload fixtures declare a complete Kueue admission boundar
 
   const [agent, batch, fineTuning, distributed] = fixtures;
 
+  for (const fixture of fixtures) {
+    assertMatchesSchema(fixture, await readJson("workload-profile.schema.json", SCHEMA_DIR));
+  }
+
+  assert.equal(agent.supplierDependency.assessmentId, "synthetic-managed-ai-service");
+  assert.equal(batch.supplierDependency.assessmentId, "synthetic-managed-ai-service");
+  assert.equal(fineTuning.supplierDependency.assessmentId, "synthetic-dedicated-ai-capacity");
+  assert.equal(distributed.supplierDependency.assessmentId, "synthetic-dedicated-ai-capacity");
+  assert.equal(
+    fineTuning.supplierDependency.conditionalAcceptanceId,
+    "synthetic-dedicated-ai-capacity:2026-08-31T01:00:00.000Z:conditional-acceptance"
+  );
+
   assert.equal(agent.admission.preemptionPolicy, "never");
   assert.equal(agent.admission.topologyIntent, "none");
   assert.ok(agent.admission.admissionChecks.includes("human-approved"));
@@ -101,6 +119,38 @@ test("all synthetic workload fixtures declare a complete Kueue admission boundar
   for (const fixture of fixtures) {
     assertAdmissionBoundary(fixture);
   }
+});
+
+test("supplier dependency variants fail closed when their shapes are incomplete or conflicting", async () => {
+  const schema = await readJson("workload-profile.schema.json", SCHEMA_DIR);
+  const dependencySchema = schema.properties.supplierDependency;
+
+  assert.throws(
+    () =>
+      assertMatchesSchema(
+        {
+          applicability: "applicable",
+          assessmentId: "synthetic-managed-ai-service",
+          expectedSupplierClass: "managed-ai-service",
+          expectedScope: "Synthetic managed model and retrieval service boundary"
+        },
+        dependencySchema
+      ),
+    /exactly one documented variant/
+  );
+
+  assert.throws(
+    () =>
+      assertMatchesSchema(
+        {
+          applicability: "not-applicable",
+          reason: "This synthetic workload has no external supplier dependency.",
+          assessmentId: "synthetic-managed-ai-service"
+        },
+        dependencySchema
+      ),
+    /exactly one documented variant/
+  );
 });
 
 test("admission boundary fails closed when a required admission control is missing", async () => {

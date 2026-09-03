@@ -63,16 +63,16 @@ The repository can now demonstrate:
   evaluation is not implemented. `local-contract` remains the only validated
   evidence; future `provider-direct` and `provider-runtime` evidence are not
   provider, runtime, or production validation.
-- **AI infrastructure and supplier readiness:** the workload operating contract
-  remains a design/future practice, while a local deterministic supplier gate
-  now validates closed metadata contracts for synthetic managed AI services and
-  dedicated AI capacity. It returns `eligible`, `conditional`, or
-  `not-eligible`; invalid time boundaries, stale assessments, expired or revoked
-  evidence, expired remediation, missing evidence, incomplete remediation, and
-  unmet current requirements fail closed. Structured reassessment triggers are
-  recorded without contacting suppliers or retrieving evidence. It does not
-  claim supplier assurance, procurement approval, enacted future standards,
-  program participation, provider integration, or a deployed data centre.
+- **AI infrastructure and supplier-aware workload admission:** the wider
+  workload operating contract remains a design/future practice. Its local
+  synthetic supplier gate and workload-admission consumer are implemented with
+  closed contracts, deterministic decision replay, admission-time
+  re-evaluation, exact ID/class/scope correlation, bounded conditional
+  acceptance, and fail-closed denial. Three stored workload scenarios replay
+  eligible, conditionally accepted, and revoked-evidence outcomes. The path is
+  metadata-only and does not retrieve evidence, approve procurement, call a
+  provider, schedule a workload, grant Kubernetes/GPU access, or execute a
+  runtime action.
 - **P5a AI-Assisted DevSecOps Boundary:** advisory AI use, human review, CI/security checks, and release evidence
 - **P5b AI-Assisted Review Evidence:** review summaries, threat-model checklists, CI failure summaries, and release-note drafts
 - **P6f AI Platform Security and Operations Controls:** identity, data protection, AI AppSec, delivery, operations, and FinOps
@@ -89,7 +89,7 @@ It currently has six mock-first lanes:
 - **P6a Runtime AgentOps:** agent identity, tool permission, policy verdict, human approval, budget state, traceability, and pause/terminate decisions.
 - **P6b Capability Governance:** registry metadata, skill cards, scan/evaluation evidence, admission decision, lifecycle state, and approved/blocked/approval-required capability outcomes.
 - **P6c RAG Knowledge Lifecycle:** source provenance, owner, classification, authorised knowledge-base boundary, retention, review, and active/paused/retired state.
-- **P6d Control-Plane Evidence Map:** a synthetic map connecting runtime decisions, capability admission, RAG lifecycle state, guardrail verdicts, and human-owned AI-assisted review evidence.
+- **P6d Control-Plane Evidence Map:** a synthetic map connecting runtime decisions, capability admission, RAG lifecycle state, guardrail verdicts, human-owned AI-assisted review evidence, and a separate workload-to-supplier admission correlation.
 - **P6e Control-Plane Evidence Scenarios:** a synthetic scenario pack for allowed, denied, approval-required, blocked-before-runtime, and retired-source-blocked governance outcomes.
 - **P6f AI Platform Security and Operations Controls:** a control matrix connecting identity, data protection, AI AppSec, delivery controls, operations, and FinOps to existing portfolio evidence.
 
@@ -134,8 +134,8 @@ It currently has six mock-first lanes:
 | P8i AgentCore synthetic contract pack | Complete local synthetic contract evidence; provider-neutral pack remains separate from the live AWS validation | `shared/schemas/agentcore-readiness/`, `shared/examples/agentcore-readiness/`, `providers/aws/app/api/tests/agentcoreReadinessContracts.test.ts`, and `docs/solutions/p8i-agentcore-synthetic-contract-pack.md` |
 | AgentCore governed RAG POC | Synthetic data foundation, arm64 Runtime, IAM Gateway/Runtime target, direct Bedrock preflight, Gateway end-to-end evidence, and bounded CloudWatch observability complete through protected CI; teardown remains separately gated | `providers/aws/app/agentcore-rag-runtime/`, `providers/aws/agentcore/`, `.github/workflows/terraform-agentcore-rag-sandbox.yml`, `providers/aws/infra/bootstrap/github-oidc-terraform-backend.yaml`, `docs/solutions/p8i-agentcore-rag-data-foundation.md`, `docs/solutions/p8i-agentcore-rag-key-process-record.md`, and `docs/solutions/agentcore-governed-rag-poc-runbook.md` |
 | Framework-neutral agent evaluation telemetry | Stage A source implemented; provider validation pending. The protected lane is manual, synthetic-only, evaluate-only, and bounded to six calls. Stage B Runtime-to-CloudWatch evaluation is not implemented. | `shared/schemas/agent-evaluation-telemetry/`, `shared/examples/agent-evaluation-telemetry/`, `providers/aws/app/api/src/evals/agentEvaluationTelemetryNormalizer.ts`, `providers/aws/app/api/src/evals/agentEvaluationTelemetryGate.ts`, `providers/aws/app/api/src/evals/agentCoreEvaluationProviderGate.ts`, `.github/workflows/agentcore-evaluation-provider-parity.yml`, and `docs/solutions/agent-evaluation-telemetry-runbook.md` |
-| AI workload operating contract | Design/future reference; no data-centre deployment or GPU runtime claimed | `docs/architecture/ai-factory-gpu-workload-readiness.md` and `docs/practices/ai-workload-operating-contract.md` |
-| Synthetic AI supplier readiness gate | Local deterministic metadata gate implemented with six schema-validated scenarios, explicit evaluation time, evidence freshness/revocation boundaries, structured reassessment triggers, and fail-closed checks; no supplier assurance, procurement approval, provider integration, regulatory compliance, or program participation claimed | `docs/practices/ai-supplier-readiness-gate.md`, `shared/schemas/ai-supplier-readiness/`, `shared/examples/ai-supplier-readiness/`, `providers/aws/app/api/src/governance/supplierReadinessEvaluator.ts`, and supplier-readiness API tests |
+| AI workload operating contract | Wider operating model remains a design/future reference; the local synthetic supplier-aware admission slice is implemented; no scheduler, data-centre deployment, or GPU runtime claimed | `docs/architecture/ai-factory-gpu-workload-readiness.md` and `docs/practices/ai-workload-operating-contract.md` |
+| Synthetic AI supplier readiness and workload admission | Local deterministic metadata gate plus downstream admission consumer implemented with six supplier scenarios, three workload replays, exact dependency correlation, bounded conditional acceptance, and fail-closed checks; no supplier assurance, procurement approval, provider integration, runtime authority, regulatory compliance, or program participation claimed | `docs/practices/ai-supplier-readiness-gate.md`, `shared/schemas/ai-supplier-readiness/`, `shared/schemas/ai-workload-admission/`, `shared/examples/ai-supplier-readiness/`, `shared/examples/ai-workload-admission/`, and supplier/workload admission API tests |
 | P5a AI-assisted DevSecOps boundary | Complete | `docs/practices/ai-assisted-devsecops-pattern.md` and `.github/workflows/ai-assisted-devsecops.yml` |
 | P5b AI-assisted review evidence | Complete | `docs/evidence/ai-assisted-review-evidence.md`, `shared/schemas/ai-assisted-devsecops/`, and `shared/examples/ai-assisted-devsecops/` |
 | P6d control-plane evidence map | Complete | `docs/evidence/control-plane-evidence-map.md`, `shared/schemas/control-plane-evidence/`, and `shared/examples/control-plane-evidence/` |

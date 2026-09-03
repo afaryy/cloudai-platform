@@ -42,8 +42,10 @@ test("complete applicable evidence produces an eligible decision", () => {
   const result = evaluateSupplierReadiness(BASE_ASSESSMENT, "2026-08-31T01:00:00.000Z");
 
   assert.deepEqual(result, {
-    schemaVersion: "1.0",
+    schemaVersion: "1.1",
+    decisionId: "synthetic-managed-ai-service:2026-08-31T01:00:00.000Z",
     assessmentId: "synthetic-managed-ai-service",
+    scope: "Synthetic managed model and retrieval service boundary",
     decision: "eligible",
     reasonCodes: ["evidence-complete"],
     evaluatedAt: "2026-08-31T01:00:00.000Z",

@@ -1,0 +1,12 @@
+{
+  "schemaVersion": "1.0",
+  "acceptanceId": "synthetic-dedicated-ai-capacity:2026-08-31T01:00:00.000Z:conditional-acceptance",
+  "assessmentId": "synthetic-dedicated-ai-capacity",
+  "decisionId": "synthetic-dedicated-ai-capacity:2026-08-31T01:00:00.000Z",
+  "acceptanceState": "accepted",
+  "acceptedEvidenceFamilies": ["sustainability-location"],
+  "acceptedByRole": "platform-governance-reviewer",
+  "acceptedAt": "2026-08-31T02:00:00.000Z",
+  "validUntil": "2026-10-15T00:00:00.000Z",
+  "evidenceReferences": ["https://example.com/cloudai-platform/supplier-acceptance/dedicated-ai-capacity"]
+}

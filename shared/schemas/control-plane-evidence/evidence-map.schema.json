@@ -4,7 +4,7 @@
   "title": "Mock CloudAI Control Plane Evidence Map",
   "type": "object",
   "additionalProperties": false,
-  "required": ["evidenceMapId", "phase", "controlPlane", "scenario", "evidenceLanes", "audit", "boundaries"],
+  "required": ["evidenceMapId", "phase", "controlPlane", "scenario", "evidenceLanes", "workloadDependencyCorrelation", "audit", "boundaries"],
   "properties": {
     "evidenceMapId": { "type": "string", "pattern": "^p6d_[a-z0-9_]+$" },
     "phase": { "type": "string", "const": "P6d" },
@@ -34,6 +34,32 @@
           "decisionOrState": { "type": "string", "minLength": 3 },
           "ownerRole": { "type": "string", "minLength": 3 },
           "evidencePath": { "type": "string", "pattern": "^shared/examples/.+\\.json$" }
+        }
+      }
+    },
+    "workloadDependencyCorrelation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "workloadId",
+        "supplierAssessmentId",
+        "supplierDecisionId",
+        "admissionDecisionId",
+        "evaluatedAt",
+        "evidencePaths"
+      ],
+      "properties": {
+        "workloadId": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]{2,62}$" },
+        "supplierAssessmentId": { "type": "string", "minLength": 3, "maxLength": 80 },
+        "supplierDecisionId": { "type": "string", "minLength": 3, "maxLength": 180 },
+        "admissionDecisionId": { "type": "string", "minLength": 3, "maxLength": 360 },
+        "conditionalAcceptanceId": { "type": "string", "minLength": 3, "maxLength": 220 },
+        "evaluatedAt": { "type": "string", "format": "date-time" },
+        "evidencePaths": {
+          "type": "array",
+          "minItems": 4,
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^shared/examples/.+\\.json$" }
         }
       }
     },

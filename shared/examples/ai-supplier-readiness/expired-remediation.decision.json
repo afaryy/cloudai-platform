@@ -1,6 +1,8 @@
 {
-  "schemaVersion": "1.0",
+  "schemaVersion": "1.1",
+  "decisionId": "synthetic-expired-remediation:2026-08-31T01:00:00.000Z",
   "assessmentId": "synthetic-expired-remediation",
+  "scope": "Synthetic dedicated AI capacity with an expired conditional remediation boundary",
   "decision": "not-eligible",
   "reasonCodes": ["conditional-remediation-expired"],
   "evaluatedAt": "2026-08-31T01:00:00.000Z",

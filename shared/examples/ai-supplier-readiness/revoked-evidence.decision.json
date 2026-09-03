@@ -1,6 +1,8 @@
 {
-  "schemaVersion": "1.0",
+  "schemaVersion": "1.1",
+  "decisionId": "synthetic-revoked-evidence:2026-08-31T01:00:00.000Z",
   "assessmentId": "synthetic-revoked-evidence",
+  "scope": "Synthetic managed AI service with revoked applicable evidence",
   "decision": "not-eligible",
   "reasonCodes": ["evidence-revoked"],
   "evaluatedAt": "2026-08-31T01:00:00.000Z",

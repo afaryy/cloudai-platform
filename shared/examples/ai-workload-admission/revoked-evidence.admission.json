@@ -1,0 +1,13 @@
+{
+  "schemaVersion": "1.0",
+  "admissionDecisionId": "synthetic-revoked-dependency-workload:synthetic-revoked-evidence:2026-08-31T01:00:00.000Z:2026-09-01T00:00:00.000Z",
+  "workloadId": "synthetic-revoked-dependency-workload",
+  "supplierDependencyApplicability": "applicable",
+  "decision": "denied",
+  "reasonCodes": ["supplier-decision-not-eligible"],
+  "supplierReasonCodes": ["evidence-revoked"],
+  "evaluatedAt": "2026-09-01T00:00:00.000Z",
+  "supplierAssessmentId": "synthetic-revoked-evidence",
+  "supplierDecisionId": "synthetic-revoked-evidence:2026-08-31T01:00:00.000Z",
+  "evidenceReferences": ["https://example.com/cloudai-platform/supplier-evidence/revoked-evidence"]
+}
