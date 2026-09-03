@@ -30,6 +30,10 @@ implementation record and deferred scope.
 
 ## Architecture and Platform Context
 
+- [Enterprise AI framework benchmark](./enterprise-ai-framework-benchmark.md) —
+  official NIST, AWS, Azure, Google Cloud, NVIDIA, and CNCF source baseline,
+  six-layer comparison, implementation gaps, and implications for the future
+  Enterprise AI Blueprint and YY-65 evidence workflow.
 - [CloudAI architecture](./architecture.md) — ecosystem context, six enterprise
   capability layers, ten CloudAI domains, lifecycle, and implementation status.
 - [CloudAI control plane](./control-plane.md) — coordination and governance
