@@ -3,6 +3,9 @@
 Architecture reference material: platform context, reference architectures,
 provider boundaries, and future capacity design.
 
+- [Enterprise AI Framework Benchmark](enterprise-ai-framework-benchmark.md) —
+  official framework baseline spanning risk, adoption, workload architecture,
+  cloud-native AI, and AI Factory infrastructure.
 - [CloudAI Architecture](architecture.md) — enterprise context, capability
   layers, platform domains, lifecycle, and evidence boundaries.
 - [CloudAI Control Plane](control-plane.md) — platform coordination and
