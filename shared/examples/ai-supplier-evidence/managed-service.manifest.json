@@ -1,0 +1,18 @@
+{
+  "schemaVersion": "1.0",
+  "supplierAssessmentId": "synthetic-managed-ai-service",
+  "evidenceFamily": "security-privacy",
+  "sourceReference": "https://example.com/supplier-evidence/security-privacy-v1",
+  "sourceType": "synthetic-manifest",
+  "sourceVersion": "v1",
+  "observedAt": "2026-09-01T00:00:00.000Z",
+  "validUntil": "2026-12-01T00:00:00.000Z",
+  "contentDigest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "adapterId": "synthetic-manifest",
+  "adapterVersion": "1.0.0",
+  "authenticityState": "verified",
+  "redactionState": "passed",
+  "submittedByRole": "evidence-submitter",
+  "submittedByPrincipalRef": "principal:evidence-submitter",
+  "submittedAt": "2026-09-05T00:10:00.000Z"
+}

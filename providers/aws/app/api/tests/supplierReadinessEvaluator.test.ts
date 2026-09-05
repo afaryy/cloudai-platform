@@ -4,6 +4,7 @@ import {
   evaluateSupplierReadiness,
   type SupplierAssessment,
   type SupplierEvidenceFamily,
+  type SupplierEvidenceFamilyName,
   type SupplierExternalRequirement
 } from "../src/governance/supplierReadinessEvaluator.js";
 
@@ -220,7 +221,7 @@ test("an exact review, evidence, and remediation boundary remains valid", () => 
 });
 
 function evidence(
-  family: string,
+  family: SupplierEvidenceFamilyName,
   status: "complete" | "conditional" | "missing" | "not-applicable",
   critical: boolean,
   applicability: "applicable" | "not-applicable" = "applicable"

@@ -1,0 +1,16 @@
+{
+  "schemaVersion": "1.0",
+  "reviewId": "review-c40a78f1d963d84e",
+  "candidateId": "candidate-17878d4c5d338b8b",
+  "candidateDigest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "reviewAction": "approved",
+  "reviewerRole": "evidence-reviewer",
+  "reviewerPrincipalRef": "principal:evidence-reviewer",
+  "reviewedAt": "2026-09-05T00:20:00.000Z",
+  "reviewValidUntil": "2026-10-05T00:20:00.000Z",
+  "reasonCodes": ["evidence-reviewed"],
+  "approverRole": "evidence-approver",
+  "approverPrincipalRef": "principal:evidence-approver",
+  "approvedAt": "2026-09-05T00:20:00.000Z",
+  "auditEventId": "audit-df28f34cc3771575"
+}
