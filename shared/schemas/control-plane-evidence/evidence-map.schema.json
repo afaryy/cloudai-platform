@@ -4,7 +4,7 @@
   "title": "Mock CloudAI Control Plane Evidence Map",
   "type": "object",
   "additionalProperties": false,
-  "required": ["evidenceMapId", "phase", "controlPlane", "scenario", "evidenceLanes", "workloadDependencyCorrelation", "audit", "boundaries"],
+  "required": ["evidenceMapId", "phase", "controlPlane", "scenario", "evidenceLanes", "workloadDependencyCorrelation", "supplierEvidenceCorrelation", "audit", "boundaries"],
   "properties": {
     "evidenceMapId": { "type": "string", "pattern": "^p6d_[a-z0-9_]+$" },
     "phase": { "type": "string", "const": "P6d" },
@@ -58,6 +58,33 @@
         "evidencePaths": {
           "type": "array",
           "minItems": 4,
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^shared/examples/.+\\.json$" }
+        }
+      }
+    },
+    "supplierEvidenceCorrelation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "candidateId",
+        "reviewId",
+        "evidenceRecordId",
+        "supplierAssessmentId",
+        "supplierDecisionId",
+        "admissionDecisionId",
+        "evidencePaths"
+      ],
+      "properties": {
+        "candidateId": { "type": "string", "pattern": "^candidate-[a-f0-9]{16}$" },
+        "reviewId": { "type": "string", "pattern": "^review-[a-f0-9]{16}$" },
+        "evidenceRecordId": { "type": "string", "pattern": "^evidence-[a-f0-9]{16}$" },
+        "supplierAssessmentId": { "type": "string", "minLength": 3, "maxLength": 80 },
+        "supplierDecisionId": { "type": "string", "minLength": 3, "maxLength": 180 },
+        "admissionDecisionId": { "type": "string", "minLength": 3, "maxLength": 360 },
+        "evidencePaths": {
+          "type": "array",
+          "minItems": 6,
           "uniqueItems": true,
           "items": { "type": "string", "pattern": "^shared/examples/.+\\.json$" }
         }

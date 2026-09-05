@@ -1,4 +1,8 @@
 import { candidateIdentity, deterministicIdentity } from "./supplierEvidenceAdapter.js";
+import {
+  buildSupplierEvidenceTelemetryEvent,
+  type SupplierEvidenceTelemetryInput
+} from "./supplierEvidenceTelemetry.js";
 import type { SupplierEvidenceFamilyName } from "./supplierReadinessEvaluator.js";
 import type {
   EvidenceAuditEvent,
@@ -503,10 +507,10 @@ function freezeAuditEvent(event: EvidenceAuditEvent): EvidenceAuditEvent {
 
 function exportTelemetrySafely(
   store: EvidenceWorkflowStore,
-  event: SupplierEvidenceTelemetryEvent
+  input: SupplierEvidenceTelemetryInput
 ): boolean {
   try {
-    store.exportTelemetry(event);
+    store.exportTelemetry(buildSupplierEvidenceTelemetryEvent(input));
     return false;
   } catch {
     return true;
