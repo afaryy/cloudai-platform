@@ -132,6 +132,46 @@ test("record contract rejects fields that conflict with the lifecycle state", as
   );
 });
 
+test("public documentation states the implemented human-owned evidence boundary", async () => {
+  const repositoryRoot = resolve(process.cwd(), "../../../..");
+  const publicFiles = [
+    "README.md",
+    "docs/practices/ai-supplier-readiness-gate.md",
+    "docs/practices/ai-workload-operating-contract.md",
+    "docs/practices/current-status.md"
+  ];
+  const combined = (
+    await Promise.all(publicFiles.map((file) => readFile(resolve(repositoryRoot, file), "utf8")))
+  ).join("\n").toLowerCase();
+
+  for (const phrase of [
+    "local, deterministic, metadata-only",
+    "human-owned review",
+    "exact digest",
+    "synthetic manifest adapter",
+    "no supplier or procurement-system connection",
+    "does not grant runtime authority"
+  ]) {
+    assert.ok(combined.includes(phrase), `public documentation missing boundary phrase: ${phrase}`);
+  }
+
+  const supplierGuide = await readFile(
+    resolve(repositoryRoot, "docs/practices/ai-supplier-readiness-gate.md"),
+    "utf8"
+  );
+  for (const target of [
+    "../../shared/schemas/ai-supplier-evidence/synthetic-evidence-manifest.schema.json",
+    "../../shared/examples/ai-supplier-evidence/managed-service.manifest.json",
+    "../../providers/aws/app/api/src/governance/supplierEvidenceAdapter.ts",
+    "../../providers/aws/app/api/src/governance/supplierEvidenceWorkflow.ts",
+    "../../providers/aws/app/api/src/governance/supplierEvidenceProjection.ts",
+    "../../providers/aws/app/api/src/governance/supplierEvidenceTelemetry.ts",
+    "../superpowers/specs/2026-09-05-human-owned-supplier-evidence-adapter-design.md"
+  ]) {
+    assert.ok(supplierGuide.includes(`](${target})`), `supplier guide missing direct link: ${target}`);
+  }
+});
+
 async function readJson(fileName: string, directory: string): Promise<any> {
   return JSON.parse(await readFile(resolve(directory, fileName), "utf8"));
 }
