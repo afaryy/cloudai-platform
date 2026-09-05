@@ -9,7 +9,8 @@ is not used as evidence of private-worker or private-GPU validation.
 ## Operating boundary
 
 - Source validation runs on a GitHub-hosted runner with no AWS credentials.
-- Remote `plan`, `preflight`, `apply`, and `stop` run only on the run-scoped
+- Remote `bootstrap-plan`, `bootstrap-apply`, `plan`, `preflight`, `apply`,
+  `runtime-validate`, and `stop` run only on the run-scoped
   CodeBuild-hosted ephemeral runner label
   `codebuild-${PRIVATE_EKS_RUNNER_PROJECT_NAME}-${github.run_id}-${github.run_attempt}`.
 - The runner must have VPC reachability to the private EKS Kubernetes API and
@@ -81,20 +82,34 @@ commit their values:
 | `PRIVATE_EKS_ENDPOINT_POLICY_READY` | Must be exactly `true` after endpoint review |
 | `PRIVATE_EKS_BACKEND_READY` | Must be exactly `true` after state backend review |
 | `PRIVATE_EKS_BOOTSTRAP_ROLE_READY` | Must be exactly `true` for the temporary bootstrap exception |
+| `PRIVATE_EKS_ENDPOINT_PRINCIPAL_PHASE` | `runner` for zero-worker bootstrap; `expanded` before worker activation or runtime validation |
+| `PRIVATE_EKS_CPU_SMOKE_IMAGE` | Digest-pinned private ECR `linux/amd64` image used only by `runtime-validate` |
 
 ## Modes
 
 1. `validate`: runs Terraform init without backend, formatting, validation, and
    native tests. No AWS credentials are configured.
-2. `plan`: initializes the isolated backend and creates a plan only. The raw
-   plan is kept on the runner and never uploaded.
-3. `preflight`: verifies existing private-EKS state, private-only API access,
+2. `bootstrap-plan`: plans the private EKS control plane, IAM, and node group
+   with `min=0`, `desired=0`, and `max=1`. It requires the `runner` endpoint
+   principal phase and does not activate worker capacity.
+3. `bootstrap-apply`: requires
+   `I_UNDERSTAND_PRIVATE_EKS_BOOTSTRAP_APPLY`, performs the same no-delete
+   plan, applies it, and verifies that desired worker capacity remains zero.
+4. `plan`: initializes the isolated backend and plans one bounded CPU worker.
+   It requires the `expanded` endpoint principal phase. The raw plan is kept
+   on the runner and never uploaded.
+5. `preflight`: verifies existing private-EKS state, private-only API access,
    no public IPs on worker subnets, and the exact approved endpoint set
    (ECR API/DKR, S3 gateway, STS, EKS, EC2, and CloudWatch Logs).
-4. `apply`: requires `I_UNDERSTAND_PRIVATE_EKS_APPLY`, a same-run plan
+6. `apply`: requires `I_UNDERSTAND_PRIVATE_EKS_APPLY`, a same-run plan
    preflight with no delete actions, and the protected environment reviewer. It
    creates only the private worker baseline; it does not add GPU capacity.
-5. `stop`: requires `I_UNDERSTAND_PRIVATE_EKS_STOP`, an existing state/cluster
+7. `runtime-validate`: requires
+   `I_UNDERSTAND_PRIVATE_EKS_CPU_RUNTIME_VALIDATE`, configures kubeconfig from
+   the VPC-connected runner, and runs a digest-pinned private-ECR CPU Job. It
+   rejects GPU nodes, waits for completion, cleans the Job on success or
+   failure, and uploads only bounded Boolean evidence.
+8. `stop`: requires `I_UNDERSTAND_PRIVATE_EKS_STOP`, an existing state/cluster
    guard, and then scales workers to zero. It is not a destroy operation and
    fails closed when no prior private environment exists.
 
@@ -107,6 +122,14 @@ Terraform plans, or raw command output.
 The temporary shared-module cluster-admin access entry is a bootstrap
 exception. Runtime validation remains incomplete until provisioning,
 cluster-bootstrap, and namespace-scoped workload identities are separated.
+
+The CPU smoke image is published separately by
+`.github/workflows/build-private-eks-cpu-smoke-image.yml`. The workflow reuses
+the existing synthetic AgentCore RAG runtime source and private ECR repository
+for this bounded POC, but builds `linux/amd64`, verifies the pushed digest and
+architecture, and requires `I_UNDERSTAND_PRIVATE_EKS_CPU_IMAGE_PUSH`. It does
+not run Terraform. A production-oriented implementation should normally use a
+dedicated repository and promotion policy for platform smoke images.
 
 ## Current source implementation
 
@@ -144,8 +167,27 @@ private-EKS remote plan:
 4. verify the sanitised network evidence; and
 5. only then let `eks-private-sandbox` read the remote outputs.
 
-For a first private-EKS deployment, run `plan` and then `apply`; the `apply`
-mode creates and checks a fresh same-run plan preflight before mutation. The
-standalone `preflight` mode requires an existing state and cluster and is for
-post-deployment revalidation, not a prerequisite that can run before the first
-apply.
+## First-deployment dependency sequence
+
+Endpoint policy cannot start in its final shape because the runner and EKS
+node roles do not exist yet. Use this staged sequence:
+
+1. `bootstrap`: network Terraform role only.
+2. Provision the CodeBuild runner and discover its actual service-role ARN.
+3. `runner`: network role plus CodeBuild service role; validate the runner.
+4. Run EKS `bootstrap-plan` and, after separate approval,
+   `bootstrap-apply`. This creates the control plane and node IAM role while
+   keeping worker capacity at zero.
+5. Read the sensitive node-role output inside protected CI; do not publish it.
+6. `expanded`: network role, CodeBuild service role, and EKS node role.
+7. Publish the approved amd64 CPU image and configure its immutable URI.
+8. Run EKS `plan`, `apply`, and then `runtime-validate` under their separate
+   confirmations.
+
+This avoids both an endpoint-policy deadlock and an unreviewed wildcard
+principal. The standalone `preflight` mode requires an existing state and
+cluster and is for post-deployment revalidation, not a prerequisite before the
+first bootstrap apply.
+
+For the first private-EKS deployment, both `bootstrap-apply` and the later
+one-worker `apply` use a fresh same-run plan preflight before mutation.

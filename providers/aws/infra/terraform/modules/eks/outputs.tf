@@ -20,6 +20,12 @@ output "node_group_name" {
   value       = aws_eks_node_group.this.node_group_name
 }
 
+output "node_role_arn" {
+  description = "Managed worker node role ARN. Keep private and use only for reviewed endpoint-policy handoff."
+  value       = aws_iam_role.node.arn
+  sensitive   = true
+}
+
 output "cluster_security_group_id" {
   description = "Primary EKS cluster security group ID."
   value       = aws_eks_cluster.this.vpc_config[0].cluster_security_group_id

@@ -31,6 +31,12 @@ output "node_group_name" {
   value       = module.eks.node_group_name
 }
 
+output "node_role_arn" {
+  description = "Private worker node role ARN used only for endpoint-policy expansion after zero-worker bootstrap."
+  value       = module.eks.node_role_arn
+  sensitive   = true
+}
+
 output "network_state_consumed" {
   description = "Sanitised category confirming the reviewed private-network state is the source of network inputs."
   value       = data.terraform_remote_state.network.outputs.network_foundation_ready == true

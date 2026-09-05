@@ -19,6 +19,7 @@ on:
         type: choice
         options:
           - bootstrap
+          - runner
           - expanded
       confirmation:
         description: "Exact confirmation required for apply"
@@ -127,8 +128,8 @@ jobs:
             echo "::error::PRIVATE_EKS_ENDPOINT_PRINCIPAL_ARNS_JSON must contain explicit IAM role ARNs."
             missing=1
           fi
-          if [ "$PRIVATE_EKS_ENDPOINT_PRINCIPAL_PHASE" != "bootstrap" ] && [ "$PRIVATE_EKS_ENDPOINT_PRINCIPAL_PHASE" != "expanded" ]; then
-            echo "::error::PRIVATE_EKS_ENDPOINT_PRINCIPAL_PHASE must be bootstrap or expanded."
+          if [ "$PRIVATE_EKS_ENDPOINT_PRINCIPAL_PHASE" != "bootstrap" ] && [ "$PRIVATE_EKS_ENDPOINT_PRINCIPAL_PHASE" != "runner" ] && [ "$PRIVATE_EKS_ENDPOINT_PRINCIPAL_PHASE" != "expanded" ]; then
+            echo "::error::PRIVATE_EKS_ENDPOINT_PRINCIPAL_PHASE must be bootstrap, runner, or expanded."
             missing=1
           fi
           if [ "$MODE_PRINCIPAL_PHASE" != "$PRIVATE_EKS_ENDPOINT_PRINCIPAL_PHASE" ]; then
@@ -137,6 +138,10 @@ jobs:
           fi
           if [ "$PRIVATE_EKS_ENDPOINT_PRINCIPAL_PHASE" = "bootstrap" ] && ! jq -e 'length == 1' <<<"$TF_VAR_endpoint_principal_arns" >/dev/null; then
             echo "::error::bootstrap requires exactly one explicit IAM role ARN; use only an already-existing verified role."
+            missing=1
+          fi
+          if [ "$PRIVATE_EKS_ENDPOINT_PRINCIPAL_PHASE" = "runner" ] && ! jq -e 'length == 2' <<<"$TF_VAR_endpoint_principal_arns" >/dev/null; then
+            echo "::error::runner requires exactly two explicit IAM role ARNs for the network and deployed CodeBuild runtime roles."
             missing=1
           fi
           if [ "$PRIVATE_EKS_ENDPOINT_PRINCIPAL_PHASE" = "expanded" ] && ! jq -e 'length >= 3' <<<"$TF_VAR_endpoint_principal_arns" >/dev/null; then

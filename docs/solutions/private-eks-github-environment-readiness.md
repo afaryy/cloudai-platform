@@ -7,14 +7,18 @@ ARC.
 
 ## Current discovery
 
-As of 28 August 2026, the `aws-private-eks` Environment exists. Read-only API
+As of 5 September 2026, the `aws-private-eks` Environment exists. Read-only API
 inspection confirms a required reviewer, disabled administrator bypass, and a
 `main` deployment branch policy. The shared backend/OIDC names are present,
-and the network bootstrap variables are configured. The runner-role source
-contract is implemented; CloudFormation apply remains pending, and runner
-runtime validation remains pending. Private-runner, private-EKS, and ARC
-readiness variables and ARC secrets therefore remain pending, so the runner,
-EKS, and ARC runtime paths remain blocked.
+and the network bootstrap variables are configured. Workflow history contains
+source validation and a network plan, but no successful network apply, runner
+apply, or private-EKS apply. The runner-role source contract is implemented;
+CloudFormation apply remains pending, and the dedicated runner/EKS variables
+are absent. The VPC, CodeBuild runner, private EKS, and ARC paths therefore
+remain runtime-pending.
+
+Runner runtime validation remains pending. Private EKS and ARC runtime
+validation also remain pending.
 
 Variable presence is configuration evidence only. It does not prove that a
 value is correct, that the network state has the latest output contract, or
@@ -60,8 +64,8 @@ These are consumed by `.github/workflows/terraform-eks-private-network.yml`:
 | `TF_BACKEND_BUCKET` | variable | Existing Terraform state bucket |
 | `TF_BACKEND_LOCK_TABLE` | variable | Existing Terraform lock table |
 | `TF_STATE_KEY_PREFIX` | variable | State namespace prefix |
-| `PRIVATE_EKS_ENDPOINT_PRINCIPAL_ARNS_JSON` | variable | Explicit IAM role ARNs allowed to use private endpoints; bootstrap uses one verified role, expanded uses at least three; no wildcard principals |
-| `PRIVATE_EKS_ENDPOINT_PRINCIPAL_PHASE` | variable | Must match the workflow input: `bootstrap` for one existing role, or `expanded` after runner and private-worker roles exist |
+| `PRIVATE_EKS_ENDPOINT_PRINCIPAL_ARNS_JSON` | variable | Explicit IAM role ARNs allowed to use private endpoints: one for `bootstrap`, exactly two for `runner`, and at least three for `expanded`; no wildcard principals |
+| `PRIVATE_EKS_ENDPOINT_PRINCIPAL_PHASE` | variable | Must match the workflow input: `bootstrap`, `runner`, or `expanded` |
 | `PRIVATE_EKS_PRIVATE_ECR_REPOSITORY_ARNS_JSON` | variable | Non-empty JSON list of approved private ECR repository ARNs |
 | `PRIVATE_EKS_ARTIFACT_BUCKET_ARNS_JSON` | variable | Non-empty JSON list of approved S3 bucket ARNs |
 | `PRIVATE_EKS_ENABLE_NAT_GATEWAY` | variable | `false` by default; `true` only after a separate cost and egress decision |
@@ -92,6 +96,7 @@ These are consumed by `.github/workflows/terraform-eks-private-runner.yml` and
 | `PRIVATE_EKS_GITHUB_ACTIONS_PRINCIPAL_ARN` | variable | Approved OIDC principal ARN passed to the private EKS Terraform state |
 | `PRIVATE_EKS_BUDGET_APPROVED` | variable | Must be exactly `true` before remote delivery |
 | `PRIVATE_EKS_MONTHLY_BUDGET_USD` | variable | Positive monthly budget value |
+| `PRIVATE_EKS_CPU_SMOKE_IMAGE` | variable | Immutable private ECR image URI pinned by digest and verified as `linux/amd64` |
 
 ### ARC handoff variables and secrets
 
@@ -142,20 +147,38 @@ Follow this order so a missing prerequisite fails before any AWS API call:
    Then configure the remaining private-runner and private-EKS variables. The
    CodeBuild account-level GitHub source connection must be reviewed separately;
    no GitHub token is stored in Terraform.
-10. Discover and review the actual delivery-runner and private-worker role ARNs,
-   update the endpoint principal list, select `expanded`, and run a new
-   endpoint-policy plan before private runtime use.
-11. For the first private-EKS deployment, review `plan`, then use `apply`; the
-    apply mode performs a fresh same-run plan preflight. Use standalone
-    `preflight` only when an existing state and cluster can be revalidated for
-    private-only API access, endpoints, and no-public-IP subnets.
-12. Only after the private worker baseline is healthy should ARC variables and
+10. Apply and metadata-validate the runner foundation. Discover its actual
+    CodeBuild service-role ARN, update the endpoint list to exactly the network
+    role plus runner role, select `runner`, and apply the reviewed endpoint
+    policy before asking CodeBuild to reach private services.
+11. Run EKS `bootstrap-plan`, then obtain
+    `I_UNDERSTAND_PRIVATE_EKS_BOOTSTRAP_APPLY` for `bootstrap-apply`. This
+    creates the control plane and node role while keeping worker capacity at
+    zero.
+12. Read the sensitive node-role output only in protected CI. Update the
+    endpoint principal list to include the network, runner, and node roles,
+    select `expanded`, and apply the reviewed endpoint-policy change.
+13. Run `build-private-eks-cpu-smoke-image` with
+    `I_UNDERSTAND_PRIVATE_EKS_CPU_IMAGE_PUSH`; configure the verified immutable
+    amd64 URI as `PRIVATE_EKS_CPU_SMOKE_IMAGE`.
+14. Review EKS `plan`, obtain `I_UNDERSTAND_PRIVATE_EKS_APPLY`, and activate one
+    bounded CPU worker. Then obtain
+    `I_UNDERSTAND_PRIVATE_EKS_CPU_RUNTIME_VALIDATE` for the CPU Job validation.
+    Use standalone `preflight` only when an existing cluster can be revalidated.
+15. Only after the private worker baseline is healthy should ARC variables and
     secrets be added. ARC `install` and `smoke` require the separate exact
     confirmation `I_UNDERSTAND_PRIVATE_EKS_ARC_APPLY`.
 
 There is deliberately no automatic `destroy` path in these workflows. A
 future teardown or uninstall must be designed, reviewed, cost-checked, and
 confirmed separately.
+
+The CodeBuild-hosted GitHub runner must reach GitHub to receive work, download
+actions, exchange OIDC, and publish logs or artifacts. Interface endpoints do
+not replace that outbound path. For this time-boxed POC, enabling the NAT
+gateway is the current likely implementation, but it must appear explicitly in
+the reviewed network plan and cost-duration decision. Do not silently change
+`PRIVATE_EKS_ENABLE_NAT_GATEWAY` or treat the monthly budget as a hard cap.
 
 ## Read-only verification commands
 
