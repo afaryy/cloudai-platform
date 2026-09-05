@@ -33,10 +33,20 @@ supplier assessment, recorded supplier decision, admission result, evaluation
 time, and synthetic evidence paths. It is separate because workload dependency
 correlation is not another runtime or governance lane.
 
+A second required `supplierEvidenceCorrelation` object makes the human-owned
+evidence workflow replayable without storing source content. It binds the
+synthetic candidate, exact-digest review, immutable evidence record, supplier
+decision, and workload-admission decision through controlled identifiers and
+paths under `shared/examples/`. This correlation does not make the manifest
+adapter an approver and does not grant runtime authority.
+
 ## Control-Plane Flow
 
 ```text
 Workload supplier-dependency declaration
+  -> synthetic evidence candidate
+  -> exact-digest human review
+  -> immutable evidence record
   -> recorded supplier decision replay
   -> admission-time supplier re-evaluation
   -> workload dependency correlation

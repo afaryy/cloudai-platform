@@ -40,6 +40,59 @@ test("control-plane evidence map links all current synthetic governance lanes", 
     JSON.parse(await readFile(resolve(REPOSITORY_ROOT, evidencePath), "utf8"));
   }
 
+  assert.ok(schema.required.includes("supplierEvidenceCorrelation"));
+  const supplierEvidence = fixture.supplierEvidenceCorrelation;
+  assert.deepEqual(
+    {
+      candidateId: supplierEvidence.candidateId,
+      reviewId: supplierEvidence.reviewId,
+      evidenceRecordId: supplierEvidence.evidenceRecordId,
+      supplierAssessmentId: supplierEvidence.supplierAssessmentId,
+      supplierDecisionId: supplierEvidence.supplierDecisionId,
+      admissionDecisionId: supplierEvidence.admissionDecisionId
+    },
+    {
+      candidateId: "candidate-17878d4c5d338b8b",
+      reviewId: "review-c40a78f1d963d84e",
+      evidenceRecordId: "evidence-febe039f9cda91c2",
+      supplierAssessmentId: "synthetic-managed-ai-service",
+      supplierDecisionId: "synthetic-managed-ai-service:2026-08-31T01:00:00.000Z",
+      admissionDecisionId:
+        "synthetic-agent-rag-inference:synthetic-managed-ai-service:2026-08-31T01:00:00.000Z:2026-09-01T00:00:00.000Z"
+    }
+  );
+  for (const evidencePath of supplierEvidence.evidencePaths) {
+    JSON.parse(await readFile(resolve(REPOSITORY_ROOT, evidencePath), "utf8"));
+  }
+
+  const candidate = await readJsonFromRepository(
+    "shared/examples/ai-supplier-evidence/managed-service.candidate.json"
+  );
+  const review = await readJsonFromRepository(
+    "shared/examples/ai-supplier-evidence/managed-service.review.json"
+  );
+  const record = await readJsonFromRepository(
+    "shared/examples/ai-supplier-evidence/managed-service.record.json"
+  );
+  const supplierDecision = await readJsonFromRepository(
+    "shared/examples/ai-supplier-readiness/managed-ai-service.decision.json"
+  );
+  const admissionDecision = await readJsonFromRepository(
+    "shared/examples/ai-workload-admission/managed-ai-service.admission.json"
+  );
+  assert.equal(candidate.candidateId, supplierEvidence.candidateId);
+  assert.equal(review.candidateId, candidate.candidateId);
+  assert.equal(review.reviewId, supplierEvidence.reviewId);
+  assert.equal(record.candidateId, candidate.candidateId);
+  assert.equal(record.reviewId, review.reviewId);
+  assert.equal(record.evidenceRecordId, supplierEvidence.evidenceRecordId);
+  assert.equal(record.supplierAssessmentId, supplierEvidence.supplierAssessmentId);
+  assert.equal(supplierDecision.assessmentId, supplierEvidence.supplierAssessmentId);
+  assert.equal(supplierDecision.decisionId, supplierEvidence.supplierDecisionId);
+  assert.equal(admissionDecision.supplierAssessmentId, supplierEvidence.supplierAssessmentId);
+  assert.equal(admissionDecision.supplierDecisionId, supplierEvidence.supplierDecisionId);
+  assert.equal(admissionDecision.admissionDecisionId, supplierEvidence.admissionDecisionId);
+
   assert.equal(fixture.boundaries.containsSensitiveData, false);
   assert.equal(fixture.boundaries.containsPromptTranscript, false);
   assert.equal(fixture.boundaries.executesRuntimeAction, false);
@@ -49,6 +102,10 @@ test("control-plane evidence map links all current synthetic governance lanes", 
 
 async function readJson(fileName: string, directory: string): Promise<any> {
   return JSON.parse(await readFile(resolve(directory, fileName), "utf8"));
+}
+
+async function readJsonFromRepository(path: string): Promise<any> {
+  return JSON.parse(await readFile(resolve(REPOSITORY_ROOT, path), "utf8"));
 }
 
 function assertMatchesSchema(value: unknown, schema: any, path = "$"): void {

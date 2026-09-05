@@ -120,9 +120,13 @@ and revocation paths. A downstream local admission consumer now binds workload
 profiles to those decisions, replays recorded outcomes, re-evaluates them at an
 explicit admission time, requires exact bounded acceptance for conditional
 dependencies, and records workload-to-supplier evidence correlation. This path
-remains synthetic and metadata-only: it does not retrieve evidence, approve
+now also includes a local, deterministic, metadata-only synthetic manifest
+adapter, human-owned review bound to the exact digest, immutable evidence
+records, fail-closed lifecycle handling, sanitized telemetry, and deterministic
+projection into those existing evaluators. There is no supplier or
+procurement-system connection. It does not retrieve source documents, approve
 procurement, call a provider, schedule a workload, grant Kubernetes/GPU access,
-or execute a runtime action.
+execute a runtime action, or grant runtime authority.
 
 ## Run Locally in Mock Mode
 

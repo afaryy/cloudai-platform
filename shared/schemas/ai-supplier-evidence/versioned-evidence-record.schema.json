@@ -1,0 +1,125 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cloudai-platform.example/schemas/ai-supplier-evidence/versioned-evidence-record.schema.json",
+  "title": "Versioned supplier evidence record",
+  "description": "Closed, append-only metadata record for reviewed supplier evidence.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "evidenceRecordId",
+    "candidateId",
+    "reviewId",
+    "supplierAssessmentId",
+    "evidenceFamily",
+    "sourceReference",
+    "sourceVersion",
+    "contentDigest",
+    "observedAt",
+    "validUntil",
+    "recordState",
+    "approvedByRole",
+    "approvedAt",
+    "retentionClass",
+    "policyRef",
+    "legalHoldState",
+    "deletionState",
+    "auditEventIds"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "1.0" },
+    "evidenceRecordId": { "type": "string", "pattern": "^evidence-[a-f0-9]{16}$" },
+    "candidateId": { "type": "string", "pattern": "^candidate-[a-f0-9]{16}$" },
+    "reviewId": { "type": "string", "pattern": "^review-[a-f0-9]{16}$" },
+    "supplierAssessmentId": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]{2,80}$" },
+    "evidenceFamily": {
+      "type": "string",
+      "enum": [
+        "security-privacy",
+        "ai-governance",
+        "risk-compliance",
+        "data-model-tool-lifecycle",
+        "operations-resilience",
+        "commercial-exit",
+        "sustainability-location"
+      ]
+    },
+    "sourceReference": { "type": "string", "format": "uri", "maxLength": 500 },
+    "sourceVersion": { "type": "string", "minLength": 1, "maxLength": 80 },
+    "contentDigest": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+    "observedAt": { "type": "string", "format": "date-time" },
+    "validUntil": { "type": "string", "format": "date-time" },
+    "recordState": { "type": "string", "enum": ["current", "superseded", "expired", "revoked"] },
+    "approvedByRole": { "type": "string", "minLength": 1, "maxLength": 120 },
+    "approvedAt": { "type": "string", "format": "date-time" },
+    "retentionClass": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]{2,100}$" },
+    "policyRef": { "type": "string", "format": "uri", "maxLength": 500 },
+    "legalHoldState": { "type": "string", "enum": ["not-held", "held"] },
+    "deletionState": { "type": "string", "enum": ["retained", "deletion-pending", "deleted"] },
+    "supersedesEvidenceRecordId": { "type": "string", "pattern": "^evidence-[a-f0-9]{16}$" },
+    "revocationReasonCode": {
+      "type": "string",
+      "enum": ["source-revoked", "source-material-change", "digest-conflict", "authenticity-failed"]
+    },
+    "revokedAt": { "type": "string", "format": "date-time" },
+    "expiryReasonCode": { "const": "validity-boundary-reached" },
+    "expiredAt": { "type": "string", "format": "date-time" },
+    "auditEventIds": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "pattern": "^audit-[a-f0-9]{16}$" }
+    }
+  },
+  "oneOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": {}, "evidenceRecordId": {}, "candidateId": {}, "reviewId": {},
+        "supplierAssessmentId": {}, "evidenceFamily": {}, "sourceReference": {}, "sourceVersion": {},
+        "contentDigest": {}, "observedAt": {}, "validUntil": {}, "recordState": { "const": "current" },
+        "approvedByRole": {}, "approvedAt": {}, "retentionClass": {}, "policyRef": {},
+        "legalHoldState": {}, "deletionState": {}, "supersedesEvidenceRecordId": {}, "auditEventIds": {}
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["supersedesEvidenceRecordId"],
+      "properties": {
+        "schemaVersion": {}, "evidenceRecordId": {}, "candidateId": {}, "reviewId": {},
+        "supplierAssessmentId": {}, "evidenceFamily": {}, "sourceReference": {}, "sourceVersion": {},
+        "contentDigest": {}, "observedAt": {}, "validUntil": {}, "recordState": { "const": "superseded" },
+        "approvedByRole": {}, "approvedAt": {}, "retentionClass": {}, "policyRef": {},
+        "legalHoldState": {}, "deletionState": {}, "supersedesEvidenceRecordId": {}, "auditEventIds": {}
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["supersedesEvidenceRecordId", "expiryReasonCode", "expiredAt"],
+      "properties": {
+        "schemaVersion": {}, "evidenceRecordId": {}, "candidateId": {}, "reviewId": {},
+        "supplierAssessmentId": {}, "evidenceFamily": {}, "sourceReference": {}, "sourceVersion": {},
+        "contentDigest": {}, "observedAt": {}, "validUntil": {}, "recordState": { "const": "expired" },
+        "approvedByRole": {}, "approvedAt": {}, "retentionClass": {}, "policyRef": {},
+        "legalHoldState": {}, "deletionState": {}, "supersedesEvidenceRecordId": {},
+        "expiryReasonCode": {}, "expiredAt": {}, "auditEventIds": {}
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["supersedesEvidenceRecordId", "revocationReasonCode", "revokedAt"],
+      "properties": {
+        "schemaVersion": {}, "evidenceRecordId": {}, "candidateId": {}, "reviewId": {},
+        "supplierAssessmentId": {}, "evidenceFamily": {}, "sourceReference": {}, "sourceVersion": {},
+        "contentDigest": {}, "observedAt": {}, "validUntil": {}, "recordState": { "const": "revoked" },
+        "approvedByRole": {}, "approvedAt": {}, "retentionClass": {}, "policyRef": {},
+        "legalHoldState": {}, "deletionState": {}, "supersedesEvidenceRecordId": {},
+        "revocationReasonCode": {}, "revokedAt": {}, "auditEventIds": {}
+      }
+    }
+  ]
+}

@@ -30,8 +30,21 @@ export type ExternalRequirementStatus =
   | "watch-item";
 export type ExternalRequirementAssessment = "met" | "gap" | "tracking" | "not-applicable";
 
+export const SUPPLIER_EVIDENCE_FAMILIES = [
+  "security-privacy",
+  "ai-governance",
+  "risk-compliance",
+  "data-model-tool-lifecycle",
+  "operations-resilience",
+  "commercial-exit",
+  "sustainability-location"
+] as const;
+
+export type SupplierEvidenceFamilyName =
+  (typeof SUPPLIER_EVIDENCE_FAMILIES)[number];
+
 export interface SupplierEvidenceFamily {
-  family: string;
+  family: SupplierEvidenceFamilyName;
   applicability: SupplierEvidenceApplicability;
   status: SupplierEvidenceStatus;
   critical: boolean;
@@ -79,22 +92,12 @@ export interface SupplierAssessmentDecision {
   evidenceReferences: string[];
 }
 
-const REQUIRED_EVIDENCE_FAMILIES = [
-  "security-privacy",
-  "ai-governance",
-  "risk-compliance",
-  "data-model-tool-lifecycle",
-  "operations-resilience",
-  "commercial-exit",
-  "sustainability-location"
-] as const;
-
 export function evaluateSupplierReadiness(
   assessment: SupplierAssessment,
   evaluatedAt: string
 ): SupplierAssessmentDecision {
   const presentFamilies = new Set(assessment.evidenceFamilies.map((evidence) => evidence.family));
-  if (REQUIRED_EVIDENCE_FAMILIES.some((family) => !presentFamilies.has(family))) {
+  if (SUPPLIER_EVIDENCE_FAMILIES.some((family) => !presentFamilies.has(family))) {
     return decision(assessment, evaluatedAt, "not-eligible", "required-evidence-family-missing");
   }
 

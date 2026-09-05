@@ -80,6 +80,14 @@ timestamp rather than the wall clock. A trigger indicates that a human-owned
 reassessment is required; it does not automatically retrieve evidence or change
 a supplier decision.
 
+Its upstream evidence path is now source-implemented with synthetic metadata:
+a closed synthetic manifest adapter creates an immutable candidate, a
+human-owned review binds approval to the exact digest, an atomic local workflow
+publishes a versioned record, and a deterministic projection feeds only the
+current approved metadata into the existing readiness and admission
+evaluators. There is no supplier or procurement-system connection, and this
+path does not grant runtime authority.
+
 ## Implemented Supplier-Aware Admission Boundary
 
 Every workload profile now declares a closed `supplierDependency` as either
@@ -89,6 +97,9 @@ admission evaluator then applies this sequence:
 
 ```text
 workload dependency declaration
+  -> synthetic manifest validation and candidate identity
+  -> exact-digest human review and immutable evidence publication
+  -> current evidence projection
   -> recorded supplier decision replay
   -> supplier re-evaluation at admission time
   -> exact ID / class / scope correlation

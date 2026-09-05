@@ -1,0 +1,106 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cloudai-platform.example/schemas/ai-supplier-evidence/human-review-record.schema.json",
+  "title": "Human supplier evidence review record",
+  "description": "Closed human decision bound to an immutable supplier evidence candidate and exact digest.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "reviewId",
+    "candidateId",
+    "candidateDigest",
+    "reviewAction",
+    "reviewerRole",
+    "reviewerPrincipalRef",
+    "reviewedAt",
+    "reviewValidUntil",
+    "reasonCodes",
+    "auditEventId"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "1.0" },
+    "reviewId": { "type": "string", "pattern": "^review-[a-f0-9]{16}$" },
+    "candidateId": { "type": "string", "pattern": "^candidate-[a-f0-9]{16}$" },
+    "candidateDigest": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+    "reviewAction": { "type": "string", "enum": ["approved", "rejected", "changes-requested"] },
+    "reviewerRole": { "type": "string", "minLength": 1, "maxLength": 120 },
+    "reviewerPrincipalRef": { "type": "string", "pattern": "^[a-z0-9][a-z0-9:-]{2,120}$" },
+    "reviewedAt": { "type": "string", "format": "date-time" },
+    "reviewValidUntil": { "type": "string", "format": "date-time" },
+    "reasonCodes": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "enum": ["evidence-reviewed", "human-rejected", "changes-requested"] }
+    },
+    "approverRole": { "type": "string", "minLength": 1, "maxLength": 120 },
+    "approverPrincipalRef": { "type": "string", "pattern": "^[a-z0-9][a-z0-9:-]{2,120}$" },
+    "approvedAt": { "type": "string", "format": "date-time" },
+    "exceptionBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["exceptionOwnerRole", "validUntil", "compensatingControls", "acceptedEvidenceFamilies"],
+      "properties": {
+        "exceptionOwnerRole": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "validUntil": { "type": "string", "format": "date-time" },
+        "compensatingControls": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1, "maxLength": 160 }
+        },
+        "acceptedEvidenceFamilies": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "enum": [
+              "security-privacy",
+              "ai-governance",
+              "risk-compliance",
+              "data-model-tool-lifecycle",
+              "operations-resilience",
+              "commercial-exit",
+              "sustainability-location"
+            ]
+          }
+        }
+      }
+    },
+    "auditEventId": { "type": "string", "pattern": "^audit-[a-f0-9]{16}$" }
+  },
+  "oneOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["approverRole", "approverPrincipalRef", "approvedAt"],
+      "properties": {
+        "schemaVersion": {}, "reviewId": {}, "candidateId": {}, "candidateDigest": {},
+        "reviewAction": { "const": "approved" }, "reviewerRole": {}, "reviewerPrincipalRef": {},
+        "reviewedAt": {}, "reviewValidUntil": {}, "reasonCodes": {}, "approverRole": {},
+        "approverPrincipalRef": {}, "approvedAt": {}, "exceptionBoundary": {}, "auditEventId": {}
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": {}, "reviewId": {}, "candidateId": {}, "candidateDigest": {},
+        "reviewAction": { "const": "rejected" }, "reviewerRole": {}, "reviewerPrincipalRef": {},
+        "reviewedAt": {}, "reviewValidUntil": {}, "reasonCodes": {}, "auditEventId": {}
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": {}, "reviewId": {}, "candidateId": {}, "candidateDigest": {},
+        "reviewAction": { "const": "changes-requested" }, "reviewerRole": {}, "reviewerPrincipalRef": {},
+        "reviewedAt": {}, "reviewValidUntil": {}, "reasonCodes": {}, "auditEventId": {}
+      }
+    }
+  ]
+}

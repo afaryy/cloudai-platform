@@ -18,6 +18,11 @@ replays the recorded decision, re-evaluates the unchanged assessment at the
 requested admission time, correlates exact IDs, class, and scope, and produces
 a metadata-only `admitted` or `denied` decision.
 
+The upstream evidence boundary is now local/source-implemented with synthetic
+metadata: deterministic manifest intake, digest-bound human review, immutable
+evidence records, fail-closed lifecycle transitions, sanitized telemetry, and
+replay into the existing supplier-readiness and workload-admission evaluators.
+
 It does not contact a supplier, approve a procurement, certify a control,
 perform legal or regulatory due diligence, retrieve evidence, or call a cloud
 provider. The examples use generic identifiers and synthetic metadata only.
@@ -46,6 +51,46 @@ Supplier scope
 The schema owns the shape of accepted metadata. The evaluator owns the decision
 logic. Human owners remain accountable for the accuracy and acceptance of the
 referenced evidence.
+
+## Human-Owned Evidence Intake and Review
+
+The upstream path is **local, deterministic, metadata-only**. A synthetic
+manifest adapter validates a closed manifest and creates an immutable
+`pending-review` candidate. Human-owned review binds the decision to the
+candidate ID and exact digest. The submitter, reviewer, and final approver use
+separate opaque principal references, and an approved record becomes visible
+only after the audit event and registry record commit atomically.
+
+```text
+synthetic manifest adapter
+  -> validated immutable candidate
+  -> human-owned review bound to exact digest
+  -> atomic audit and versioned evidence record
+  -> current-record projection
+  -> existing supplier-readiness evaluator
+  -> existing workload-admission evaluator
+```
+
+Revocation and expiry append new immutable heads rather than rewriting prior
+records. Unknown versions, invalid time boundaries, digest mismatch, incomplete
+exception boundaries, separation-of-duties conflicts, broken chains, stale
+records, and authoritative write failures all fail closed. A telemetry-export
+failure records a bounded gap but cannot change authoritative state.
+
+There is **no supplier or procurement-system connection**. The implementation
+does not retrieve source documents, integrate a real identity provider, make a
+procurement or compliance decision, call a cloud service, or schedule a
+workload. It **does not grant runtime authority**.
+
+Direct implementation evidence:
+
+- [Synthetic manifest schema](../../shared/schemas/ai-supplier-evidence/synthetic-evidence-manifest.schema.json)
+- [Replayable synthetic manifest](../../shared/examples/ai-supplier-evidence/managed-service.manifest.json)
+- [Deterministic manifest adapter](../../providers/aws/app/api/src/governance/supplierEvidenceAdapter.ts)
+- [Human review and immutable registry workflow](../../providers/aws/app/api/src/governance/supplierEvidenceWorkflow.ts)
+- [Current-record assessment projection](../../providers/aws/app/api/src/governance/supplierEvidenceProjection.ts)
+- [Metadata-safe telemetry builder](../../providers/aws/app/api/src/governance/supplierEvidenceTelemetry.ts)
+- [Approved design](../superpowers/specs/2026-09-05-human-owned-supplier-evidence-adapter-design.md)
 
 ## Required Evidence Families
 
@@ -166,6 +211,10 @@ grant runtime authority.
 | Conditional acceptance and admission contracts | `shared/schemas/ai-workload-admission/` and `shared/examples/ai-workload-admission/` |
 | Supplier-aware admission evaluator | `providers/aws/app/api/src/governance/supplierWorkloadAdmissionEvaluator.ts` |
 | Admission behaviour and replay tests | `providers/aws/app/api/tests/supplierWorkloadAdmissionEvaluator.test.ts` and `providers/aws/app/api/tests/supplierWorkloadAdmissionContracts.test.ts` |
+| Evidence intake schemas and fixtures | `shared/schemas/ai-supplier-evidence/` and `shared/examples/ai-supplier-evidence/` |
+| Manifest adapter and human-review workflow | `providers/aws/app/api/src/governance/supplierEvidenceAdapter.ts` and `providers/aws/app/api/src/governance/supplierEvidenceWorkflow.ts` |
+| Evidence projection and sanitized telemetry | `providers/aws/app/api/src/governance/supplierEvidenceProjection.ts` and `providers/aws/app/api/src/governance/supplierEvidenceTelemetry.ts` |
+| Evidence workflow tests | `providers/aws/app/api/tests/supplierEvidenceContracts.test.ts`, `supplierEvidenceAdapter.test.ts`, `supplierEvidenceWorkflow.test.ts`, `supplierEvidenceProjection.test.ts`, and `supplierEvidenceTelemetry.test.ts` |
 
 Run the local validation with:
 
@@ -182,6 +231,13 @@ supplier-aware admission consumer described above.
 
 Future provider integration must remain a separate reviewed change. The local
 contract defines freshness, revocation, expiry, reassessment, replay, and
-workload-correlation semantics, but a provider integration would still need evidence-ingestion boundaries,
-identity and access controls, human approval ownership, audit retention, and
-tests that preserve the deterministic decision contract.
+workload-correlation semantics, but a provider integration would still need
+evidence-ingestion boundaries, identity and access controls, human approval
+ownership, audit retention, and tests that preserve the deterministic decision
+contract.
+
+The approved design for that upstream boundary is documented in the
+[Human-Owned Supplier Evidence Adapter and Review Workflow Design](../superpowers/specs/2026-09-05-human-owned-supplier-evidence-adapter-design.md).
+Its local synthetic implementation now proves the metadata workflow, not a
+real supplier source, raw-document pipeline, procurement system, external
+workflow, identity system, assurance outcome, or provider service.
