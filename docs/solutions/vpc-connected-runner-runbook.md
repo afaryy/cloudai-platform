@@ -43,6 +43,22 @@ reviewed, applied, and its output is stored in `aws-private-eks`. Runner runtime
 validation remains pending. Reusing `AWS_ROLE_TO_ASSUME` would collapse the
 state and identity boundaries and is not an approved workaround.
 
+## Endpoint-principal handoff
+
+Private endpoint policies are tightened in three stages:
+
+| Phase | Allowed principals | Purpose |
+| --- | --- | --- |
+| `bootstrap` | Private-network Terraform role | Create and inspect the shared network without guessing future role ARNs |
+| `runner` | Network role plus deployed CodeBuild service role | Allow the recovery runner to reach approved AWS endpoints before EKS bootstrap |
+| `expanded` | Network role, CodeBuild service role, and EKS node role | Allow one private CPU worker to authenticate, pull its image, and publish logs |
+
+The CodeBuild service-role ARN is a runner-state output and the node-role ARN
+is a private-EKS-state output. Neither may be guessed, wildcarded, or copied to
+public evidence. The EKS node role is created first with desired worker
+capacity zero; only then can the endpoint policy move to `expanded` before one
+worker is activated.
+
 ## State ownership
 
 | State | Owns | Must not own |
@@ -137,6 +153,21 @@ codebuild-<project>-<github.run_id>-<github.run_attempt>
 Only after both metadata validation and an ephemeral execution smoke may
 `PRIVATE_EKS_RUNNER_FOUNDATION_READY` and `PRIVATE_EKS_RUNNER_READY` be reviewed
 for downstream use.
+
+## Outbound GitHub connectivity
+
+A VPC-attached CodeBuild runner still needs outbound access to GitHub for job
+registration, source and action downloads, OIDC exchange, and result upload.
+AWS service endpoints cover the private AWS path but do not provide GitHub
+connectivity. Without an approved NAT, proxy, or equivalent egress path, the
+job can wait or fail before repository steps run.
+
+For this bounded POC, a NAT gateway is the currently proposed path. It remains
+a separately reviewed cost and egress choice: the network plan must show it
+explicitly, the exercise duration and stop owner must be recorded, and no
+runtime readiness flag is set merely because NAT was enabled. A reusable
+technical target may instead use a central egress proxy or firewall with
+domain policy and telemetry.
 
 ## Failure rules
 

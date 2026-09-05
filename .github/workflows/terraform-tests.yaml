@@ -13,6 +13,8 @@ on:
       - ".github/workflows/terraform-eks-gpu-kueue-poc.yml"
       - ".github/workflows/terraform-eks-private-sandbox.yml"
       - ".github/workflows/terraform-eks-private-network.yml"
+      - ".github/workflows/terraform-eks-private-runner.yml"
+      - ".github/workflows/build-private-eks-cpu-smoke-image.yml"
       - ".github/workflows/arc-private-eks-handoff.yml"
       - ".github/workflows/private-eks-teardown-plan.yml"
       - "scripts/gpu-quota.sh"
@@ -20,6 +22,8 @@ on:
       - "scripts/validate-private-eks-teardown-readiness.sh"
       - "scripts/tests/test-private-eks-teardown-readiness.sh"
       - "scripts/tests/test-private-eks-teardown-workflow.sh"
+      - "scripts/validate-private-eks-cpu-runtime.sh"
+      - "scripts/tests/test-private-eks-cpu-runtime.sh"
       - "providers/aws/infra/terraform/**"
       - "providers/aws/app/api/**"
   push:
@@ -36,6 +40,8 @@ on:
       - ".github/workflows/terraform-eks-gpu-kueue-poc.yml"
       - ".github/workflows/terraform-eks-private-sandbox.yml"
       - ".github/workflows/terraform-eks-private-network.yml"
+      - ".github/workflows/terraform-eks-private-runner.yml"
+      - ".github/workflows/build-private-eks-cpu-smoke-image.yml"
       - ".github/workflows/arc-private-eks-handoff.yml"
       - ".github/workflows/private-eks-teardown-plan.yml"
       - "scripts/gpu-quota.sh"
@@ -43,6 +49,8 @@ on:
       - "scripts/validate-private-eks-teardown-readiness.sh"
       - "scripts/tests/test-private-eks-teardown-readiness.sh"
       - "scripts/tests/test-private-eks-teardown-workflow.sh"
+      - "scripts/validate-private-eks-cpu-runtime.sh"
+      - "scripts/tests/test-private-eks-cpu-runtime.sh"
       - "providers/aws/infra/terraform/**"
       - "providers/aws/app/api/**"
   workflow_dispatch:
@@ -348,6 +356,7 @@ jobs:
           grep -q -- '- plan' "$workflow"
           grep -q -- '- preflight' "$workflow"
           grep -q -- '- apply' "$workflow"
+          grep -q -- '- runtime-validate' "$workflow"
           grep -q -- '- stop' "$workflow"
           grep -q 'runs-on: codebuild-' "$workflow"
           grep -q 'environment: aws-private-eks' "$workflow"
@@ -365,8 +374,13 @@ jobs:
           grep -q 'PRIVATE_EKS_BACKEND_READY' "$workflow"
           grep -q 'PRIVATE_EKS_BOOTSTRAP_ROLE_READY' "$workflow"
           grep -q 'I_UNDERSTAND_PRIVATE_EKS_APPLY' "$workflow"
+          grep -q 'I_UNDERSTAND_PRIVATE_EKS_CPU_RUNTIME_VALIDATE' "$workflow"
           grep -q 'I_UNDERSTAND_PRIVATE_EKS_STOP' "$workflow"
+          grep -q 'PRIVATE_EKS_CPU_SMOKE_IMAGE' "$workflow"
           grep -q 'terraform apply -input=false -auto-approve -no-color' "$workflow"
+          grep -q 'aws eks update-kubeconfig' "$workflow"
+          grep -q 'validate-private-eks-cpu-runtime.sh' "$workflow"
+          grep -q 'eks-private-cpu-runtime-evidence' "$workflow"
           grep -q 'aws eks describe-cluster' "$workflow"
           grep -q 'endpointPrivateAccess' "$workflow"
           grep -q 'MapPublicIpOnLaunch == false' "$workflow"
@@ -382,6 +396,37 @@ jobs:
           grep -q 'data "terraform_remote_state" "network"' "$composition"
           ! grep -q 'variable "delivery_runner_security_group_id"' "$variables"
           ! grep -q 'variable "private_artifact_bucket_arns"' "$variables"
+          grep -q 'output "node_role_arn"' providers/aws/infra/terraform/modules/eks/outputs.tf
+          grep -q 'output "node_role_arn"' providers/aws/infra/terraform/envs/eks-private-sandbox/outputs.tf
+          grep -A5 'output "node_role_arn"' providers/aws/infra/terraform/envs/eks-private-sandbox/outputs.tf | grep -q 'sensitive.*=.*true'
+
+  eks_private_cpu_runtime_behavior:
+    name: Private EKS CPU runtime behavior
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Exercise CPU runtime acceptance and cleanup
+        run: bash scripts/tests/test-private-eks-cpu-runtime.sh
+
+  eks_private_cpu_image_boundary:
+    name: Private EKS CPU image promotion boundary
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Check immutable amd64 image promotion
+        run: |
+          workflow=.github/workflows/build-private-eks-cpu-smoke-image.yml
+          test -f "$workflow"
+          grep -q 'environment: aws-sandbox' "$workflow"
+          grep -q 'I_UNDERSTAND_PRIVATE_EKS_CPU_IMAGE_PUSH' "$workflow"
+          grep -q 'platforms: linux/amd64' "$workflow"
+          grep -q 'providers/aws/app/agentcore-rag-runtime' "$workflow"
+          grep -q 'AWS_AGENTCORE_RAG_IMAGE_PUBLISHER_ROLE_TO_ASSUME' "$workflow"
+          grep -q 'steps.build.outputs.digest' "$workflow"
+          grep -q 'docker pull --platform linux/amd64' "$workflow"
+          ! grep -Eq 'terraform (apply|destroy)' "$workflow"
 
   eks_private_network_runner_workflow_boundary:
     name: Private network and runner workflow boundary
@@ -398,15 +443,21 @@ jobs:
           grep -q 'terraform init -backend=false' "$network_workflow"
           grep -q 'principal_phase' "$network_workflow"
           grep -q -- '- bootstrap' "$network_workflow"
+          grep -q -- '- runner' "$network_workflow"
           grep -q -- '- expanded' "$network_workflow"
           grep -q 'PRIVATE_EKS_ENDPOINT_PRINCIPAL_PHASE' "$network_workflow"
           grep -q 'bootstrap requires exactly one explicit IAM role ARN' "$network_workflow"
+          grep -q 'runner requires exactly two explicit IAM role ARNs' "$network_workflow"
           grep -q 'expanded requires at least three explicit IAM role ARNs' "$network_workflow"
           ! grep -q 'kubectl' "$network_workflow"
           ! grep -q 'helm ' "$network_workflow"
           grep -q 'codebuild-' "$eks_workflow"
           grep -q 'github.run_id' "$eks_workflow"
           grep -q 'I_UNDERSTAND_PRIVATE_EKS_APPLY' "$eks_workflow"
+          grep -q -- '- bootstrap-apply' "$eks_workflow"
+          grep -q 'I_UNDERSTAND_PRIVATE_EKS_BOOTSTRAP_APPLY' "$eks_workflow"
+          grep -q 'node_desired_size=0' "$eks_workflow"
+          grep -q 'worker_capacity_zero' "$eks_workflow"
           grep -q 'PRIVATE_EKS_RUNNER_READY' "$eks_workflow"
 
   eks_private_runner_lifecycle_workflow_boundary:

@@ -1,0 +1,130 @@
+name: build-private-eks-cpu-smoke-image
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirmation:
+        description: "Type I_UNDERSTAND_PRIVATE_EKS_CPU_IMAGE_PUSH to publish the synthetic CPU smoke image"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: cloudai-private-eks-cpu-image
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build and push immutable amd64 CPU smoke image
+    runs-on: ubuntu-latest
+    environment: aws-sandbox
+    env:
+      AWS_ROLE_TO_ASSUME: ${{ vars.AWS_ROLE_TO_ASSUME || secrets.AWS_ROLE_TO_ASSUME }}
+      AWS_REGION: ${{ vars.AWS_REGION || 'ap-southeast-2' }}
+      AWS_AGENTCORE_RAG_IMAGE_PUBLISHER_ROLE_TO_ASSUME: ${{ vars.AWS_AGENTCORE_RAG_IMAGE_PUBLISHER_ROLE_TO_ASSUME }}
+      TF_BACKEND_BUCKET: ${{ vars.TF_BACKEND_BUCKET }}
+      TF_BACKEND_LOCK_TABLE: ${{ vars.TF_BACKEND_LOCK_TABLE }}
+      TF_STATE_KEY_PREFIX: ${{ vars.TF_STATE_KEY_PREFIX }}
+      TF_STATE_KEY: ${{ vars.TF_STATE_KEY_PREFIX }}/agentcore-rag-sandbox/terraform.tfstate
+    defaults:
+      run:
+        working-directory: providers/aws/infra/terraform/envs/agentcore-rag-sandbox
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Confirm image push boundary
+        env:
+          CONFIRMATION: ${{ inputs.confirmation }}
+        run: |
+          if [ "$CONFIRMATION" != "I_UNDERSTAND_PRIVATE_EKS_CPU_IMAGE_PUSH" ]; then
+            echo "::error::Image push requires I_UNDERSTAND_PRIVATE_EKS_CPU_IMAGE_PUSH."
+            exit 1
+          fi
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Check foundation environment
+        run: |
+          missing=0
+          for name in AWS_ROLE_TO_ASSUME AWS_REGION AWS_AGENTCORE_RAG_IMAGE_PUBLISHER_ROLE_TO_ASSUME TF_BACKEND_BUCKET TF_BACKEND_LOCK_TABLE TF_STATE_KEY_PREFIX; do
+            if [ -z "${!name}" ]; then
+              echo "::error::$name is required in aws-sandbox."
+              missing=1
+            fi
+          done
+          exit "$missing"
+
+      - name: Configure AWS credentials through GitHub OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ env.AWS_REGION }}
+          mask-aws-account-id: true
+
+      - name: Read Terraform-managed synthetic ECR repository
+        run: |
+          terraform init \
+            -backend-config="bucket=${TF_BACKEND_BUCKET}" \
+            -backend-config="key=${TF_STATE_KEY}" \
+            -backend-config="region=${AWS_REGION}" \
+            -backend-config="dynamodb_table=${TF_BACKEND_LOCK_TABLE}" \
+            -backend-config="encrypt=true"
+          repository_url="$(terraform output -raw ecr_repository_url)"
+          if [ -z "$repository_url" ]; then
+            echo "::error::No ECR output exists. The AgentCore RAG sandbox repository must already be deployed."
+            exit 1
+          fi
+          echo "REPOSITORY_URL=$repository_url" >> "$GITHUB_ENV"
+
+      - name: Assume dedicated image publisher role
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.AWS_AGENTCORE_RAG_IMAGE_PUBLISHER_ROLE_TO_ASSUME }}
+          aws-region: ${{ env.AWS_REGION }}
+          mask-aws-account-id: true
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push immutable amd64 image
+        id: build
+        uses: docker/build-push-action@v6
+        with:
+          context: providers/aws/app/agentcore-rag-runtime
+          platforms: linux/amd64
+          push: true
+          tags: ${{ env.REPOSITORY_URL }}:${{ github.sha }}-private-cpu-smoke
+          provenance: false
+          sbom: false
+
+      - name: Verify digest and image architecture
+        env:
+          IMAGE_DIGEST: ${{ steps.build.outputs.digest }}
+        run: |
+          if [ -z "$IMAGE_DIGEST" ]; then
+            echo "::error::The image build did not return an immutable digest."
+            exit 1
+          fi
+          image_uri="${REPOSITORY_URL}@${IMAGE_DIGEST}"
+          docker pull --platform linux/amd64 "$image_uri"
+          image_platform="$(docker image inspect "$image_uri" --format '{{.Os}}/{{.Architecture}}')"
+          if [ "$image_platform" != "linux/amd64" ]; then
+            echo "::error::The pushed image reports $image_platform, expected linux/amd64."
+            exit 1
+          fi
+          {
+            echo "### Private EKS CPU smoke image"
+            echo
+            printf '%s\n' '- Platform: `linux/amd64`'
+            printf '%s\n' "- Immutable URI: \`$image_uri\`"
+            echo
+            echo "Set PRIVATE_EKS_CPU_SMOKE_IMAGE in the aws-private-eks environment to this immutable URI before runtime validation."
+          } >> "$GITHUB_STEP_SUMMARY"

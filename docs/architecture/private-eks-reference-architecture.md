@@ -277,12 +277,14 @@ privilege, short-lived credentials, and independent recovery capability.
 ```text
 1. Design the VPC-connected runner contract
 2. Implement the source and protected CI path
-3. Validate runner, endpoint, backend, and IAM prerequisites
-4. Perform protected private-worker bootstrap
-5. Validate private EKS API, worker networking, image pull, and evidence
-6. Install ARC controller and ephemeral runner scale sets
-7. Move Helm/Argo/Kueue/GPU delivery to ARC
-8. Add bounded GPU validation only after ordinary private-worker validation
+3. Apply the network with only the network role in endpoint policy
+4. Provision the runner and add its service role to endpoint policy
+5. Bootstrap EKS with zero desired workers to create the node role
+6. Add the node role to endpoint policy, then activate one CPU worker
+7. Validate private EKS API, private image pull, CPU Job, and cleanup evidence
+8. Install ARC controller and ephemeral runner scale sets
+9. Move Helm/Argo/Kueue/GPU delivery to ARC
+10. Add bounded GPU validation only after ordinary private-worker validation
 ```
 
 The current repository has the private-EKS Terraform, CodeBuild runner source,
@@ -290,6 +292,29 @@ and protected workflow contracts, but private-worker and runner runtime
 validation remain pending. No ARC runtime claim should be made until Phase 0 is complete. The former
 in-cluster runner pattern remains valid as a Phase 1 steady-state pattern; it
 does not remove the Phase 0 bootstrap and recovery requirement.
+
+### Why EKS bootstrap starts with zero workers
+
+Endpoint policies require explicit principals, but the EKS node role is
+created by the EKS Terraform state. Activating a node before that role is added
+to ECR, S3, STS, EC2, EKS, and logging endpoint policies can leave the node
+unable to bootstrap. Wildcard principals would hide the dependency rather than
+solve it.
+
+The staged contract is therefore:
+
+```text
+bootstrap: network role
+  -> runner: network role + CodeBuild service role
+  -> zero-worker EKS bootstrap creates node role
+  -> expanded: network + CodeBuild + node roles
+  -> one CPU worker
+  -> digest-pinned private-ECR smoke
+```
+
+This is a provisioning sequence, not a permanent privilege expansion. Each
+phase uses an exact principal count, a new Terraform plan, and a separate
+confirmation before apply.
 
 ### Interview-ready explanation
 

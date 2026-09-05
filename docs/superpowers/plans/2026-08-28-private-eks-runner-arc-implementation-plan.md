@@ -357,7 +357,7 @@ git commit -m "ci: add private EKS runner lifecycle"
 - Consumes: sanitised state-presence categories for workload, GPU, ARC, EKS, runner and network layers.
 - Produces: ordered `teardown-plan` evidence; no deletion capability.
 
-- [ ] **Step 1: Write the failing shell tests**
+- [x] **Step 1: Write the failing shell tests**
 
 Cover these cases:
 
@@ -370,7 +370,7 @@ assert_passes "approved order" \
   env LAYERS='workloads,gpu-platform,gpu-node,arc,eks,runner,network' bash scripts/validate-private-eks-teardown-readiness.sh
 ```
 
-- [ ] **Step 2: Run the test and verify failure**
+- [x] **Step 2: Run the test and verify failure**
 
 ```bash
 bash scripts/tests/test-private-eks-teardown-readiness.sh
@@ -378,7 +378,7 @@ bash scripts/tests/test-private-eks-teardown-readiness.sh
 
 Expected: FAIL because the validator does not exist.
 
-- [ ] **Step 3: Implement the exact layer-order validator**
+- [x] **Step 3: Implement the exact layer-order validator**
 
 The script accepts only:
 
@@ -389,7 +389,7 @@ workloads,gpu-platform,gpu-node,arc,eks,runner,network
 It rejects missing, duplicated, unknown, or reordered layers and writes no cloud
 identifiers.
 
-- [ ] **Step 4: Add a plan-only workflow**
+- [x] **Step 4: Add a plan-only workflow**
 
 Expose only `inspect` and `teardown-plan`. Require:
 
@@ -402,7 +402,7 @@ inside each layer solely to produce Boolean sanitised categories. It must not
 contain `terraform destroy`, `terraform apply`, AWS delete calls, or `kubectl
 delete`.
 
-- [ ] **Step 5: Run refusal and repository tests**
+- [x] **Step 5: Run refusal and repository tests**
 
 ```bash
 bash scripts/tests/test-private-eks-teardown-readiness.sh
@@ -411,7 +411,7 @@ cd providers/aws/app/api && pnpm test
 
 Expected: all tests pass and workflow boundary checks prove no mutation path.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add scripts/validate-private-eks-teardown-readiness.sh scripts/tests/test-private-eks-teardown-readiness.sh .github/workflows/private-eks-teardown-plan.yml .github/workflows/terraform-tests.yaml docs/solutions/private-eks-layered-teardown-runbook.md
@@ -455,6 +455,12 @@ Then run `runtime-validate`. Expected: the project is VPC-attached, log delivery
 is configured, an ephemeral runner job can start and terminate, and no EKS
 resource exists yet.
 
+Before using the runner for EKS bootstrap, discover its actual CodeBuild
+service-role ARN, move the network endpoint policy from `bootstrap` to
+`runner`, and apply that reviewed two-principal policy. Confirm outbound GitHub
+connectivity through an explicitly costed NAT, proxy, or equivalent path;
+interface endpoints alone do not provide it.
+
 - [ ] **Step 5: Record evidence and commit public status only**
 
 ```bash
@@ -476,7 +482,7 @@ Do not add the private runtime note.
 - Consumes: sandbox-validated CodeBuild runner and private-network state.
 - Produces: ACTIVE private-only EKS API, one CPU system node, successful private image pull and non-GPU Job evidence.
 
-- [ ] **Step 1: Add a CPU acceptance script to the workflow**
+- [x] **Step 1: Add and locally validate the CPU acceptance script**
 
 The runtime mode must verify:
 
@@ -490,7 +496,14 @@ kubectl wait --for=condition=complete job/private-cpu-smoke --timeout=3m
 Use an approved digest-pinned private ECR image. Delete the smoke Job after
 capturing only completion status.
 
-- [ ] **Step 2: Run source tests before protected CI**
+The protected implementation uses two EKS stages. `bootstrap-apply` creates
+the control plane and node role with zero desired workers under the `runner`
+endpoint phase. After protected CI reads the sensitive node-role output, the
+network moves to `expanded`; only then may ordinary `apply` activate one CPU
+worker. Publish the amd64 smoke image through the separately confirmed
+`build-private-eks-cpu-smoke-image` workflow.
+
+- [ ] **Step 2: Run the complete source test set before protected CI**
 
 ```bash
 terraform -chdir=providers/aws/infra/terraform/envs/eks-private-sandbox test
@@ -499,17 +512,40 @@ cd providers/aws/app/api && pnpm test
 
 Expected: all tests pass.
 
-- [ ] **Step 3: Run protected plan and review the fresh result**
+- [ ] **Step 3: Run and review zero-worker bootstrap plan**
+
+Expected: private API only, control plane and node IAM role, node group bounded
+to `min=0`, `desired=0`, `max=1`, no GPU node, no duplicate network resources,
+and no deletes outside the EKS state.
+
+- [ ] **Step 4: Bootstrap with zero workers after a new exact confirmation**
+
+Use `I_UNDERSTAND_PRIVATE_EKS_BOOTSTRAP_APPLY`. Record only bounded evidence
+that worker capacity remains zero. Discover the node-role ARN privately, add it
+to the `expanded` endpoint principal set, and apply the separately reviewed
+network policy before worker activation.
+
+- [ ] **Step 5: Publish the immutable amd64 CPU smoke image**
+
+Use `I_UNDERSTAND_PRIVATE_EKS_CPU_IMAGE_PUSH`. Verify `linux/amd64`, capture the
+digest-pinned private ECR URI from the protected summary, and configure
+`PRIVATE_EKS_CPU_SMOKE_IMAGE` without committing it.
+
+- [ ] **Step 6: Run protected one-worker plan and review the fresh result**
 
 Expected: private API only, one bounded CPU node, no GPU node, no public worker
 IP, no duplicate network resources, and no deletes outside the EKS state.
 
-- [ ] **Step 4: Apply and runtime-validate after a new exact confirmation**
+- [ ] **Step 7: Apply and runtime-validate under separate confirmations**
 
 Expected: cluster ACTIVE, one Ready CPU worker, DNS and private image pull pass,
 and the CPU Job completes through the VPC-connected runner.
 
-- [ ] **Step 5: Commit the public validation record**
+Use `I_UNDERSTAND_PRIVATE_EKS_APPLY` for worker activation and
+`I_UNDERSTAND_PRIVATE_EKS_CPU_RUNTIME_VALIDATE` for the Kubernetes smoke. A
+successful apply is not runtime evidence.
+
+- [ ] **Step 8: Commit the public validation record**
 
 ```bash
 git add .github/workflows/terraform-eks-private-sandbox.yml docs/solutions/eks-private-sandbox-runbook.md docs/practices/current-status.md

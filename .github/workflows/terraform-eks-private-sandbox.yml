@@ -10,12 +10,15 @@ on:
         type: choice
         options:
           - validate
+          - bootstrap-plan
+          - bootstrap-apply
           - plan
           - preflight
           - apply
+          - runtime-validate
           - stop
       confirmation:
-        description: "Exact confirmation required for apply or stop"
+        description: "Exact confirmation required for apply, CPU runtime validation, or stop"
         required: false
         default: ""
         type: string
@@ -83,6 +86,8 @@ jobs:
       PRIVATE_EKS_ENDPOINT_POLICY_READY: ${{ vars.PRIVATE_EKS_ENDPOINT_POLICY_READY }}
       PRIVATE_EKS_BACKEND_READY: ${{ vars.PRIVATE_EKS_BACKEND_READY }}
       PRIVATE_EKS_BOOTSTRAP_ROLE_READY: ${{ vars.PRIVATE_EKS_BOOTSTRAP_ROLE_READY }}
+      PRIVATE_EKS_CPU_SMOKE_IMAGE: ${{ vars.PRIVATE_EKS_CPU_SMOKE_IMAGE }}
+      PRIVATE_EKS_ENDPOINT_PRINCIPAL_PHASE: ${{ vars.PRIVATE_EKS_ENDPOINT_PRINCIPAL_PHASE }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -128,9 +133,34 @@ jobs:
             echo "::error::Private EKS must consume the single reviewed private-network state key."
             missing=1
           fi
+          if { [ "$MODE" = "bootstrap-plan" ] || [ "$MODE" = "bootstrap-apply" ]; } && [ "$PRIVATE_EKS_ENDPOINT_PRINCIPAL_PHASE" != "runner" ]; then
+            echo "::error::EKS zero-worker bootstrap requires the runner endpoint-principal phase."
+            missing=1
+          fi
+          if { [ "$MODE" = "plan" ] || [ "$MODE" = "preflight" ] || [ "$MODE" = "apply" ] || [ "$MODE" = "runtime-validate" ]; } && [ "$PRIVATE_EKS_ENDPOINT_PRINCIPAL_PHASE" != "expanded" ]; then
+            echo "::error::$MODE requires the expanded endpoint-principal phase."
+            missing=1
+          fi
+          if [ "$MODE" = "bootstrap-apply" ] && [ "$CONFIRMATION" != "I_UNDERSTAND_PRIVATE_EKS_BOOTSTRAP_APPLY" ]; then
+            echo "::error::bootstrap-apply requires I_UNDERSTAND_PRIVATE_EKS_BOOTSTRAP_APPLY."
+            missing=1
+          fi
           if [ "$MODE" = "apply" ] && [ "$CONFIRMATION" != "I_UNDERSTAND_PRIVATE_EKS_APPLY" ]; then
             echo "::error::apply requires I_UNDERSTAND_PRIVATE_EKS_APPLY."
             missing=1
+          fi
+          if [ "$MODE" = "runtime-validate" ]; then
+            if [ "$CONFIRMATION" != "I_UNDERSTAND_PRIVATE_EKS_CPU_RUNTIME_VALIDATE" ]; then
+              echo "::error::runtime-validate requires I_UNDERSTAND_PRIVATE_EKS_CPU_RUNTIME_VALIDATE."
+              missing=1
+            fi
+            if [ -z "$PRIVATE_EKS_CPU_SMOKE_IMAGE" ]; then
+              echo "::error::PRIVATE_EKS_CPU_SMOKE_IMAGE is required for runtime-validate."
+              missing=1
+            elif ! grep -Eq '^[0-9]{12}\.dkr\.ecr\.[a-z0-9-]+\.amazonaws\.com/[a-z0-9][a-z0-9._/-]*@sha256:[0-9a-f]{64}$' <<<"$PRIVATE_EKS_CPU_SMOKE_IMAGE"; then
+              echo "::error::PRIVATE_EKS_CPU_SMOKE_IMAGE must be a digest-pinned private ECR image URI."
+              missing=1
+            fi
           fi
           if [ "$MODE" = "stop" ] && [ "$CONFIRMATION" != "I_UNDERSTAND_PRIVATE_EKS_STOP" ]; then
             echo "::error::stop requires I_UNDERSTAND_PRIVATE_EKS_STOP."
@@ -155,19 +185,42 @@ jobs:
             -backend-config="encrypt=true"
 
       - name: Terraform plan without saved artifact
-        if: ${{ inputs.mode == 'plan' }}
-        run: |
-          terraform validate
-          terraform plan -input=false -no-color > /tmp/private-eks-plan.log 2>&1
-          printf '{"mode":"plan","terraform_plan_succeeded":true,"state_key_suffix":"%s"}\n' "$TF_STATE_KEY_SUFFIX" > /tmp/private-eks-plan-evidence.json
-
-      - name: Private endpoint and route preflight
-        if: ${{ inputs.mode == 'preflight' || inputs.mode == 'apply' }}
+        if: ${{ inputs.mode == 'bootstrap-plan' || inputs.mode == 'plan' }}
         env:
           MODE: ${{ inputs.mode }}
         run: |
-          if [ "$MODE" = "apply" ]; then
-            terraform plan -input=false -no-color -out=/tmp/private-eks-apply.tfplan > /tmp/private-eks-apply-plan.log 2>&1
+          set -euo pipefail
+          terraform validate
+          plan_args=()
+          worker_capacity="one"
+          if [ "$MODE" = "bootstrap-plan" ]; then
+            plan_args+=(
+              -var=node_min_size=0
+              -var=node_desired_size=0
+              -var=node_max_size=1
+            )
+            worker_capacity="zero"
+          fi
+          terraform plan -input=false -no-color "${plan_args[@]}" > /tmp/private-eks-plan.log 2>&1
+          printf '{"mode":"%s","terraform_plan_succeeded":true,"worker_capacity":"%s","state_key_suffix":"%s","raw_identifiers_published":false}\n' "$MODE" "$worker_capacity" "$TF_STATE_KEY_SUFFIX" > /tmp/private-eks-plan-evidence.json
+
+      - name: Private endpoint and route preflight
+        if: ${{ inputs.mode == 'preflight' || inputs.mode == 'bootstrap-apply' || inputs.mode == 'apply' }}
+        env:
+          MODE: ${{ inputs.mode }}
+        run: |
+          if [ "$MODE" = "bootstrap-apply" ] || [ "$MODE" = "apply" ]; then
+            plan_args=()
+            worker_capacity="one"
+            if [ "$MODE" = "bootstrap-apply" ]; then
+              plan_args+=(
+                -var=node_min_size=0
+                -var=node_desired_size=0
+                -var=node_max_size=1
+              )
+              worker_capacity="zero"
+            fi
+            terraform plan -input=false -no-color "${plan_args[@]}" -out=/tmp/private-eks-apply.tfplan > /tmp/private-eks-apply-plan.log 2>&1
             terraform show -json /tmp/private-eks-apply.tfplan > /tmp/private-eks-apply-plan.json
             if [ "$(jq '[.resource_changes[]? | select(.change.actions | index("delete"))] | length' /tmp/private-eks-apply-plan.json)" -ne 0 ]; then
               echo "::error::Apply preflight found delete actions; refusing to continue."
@@ -193,7 +246,7 @@ jobs:
               echo "::error::GPU/Kueue/HyperPod/Slurm resources are outside this worker baseline."
               exit 1
             fi
-          printf '{"mode":"apply","plan_preflight_succeeded":true,"delete_actions":0,"network_state_consumed":true,"duplicate_network_resources":false,"eks_api_private_only":true,"runner_foundation_ready":true,"gpu_capacity_added":false,"raw_identifiers_published":false}\n' > /tmp/private-eks-preflight-evidence.json
+          printf '{"mode":"%s","plan_preflight_succeeded":true,"delete_actions":0,"network_state_consumed":true,"duplicate_network_resources":false,"eks_api_private_only":true,"runner_foundation_ready":true,"worker_capacity":"%s","gpu_capacity_added":false,"raw_identifiers_published":false}\n' "$MODE" "$worker_capacity" > /tmp/private-eks-preflight-evidence.json
           else
             terraform output -json > /tmp/private-eks-outputs.json
             vpc_id=$(jq -r '.vpc_id.value' /tmp/private-eks-outputs.json)
@@ -230,7 +283,7 @@ jobs:
           fi
 
       - name: Upload sanitised preflight evidence
-        if: ${{ inputs.mode == 'preflight' || inputs.mode == 'apply' }}
+        if: ${{ inputs.mode == 'preflight' || inputs.mode == 'bootstrap-apply' || inputs.mode == 'apply' }}
         uses: actions/upload-artifact@v4
         with:
           name: eks-private-sandbox-preflight-evidence
@@ -239,13 +292,15 @@ jobs:
           retention-days: 7
 
       - name: Apply private worker baseline after fresh plan
-        if: ${{ inputs.mode == 'apply' }}
+        if: ${{ inputs.mode == 'bootstrap-apply' || inputs.mode == 'apply' }}
+        env:
+          MODE: ${{ inputs.mode }}
         run: |
           terraform apply -input=false -auto-approve -no-color /tmp/private-eks-apply.tfplan > /tmp/private-eks-apply.log 2>&1
-          printf '{"mode":"apply","terraform_apply_succeeded":true,"gpu_capacity_added":false,"raw_identifiers_published":false}\n' > /tmp/private-eks-apply-evidence.json
+          printf '{"mode":"%s","terraform_apply_succeeded":true,"gpu_capacity_added":false,"raw_identifiers_published":false}\n' "$MODE" > /tmp/private-eks-apply-evidence.json
 
       - name: Upload sanitised apply evidence
-        if: ${{ inputs.mode == 'apply' }}
+        if: ${{ inputs.mode == 'bootstrap-apply' || inputs.mode == 'apply' }}
         uses: actions/upload-artifact@v4
         with:
           name: eks-private-sandbox-apply-evidence
@@ -254,7 +309,9 @@ jobs:
           retention-days: 7
 
       - name: Verify private worker baseline after apply
-        if: ${{ inputs.mode == 'apply' }}
+        if: ${{ inputs.mode == 'bootstrap-apply' || inputs.mode == 'apply' }}
+        env:
+          MODE: ${{ inputs.mode }}
         run: |
           terraform output -json > /tmp/private-eks-outputs.json
           vpc_id=$(jq -r '.vpc_id.value' /tmp/private-eks-outputs.json)
@@ -283,14 +340,57 @@ jobs:
             echo "::error::Applied environment is missing the required S3 gateway endpoint."
             exit 1
           fi
-          printf '{"mode":"apply","private_worker_baseline_verified":true,"eks_api_private_only":true,"private_subnets_no_public_ip":true,"approved_endpoint_set_verified":true,"raw_identifiers_published":false}\n' > /tmp/private-eks-post-apply-evidence.json
+          node_group_name=$(terraform output -raw node_group_name)
+          desired_size=$(aws eks describe-nodegroup --cluster-name "$cluster_name" --nodegroup-name "$node_group_name" --region "$AWS_REGION" --query 'nodegroup.scalingConfig.desiredSize' --output text)
+          if [ "$MODE" = "bootstrap-apply" ]; then
+            if [ "$desired_size" != "0" ]; then
+              echo "::error::Bootstrap apply must leave private worker capacity at zero."
+              exit 1
+            fi
+            printf '{"mode":"bootstrap-apply","control_plane_bootstrap_verified":true,"worker_capacity_zero":true,"eks_api_private_only":true,"private_subnets_no_public_ip":true,"approved_endpoint_set_verified":true,"raw_identifiers_published":false}\n' > /tmp/private-eks-post-apply-evidence.json
+          else
+            if [ "$desired_size" != "1" ]; then
+              echo "::error::CPU activation apply must request exactly one private worker."
+              exit 1
+            fi
+            printf '{"mode":"apply","cpu_worker_capacity_requested":true,"worker_capacity_one":true,"runtime_validation_pending":true,"eks_api_private_only":true,"private_subnets_no_public_ip":true,"approved_endpoint_set_verified":true,"raw_identifiers_published":false}\n' > /tmp/private-eks-post-apply-evidence.json
+          fi
 
       - name: Upload sanitised post-apply evidence
-        if: ${{ inputs.mode == 'apply' }}
+        if: ${{ inputs.mode == 'bootstrap-apply' || inputs.mode == 'apply' }}
         uses: actions/upload-artifact@v4
         with:
           name: eks-private-sandbox-post-apply-evidence
           path: /tmp/private-eks-post-apply-evidence.json
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Configure private Kubernetes API access
+        if: ${{ inputs.mode == 'runtime-validate' }}
+        run: |
+          set -euo pipefail
+          cluster_name=$(terraform output -raw cluster_name)
+          cluster_status=$(aws eks describe-cluster --name "$cluster_name" --region "$AWS_REGION" --query 'cluster.status' --output text)
+          if [ "$cluster_status" != "ACTIVE" ]; then
+            echo "::error::Private EKS cluster must be ACTIVE before CPU runtime validation."
+            exit 1
+          fi
+          aws eks update-kubeconfig --name "$cluster_name" --region "$AWS_REGION" >/dev/null
+
+      - name: Run bounded private CPU smoke
+        if: ${{ inputs.mode == 'runtime-validate' }}
+        env:
+          CPU_SMOKE_IMAGE: ${{ env.PRIVATE_EKS_CPU_SMOKE_IMAGE }}
+          EVIDENCE_PATH: /tmp/private-eks-cpu-runtime-evidence.json
+        working-directory: ${{ github.workspace }}
+        run: bash scripts/validate-private-eks-cpu-runtime.sh
+
+      - name: Upload sanitised CPU runtime evidence
+        if: ${{ inputs.mode == 'runtime-validate' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: eks-private-cpu-runtime-evidence
+          path: /tmp/private-eks-cpu-runtime-evidence.json
           if-no-files-found: error
           retention-days: 7
 
