@@ -2,7 +2,7 @@
 
 **Linear:** YY-65
 
-**Status:** Sectioned design approved; written specification under review
+**Status:** Approved design; implementation planning
 
 **Date:** 5 September 2026
 
@@ -213,6 +213,9 @@ Key constraints:
 - `authenticityState` is bounded to verified, failed, or unknown;
 - `redactionState` is bounded to passed or failed;
 - failed or unknown authenticity and failed redaction cannot enter review;
+- the first local implementation persists only validated `pending-review`
+  candidates; submitted, validation-pending, and validation-failed are workflow
+  outcomes rather than mutable candidate snapshots;
 - candidate identity is deterministic from a canonical tuple containing source
   reference, source version, content digest, and adapter version;
 - replaying the same canonical tuple returns the same candidate identity; and
@@ -221,8 +224,8 @@ Key constraints:
 
 `submittedByPrincipalRef` is an opaque, controlled identity reference used to
 enforce separation of duties. It is not a personal name and is not exported to
-public fixtures, metrics, or CI evidence. The synthetic implementation uses
-generic principal references only.
+metrics or CI evidence. Real principal references are never published; public
+fixtures use generic synthetic principal references only.
 
 The precise digest and canonicalization algorithm belongs in the future
 implementation plan and must be versioned. It must not be invented implicitly
@@ -276,7 +279,8 @@ review; the existing review is never rebound.
 
 Opaque principal references remain in the controlled review and audit record
 so the workflow can compare submitter, reviewer, and approver identities. They
-must not be used as telemetry dimensions or copied to public examples.
+must not be used as telemetry dimensions. Public examples may contain only
+generic synthetic principal references, never real identity-provider subjects.
 
 ### 6.3 Versioned Evidence Record
 
@@ -357,9 +361,11 @@ validation-pending
   -> validation-failed
 ```
 
-Only defined transitions are valid. Terminal candidate states cannot be
-reopened. An approved record remains usable only until its original validity
-boundary and only while no material invalidation event applies.
+Only defined transitions are valid. The lifecycle state is derived from the
+immutable candidate, latest review, and evidence-record chain; the candidate is
+not mutated as the workflow advances. Terminal outcomes cannot be reopened. An
+approved record remains usable only until its original validity boundary and
+only while no material invalidation event applies.
 
 ### 7.1 Refresh
 
