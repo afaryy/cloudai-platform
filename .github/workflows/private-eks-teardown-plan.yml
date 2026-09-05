@@ -1,0 +1,154 @@
+name: private-eks-teardown-plan
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "Inspect the source contract or produce a read-only layered teardown plan"
+        required: true
+        default: "inspect"
+        type: choice
+        options:
+          - inspect
+          - teardown-plan
+      confirmation:
+        description: "Exact confirmation required for the protected plan-only inventory"
+        required: false
+        default: ""
+        type: string
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: cloudai-private-eks-teardown-planning
+  cancel-in-progress: false
+
+env:
+  LAYER_ORDER: workloads,gpu-platform,gpu-node,arc,eks,runner,network
+
+jobs:
+  inspect:
+    name: Inspect layered teardown contract
+    if: ${{ inputs.mode == 'inspect' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate exact dependency order
+        env:
+          MODE: inspect
+          CONFIRMATION: ""
+          LAYERS: ${{ env.LAYER_ORDER }}
+        run: bash scripts/validate-private-eks-teardown-readiness.sh
+
+      - name: Publish source-only inspection evidence
+        run: |
+          echo '### Private EKS layered teardown inspection' >> "$GITHUB_STEP_SUMMARY"
+          echo '- Exact seven-layer order: valid' >> "$GITHUB_STEP_SUMMARY"
+          echo '- Remote state inspected: false' >> "$GITHUB_STEP_SUMMARY"
+          echo '- Destructive execution available: false' >> "$GITHUB_STEP_SUMMARY"
+          echo '- Raw identifiers published: false' >> "$GITHUB_STEP_SUMMARY"
+
+  teardown_plan:
+    name: Produce protected read-only teardown plan
+    if: ${{ inputs.mode == 'teardown-plan' }}
+    runs-on: ubuntu-latest
+    environment: aws-private-eks
+    env:
+      AWS_ROLE_TO_ASSUME: ${{ vars.AWS_ROLE_TO_ASSUME || secrets.AWS_ROLE_TO_ASSUME }}
+      AWS_REGION: ${{ vars.AWS_REGION || 'ap-southeast-2' }}
+      TF_BACKEND_BUCKET: ${{ vars.TF_BACKEND_BUCKET }}
+      TF_STATE_KEY_PREFIX: ${{ vars.TF_STATE_KEY_PREFIX }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate plan-only boundary
+        env:
+          MODE: ${{ inputs.mode }}
+          CONFIRMATION: ${{ inputs.confirmation }}
+          LAYERS: ${{ env.LAYER_ORDER }}
+        run: |
+          set -euo pipefail
+          for name in AWS_ROLE_TO_ASSUME AWS_REGION TF_BACKEND_BUCKET TF_STATE_KEY_PREFIX; do
+            if [ -z "${!name}" ]; then
+              echo "::error::$name is required in the aws-private-eks environment."
+              exit 1
+            fi
+          done
+          bash scripts/validate-private-eks-teardown-readiness.sh
+
+      - name: Configure read-only AWS session through GitHub OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ env.AWS_REGION }}
+          mask-aws-account-id: true
+
+      - name: Inspect managed state-object presence without reading state
+        run: |
+          set -euo pipefail
+
+          state_presence() {
+            local state_suffix="$1"
+            if aws s3api head-object \
+              --bucket "$TF_BACKEND_BUCKET" \
+              --key "${TF_STATE_KEY_PREFIX}/${state_suffix}/terraform.tfstate" \
+              >/dev/null 2>&1; then
+              echo 'present'
+            else
+              echo 'unknown'
+            fi
+          }
+
+          gpu_state=$(state_presence 'eks-gpu-kueue-poc')
+          eks_state=$(state_presence 'eks-private-sandbox')
+          runner_state=$(state_presence 'eks-private-runner')
+          network_state=$(state_presence 'eks-private-network')
+
+          jq -n \
+            --arg gpu "$gpu_state" \
+            --arg eks "$eks_state" \
+            --arg runner "$runner_state" \
+            --arg network "$network_state" \
+            '{
+              schema_version: "1.0",
+              mode: "teardown-plan",
+              ordered_layers_valid: true,
+              layer_count: 7,
+              managed_state_presence: {
+                gpu_platform_and_node: $gpu,
+                eks: $eks,
+                runner: $runner,
+                network: $network
+              },
+              manual_runtime_inspection_required: {
+                workloads: true,
+                arc: true
+              },
+              raw_state_retrieved: false,
+              raw_identifiers_published: false,
+              destructive_execution_available: false
+            }' > /tmp/private-eks-teardown-plan-evidence.json
+
+      - name: Upload sanitised plan evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: private-eks-teardown-plan-evidence
+          path: /tmp/private-eks-teardown-plan-evidence.json
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Publish sanitised plan summary
+        run: |
+          echo '### Private EKS layered teardown plan' >> "$GITHUB_STEP_SUMMARY"
+          echo '- Exact order validated: workloads → GPU platform → GPU node → ARC → EKS → runner → network' >> "$GITHUB_STEP_SUMMARY"
+          echo '- Managed state presence recorded as bounded categories only' >> "$GITHUB_STEP_SUMMARY"
+          echo '- Workload and ARC runtime inspection remains a manual prerequisite' >> "$GITHUB_STEP_SUMMARY"
+          echo '- Destructive execution available: false' >> "$GITHUB_STEP_SUMMARY"
+          echo '- Raw identifiers published: false' >> "$GITHUB_STEP_SUMMARY"

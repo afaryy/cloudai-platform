@@ -22,5 +22,6 @@ evidence, validation, trade-offs, and explicit limits.
   [key process record](p8i-agentcore-rag-key-process-record.md), and
   [POC runbook](agentcore-governed-rag-poc-runbook.md)
 - [Private EKS GitHub Environment Readiness](private-eks-github-environment-readiness.md)
+- [Private EKS Layered Teardown Planning Gate](private-eks-layered-teardown-runbook.md)
 - [Solution Walkthrough](cloudai-platform-solution-walkthrough.md) and
   [Featured Solutions](featured-solutions.md)
