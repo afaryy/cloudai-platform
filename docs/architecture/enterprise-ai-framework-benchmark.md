@@ -120,6 +120,9 @@ business outcome and owner
 The framework comparison supports a ports-and-adapters boundary for future
 supplier evidence:
 
+The approved detailed architecture is recorded in the
+[Human-Owned Supplier Evidence Adapter and Review Workflow Design](../superpowers/specs/2026-09-05-human-owned-supplier-evidence-adapter-design.md).
+
 ```text
 controlled raw-evidence source
   -> quarantined, least-privilege adapter
@@ -176,4 +179,3 @@ not the goal.
 5. Mark each project claim as design-only, mock-first, source-implemented,
    sandbox-validated, or production-validated.
 6. Require repository evidence before changing an implementation-status claim.
-

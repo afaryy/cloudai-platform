@@ -182,6 +182,12 @@ supplier-aware admission consumer described above.
 
 Future provider integration must remain a separate reviewed change. The local
 contract defines freshness, revocation, expiry, reassessment, replay, and
-workload-correlation semantics, but a provider integration would still need evidence-ingestion boundaries,
-identity and access controls, human approval ownership, audit retention, and
-tests that preserve the deterministic decision contract.
+workload-correlation semantics, but a provider integration would still need
+evidence-ingestion boundaries, identity and access controls, human approval
+ownership, audit retention, and tests that preserve the deterministic decision
+contract.
+
+The approved design for that upstream boundary is documented in the
+[Human-Owned Supplier Evidence Adapter and Review Workflow Design](../superpowers/specs/2026-09-05-human-owned-supplier-evidence-adapter-design.md).
+It remains design-only: no real supplier source, raw document, procurement
+system, external workflow, or provider service is connected by that document.
