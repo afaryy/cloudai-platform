@@ -448,6 +448,11 @@ Resources:
                   - codebuild:CreateWebhook
                   - codebuild:UpdateProjectVisibility
                 Resource: !Sub "arn:${AWS::Partition}:codebuild:${AWS::Region}:${AWS::AccountId}:project/cloudai-platform-private-eks-runner"
+              - Sid: DiscoverCodeBuildSourceCredentials
+                Effect: Allow
+                Action:
+                  - codebuild:ListSourceCredentials
+                Resource: "*"
               - Sid: ManageOnlyPrivateEKSRunnerServiceRole
                 Effect: Allow
                 Action:

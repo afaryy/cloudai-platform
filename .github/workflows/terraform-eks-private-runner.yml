@@ -10,6 +10,7 @@ on:
         type: choice
         options:
           - source-validate
+          - auth-discover
           - plan
           - apply
           - runtime-validate
@@ -55,9 +56,63 @@ jobs:
           terraform validate
           terraform test
 
+  source_auth_discovery:
+    name: Read-only CodeBuild GitHub source auth discovery
+    if: ${{ inputs.mode == 'auth-discover' }}
+    runs-on: ubuntu-latest
+    environment: aws-private-eks
+    env:
+      AWS_PRIVATE_EKS_RUNNER_ROLE_TO_ASSUME: ${{ vars.AWS_PRIVATE_EKS_RUNNER_ROLE_TO_ASSUME || secrets.AWS_PRIVATE_EKS_RUNNER_ROLE_TO_ASSUME }}
+      AWS_REGION: ${{ vars.AWS_REGION || 'ap-southeast-2' }}
+    steps:
+      - name: Check discovery inputs
+        run: |
+          set -euo pipefail
+          test -n "$AWS_PRIVATE_EKS_RUNNER_ROLE_TO_ASSUME"
+          test -n "$AWS_REGION"
+
+      - name: Configure AWS credentials through dedicated runner OIDC role
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.AWS_PRIVATE_EKS_RUNNER_ROLE_TO_ASSUME }}
+          aws-region: ${{ env.AWS_REGION }}
+          mask-aws-account-id: true
+
+      - name: Discover account-level GitHub source auth without publishing identifiers
+        run: |
+          set -euo pipefail
+          aws codebuild list-source-credentials --region "$AWS_REGION" --output json > /tmp/private-runner-source-credentials.json
+          github_count=$(jq '[.sourceCredentialsInfos[]? | select(.serverType == "GITHUB")] | length' /tmp/private-runner-source-credentials.json)
+          acceptable_count=$(jq '[.sourceCredentialsInfos[]? | select(.serverType == "GITHUB" and (.authType == "OAUTH" or .authType == "CODECONNECTIONS" or .authType == "SECRETS_MANAGER"))] | length' /tmp/private-runner-source-credentials.json)
+          credential_present=false
+          credential_unique=false
+          auth_acceptable=false
+          if [ "$github_count" -gt 0 ]; then credential_present=true; fi
+          if [ "$github_count" -eq 1 ]; then credential_unique=true; fi
+          if [ "$github_count" -eq 1 ] && [ "$acceptable_count" -eq 1 ]; then auth_acceptable=true; fi
+          jq -n \
+            --argjson present "$credential_present" \
+            --argjson unique "$credential_unique" \
+            --argjson acceptable "$auth_acceptable" \
+            '{github_source_credential_present:$present,github_source_credential_unique:$unique,github_source_auth_acceptable:$acceptable,raw_identifiers_published:false}' \
+            > /tmp/private-runner-source-auth-evidence.json
+          if [ "$credential_unique" != "true" ] || [ "$auth_acceptable" != "true" ]; then
+            echo "::error::A unique approved account-level GitHub source credential was not discovered; stop before runner plan."
+            exit 1
+          fi
+
+      - name: Upload sanitised source-auth evidence
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: eks-private-runner-source-auth-evidence
+          path: /tmp/private-runner-source-auth-evidence.json
+          if-no-files-found: error
+          retention-days: 7
+
   protected_runner:
     name: Protected VPC-connected runner lifecycle
-    if: ${{ inputs.mode != 'source-validate' }}
+    if: ${{ inputs.mode != 'source-validate' && inputs.mode != 'auth-discover' }}
     runs-on: ubuntu-latest
     environment: aws-private-eks
     defaults:

@@ -471,6 +471,7 @@ jobs:
           workflow=.github/workflows/terraform-eks-private-runner.yml
           test -f "$workflow"
           grep -q -- '- source-validate' "$workflow"
+          grep -q -- '- auth-discover' "$workflow"
           grep -q -- '- plan' "$workflow"
           grep -q -- '- apply' "$workflow"
           grep -q -- '- runtime-validate' "$workflow"
@@ -482,6 +483,9 @@ jobs:
           grep -q 'TF_VAR_network_state_key' "$workflow"
           grep -q 'TF_VAR_network_state_region' "$workflow"
           grep -q 'aws codebuild batch-get-projects' "$workflow"
+          grep -q 'aws codebuild list-source-credentials' "$workflow"
+          grep -q 'github_source_credential_present' "$workflow"
+          ! grep -q 'aws codebuild import-source-credentials' "$workflow"
           grep -q 'runner_project_present' "$workflow"
           grep -q 'raw_identifiers_published' "$workflow"
           ! grep -q 'terraform destroy' "$workflow"
@@ -527,6 +531,10 @@ jobs:
           raise "runner state must be writable" unless %w[s3:GetObject s3:PutObject s3:DeleteObject].all? { |action| runner_state.fetch("Action").include?(action) }
           network_state = statements.fetch("PrivateEKSNetworkStateReadOnly")
           raise "network state must be read only" unless network_state.fetch("Action") == ["s3:GetObject"]
+
+          source_discovery = statements.fetch("DiscoverCodeBuildSourceCredentials")
+          raise "source credential discovery must be read only" unless source_discovery.fetch("Action") == ["codebuild:ListSourceCredentials"]
+          raise "ListSourceCredentials has no resource-level IAM scope" unless source_discovery.fetch("Resource") == "*"
 
           pass_role = statements.fetch("PassOnlyPrivateEKSRunnerServiceRole")
           raise "PassRole must be exact" unless pass_role.fetch("Action") == ["iam:PassRole"]

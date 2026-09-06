@@ -139,14 +139,13 @@ Follow this order so a missing prerequisite fails before any AWS API call:
    approved. The protected workflow performs its own fresh no-delete plan.
 8. Ensure the applied network state contains the current remote-output
    contract, including `vpc_cidr`, before any consumer state is planned.
-9. After bootstrap network verification, review the dedicated runner-state OIDC
-   role in the bootstrap source, create and inspect a non-executing change set,
-   and obtain a separate apply approval. Only after apply should
-   `AWS_PRIVATE_EKS_RUNNER_ROLE_TO_ASSUME` be configured from
-   `PrivateEKSRunnerRoleArn`; do not reuse or expand the network-state role.
-   Then configure the remaining private-runner and private-EKS variables. The
-   CodeBuild account-level GitHub source connection must be reviewed separately;
-   no GitHub token is stored in Terraform.
+9. The dedicated runner-state OIDC role has been applied and
+   `AWS_PRIVATE_EKS_RUNNER_ROLE_TO_ASSUME` has been handed off from the
+   `PrivateEKSRunnerRoleArn` output. Do not reuse or expand the network-state
+   role. Before configuring the remaining private-runner values, run the
+   protected read-only `auth-discover` mode and require sanitised evidence of
+   one approved account-level GitHub source credential. No GitHub token is
+   stored in Terraform or published in workflow evidence.
 10. Apply and metadata-validate the runner foundation. Discover its actual
     CodeBuild service-role ARN, update the endpoint list to exactly the network
     role plus runner role, select `runner`, and apply the reviewed endpoint
