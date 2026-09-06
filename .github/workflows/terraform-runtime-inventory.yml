@@ -31,14 +31,14 @@ jobs:
       - name: Configure read-only AWS session through GitHub OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          role-to-assume: ${{ vars.AWS_ROLE_TO_ASSUME || secrets.AWS_ROLE_TO_ASSUME }}
           aws-region: ${{ env.AWS_REGION }}
           mask-aws-account-id: true
 
       - name: Discover sanitised runtime inventory
         env:
-          TF_BACKEND_BUCKET: ${{ secrets.TF_BACKEND_BUCKET }}
-          TF_STATE_KEY_PREFIX: ${{ secrets.TF_STATE_KEY_PREFIX }}
+          TF_BACKEND_BUCKET: ${{ vars.TF_BACKEND_BUCKET }}
+          TF_STATE_KEY_PREFIX: ${{ vars.TF_STATE_KEY_PREFIX }}
         run: bash scripts/discover-terraform-runtime-inventory.sh "$EVIDENCE_PATH"
 
       - name: Upload sanitised inventory evidence

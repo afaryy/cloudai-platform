@@ -155,9 +155,12 @@ for prohibited in delete destroy apply import 'state rm' taint untaint; do
   ! grep -Fqi "$prohibited" "$discoverer"
 done
 
-grep -Fq 'role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}' "$workflow"
-! grep -Fq 'vars.AWS_ROLE_TO_ASSUME' "$workflow"
+grep -Fq 'role-to-assume: ${{ vars.AWS_ROLE_TO_ASSUME || secrets.AWS_ROLE_TO_ASSUME }}' "$workflow"
 ! grep -Fq 'AWS_ROLE_TO_ASSUME:' "$workflow"
+grep -Fq 'TF_BACKEND_BUCKET: ${{ vars.TF_BACKEND_BUCKET }}' "$workflow"
+grep -Fq 'TF_STATE_KEY_PREFIX: ${{ vars.TF_STATE_KEY_PREFIX }}' "$workflow"
+! grep -Fq 'TF_BACKEND_BUCKET: ${{ secrets.TF_BACKEND_BUCKET }}' "$workflow"
+! grep -Fq 'TF_STATE_KEY_PREFIX: ${{ secrets.TF_STATE_KEY_PREFIX }}' "$workflow"
 grep -Fq 'codebuild list-projects' "$discoverer"
 ! grep -Fq 'codebuild batch-get-projects' "$discoverer"
 
