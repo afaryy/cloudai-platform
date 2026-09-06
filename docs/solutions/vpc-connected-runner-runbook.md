@@ -8,9 +8,10 @@ ephemeral GitHub Actions runner hosted by CodeBuild and attached to private
 subnets. It is deliberately outside the Kubernetes failure domain.
 
 The lifecycle workflow is
-`.github/workflows/terraform-eks-private-runner.yml`. Source implementation is
-complete; protected AWS runtime validation remains pending until its dedicated
-OIDC role and GitHub source connection have been provisioned and reviewed.
+`.github/workflows/terraform-eks-private-runner.yml`. The dedicated OIDC role
+has been applied and handed off to `aws-private-eks`, and credential-free source
+validation has passed. Protected read-only GitHub source-auth discovery and all
+infrastructure/runtime validation remain pending.
 
 ## Architecture boundary
 
@@ -36,12 +37,11 @@ Three identities remain separate:
 3. The CodeBuild service role is assumed only by CodeBuild during ephemeral
    runner execution and has no Terraform backend ownership.
 
-The bootstrap source now defines identity 2 with a reviewed state and service
-lifecycle boundary. CloudFormation apply remains pending, so
-`AWS_PRIVATE_EKS_RUNNER_ROLE_TO_ASSUME` must remain unset until a change set is
-reviewed, applied, and its output is stored in `aws-private-eks`. Runner runtime
-validation remains pending. Reusing `AWS_ROLE_TO_ASSUME` would collapse the
-state and identity boundaries and is not an approved workaround.
+The bootstrap stack now provides identity 2 with a reviewed state and service
+lifecycle boundary, and `AWS_PRIVATE_EKS_RUNNER_ROLE_TO_ASSUME` has been stored
+in `aws-private-eks` from its CloudFormation output. Runner source-auth and
+runtime validation remain pending. Reusing `AWS_ROLE_TO_ASSUME` would collapse
+the state and identity boundaries and is not an approved workaround.
 
 ## Endpoint-principal handoff
 
@@ -112,6 +112,16 @@ to downstream private-EKS delivery and require protected runtime evidence.
 Runs on `ubuntu-latest` with `contents: read` only. It performs backend-free
 Terraform init, formatting, validation, and tests. It does not obtain AWS
 credentials.
+
+### `auth-discover`
+
+Uses only the dedicated runner-state OIDC role to call
+`codebuild:ListSourceCredentials`. It does not initialise Terraform, read
+network state, create a connection, import a token, or mutate AWS resources. It
+fails closed unless exactly one approved account-level GitHub source credential
+is present. The retained evidence contains only booleans for presence,
+uniqueness, acceptable auth category, and identifier suppression; credential
+ARNs and connection resources are never uploaded.
 
 ### `plan`
 
@@ -184,9 +194,10 @@ domain policy and telemetry.
 
 ## Safe next gate
 
-Before protected runner plan or apply, review the dedicated runner-state OIDC
-role already defined in the bootstrap source, create a non-executing
-CloudFormation change set, and inspect its exact IAM change. Only after separate
-approval may that change set be applied and its output stored as
-`AWS_PRIVATE_EKS_RUNNER_ROLE_TO_ASSUME`. No runtime claim is valid before that
-prerequisite is complete.
+Apply the reviewed read-only `codebuild:ListSourceCredentials` permission to the
+dedicated runner-state role, then run `auth-discover`. If it proves one approved
+account-level GitHub source credential, configure the version-controlled runner
+defaults and reviewed cost/readiness values before runner plan. If discovery
+fails, stop and review a CodeConnections-based setup separately; do not import a
+PAT, guess an ARN, or proceed to paid network deployment. No runtime claim is
+valid before that prerequisite is complete.
