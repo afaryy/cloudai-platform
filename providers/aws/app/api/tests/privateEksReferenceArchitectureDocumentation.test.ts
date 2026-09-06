@@ -117,7 +117,7 @@ test("private runner consumes network state without overstating runtime readines
   assert.match(runnerWorkflow, /AWS_PRIVATE_EKS_RUNNER_ROLE_TO_ASSUME/);
   assert.match(runnerWorkflow, /I_UNDERSTAND_PRIVATE_EKS_RUNNER_APPLY/);
   assert.match(runnerRunbook, /dedicated runner-state OIDC role/i);
-  assert.match(runnerRunbook, /runtime validation remains pending/i);
+  assert.match(runnerRunbook, /source-auth.*runtime validation remain pending/is);
   assert.match(architecture, /protected runner lifecycle\s+workflow is source implemented/is);
   assert.match(runbook, /protected lifecycle workflow is source implemented/is);
 });
@@ -134,8 +134,8 @@ test("private runner bootstrap documents the three-identity handoff without clai
   assert.match(bootstrapTemplate, /PrivateEKSRunnerRoleArn/);
   assert.match(bootstrapWorkflow, /Publish private EKS runner role handoff/);
   assert.match(bootstrapWorkflow, /AWS_PRIVATE_EKS_RUNNER_ROLE_TO_ASSUME/);
-  assert.match(runnerRunbook, /bootstrap source now defines identity 2/i);
-  assert.match(readiness, /runner-role source\s+contract is implemented/i);
-  assert.match(`${runnerRunbook}\n${readiness}`, /CloudFormation apply remains pending/i);
+  assert.match(runnerRunbook, /bootstrap stack now provides identity 2/i);
+  assert.match(readiness, /runner-state OIDC role.*applied.*handed off/is);
+  assert.doesNotMatch(`${runnerRunbook}\n${readiness}`, /CloudFormation apply remains pending/i);
   assert.match(`${runnerRunbook}\n${readiness}`, /runner\s+runtime validation remains pending/i);
 });

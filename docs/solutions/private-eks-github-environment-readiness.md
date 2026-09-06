@@ -12,10 +12,10 @@ inspection confirms a required reviewer, disabled administrator bypass, and a
 `main` deployment branch policy. The shared backend/OIDC names are present,
 and the network bootstrap variables are configured. Workflow history contains
 source validation and a network plan, but no successful network apply, runner
-apply, or private-EKS apply. The runner-role source contract is implemented;
-CloudFormation apply remains pending, and the dedicated runner/EKS variables
-are absent. The VPC, CodeBuild runner, private EKS, and ARC paths therefore
-remain runtime-pending.
+apply, or private-EKS apply. The dedicated runner-state OIDC role has been
+applied and handed off; CodeBuild source-auth discovery and the remaining
+runner/EKS variables are pending. The VPC, CodeBuild runner, private EKS, and
+ARC paths therefore remain runtime-pending.
 
 Runner runtime validation remains pending. Private EKS and ARC runtime
 validation also remain pending.
