@@ -85,7 +85,7 @@ jobs:
                 elif .status == "migrated" then .to
                 else error("unsupported migration status")
                 end
-              | "providers/aws/infra/terraform/\\(.)"
+              | "providers/aws/infra/terraform/\(.)"
             ]
             | unique
           ' providers/aws/infra/terraform/layout-migration.json)"
