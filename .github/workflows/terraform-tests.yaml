@@ -17,6 +17,7 @@ on:
       - ".github/workflows/build-private-eks-cpu-smoke-image.yml"
       - ".github/workflows/arc-private-eks-handoff.yml"
       - ".github/workflows/private-eks-teardown-plan.yml"
+      - ".github/workflows/terraform-runtime-inventory.yml"
       - "scripts/gpu-quota.sh"
       - "scripts/tests/test-gpu-quota.sh"
       - "scripts/validate-private-eks-teardown-readiness.sh"
@@ -24,6 +25,8 @@ on:
       - "scripts/tests/test-private-eks-teardown-workflow.sh"
       - "scripts/validate-private-eks-cpu-runtime.sh"
       - "scripts/tests/test-private-eks-cpu-runtime.sh"
+      - "scripts/discover-terraform-runtime-inventory.sh"
+      - "scripts/tests/test-discover-terraform-runtime-inventory.sh"
       - "providers/aws/infra/terraform/**"
       - "providers/aws/app/api/**"
   push:
@@ -44,6 +47,7 @@ on:
       - ".github/workflows/build-private-eks-cpu-smoke-image.yml"
       - ".github/workflows/arc-private-eks-handoff.yml"
       - ".github/workflows/private-eks-teardown-plan.yml"
+      - ".github/workflows/terraform-runtime-inventory.yml"
       - "scripts/gpu-quota.sh"
       - "scripts/tests/test-gpu-quota.sh"
       - "scripts/validate-private-eks-teardown-readiness.sh"
@@ -51,6 +55,8 @@ on:
       - "scripts/tests/test-private-eks-teardown-workflow.sh"
       - "scripts/validate-private-eks-cpu-runtime.sh"
       - "scripts/tests/test-private-eks-cpu-runtime.sh"
+      - "scripts/discover-terraform-runtime-inventory.sh"
+      - "scripts/tests/test-discover-terraform-runtime-inventory.sh"
       - "providers/aws/infra/terraform/**"
       - "providers/aws/app/api/**"
   workflow_dispatch:
@@ -59,25 +65,40 @@ permissions:
   contents: read
 
 jobs:
+  terraform_directories:
+    name: Resolve Terraform test directories
+    runs-on: ubuntu-latest
+    outputs:
+      terraform_dirs: ${{ steps.directories.outputs.terraform_dirs }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Read implemented Terraform directories from migration contract
+        id: directories
+        run: |
+          terraform_dirs="$(jq -c '
+            [
+              .mappings[]
+              | select(.kind == "module" or .kind == "foundation")
+              | if .status == "legacy" then .from
+                elif .status == "migrated" then .to
+                else error("unsupported migration status")
+                end
+              | "providers/aws/infra/terraform/\(.)"
+            ]
+            | unique
+          ' providers/aws/infra/terraform/layout-migration.json)"
+          echo "terraform_dirs=$terraform_dirs" >> "$GITHUB_OUTPUT"
+
   terraform:
     name: Terraform tests
     runs-on: ubuntu-latest
+    needs: terraform_directories
     strategy:
       fail-fast: false
       matrix:
-        terraform_dir:
-          - providers/aws/infra/terraform/modules/network
-          - providers/aws/infra/terraform/modules/eks
-          - providers/aws/infra/terraform/modules/bedrock-access
-          - providers/aws/infra/terraform/modules/eks-gpu-kueue
-          - providers/aws/infra/terraform/envs/eks-sandbox
-          - providers/aws/infra/terraform/envs/eks-gpu-kueue-poc
-          - providers/aws/infra/terraform/envs/eks-private-sandbox
-          - providers/aws/infra/terraform/modules/private-runner
-          - providers/aws/infra/terraform/envs/eks-private-network
-          - providers/aws/infra/terraform/envs/eks-private-runner
-          - providers/aws/infra/terraform/envs/bedrock-sandbox
-          - providers/aws/infra/terraform/envs/agentcore-rag-sandbox
+        terraform_dir: ${{ fromJSON(needs.terraform_directories.outputs.terraform_dirs) }}
     defaults:
       run:
         working-directory: ${{ matrix.terraform_dir }}
@@ -132,6 +153,16 @@ jobs:
 
       - name: Test plan-only workflow boundary
         run: bash scripts/tests/test-private-eks-teardown-workflow.sh
+
+  terraform_runtime_inventory_boundary:
+    name: Terraform runtime inventory boundary
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Test sanitised read-only inventory discovery
+        run: bash scripts/tests/test-discover-terraform-runtime-inventory.sh
 
   bedrock_workflow_boundary:
     name: Bedrock apply workflow boundary

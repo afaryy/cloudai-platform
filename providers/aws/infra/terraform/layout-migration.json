@@ -1,0 +1,126 @@
+{
+  "version": 1,
+  "preserveStateKeys": true,
+  "preserveResourceAddresses": true,
+  "mappings": [
+    {
+      "kind": "bootstrap",
+      "from": "bootstrap/github-oidc-terraform-backend.yaml",
+      "to": "bootstrap/cloudformation/github-oidc-terraform-backend.yaml",
+      "stateKey": null,
+      "status": "legacy"
+    },
+    {
+      "kind": "module",
+      "from": "modules/bedrock-access",
+      "to": "modules/ai/bedrock-access",
+      "stateKey": null,
+      "status": "legacy"
+    },
+    {
+      "kind": "module",
+      "from": "modules/cost-guardrails",
+      "to": "modules/governance/cost-guardrails",
+      "stateKey": null,
+      "status": "legacy"
+    },
+    {
+      "kind": "module",
+      "from": "modules/eks",
+      "to": "modules/compute/eks",
+      "stateKey": null,
+      "status": "legacy"
+    },
+    {
+      "kind": "module",
+      "from": "modules/eks-gpu-kueue",
+      "to": "modules/compute/gpu-kueue",
+      "stateKey": null,
+      "status": "legacy"
+    },
+    {
+      "kind": "module",
+      "from": "modules/network",
+      "to": "modules/networking/public-sandbox-network",
+      "stateKey": null,
+      "status": "legacy"
+    },
+    {
+      "kind": "module",
+      "from": "modules/private-network",
+      "to": "modules/networking/private-network",
+      "stateKey": null,
+      "status": "legacy"
+    },
+    {
+      "kind": "module",
+      "from": "modules/private-egress",
+      "to": "modules/networking/private-egress",
+      "stateKey": null,
+      "status": "legacy"
+    },
+    {
+      "kind": "module",
+      "from": "modules/private-runner",
+      "to": "modules/delivery/codebuild-github-runner",
+      "stateKey": null,
+      "status": "legacy"
+    },
+    {
+      "kind": "foundation",
+      "from": "envs/bedrock-sandbox",
+      "to": "foundations/bedrock-platform",
+      "stateKey": "bedrock-sandbox/terraform.tfstate",
+      "status": "legacy"
+    },
+    {
+      "kind": "foundation",
+      "from": "envs/agentcore-rag-sandbox",
+      "to": "foundations/agentcore-rag-platform",
+      "stateKey": "agentcore-rag-sandbox/terraform.tfstate",
+      "status": "legacy"
+    },
+    {
+      "kind": "foundation",
+      "from": "envs/cost-guardrails",
+      "to": "foundations/cost-governance",
+      "stateKey": "cost-guardrails/terraform.tfstate",
+      "status": "legacy"
+    },
+    {
+      "kind": "foundation",
+      "from": "envs/eks-sandbox",
+      "to": "foundations/public-eks-cluster",
+      "stateKey": "eks-sandbox/terraform.tfstate",
+      "status": "legacy"
+    },
+    {
+      "kind": "foundation",
+      "from": "envs/eks-private-network",
+      "to": "foundations/private-eks-network",
+      "stateKey": "eks-private-network/terraform.tfstate",
+      "status": "legacy"
+    },
+    {
+      "kind": "foundation",
+      "from": "envs/eks-private-runner",
+      "to": "foundations/private-eks-delivery",
+      "stateKey": "eks-private-runner/terraform.tfstate",
+      "status": "legacy"
+    },
+    {
+      "kind": "foundation",
+      "from": "envs/eks-private-sandbox",
+      "to": "foundations/private-eks-cluster",
+      "stateKey": "eks-private-sandbox/terraform.tfstate",
+      "status": "legacy"
+    },
+    {
+      "kind": "foundation",
+      "from": "envs/eks-gpu-kueue-poc",
+      "to": "foundations/gpu-platform",
+      "stateKey": "eks-gpu-kueue-poc/terraform.tfstate",
+      "status": "legacy"
+    }
+  ]
+}

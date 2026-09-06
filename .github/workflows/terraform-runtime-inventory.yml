@@ -1,0 +1,50 @@
+name: terraform-runtime-inventory
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "Read-only inventory mode"
+        required: true
+        default: discover
+        type: choice
+        options:
+          - discover
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  discover:
+    name: Discover Terraform runtime inventory
+    if: ${{ inputs.mode == 'discover' }}
+    runs-on: ubuntu-latest
+    environment: aws-private-eks
+    env:
+      AWS_REGION: ${{ vars.AWS_REGION || 'ap-southeast-2' }}
+      EVIDENCE_PATH: /tmp/terraform-runtime-inventory-evidence.json
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure read-only AWS session through GitHub OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ env.AWS_REGION }}
+          mask-aws-account-id: true
+
+      - name: Discover sanitised runtime inventory
+        env:
+          TF_BACKEND_BUCKET: ${{ secrets.TF_BACKEND_BUCKET }}
+          TF_STATE_KEY_PREFIX: ${{ secrets.TF_STATE_KEY_PREFIX }}
+        run: bash scripts/discover-terraform-runtime-inventory.sh "$EVIDENCE_PATH"
+
+      - name: Upload sanitised inventory evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: terraform-runtime-inventory-evidence
+          path: ${{ env.EVIDENCE_PATH }}
+          if-no-files-found: error
+          retention-days: 7

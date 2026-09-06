@@ -5,6 +5,9 @@ run "defines_the_two_bounded_notification_budgets" {
 
   variables {
     budget_alert_email = "synthetic-alert@example.invalid"
+    tags = {
+      Test = "synthetic"
+    }
   }
 
   assert {
@@ -33,6 +36,7 @@ run "accepts_environment_budget_overrides" {
 
   variables {
     budget_alert_email       = "synthetic-alert@example.invalid"
+    tags                     = { Test = "synthetic" }
     monthly_budget_usd       = 100
     gpu_daily_budget_usd     = 30
     monthly_alert_thresholds = "25,50,75,100"
