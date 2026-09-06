@@ -1,0 +1,60 @@
+name: terraform-runtime-inventory
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "Read-only inventory mode"
+        required: true
+        default: discover
+        type: choice
+        options:
+          - discover
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  discover:
+    name: Discover Terraform runtime inventory
+    if: ${{ inputs.mode == 'discover' }}
+    runs-on: ubuntu-latest
+    environment: aws-private-eks
+    env:
+      AWS_ROLE_TO_ASSUME: ${{ vars.AWS_ROLE_TO_ASSUME || secrets.AWS_ROLE_TO_ASSUME }}
+      AWS_REGION: ${{ vars.AWS_REGION || 'ap-southeast-2' }}
+      TF_BACKEND_BUCKET: ${{ vars.TF_BACKEND_BUCKET }}
+      TF_STATE_KEY_PREFIX: ${{ vars.TF_STATE_KEY_PREFIX }}
+      EVIDENCE_PATH: /tmp/terraform-runtime-inventory-evidence.json
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate protected inventory configuration
+        run: |
+          set -euo pipefail
+          for required_name in AWS_ROLE_TO_ASSUME AWS_REGION TF_BACKEND_BUCKET TF_STATE_KEY_PREFIX; do
+            if [ -z "${!required_name}" ]; then
+              echo "::error::Protected inventory configuration is incomplete."
+              exit 1
+            fi
+          done
+
+      - name: Configure read-only AWS session through GitHub OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ env.AWS_REGION }}
+          mask-aws-account-id: true
+
+      - name: Discover sanitised runtime inventory
+        run: bash scripts/discover-terraform-runtime-inventory.sh "$EVIDENCE_PATH"
+
+      - name: Upload sanitised inventory evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: terraform-runtime-inventory-evidence
+          path: ${{ env.EVIDENCE_PATH }}
+          if-no-files-found: error
+          retention-days: 7

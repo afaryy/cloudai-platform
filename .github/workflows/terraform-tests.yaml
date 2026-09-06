@@ -17,6 +17,7 @@ on:
       - ".github/workflows/build-private-eks-cpu-smoke-image.yml"
       - ".github/workflows/arc-private-eks-handoff.yml"
       - ".github/workflows/private-eks-teardown-plan.yml"
+      - ".github/workflows/terraform-runtime-inventory.yml"
       - "scripts/gpu-quota.sh"
       - "scripts/tests/test-gpu-quota.sh"
       - "scripts/validate-private-eks-teardown-readiness.sh"
@@ -24,6 +25,8 @@ on:
       - "scripts/tests/test-private-eks-teardown-workflow.sh"
       - "scripts/validate-private-eks-cpu-runtime.sh"
       - "scripts/tests/test-private-eks-cpu-runtime.sh"
+      - "scripts/discover-terraform-runtime-inventory.sh"
+      - "scripts/tests/test-discover-terraform-runtime-inventory.sh"
       - "providers/aws/infra/terraform/**"
       - "providers/aws/app/api/**"
   push:
@@ -44,6 +47,7 @@ on:
       - ".github/workflows/build-private-eks-cpu-smoke-image.yml"
       - ".github/workflows/arc-private-eks-handoff.yml"
       - ".github/workflows/private-eks-teardown-plan.yml"
+      - ".github/workflows/terraform-runtime-inventory.yml"
       - "scripts/gpu-quota.sh"
       - "scripts/tests/test-gpu-quota.sh"
       - "scripts/validate-private-eks-teardown-readiness.sh"
@@ -51,6 +55,8 @@ on:
       - "scripts/tests/test-private-eks-teardown-workflow.sh"
       - "scripts/validate-private-eks-cpu-runtime.sh"
       - "scripts/tests/test-private-eks-cpu-runtime.sh"
+      - "scripts/discover-terraform-runtime-inventory.sh"
+      - "scripts/tests/test-discover-terraform-runtime-inventory.sh"
       - "providers/aws/infra/terraform/**"
       - "providers/aws/app/api/**"
   workflow_dispatch:
@@ -147,6 +153,16 @@ jobs:
 
       - name: Test plan-only workflow boundary
         run: bash scripts/tests/test-private-eks-teardown-workflow.sh
+
+  terraform_runtime_inventory_boundary:
+    name: Terraform runtime inventory boundary
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Test sanitised read-only inventory discovery
+        run: bash scripts/tests/test-discover-terraform-runtime-inventory.sh
 
   bedrock_workflow_boundary:
     name: Bedrock apply workflow boundary
