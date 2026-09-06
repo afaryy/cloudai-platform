@@ -347,7 +347,6 @@ All implemented Terraform modules and roots are in scope. The target mapping is:
 | `modules/private-network` | `modules/networking/private-network` |
 | `modules/private-egress` | `modules/networking/private-egress` |
 | `modules/private-runner` | `modules/delivery/codebuild-github-runner` |
-| new CodeConnection module | `modules/integrations/github-codeconnection` |
 | `envs/bedrock-sandbox` | `foundations/bedrock-platform` |
 | `envs/agentcore-rag-sandbox` | `foundations/agentcore-rag-platform` |
 | `envs/cost-guardrails` | `foundations/cost-governance` |
@@ -356,7 +355,11 @@ All implemented Terraform modules and roots are in scope. The target mapping is:
 | `envs/eks-private-runner` | `foundations/private-eks-delivery` |
 | `envs/eks-private-sandbox` | `foundations/private-eks-cluster` |
 | `envs/eks-gpu-kueue-poc` | `foundations/gpu-platform` |
-| new CodeConnection root | `foundations/github-integration` |
+
+The new CodeConnection has no legacy source path and therefore is not one of
+the 17 migration mappings. It is created directly at
+`modules/integrations/github-codeconnection` and
+`foundations/github-integration`.
 
 Reusable-module dependency lock files are not retained as committed ownership
 artifacts. Provider lock files belong to deployable foundations; module tests
