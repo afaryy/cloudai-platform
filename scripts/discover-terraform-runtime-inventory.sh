@@ -3,6 +3,8 @@
 set -euo pipefail
 
 evidence_path="${1:-/tmp/terraform-runtime-inventory-evidence.json}"
+state_directory="$(mktemp -d)"
+trap 'rm -rf "$state_directory"' EXIT
 
 for required_name in AWS_REGION TF_BACKEND_BUCKET TF_STATE_KEY_PREFIX; do
   if [[ -z "${!required_name:-}" ]]; then
@@ -14,30 +16,24 @@ done
 json_scalar() {
   local filter="$1"
   shift
-  local statuses
 
   if "$@" --output json 2>/dev/null | jq -r "$filter" 2>/dev/null; then
-    statuses=("${PIPESTATUS[@]}")
+    return 0
   else
-    statuses=("${PIPESTATUS[@]}")
-  fi
-
-  if (( statuses[0] != 0 || statuses[1] != 0 )); then
     return 1
   fi
 }
 
-boolean_from_scalar() {
-  local scalar="$1"
+json_scalar_for_key() {
+  local key="$1"
+  local filter="$2"
+  shift 2
 
-  case "$scalar" in
-    true|false)
-      printf '%s\n' "$scalar"
-      ;;
-    *)
-      return 1
-      ;;
-  esac
+  if "$@" --output json 2>/dev/null | jq -r --arg expected "$key" "$filter" 2>/dev/null; then
+    return 0
+  else
+    return 1
+  fi
 }
 
 inventory_boolean() {
@@ -45,15 +41,11 @@ inventory_boolean() {
   shift
   local scalar
 
-  if ! scalar="$(json_scalar "$filter" "$@")"; then
-    echo "read-only inventory query failed" >&2
-    exit 1
-  fi
-
-  if ! boolean_from_scalar "$scalar"; then
-    echo "read-only inventory query returned an invalid result" >&2
-    exit 1
-  fi
+  scalar="$(json_scalar "$filter" "$@")" || return 1
+  case "$scalar" in
+    true|false) printf '%s\n' "$scalar" ;;
+    *) return 1 ;;
+  esac
 }
 
 inventory_count() {
@@ -61,39 +53,79 @@ inventory_count() {
   shift
   local scalar
 
-  if ! scalar="$(json_scalar "$filter" "$@")"; then
-    echo "read-only inventory query failed" >&2
-    exit 1
-  fi
-
-  if [[ ! "$scalar" =~ ^[0-9]+$ ]]; then
-    echo "read-only inventory query returned an invalid count" >&2
-    exit 1
-  fi
-
+  scalar="$(json_scalar "$filter" "$@")" || return 1
+  [[ "$scalar" =~ ^[0-9]+$ ]] || return 1
   printf '%s\n' "$scalar"
 }
 
-state_present() {
+state_resource_present() {
   local suffix="$1"
+  local module="$2"
+  local resource_type="$3"
+  local resource_name="$4"
   local state_key="${TF_STATE_KEY_PREFIX}/${suffix}/terraform.tfstate"
-  local count
+  local object_count
+  local state_file
+  local result
 
-  count="$(inventory_count '.Contents | length' aws s3api list-objects-v2 \
+  object_count="$(json_scalar_for_key "$state_key" \
+    '[.Contents[]? | select(.Key == $expected)] | length' \
+    aws s3api list-objects-v2 \
     --bucket "$TF_BACKEND_BUCKET" \
     --prefix "$state_key" \
-    --max-keys 1)"
+    --max-keys 2)" || return 1
+  [[ "$object_count" == 1 ]] || return 1
 
-  if (( count > 0 )); then
-    printf 'true\n'
-  else
-    printf 'false\n'
-  fi
+  state_file="$(mktemp "$state_directory/state.XXXXXX")" || return 1
+  aws s3api get-object \
+    --bucket "$TF_BACKEND_BUCKET" \
+    --key "$state_key" \
+    "$state_file" \
+    --output json >/dev/null 2>&1 || return 1
+
+  result="$(jq -er \
+    --arg expected_module "$module" \
+    --arg expected_type "$resource_type" \
+    --arg expected_name "$resource_name" '
+      if type != "object"
+        or .version != 4
+        or (.resources | type) != "array"
+        or any(.resources[]?; type != "object"
+          or (.mode | type) != "string"
+          or (.type | type) != "string"
+          or (.name | type) != "string"
+          or (.instances | type) != "array")
+      then error("unsupported state shape")
+      else
+        [.resources[] | select(
+          .module == $expected_module
+          and .mode == "managed"
+          and .type == $expected_type
+          and .name == $expected_name
+        )] as $matches
+        | if ($matches | length) > 1 then error("ambiguous state address")
+          elif ($matches | length) == 0 then "false"
+          elif ($matches[0].instances | length) == 0 then "false"
+          elif ($matches[0].instances | length) == 1 then "true"
+          else error("ambiguous state instances")
+          end
+      end
+    ' "$state_file" 2>/dev/null)" || return 1
+
+  case "$result" in
+    true|false) printf '%s\n' "$result" ;;
+    *) return 1 ;;
+  esac
+}
+
+fail_closed() {
+  echo "read-only inventory query failed" >&2
+  exit 1
 }
 
 legacy_public_eks_present="$(inventory_boolean \
   '.clusters | index("cloudai-platform-eks-sandbox") != null' \
-  aws eks list-clusters)"
+  aws eks list-clusters)" || fail_closed
 
 private_network_count="$(inventory_count \
   '.Vpcs | length' \
@@ -102,7 +134,7 @@ private_network_count="$(inventory_count \
     'Name=tag:Project,Values=cloudai-platform' \
     'Name=tag:Environment,Values=eks-private-network' \
     'Name=tag:ManagedBy,Values=terraform' \
-    'Name=tag:Name,Values=cloudai-platform-eks-private-network-vpc')"
+    'Name=tag:Name,Values=cloudai-platform-eks-private-network-vpc')" || fail_closed
 if (( private_network_count > 0 )); then
   private_network_present=true
 else
@@ -110,9 +142,8 @@ else
 fi
 
 private_runner_count="$(inventory_count \
-  '.projects | length' \
-  aws codebuild batch-get-projects \
-  --names 'cloudai-platform-private-eks-runner')"
+  '[.projects[]? | select(. == "cloudai-platform-private-eks-runner")] | length' \
+  aws codebuild list-projects)" || fail_closed
 if (( private_runner_count > 0 )); then
   private_runner_present=true
 else
@@ -121,21 +152,26 @@ fi
 
 private_eks_present="$(inventory_boolean \
   '.clusters | index("cloudai-platform-eks-private-sandbox") != null' \
-  aws eks list-clusters)"
+  aws eks list-clusters)" || fail_closed
 
 if [[ "$legacy_public_eks_present" == true ]]; then
   gpu_capacity_present="$(inventory_boolean \
     '.nodegroups | index("cloudai-platform-eks-sandbox-gpu-poc") != null' \
-    aws eks list-nodegroups --cluster-name 'cloudai-platform-eks-sandbox')"
+    aws eks list-nodegroups --cluster-name 'cloudai-platform-eks-sandbox')" || fail_closed
 else
   gpu_capacity_present=false
 fi
 
-legacy_public_eks_state_present="$(state_present 'eks-sandbox')"
-private_network_state_present="$(state_present 'eks-private-network')"
-private_runner_state_present="$(state_present 'eks-private-runner')"
-private_eks_state_present="$(state_present 'eks-private-sandbox')"
-gpu_capacity_state_present="$(state_present 'eks-gpu-kueue-poc')"
+legacy_public_eks_state_present="$(state_resource_present \
+  'eks-sandbox' 'module.eks' 'aws_eks_cluster' 'this')" || fail_closed
+private_network_state_present="$(state_resource_present \
+  'eks-private-network' 'module.network' 'aws_vpc' 'this')" || fail_closed
+private_runner_state_present="$(state_resource_present \
+  'eks-private-runner' 'module.runner' 'aws_codebuild_project' 'runner')" || fail_closed
+private_eks_state_present="$(state_resource_present \
+  'eks-private-sandbox' 'module.eks' 'aws_eks_cluster' 'this')" || fail_closed
+gpu_capacity_state_present="$(state_resource_present \
+  'eks-gpu-kueue-poc' 'module.gpu_kueue' 'aws_eks_node_group' 'gpu_poc')" || fail_closed
 
 if [[ "$legacy_public_eks_present" == "$legacy_public_eks_state_present" \
   && "$private_network_present" == "$private_network_state_present" \
