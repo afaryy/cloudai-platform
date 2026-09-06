@@ -59,25 +59,40 @@ permissions:
   contents: read
 
 jobs:
+  terraform_directories:
+    name: Resolve Terraform test directories
+    runs-on: ubuntu-latest
+    outputs:
+      terraform_dirs: ${{ steps.directories.outputs.terraform_dirs }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Read implemented Terraform directories from migration contract
+        id: directories
+        run: |
+          terraform_dirs="$(jq -c '
+            [
+              .mappings[]
+              | select(.kind == "module" or .kind == "foundation")
+              | if .status == "legacy" then .from
+                elif .status == "migrated" then .to
+                else error("unsupported migration status")
+                end
+              | "providers/aws/infra/terraform/\\(.)"
+            ]
+            | unique
+          ' providers/aws/infra/terraform/layout-migration.json)"
+          echo "terraform_dirs=$terraform_dirs" >> "$GITHUB_OUTPUT"
+
   terraform:
     name: Terraform tests
     runs-on: ubuntu-latest
+    needs: terraform_directories
     strategy:
       fail-fast: false
       matrix:
-        terraform_dir:
-          - providers/aws/infra/terraform/modules/network
-          - providers/aws/infra/terraform/modules/eks
-          - providers/aws/infra/terraform/modules/bedrock-access
-          - providers/aws/infra/terraform/modules/eks-gpu-kueue
-          - providers/aws/infra/terraform/envs/eks-sandbox
-          - providers/aws/infra/terraform/envs/eks-gpu-kueue-poc
-          - providers/aws/infra/terraform/envs/eks-private-sandbox
-          - providers/aws/infra/terraform/modules/private-runner
-          - providers/aws/infra/terraform/envs/eks-private-network
-          - providers/aws/infra/terraform/envs/eks-private-runner
-          - providers/aws/infra/terraform/envs/bedrock-sandbox
-          - providers/aws/infra/terraform/envs/agentcore-rag-sandbox
+        terraform_dir: ${{ fromJSON(needs.terraform_directories.outputs.terraform_dirs) }}
     defaults:
       run:
         working-directory: ${{ matrix.terraform_dir }}

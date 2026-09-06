@@ -84,6 +84,10 @@ implementation record and deferred scope.
 
 ## Supporting Implementation Records
 
+- [Terraform layout migration contract](../../providers/aws/infra/terraform/layout-migration.json)
+  — machine-readable legacy-to-target source mapping that preserves backend state
+  key suffixes and Terraform resource addresses during staged relocation; it does
+  not perform a state migration or an AWS operation.
 - [EKS sandbox design](../solutions/p4b-real-eks-sandbox-design.md) and [operator
   runbook](../solutions/p4b-eks-sandbox-operator-runbook.md) — bounded synthetic sandbox
   lifecycle and operator guidance.
